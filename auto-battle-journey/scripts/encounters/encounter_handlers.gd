@@ -295,6 +295,7 @@ static func _create_skill_trainer_ui(encounter_data: Dictionary, context: Dictio
 
 	var skill_id = encounter_data["data"]["skill_id"]
 	var skill_data = GameData.get_skill_by_id(skill_id)
+	var on_complete = context.get("on_encounter_complete", Callable())
 
 	if skill_data.is_empty():
 		vbox.add_child(UIHelpers.create_label("No skill available...", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
@@ -314,7 +315,6 @@ static func _create_skill_trainer_ui(encounter_data: Dictionary, context: Dictio
 	vbox.add_child(UIHelpers.create_label("Choose a character to learn this skill:", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
 
 	var team = RunManager.get_team()
-	var on_complete = context.get("on_encounter_complete", Callable())
 
 	for i in range(team.size()):
 		var char_instance = team[i]

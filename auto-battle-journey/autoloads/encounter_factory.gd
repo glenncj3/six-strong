@@ -198,10 +198,24 @@ func apply_scaling(encounter_data: Dictionary, round_num: int) -> void:
 
 
 func _generate_skill_trainer_data() -> Dictionary:
-	"""Generate a random skill for the trainer to offer."""
+	"""Generate a random skill for the trainer to offer that at least one team member can learn."""
 	var all_skills = GameData.get_all_skills()
-	all_skills.shuffle()
+	var team = RunManager.get_team()
 
-	if all_skills.size() > 0:
-		return {"skill_id": all_skills[0]["id"]}
+	# Filter to skills that at least one team member can learn
+	var learnable_skills: Array = []
+	for skill in all_skills:
+		var skill_id = skill["id"]
+		var level_req = skill.get("level_requirement", 1)
+
+		for char_instance in team:
+			# Check if character can learn this skill (not already known + meets level req)
+			if skill_id not in char_instance.learned_skills and char_instance.level >= level_req:
+				learnable_skills.append(skill)
+				break  # At least one character can learn it, move to next skill
+
+	learnable_skills.shuffle()
+
+	if learnable_skills.size() > 0:
+		return {"skill_id": learnable_skills[0]["id"]}
 	return {"skill_id": ""}

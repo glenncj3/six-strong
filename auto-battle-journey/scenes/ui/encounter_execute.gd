@@ -5,6 +5,7 @@ extends Control
 @onready var title_label = $EncounterContainer/TitleLabel
 @onready var content_container = $EncounterContainer/ContentContainer
 @onready var complete_button = $CompleteButton
+@onready var skip_button = $SkipButton
 
 var encounter_data: Dictionary = {}
 var encounter_completed: bool = false
@@ -16,6 +17,7 @@ var _gold_label: Label = null
 func _ready() -> void:
 	complete_button.pressed.connect(_on_complete_pressed)
 	complete_button.disabled = true  # Enable after encounter interaction
+	skip_button.pressed.connect(_on_skip_pressed)
 
 	# Get selected encounter data from SceneManager
 	encounter_data = SceneManager.get_scene_data("selected_encounter", {})
@@ -41,7 +43,8 @@ func _setup_encounter() -> void:
 		"set_gold_label": _set_gold_label,
 		"on_buy_item": _on_buy_item,
 		"on_buy_skill": _on_buy_skill,
-		"on_xp_select": _on_xp_character_selected
+		"on_xp_select": _on_xp_character_selected,
+		"on_encounter_complete": _enable_complete
 	}
 
 	# Create UI using the handler
@@ -140,6 +143,23 @@ func _update_gold_label() -> void:
 # =============================================================================
 # COMPLETION
 # =============================================================================
+
+func _enable_complete() -> void:
+	"""Enable the complete button - called by handlers when encounter is ready to complete."""
+	complete_button.disabled = false
+	encounter_completed = true
+
+
+func _on_skip_pressed() -> void:
+	"""Skip the encounter without taking rewards and return to run view."""
+	print("EncounterExecute: Skipping encounter...")
+
+	# Complete encounter (advances game state) but player gets no rewards
+	RunManager.complete_encounter()
+
+	# Return to run view using SceneManager
+	SceneManager.go_to("run_view")
+
 
 func _on_complete_pressed() -> void:
 	"""Complete the encounter and return to run view."""
