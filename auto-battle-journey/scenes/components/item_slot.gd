@@ -35,7 +35,7 @@ func _show_empty_slot() -> void:
 	"""Display an empty slot"""
 	item_icon.texture = null
 	item_name.text = "[Empty]"
-	modulate = Color(0.7, 0.7, 0.7)
+	modulate = GameConstants.COLOR_DISABLED
 
 
 func _show_equipped_item(item_id: String) -> void:
@@ -46,10 +46,8 @@ func _show_equipped_item(item_id: String) -> void:
 		_show_empty_slot()
 		return
 
-	# Set icon
-	var icon_path = item_data["image_path"]
-	if ResourceLoader.exists(icon_path):
-		item_icon.texture = load(icon_path)
+	# Set icon using UIHelpers for safe texture loading
+	UIHelpers.set_texture_safe(item_icon, item_data.get("image_path", ""))
 
 	# Set name
 	item_name.text = item_data["name"]
@@ -73,9 +71,9 @@ func _on_gui_input(event: InputEvent) -> void:
 func highlight(enabled: bool) -> void:
 	"""Visually highlight the slot"""
 	if enabled:
-		modulate = Color(1.3, 1.3, 1.0)  # Yellow tint
+		modulate = GameConstants.COLOR_HIGHLIGHT
 	else:
 		if equipped_item_id.is_empty():
-			modulate = Color(0.7, 0.7, 0.7)
+			modulate = GameConstants.COLOR_DISABLED
 		else:
 			modulate = Color.WHITE

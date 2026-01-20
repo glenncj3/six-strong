@@ -101,3 +101,91 @@ static func get_default_stats() -> Dictionary:
 		STAT_DEFENSE: 0,
 		STAT_INCOME: 0
 	}
+
+
+# =============================================================================
+# UI CONSTANTS
+# =============================================================================
+
+# Icon sizes used in shop rows, encounter panels, etc.
+const SHOP_ICON_SIZE := 48
+const ENCOUNTER_IMAGE_SIZE := 180
+const COMBAT_IMAGE_SIZE := 100
+
+# Standard margins and spacing
+const PANEL_MARGIN := 10
+const CONTENT_SEPARATION := 8
+const SHOP_ROW_SEPARATION := 12
+
+# Font sizes for dynamic UI
+const FONT_SIZE_REWARD := 32
+const FONT_SIZE_GOLD_DISPLAY := 20
+
+# =============================================================================
+# COLOR CONSTANTS
+# =============================================================================
+
+const COLOR_GOLD := Color(1.0, 0.84, 0.0)
+const COLOR_SUCCESS := Color(0.3, 1.0, 0.3)
+const COLOR_ERROR := Color(1.0, 0.5, 0.5)
+const COLOR_DISABLED := Color(0.7, 0.7, 0.7)
+const COLOR_MUTED := Color(0.8, 0.8, 0.8)
+const COLOR_GHOST_RANK := Color(0.5, 0.5, 1.0)
+const COLOR_HIGHLIGHT := Color(1.3, 1.3, 1.0)
+
+# Reputation color thresholds
+const REPUTATION_CRITICAL_THRESHOLD := 5
+const REPUTATION_WARNING_THRESHOLD := 10
+
+# =============================================================================
+# EMOJI CONSTANTS
+# =============================================================================
+
+const EMOJI_GEM := "💎"
+const EMOJI_REROLL := "🎫"
+const EMOJI_HEART := "❤️"
+const EMOJI_STAR := "⭐"
+const EMOJI_GOLD := "💰"
+
+# =============================================================================
+# COMBAT CONSTANTS
+# =============================================================================
+
+# Difficulty settings
+const COMBAT_DIFFICULTIES := ["Easy", "Medium", "Hard"]
+
+# Base rewards for combat
+const AI_BASE_REWARD_GOLD := 20
+const AI_REWARD_PER_DIFFICULTY := 10
+const AI_BONUS_XP := 10
+const GHOST_BASE_REWARD_GOLD := 25
+const GHOST_REWARD_PER_RANK := 5
+const GHOST_BONUS_XP := 15
+
+# =============================================================================
+# ENCOUNTER CONSTANTS
+# =============================================================================
+
+# Shop inventory generation
+const SHOP_MIN_ITEMS := 2
+const SHOP_MAX_ITEMS := 4
+const SHOP_MIN_SKILLS := 1
+const SHOP_MAX_SKILLS := 2
+const SHOP_ITEM_MIN_COST := 10
+const SHOP_ITEM_MAX_COST := 30
+const SHOP_SKILL_MIN_COST := 15
+const SHOP_SKILL_MAX_COST := 40
+
+# XP reward range
+const XP_REWARD_MIN := 30
+const XP_REWARD_MAX := 80
+
+# Gold reward range
+const GOLD_REWARD_MIN := 20
+const GOLD_REWARD_MAX := 50
+
+# Health restore
+const HEALTH_RESTORE_PERCENTAGE := 0.5
+
+# Scaling per round
+const ROUND_SCALE_FACTOR := 0.1

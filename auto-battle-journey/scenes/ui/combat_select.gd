@@ -68,22 +68,22 @@ func _create_option_panel(combat_data: Dictionary) -> void:
 	var type_label = Label.new()
 	info_vbox.add_child(type_label)
 	type_label.text = "[%s]" % combat_data["type"].to_upper()
-	type_label.modulate = Color(0.7, 0.7, 0.7)
-	type_label.add_theme_font_size_override("font_size", 14)
+	type_label.modulate = GameConstants.COLOR_DISABLED
+	type_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
 
 	# Description
 	var desc_label = Label.new()
 	info_vbox.add_child(desc_label)
 	desc_label.text = combat_data["description"]
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc_label.add_theme_font_size_override("font_size", 14)
+	desc_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
 
 	# Difficulty or Rank
 	if combat_data["type"] == "ai":
 		var diff_label = Label.new()
 		info_vbox.add_child(diff_label)
 		diff_label.text = "Difficulty: %s" % combat_data["difficulty"]
-		diff_label.add_theme_font_size_override("font_size", 14)
+		diff_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
 
 		# Color code difficulty
 		match combat_data["difficulty"]:
@@ -98,15 +98,15 @@ func _create_option_panel(combat_data: Dictionary) -> void:
 		var rank_label = Label.new()
 		info_vbox.add_child(rank_label)
 		rank_label.text = "Player Rank: %d" % combat_data["rank"]
-		rank_label.modulate = Color(0.5, 0.5, 1.0)
-		rank_label.add_theme_font_size_override("font_size", 14)
+		rank_label.modulate = GameConstants.COLOR_GHOST_RANK
+		rank_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
 
 	# Rewards
 	var reward_label = Label.new()
 	info_vbox.add_child(reward_label)
 	reward_label.text = "Rewards: +%d Gold  +%d XP" % [combat_data["reward_gold"], combat_data["reward_xp"]]
-	reward_label.modulate = Color(0.3, 1.0, 0.3)
-	reward_label.add_theme_font_size_override("font_size", 14)
+	reward_label.modulate = GameConstants.COLOR_SUCCESS
+	reward_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
 
 	# Spacer
 	var spacer = Control.new()

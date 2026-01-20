@@ -41,36 +41,36 @@ func load_all_data() -> void:
 	print("  - Encounter Types: %d" % encounter_types.size())
 
 
+func _load_data_collection(path: String, container_key: String, target_dict: Dictionary) -> void:
+	"""
+	Generic helper to load a JSON array into a dictionary keyed by id.
+
+	Args:
+		path: Path to JSON file
+		container_key: Key in JSON that contains the array (e.g., "characters")
+		target_dict: Dictionary to populate with id -> data mappings
+	"""
+	var data = JsonPersistence.load_json(path)
+	if data and data.has(container_key):
+		for item_data in data[container_key]:
+			if item_data.has("id"):
+				target_dict[item_data["id"]] = item_data
+
+
 func _load_characters() -> void:
-	var data = JsonPersistence.load_json(CHARACTERS_PATH)
-	if data and data.has("characters"):
-		for char_data in data["characters"]:
-			if char_data.has("id"):
-				characters[char_data["id"]] = char_data
+	_load_data_collection(CHARACTERS_PATH, "characters", characters)
 
 
 func _load_items() -> void:
-	var data = JsonPersistence.load_json(ITEMS_PATH)
-	if data and data.has("items"):
-		for item_data in data["items"]:
-			if item_data.has("id"):
-				items[item_data["id"]] = item_data
+	_load_data_collection(ITEMS_PATH, "items", items)
 
 
 func _load_item_upgrades() -> void:
-	var data = JsonPersistence.load_json(ITEM_UPGRADES_PATH)
-	if data and data.has("item_upgrades"):
-		for upgrade_data in data["item_upgrades"]:
-			if upgrade_data.has("id"):
-				item_upgrades[upgrade_data["id"]] = upgrade_data
+	_load_data_collection(ITEM_UPGRADES_PATH, "item_upgrades", item_upgrades)
 
 
 func _load_skills() -> void:
-	var data = JsonPersistence.load_json(SKILLS_PATH)
-	if data and data.has("skills"):
-		for skill_data in data["skills"]:
-			if skill_data.has("id"):
-				skills[skill_data["id"]] = skill_data
+	_load_data_collection(SKILLS_PATH, "skills", skills)
 
 
 func _load_encounter_types() -> void:

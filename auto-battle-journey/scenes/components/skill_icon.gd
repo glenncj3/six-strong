@@ -16,10 +16,8 @@ func setup(skill_data_id: String) -> void:
 		push_error("SkillIcon: Skill not found: %s" % skill_id)
 		return
 
-	# Set icon
-	var icon_path = skill_data["image_path"]
-	if ResourceLoader.exists(icon_path):
-		icon.texture = load(icon_path)
+	# Set icon using UIHelpers for safe texture loading
+	UIHelpers.set_texture_safe(icon, skill_data.get("image_path", ""))
 
 	# Set name
 	skill_name.text = skill_data["name"]

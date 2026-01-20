@@ -106,15 +106,17 @@ func _setup_manager_connections() -> void:
 	_currency.set_change_callback(save_account)
 	_collection.set_change_callback(save_account)
 
-	# Forward signals
-	if not _currency.gems_changed.is_connected(_on_gems_changed):
-		_currency.gems_changed.connect(_on_gems_changed)
-	if not _currency.reroll_tokens_changed.is_connected(_on_reroll_tokens_changed):
-		_currency.reroll_tokens_changed.connect(_on_reroll_tokens_changed)
-	if not _collection.character_unlocked.is_connected(_on_character_unlocked):
-		_collection.character_unlocked.connect(_on_character_unlocked)
-	if not _collection.character_ranked_up.is_connected(_on_character_ranked_up):
-		_collection.character_ranked_up.connect(_on_character_ranked_up)
+	# Forward signals using safe connect helper
+	_safe_connect(_currency.gems_changed, _on_gems_changed)
+	_safe_connect(_currency.reroll_tokens_changed, _on_reroll_tokens_changed)
+	_safe_connect(_collection.character_unlocked, _on_character_unlocked)
+	_safe_connect(_collection.character_ranked_up, _on_character_ranked_up)
+
+
+func _safe_connect(sig: Signal, handler: Callable) -> void:
+	"""Connect a signal only if not already connected (DRY helper)."""
+	if not sig.is_connected(handler):
+		sig.connect(handler)
 
 
 func _on_gems_changed(amount: int) -> void:

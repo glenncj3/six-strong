@@ -33,16 +33,16 @@ func _ready() -> void:
 
 
 func _update_currency_display() -> void:
-	gems_label.text = UIHelpers.format_currency(PlayerAccount.get_gems(), "💎")
-	reroll_tokens_label.text = UIHelpers.format_currency(PlayerAccount.get_reroll_tokens(), "🎫")
+	gems_label.text = UIHelpers.format_currency(PlayerAccount.get_gems(), GameConstants.EMOJI_GEM)
+	reroll_tokens_label.text = UIHelpers.format_currency(PlayerAccount.get_reroll_tokens(), GameConstants.EMOJI_REROLL)
 
 
 func _on_gems_changed(new_amount: int) -> void:
-	gems_label.text = UIHelpers.format_currency(new_amount, "💎")
+	gems_label.text = UIHelpers.format_currency(new_amount, GameConstants.EMOJI_GEM)
 
 
 func _on_reroll_tokens_changed(new_amount: int) -> void:
-	reroll_tokens_label.text = UIHelpers.format_currency(new_amount, "🎫")
+	reroll_tokens_label.text = UIHelpers.format_currency(new_amount, GameConstants.EMOJI_REROLL)
 
 
 func _on_play_pressed() -> void:

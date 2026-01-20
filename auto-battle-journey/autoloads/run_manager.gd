@@ -1,7 +1,7 @@
 extends Node
 # RunManager Singleton
-# Manages active run state, team, progression, and save/load
-# Refactored to use JsonPersistence and GameConstants
+# Manages active run state - now delegates to focused managers
+# Refactored to follow Single Responsibility Principle
 
 signal run_started
 signal round_changed(new_round: int)
@@ -20,10 +20,11 @@ const PHASE_COMBAT = "combat"
 var is_run_active: bool = false
 var run_id: String = ""
 
-# Team
-var team: Array[CharacterInstance] = []
+# Focused managers (Single Responsibility Principle)
+var _team_manager: TeamManager = TeamManager.new()
+var _combat_generator: CombatGenerator = CombatGenerator.new()
 
-# Progression
+# Progression (kept in RunManager as it's core run state)
 var current_round: int = 0
 var current_phase: String = PHASE_ENCOUNTER
 var reputation: int = GameConstants.STARTING_REPUTATION
@@ -62,8 +63,8 @@ func start_new_run(drafted_character_ids: Array) -> void:
 	# Generate run ID
 	run_id = "run_%d" % Time.get_unix_time_from_system()
 
-	# Initialize team
-	team.clear()
+	# Initialize team via TeamManager
+	_team_manager.clear()
 	starting_gold = 0
 
 	for char_id in drafted_character_ids:
@@ -74,10 +75,10 @@ func start_new_run(drafted_character_ids: Array) -> void:
 
 		# Create runtime instance
 		var char_instance = CharacterInstance.new(char_data)
-		team.append(char_instance)
+		_team_manager.add_character(char_instance)
 
-		# Add income to starting gold
-		starting_gold += char_instance.income
+	# Calculate starting gold from team income
+	starting_gold = _team_manager.calculate_total_income()
 
 	# Initialize run state
 	current_round = 0
@@ -89,7 +90,7 @@ func start_new_run(drafted_character_ids: Array) -> void:
 	encounter_history.clear()
 	is_run_active = true
 
-	print("RunManager: Run started with %d characters, starting gold: %d" % [team.size(), starting_gold])
+	print("RunManager: Run started with %d characters, starting gold: %d" % [_team_manager.get_size(), starting_gold])
 
 	# Save initial state
 	save_run_state()
@@ -111,13 +112,9 @@ func save_run_state() -> void:
 		"losses": losses,
 		"starting_gold": starting_gold,
 		"current_gold": current_gold,
-		"team": [],
+		"team": _team_manager.to_array(),
 		"encounter_history": encounter_history
 	}
-
-	# Serialize team
-	for char_instance in team:
-		save_data["team"].append(char_instance.to_dict())
 
 	if JsonPersistence.save_json(SAVE_PATH, save_data):
 		print("RunManager: Run state saved (Round %d, Reputation %d)" % [current_round, reputation])
@@ -140,15 +137,12 @@ func load_run_state() -> bool:
 	current_gold = save_data.get("current_gold", 0)
 	encounter_history = save_data.get("encounter_history", [])
 
-	# Restore team
-	team.clear()
-	for char_data in save_data.get("team", []):
-		var char_instance = CharacterInstance.from_dict(char_data)
-		team.append(char_instance)
+	# Restore team via TeamManager
+	_team_manager.load_from_array(save_data.get("team", []))
 
 	is_run_active = true
 
-	print("RunManager: Run state loaded (Round %d, %d characters)" % [current_round, team.size()])
+	print("RunManager: Run state loaded (Round %d, %d characters)" % [current_round, _team_manager.get_size()])
 	return true
 
 
@@ -161,18 +155,8 @@ func end_run(victory: bool) -> void:
 	"""
 	print("RunManager: Ending run - %s" % ("VICTORY" if victory else "DEFEAT"))
 
-	# Award character rank XP
-	for char_instance in team:
-		PlayerAccount.add_character_experience(
-			char_instance.base_character_id,
-			GameConstants.RUN_CHARACTER_XP_REWARD
-		)
-
-	# Award gems based on outcome
-	if victory:
-		PlayerAccount.add_gems(GameConstants.VICTORY_GEM_REWARD)
-	else:
-		PlayerAccount.add_gems(GameConstants.DEFEAT_GEM_REWARD)
+	# Apply rewards via RewardCalculator
+	RewardCalculator.apply_run_end_rewards(_team_manager, victory)
 
 	# Clear run state
 	_clear_run_state()
@@ -184,7 +168,7 @@ func _clear_run_state() -> void:
 	"""Clear all run state and delete save file."""
 	is_run_active = false
 	run_id = ""
-	team.clear()
+	_team_manager.clear()
 	current_round = 0
 	current_phase = PHASE_ENCOUNTER
 	reputation = GameConstants.STARTING_REPUTATION
@@ -200,11 +184,11 @@ func _clear_run_state() -> void:
 
 
 # =============================================================================
-# GETTERS
+# GETTERS - Delegated to TeamManager where appropriate
 # =============================================================================
 
 func get_team() -> Array[CharacterInstance]:
-	return team
+	return _team_manager.get_team()
 
 
 func get_round() -> int:
@@ -322,7 +306,7 @@ func did_player_win() -> bool:
 
 
 # =============================================================================
-# UTILITY METHODS
+# UTILITY METHODS - Delegated to TeamManager
 # =============================================================================
 
 func get_phase_name() -> String:
@@ -332,41 +316,22 @@ func get_phase_name() -> String:
 
 func get_team_summary() -> Dictionary:
 	"""Get summary stats for the team."""
-	var summary = {
-		"total_health": 0,
-		"max_health": 0,
-		"average_level": 0.0,
-		"total_attack": 0
-	}
-
-	if team.is_empty():
-		return summary
-
-	for char_instance in team:
-		summary["total_health"] += char_instance.current_health
-		summary["max_health"] += char_instance.max_health
-		summary["average_level"] += char_instance.level
-		summary["total_attack"] += char_instance.basic_attack_damage
-
-	summary["average_level"] /= team.size()
-
-	return summary
+	return _team_manager.get_summary()
 
 
 func get_character_by_index(index: int) -> CharacterInstance:
 	"""Get a team member by index (0-2)."""
-	if index >= 0 and index < team.size():
-		return team[index]
-	return null
+	return _team_manager.get_character_by_index(index)
 
 
 # =============================================================================
-# COMBAT GENERATION
+# COMBAT GENERATION - Delegated to CombatGenerator
 # =============================================================================
 
 func generate_combat_options(count: int) -> Array:
 	"""
 	Generate random combat options (AI enemies or Player Ghosts).
+	Returns dictionaries for backwards compatibility.
 
 	Args:
 		count: Number of options to generate (usually 3)
@@ -374,56 +339,25 @@ func generate_combat_options(count: int) -> Array:
 	Returns:
 		Array of combat option dictionaries
 	"""
-	var options = []
-
-	for i in range(count):
-		var is_player_ghost = randf() > 0.5  # 50% chance of player ghost
-
-		if is_player_ghost:
-			options.append(_generate_player_ghost_option())
-		else:
-			options.append(_generate_ai_combat_option())
-
-	return options
+	return _combat_generator.generate_options_as_dicts(count)
 
 
-func _generate_ai_combat_option() -> Dictionary:
-	"""Generate an AI enemy combat option."""
-	var difficulties = ["Easy", "Medium", "Hard"]
-	var difficulty = difficulties[randi() % difficulties.size()]
-
-	var difficulty_index = difficulties.find(difficulty)
-	var base_reward = 20 + (difficulty_index * 10)
-
-	return {
-		"type": "ai",
-		"name": "AI Enemy (%s)" % difficulty,
-		"description": "Fight an AI-controlled enemy.",
-		"image_path": "res://assets/combat/ai_enemy.png",
-		"difficulty": difficulty,
-		"reward_gold": base_reward,
-		"reward_xp": base_reward + 10
-	}
-
-
-func _generate_player_ghost_option() -> Dictionary:
+func generate_combat_options_typed(count: int) -> Array[CombatOption]:
 	"""
-	Generate a player ghost combat option.
-	TODO: Replace with actual ghost team loading from server
+	Generate random combat options as typed CombatOption objects.
+
+	Args:
+		count: Number of options to generate (usually 3)
+
+	Returns:
+		Array of CombatOption objects
 	"""
-	var rank = randi_range(1, 10)
-	var base_reward = 25 + (rank * 5)
+	return _combat_generator.generate_options(count)
 
-	return {
-		"type": "ghost",
-		"name": "Player Ghost (Rank %d)" % rank,
-		"description": "Fight another player's team.",
-		"image_path": "res://assets/combat/player_ghost.png",
-		"rank": rank,
-		"reward_gold": base_reward,
-		"reward_xp": base_reward + 15
-	}
 
+# =============================================================================
+# REWARDS - Delegated to RewardCalculator
+# =============================================================================
 
 func apply_combat_rewards(won: bool, combat_data: Dictionary) -> void:
 	"""
@@ -434,20 +368,9 @@ func apply_combat_rewards(won: bool, combat_data: Dictionary) -> void:
 		combat_data: The combat option data
 	"""
 	if won:
-		# Award gold and XP
-		var reward_gold = combat_data.get("reward_gold", 20)
-		var reward_xp = combat_data.get("reward_xp", 30)
-
-		add_gold(reward_gold)
-
-		# Distribute XP to all team members
-		for char_instance in team:
-			char_instance.add_experience(reward_xp)
-
-		print("RunManager: Victory! Awarded %d gold, %d XP per character" % [reward_gold, reward_xp])
+		RewardCalculator.apply_combat_victory_rewards(_team_manager, add_gold, combat_data)
 	else:
 		# Lose reputation equal to round number
-		var reputation_loss = current_round + 1  # +1 because displayed as 1-indexed
+		var reputation_loss = RewardCalculator.calculate_reputation_loss(current_round)
 		lose_reputation(reputation_loss)
-
 		print("RunManager: Defeat! Lost %d reputation" % reputation_loss)

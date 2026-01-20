@@ -50,14 +50,14 @@ func _update_top_bar() -> void:
 	var gold = RunManager.get_gold()
 
 	round_label.text = "ROUND %d" % (round_num + 1)  # Display as 1-indexed
-	reputation_label.text = "❤️ %d/%d" % [rep, GameConstants.STARTING_REPUTATION]
-	wins_label.text = "⭐ %d/%d" % [wins, GameConstants.WINS_FOR_VICTORY]
-	gold_label.text = "💰 %d" % gold
+	reputation_label.text = "%s %d/%d" % [GameConstants.EMOJI_HEART, rep, GameConstants.STARTING_REPUTATION]
+	wins_label.text = "%s %d/%d" % [GameConstants.EMOJI_STAR, wins, GameConstants.WINS_FOR_VICTORY]
+	gold_label.text = "%s %d" % [GameConstants.EMOJI_GOLD, gold]
 
 	# Color code reputation
-	if rep <= 5:
+	if rep <= GameConstants.REPUTATION_CRITICAL_THRESHOLD:
 		reputation_label.modulate = Color.RED
-	elif rep <= 10:
+	elif rep <= GameConstants.REPUTATION_WARNING_THRESHOLD:
 		reputation_label.modulate = Color.YELLOW
 	else:
 		reputation_label.modulate = Color.WHITE

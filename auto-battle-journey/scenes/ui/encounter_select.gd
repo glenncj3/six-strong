@@ -64,8 +64,8 @@ func _create_option_panel(encounter_data: Dictionary, index: int) -> void:
 	content.add_child(type_label)
 	type_label.text = "[%s]" % encounter_data["type"].to_upper().replace("_", " ")
 	type_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	type_label.add_theme_font_size_override("font_size", 12)
-	type_label.modulate = Color(0.7, 0.7, 0.7)
+	type_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_TINY)
+	type_label.modulate = GameConstants.COLOR_DISABLED
 
 	# Description
 	var desc_label = Label.new()
@@ -80,7 +80,7 @@ func _create_option_panel(encounter_data: Dictionary, index: int) -> void:
 	content.add_child(preview_label)
 	preview_label.text = _get_reward_preview(encounter_data)
 	preview_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	preview_label.modulate = Color(0.3, 1.0, 0.3)
+	preview_label.modulate = GameConstants.COLOR_SUCCESS
 
 	# Spacer
 	var spacer = Control.new()

@@ -103,7 +103,7 @@ func _create_encounter_data(encounter_type: String) -> Dictionary:
 			encounter_data["description"] = "Practice your skills and gain experience."
 			encounter_data["image_path"] = "res://assets/encounters/training.png"
 			encounter_data["data"] = {
-				"xp_amount": randi_range(30, 80)
+				"xp_amount": randi_range(GameConstants.XP_REWARD_MIN, GameConstants.XP_REWARD_MAX)
 			}
 
 		"gold_reward":
@@ -111,7 +111,7 @@ func _create_encounter_data(encounter_type: String) -> Dictionary:
 			encounter_data["description"] = "You found a chest full of gold!"
 			encounter_data["image_path"] = "res://assets/encounters/chest.png"
 			encounter_data["data"] = {
-				"gold_amount": randi_range(20, 50)
+				"gold_amount": randi_range(GameConstants.GOLD_REWARD_MIN, GameConstants.GOLD_REWARD_MAX)
 			}
 
 		"health_restore":
@@ -119,7 +119,7 @@ func _create_encounter_data(encounter_type: String) -> Dictionary:
 			encounter_data["description"] = "Restore your team's health."
 			encounter_data["image_path"] = "res://assets/encounters/fountain.png"
 			encounter_data["data"] = {
-				"heal_percentage": 0.5  # Heal 50% of max health
+				"heal_percentage": GameConstants.HEALTH_RESTORE_PERCENTAGE
 			}
 
 	return encounter_data
@@ -132,24 +132,24 @@ func _generate_shop_inventory() -> Dictionary:
 		"skills": []
 	}
 
-	# Add 2-4 random item upgrades for sale
+	# Add random item upgrades for sale
 	var all_item_upgrades = GameData.get_all_item_upgrades()
 	all_item_upgrades.shuffle()
-	var item_count = randi_range(2, 4)
+	var item_count = randi_range(GameConstants.SHOP_MIN_ITEMS, GameConstants.SHOP_MAX_ITEMS)
 	for i in range(mini(item_count, all_item_upgrades.size())):
 		inventory["items"].append({
 			"id": all_item_upgrades[i]["id"],
-			"cost": randi_range(10, 30)
+			"cost": randi_range(GameConstants.SHOP_ITEM_MIN_COST, GameConstants.SHOP_ITEM_MAX_COST)
 		})
 
-	# Add 1-2 random skills for sale
+	# Add random skills for sale
 	var all_skills = GameData.get_all_skills()
 	all_skills.shuffle()
-	var skill_count = randi_range(1, 2)
+	var skill_count = randi_range(GameConstants.SHOP_MIN_SKILLS, GameConstants.SHOP_MAX_SKILLS)
 	for i in range(mini(skill_count, all_skills.size())):
 		inventory["skills"].append({
 			"id": all_skills[i]["id"],
-			"cost": randi_range(15, 40)
+			"cost": randi_range(GameConstants.SHOP_SKILL_MIN_COST, GameConstants.SHOP_SKILL_MAX_COST)
 		})
 
 	return inventory
@@ -158,7 +158,7 @@ func _generate_shop_inventory() -> Dictionary:
 func apply_scaling(encounter_data: Dictionary, round_num: int) -> void:
 	"""Apply difficulty/reward scaling based on round number."""
 	# Scale rewards based on how far into the run the player is
-	var scale_factor = 1.0 + (round_num * 0.1)  # 10% increase per round
+	var scale_factor = 1.0 + (round_num * GameConstants.ROUND_SCALE_FACTOR)
 
 	match encounter_data["type"]:
 		"xp_reward":
