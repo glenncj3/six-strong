@@ -1,0 +1,78 @@
+[gd_scene load_steps=2 format=3 uid="uid://cw2nkv4m6r8xp"]
+
+[ext_resource type="Script" path="res://scenes/ui/collection.gd" id="1_script"]
+
+[node name="Collection" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.14902, 0.152941, 0.2, 1)
+
+[node name="HSplitContainer" type="HSplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 60.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+split_offset = 400
+
+[node name="LeftPanel" type="VBoxContainer" parent="HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="HSplitContainer/LeftPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "CHARACTER COLLECTION"
+
+[node name="CharacterListScroll" type="ScrollContainer" parent="HSplitContainer/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="CharacterGrid" type="GridContainer" parent="HSplitContainer/LeftPanel/CharacterListScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 3
+
+[node name="RightPanel" type="VBoxContainer" parent="HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="DetailsTitle" type="Label" parent="HSplitContainer/RightPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "CHARACTER DETAILS"
+
+[node name="CharacterDetailsPanel" type="Control" parent="HSplitContainer/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 96.0
+offset_bottom = 47.0
+text = "BACK"

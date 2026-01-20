@@ -1,0 +1,148 @@
+[gd_scene load_steps=2 format=3 uid="uid://dj3v8g7yx5qmc"]
+
+[ext_resource type="Script" path="res://scenes/ui/character_details.gd" id="1_script"]
+
+[node name="CharacterDetails" type="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TopBar" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Portrait" type="TextureRect" parent="MarginContainer/VBoxContainer/TopBar"]
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="InfoContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/InfoContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Character Name"
+
+[node name="RankLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/InfoContainer"]
+layout_mode = 2
+text = "Rank 1"
+
+[node name="RankProgressBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/TopBar/InfoContainer"]
+layout_mode = 2
+max_value = 100.0
+show_percentage = false
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="StatsTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "STATS"
+
+[node name="StatsGrid" type="GridContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="HealthLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+text = "Health:"
+
+[node name="HealthValue" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+text = "100"
+
+[node name="AttackLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+text = "Attack:"
+
+[node name="AttackValue" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+text = "10"
+
+[node name="DefenseLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+text = "Defense:"
+
+[node name="DefenseValue" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+text = "8"
+
+[node name="SpeedLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+text = "Speed:"
+
+[node name="SpeedValue" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+text = "5"
+
+[node name="IncomeLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+text = "Income:"
+
+[node name="IncomeValue" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+text = "3"
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="EquipmentTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "EQUIPPED ITEMS"
+
+[node name="EquippedItemsContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ItemsTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "AVAILABLE ITEMS"
+
+[node name="ItemListContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ItemList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ItemListContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="SkillsTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "UNLOCKED SKILLS"
+
+[node name="SkillsContainer" type="GridContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 4

@@ -53,7 +53,7 @@ func _create_character_data(char_id: String) -> void:
 		return
 
 	# Get rank 1 unlocked items
-	var unlocked_items = []
+	var unlocked_items: Array = []
 	if char_master.has("rank_rewards") and char_master["rank_rewards"].size() > 0:
 		var rank_1_rewards = char_master["rank_rewards"][0]
 		if rank_1_rewards.has("rewards"):
@@ -61,12 +61,15 @@ func _create_character_data(char_id: String) -> void:
 				if reward["type"] == "item":
 					unlocked_items.append(reward["id"])
 
+	# Auto-equip starting items
+	var equipped_items: Array = unlocked_items.duplicate()
+
 	var char_data = {
 		"id": char_id,
 		"unlocked": true,
 		"rank": 1,
 		"experience": 0,
-		"equipped_items": [],
+		"equipped_items": equipped_items,
 		"unlocked_items": unlocked_items,
 		"unlocked_item_upgrades": [],
 		"unlocked_skills": []
@@ -215,21 +218,11 @@ func equip_item(char_id: String, item_id: String) -> bool:
 		push_warning("PlayerAccount: Item not unlocked for character: %s" % item_id)
 		return false
 
-	# Get item slot
-	var item_master = GameData.get_item_by_id(item_id)
-	if item_master.is_empty():
-		return false
+	# Check if already equipped
+	if item_id in char_data["equipped_items"]:
+		return true
 
-	var slot = item_master["slot"]
-
-	# Unequip any item in the same slot
-	for equipped_id in char_data["equipped_items"]:
-		var equipped_item = GameData.get_item_by_id(equipped_id)
-		if equipped_item["slot"] == slot:
-			char_data["equipped_items"].erase(equipped_id)
-			break
-
-	# Equip new item
+	# Equip the item
 	char_data["equipped_items"].append(item_id)
 	save_account()
 	return true

@@ -1,0 +1,30 @@
+[gd_scene load_steps=2 format=3 uid="uid://b1t7vqxgpk8wx"]
+
+[ext_resource type="Script" path="res://scenes/components/item_slot.gd" id="1_script"]
+
+[node name="ItemSlot" type="PanelContainer"]
+custom_minimum_size = Vector2(80, 100)
+script = ExtResource("1_script")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ItemIcon" type="TextureRect" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ItemName" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "[Empty]"
+horizontal_alignment = 1

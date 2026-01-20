@@ -7,8 +7,7 @@
       "image_path": "res://assets/items/rusty_sword.png",
       "stat_modifiers": {
         "basic_attack_damage": 3
-      },
-      "slot": "weapon"
+      }
     },
     {
       "id": "item_rusty_dagger",
@@ -18,8 +17,7 @@
       "stat_modifiers": {
         "basic_attack_damage": 2,
         "speed": 1
-      },
-      "slot": "weapon"
+      }
     },
     {
       "id": "item_wooden_staff",
@@ -29,8 +27,7 @@
       "stat_modifiers": {
         "basic_attack_damage": 4,
         "defense": 1
-      },
-      "slot": "weapon"
+      }
     },
     {
       "id": "item_prayer_book",
@@ -40,8 +37,7 @@
       "stat_modifiers": {
         "defense": 3,
         "health": 10
-      },
-      "slot": "weapon"
+      }
     },
     {
       "id": "item_short_bow",
@@ -51,8 +47,7 @@
       "stat_modifiers": {
         "basic_attack_damage": 5,
         "speed": 2
-      },
-      "slot": "weapon"
+      }
     },
     {
       "id": "item_leather_armor",
@@ -62,8 +57,7 @@
       "stat_modifiers": {
         "defense": 2,
         "health": 5
-      },
-      "slot": "armor"
+      }
     }
   ]
 }

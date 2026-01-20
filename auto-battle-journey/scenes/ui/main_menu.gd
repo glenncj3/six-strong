@@ -46,9 +46,8 @@ func _on_play_pressed() -> void:
 
 
 func _on_collection_pressed() -> void:
-	print("MainMenu: Collection button pressed")
-	# TODO: Load collection scene
-	pass
+	print("MainMenu: Opening collection...")
+	get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/collection.tscn")
 
 
 func _on_quit_pressed() -> void:
