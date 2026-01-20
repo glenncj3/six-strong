@@ -4,6 +4,38 @@ extends RefCounted
 # All magic numbers and tuning parameters should live here
 
 # =============================================================================
+# SCREEN / MOBILE CONSTANTS (Portrait 9:16)
+# =============================================================================
+
+const DESIGN_WIDTH := 720
+const DESIGN_HEIGHT := 1280
+
+# UI margins for mobile (smaller for portrait mode)
+const SCREEN_MARGIN := 16
+const SCREEN_MARGIN_SMALL := 8
+
+# Component sizes optimized for portrait mobile
+const CHARACTER_CARD_WIDTH := 200
+const CHARACTER_CARD_HEIGHT := 280
+const CHARACTER_CARD_SMALL_WIDTH := 100
+const CHARACTER_CARD_SMALL_HEIGHT := 140
+
+const ITEM_SLOT_WIDTH := 72
+const ITEM_SLOT_HEIGHT := 90
+const ITEM_ICON_SIZE := 56
+
+const SKILL_ICON_WIDTH := 56
+const SKILL_ICON_HEIGHT := 70
+const SKILL_ICON_IMAGE_SIZE := 40
+
+# Font sizes for mobile
+const FONT_SIZE_TITLE := 48
+const FONT_SIZE_HEADING := 24
+const FONT_SIZE_BODY := 18
+const FONT_SIZE_SMALL := 14
+const FONT_SIZE_TINY := 12
+
+# =============================================================================
 # PROGRESSION CONSTANTS
 # =============================================================================
 

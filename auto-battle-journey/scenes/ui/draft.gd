@@ -2,11 +2,12 @@ extends Control
 # Draft - Character selection for starting a run
 # Refactored to use SceneManager, UIHelpers, and GameConstants
 
-@onready var instruction_label = $MainContainer/TopSection/InstructionLabel
-@onready var selected_display = $MainContainer/TopSection/SelectedDisplay
-@onready var options_container = $MainContainer/OptionsContainer
-@onready var reroll_button = $MainContainer/BottomButtons/RerollButton
-@onready var confirm_button = $MainContainer/BottomButtons/ConfirmButton
+@onready var instruction_label = $MainContainer/VBoxContainer/TopSection/InstructionLabel
+@onready var selected_display = $MainContainer/VBoxContainer/TopSection/SelectedDisplay
+@onready var options_container = $MainContainer/VBoxContainer/OptionsScroll/OptionsContainer
+@onready var options_title = $MainContainer/VBoxContainer/OptionsTitle
+@onready var reroll_button = $MainContainer/VBoxContainer/BottomButtons/RerollButton
+@onready var confirm_button = $MainContainer/VBoxContainer/BottomButtons/ConfirmButton
 @onready var back_button = $BackButton
 
 # Preload scenes
@@ -124,9 +125,10 @@ func _generate_options() -> void:
 
 
 func _create_option_panel(option: Dictionary) -> void:
-	"""Create a selectable character option panel."""
+	"""Create a selectable character option panel for portrait layout."""
 	var panel = PanelContainer.new()
-	panel.custom_minimum_size = Vector2(200, 300)
+	# Full width for portrait mobile, height based on content
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	options_container.add_child(panel)
 
 	var vbox = VBoxContainer.new()
@@ -215,13 +217,13 @@ func _update_selected_display() -> void:
 	# Clear existing using UIHelpers
 	UIHelpers.clear_children(selected_display)
 
-	# Add card for each drafted character
+	# Add card for each drafted character (smaller for portrait mode)
 	for char_data in drafted_characters:
 		var card = CharacterCardScene.instantiate()
 		selected_display.add_child(card)
 		card.setup(char_data, true)
 		card.set_clickable(false)
-		card.custom_minimum_size = Vector2(100, 160)
+		card.custom_minimum_size = Vector2(GameConstants.CHARACTER_CARD_SMALL_WIDTH, GameConstants.CHARACTER_CARD_SMALL_HEIGHT)
 
 
 func _update_instruction() -> void:
@@ -243,10 +245,9 @@ func _show_confirm_button() -> void:
 	print("Draft: Showing confirm button (team complete)")
 
 	# Hide the options section entirely
-	var options_title = $MainContainer/OptionsTitle
 	if options_title:
 		options_title.visible = false
-	options_container.visible = false
+	options_container.get_parent().visible = false  # Hide the ScrollContainer
 
 	# Hide reroll, show confirm
 	reroll_button.visible = false

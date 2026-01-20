@@ -2,20 +2,20 @@ extends Panel
 # CharacterDetails - Detailed character view with equipment management
 # Refactored to use StatCalculator, UIHelpers, and GameConstants
 
-@onready var portrait: TextureRect = $MarginContainer/VBoxContainer/TopBar/Portrait
-@onready var name_label: Label = $MarginContainer/VBoxContainer/TopBar/InfoContainer/NameLabel
-@onready var rank_label: Label = $MarginContainer/VBoxContainer/TopBar/InfoContainer/RankLabel
-@onready var rank_progress_bar: ProgressBar = $MarginContainer/VBoxContainer/TopBar/InfoContainer/RankProgressBar
+@onready var portrait: TextureRect = $ScrollContainer/MarginContainer/VBoxContainer/TopBar/Portrait
+@onready var name_label: Label = $ScrollContainer/MarginContainer/VBoxContainer/TopBar/InfoContainer/NameLabel
+@onready var rank_label: Label = $ScrollContainer/MarginContainer/VBoxContainer/TopBar/InfoContainer/RankLabel
+@onready var rank_progress_bar: ProgressBar = $ScrollContainer/MarginContainer/VBoxContainer/TopBar/InfoContainer/RankProgressBar
 
-@onready var health_value: Label = $MarginContainer/VBoxContainer/StatsGrid/HealthValue
-@onready var attack_value: Label = $MarginContainer/VBoxContainer/StatsGrid/AttackValue
-@onready var defense_value: Label = $MarginContainer/VBoxContainer/StatsGrid/DefenseValue
-@onready var speed_value: Label = $MarginContainer/VBoxContainer/StatsGrid/SpeedValue
-@onready var income_value: Label = $MarginContainer/VBoxContainer/StatsGrid/IncomeValue
+@onready var health_value: Label = $ScrollContainer/MarginContainer/VBoxContainer/StatsGrid/HealthValue
+@onready var attack_value: Label = $ScrollContainer/MarginContainer/VBoxContainer/StatsGrid/AttackValue
+@onready var defense_value: Label = $ScrollContainer/MarginContainer/VBoxContainer/StatsGrid/DefenseValue
+@onready var speed_value: Label = $ScrollContainer/MarginContainer/VBoxContainer/StatsGrid/SpeedValue
+@onready var income_value: Label = $ScrollContainer/MarginContainer/VBoxContainer/StatsGrid/IncomeValue
 
-@onready var equipped_items_container: HBoxContainer = $MarginContainer/VBoxContainer/EquippedItemsContainer
-@onready var item_list: VBoxContainer = $MarginContainer/VBoxContainer/ItemListContainer/ItemList
-@onready var skills_container: GridContainer = $MarginContainer/VBoxContainer/SkillsContainer
+@onready var equipped_items_container: HBoxContainer = $ScrollContainer/MarginContainer/VBoxContainer/EquippedItemsContainer
+@onready var item_list: VBoxContainer = $ScrollContainer/MarginContainer/VBoxContainer/ItemListContainer/ItemList
+@onready var skills_container: GridContainer = $ScrollContainer/MarginContainer/VBoxContainer/SkillsContainer
 
 var current_character_data: Dictionary = {}
 
@@ -108,9 +108,9 @@ func _display_unlocked_items(char_data: Dictionary) -> void:
 		var item_row = HBoxContainer.new()
 		item_list.add_child(item_row)
 
-		# Item icon
+		# Item icon (using mobile-friendly size)
 		var icon = TextureRect.new()
-		icon.custom_minimum_size = Vector2(32, 32)
+		icon.custom_minimum_size = Vector2(GameConstants.SKILL_ICON_IMAGE_SIZE, GameConstants.SKILL_ICON_IMAGE_SIZE)
 		icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		UIHelpers.set_texture_safe(icon, item_data.get("image_path", ""))

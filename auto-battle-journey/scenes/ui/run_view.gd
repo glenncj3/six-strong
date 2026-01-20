@@ -2,10 +2,10 @@ extends Control
 # RunView - Main UI during an active run
 # Uses UIHelpers for common UI operations and GameConstants for magic numbers
 
-@onready var round_label = $TopBar/MarginContainer/HBoxContainer/RoundLabel
-@onready var reputation_label = $TopBar/MarginContainer/HBoxContainer/ReputationLabel
-@onready var wins_label = $TopBar/MarginContainer/HBoxContainer/WinsLabel
-@onready var gold_label = $TopBar/MarginContainer/HBoxContainer/GoldLabel
+@onready var round_label = $TopBar/MarginContainer/VBoxContainer/RoundLabel
+@onready var reputation_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/ReputationLabel
+@onready var wins_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/WinsLabel
+@onready var gold_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/GoldLabel
 
 @onready var team_container = $TeamPanel/MarginContainer/VBoxContainer/TeamContainer
 @onready var phase_label = $CenterPanel/MarginContainer/VBoxContainer/PhaseLabel
@@ -46,16 +46,16 @@ func _update_all_displays() -> void:
 
 
 func _update_top_bar() -> void:
-	"""Update round, reputation, wins, gold display."""
+	"""Update round, reputation, wins, gold display (compact mobile format)."""
 	var round_num = RunManager.get_round()
 	var rep = RunManager.get_reputation()
 	var wins = RunManager.get_wins()
 	var gold = RunManager.get_gold()
 
 	round_label.text = "ROUND %d" % (round_num + 1)  # Display as 1-indexed
-	reputation_label.text = "REPUTATION: %d/%d" % [rep, GameConstants.STARTING_REPUTATION]
-	wins_label.text = "WINS: %d/%d" % [wins, GameConstants.WINS_FOR_VICTORY]
-	gold_label.text = "GOLD: %d" % gold
+	reputation_label.text = "❤️ %d/%d" % [rep, GameConstants.STARTING_REPUTATION]
+	wins_label.text = "⭐ %d/%d" % [wins, GameConstants.WINS_FOR_VICTORY]
+	gold_label.text = "💰 %d" % gold
 
 	# Color code reputation
 	if rep <= 5:

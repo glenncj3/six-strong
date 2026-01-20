@@ -10,7 +10,8 @@ A roguelike auto-battler inspired by The Bazaar, featuring character collection,
 
 - **Engine**: Godot 4.x
 - **Language**: GDScript
-- **Platform Target**: Windows/Linux/Web
+- **Platform Target**: Mobile (Portrait 9:16 - 720x1280)
+- **Renderer**: Mobile
 
 ## Project Structure
 
@@ -155,6 +156,29 @@ Each character has:
 - **Highly extensible**: Encounters designed as modular plugins
 - **Data-driven**: All content defined in JSON (characters, items, skills, encounters)
 - **Meta-progression**: Account grows stronger through character ranks unlocking more powerful options
+
+## Mobile UI Design
+
+The game is designed for portrait mobile (9:16 aspect ratio, 720x1280 base resolution):
+
+- **Resolution**: 720x1280 with canvas_items stretch mode
+- **Orientation**: Portrait (handheld/orientation = 1)
+- **Screen margins**: 16px standard, 8px for tight spaces
+- **Touch targets**: Minimum 50px height for buttons
+
+### UI Component Sizes
+
+All sizes defined in `GameConstants`:
+- Character card: 200x280 (small: 100x140)
+- Item slot: 72x90 with 56px icon
+- Skill icon: 56x70 with 40px icon
+
+### Scene Layout Patterns
+
+- **Main Menu**: Centered VBox with large touch-friendly buttons
+- **Collection**: Full-screen grid (2 columns) with details as overlay
+- **Draft**: Vertical scrolling options, horizontal team display at top
+- **Run View**: Top stats bar, team panel in upper half, action panel in lower half
 
 ## Known Issues
 

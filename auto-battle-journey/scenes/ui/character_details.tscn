@@ -10,139 +10,160 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+horizontal_scroll_mode = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TopBar" type="HBoxContainer" parent="ScrollContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="TopBar" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="Portrait" type="TextureRect" parent="MarginContainer/VBoxContainer/TopBar"]
-custom_minimum_size = Vector2(128, 128)
+[node name="Portrait" type="TextureRect" parent="ScrollContainer/MarginContainer/VBoxContainer/TopBar"]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="InfoContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopBar"]
+[node name="InfoContainer" type="VBoxContainer" parent="ScrollContainer/MarginContainer/VBoxContainer/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
-[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/InfoContainer"]
+[node name="NameLabel" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/TopBar/InfoContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 22
 text = "Character Name"
 
-[node name="RankLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/InfoContainer"]
+[node name="RankLabel" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/TopBar/InfoContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Rank 1"
 
-[node name="RankProgressBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/TopBar/InfoContainer"]
+[node name="RankProgressBar" type="ProgressBar" parent="ScrollContainer/MarginContainer/VBoxContainer/TopBar/InfoContainer"]
+custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 max_value = 100.0
 show_percentage = false
 
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="ScrollContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="StatsTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="StatsTitle" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "STATS"
 
-[node name="StatsGrid" type="GridContainer" parent="MarginContainer/VBoxContainer"]
+[node name="StatsGrid" type="GridContainer" parent="ScrollContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 4
 columns = 2
 
-[node name="HealthLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+[node name="HealthLabel" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/StatsGrid"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Health:"
 
-[node name="HealthValue" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+[node name="HealthValue" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/StatsGrid"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "100"
 
-[node name="AttackLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+[node name="AttackLabel" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/StatsGrid"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Attack:"
 
-[node name="AttackValue" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+[node name="AttackValue" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/StatsGrid"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "10"
 
-[node name="DefenseLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+[node name="DefenseLabel" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/StatsGrid"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Defense:"
 
-[node name="DefenseValue" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+[node name="DefenseValue" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/StatsGrid"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "8"
 
-[node name="SpeedLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+[node name="SpeedLabel" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/StatsGrid"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Speed:"
 
-[node name="SpeedValue" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+[node name="SpeedValue" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/StatsGrid"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "5"
 
-[node name="IncomeLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+[node name="IncomeLabel" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/StatsGrid"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Income:"
 
-[node name="IncomeValue" type="Label" parent="MarginContainer/VBoxContainer/StatsGrid"]
+[node name="IncomeValue" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer/StatsGrid"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "3"
 
-[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator2" type="HSeparator" parent="ScrollContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="EquipmentTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="EquipmentTitle" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "EQUIPPED ITEMS"
 
-[node name="EquippedItemsContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="EquippedItemsContainer" type="HBoxContainer" parent="ScrollContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ItemsTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="ItemsTitle" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "AVAILABLE ITEMS"
 
-[node name="ItemListContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 100)
+[node name="ItemListContainer" type="ScrollContainer" parent="ScrollContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="ItemList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ItemListContainer"]
+[node name="ItemList" type="VBoxContainer" parent="ScrollContainer/MarginContainer/VBoxContainer/ItemListContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator3" type="HSeparator" parent="ScrollContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="SkillsTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="SkillsTitle" type="Label" parent="ScrollContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "UNLOCKED SKILLS"
 
-[node name="SkillsContainer" type="GridContainer" parent="MarginContainer/VBoxContainer"]
+[node name="SkillsContainer" type="GridContainer" parent="ScrollContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-columns = 4
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 3

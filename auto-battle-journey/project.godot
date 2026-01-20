@@ -22,6 +22,14 @@ PlayerAccount="*res://autoloads/player_account.gd"
 RunManager="*res://autoloads/run_manager.gd"
 SceneManager="*res://autoloads/scene_manager.gd"
 
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
 [rendering]
 
 renderer/rendering_method="mobile"

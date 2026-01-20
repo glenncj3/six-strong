@@ -4,7 +4,8 @@
       "Bash(dir /s /b \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\")",
       "Bash(dir /s \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\")",
       "Bash(dir:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(find:*)"
     ]
   }
 }

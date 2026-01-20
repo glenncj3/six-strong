@@ -1,9 +1,11 @@
 extends Control
 # Collection - Browse and manage character collection
-# Refactored to use SceneManager and UIHelpers
+# Portrait mobile layout with full-screen details overlay
 
-@onready var character_grid: GridContainer = $HSplitContainer/LeftPanel/CharacterListScroll/CharacterGrid
-@onready var character_details_panel: Control = $HSplitContainer/RightPanel/CharacterDetailsPanel
+@onready var character_grid: GridContainer = $MainContainer/VBoxContainer/CharacterListScroll/CharacterGrid
+@onready var character_details_panel: Panel = $CharacterDetailsPanel
+@onready var details_content: Control = $CharacterDetailsPanel/DetailsMargin/DetailsContainer/DetailsContent
+@onready var close_details_button: Button = $CharacterDetailsPanel/CloseDetailsButton
 @onready var back_button: Button = $BackButton
 
 # Preload scenes
@@ -16,12 +18,12 @@ var selected_character_id: String = ""
 
 func _ready() -> void:
 	back_button.pressed.connect(_on_back_pressed)
-	_populate_character_grid()
+	close_details_button.pressed.connect(_on_close_details_pressed)
 
-	# Select first character by default
-	var unlocked_chars = PlayerAccount.get_unlocked_characters()
-	if unlocked_chars.size() > 0:
-		_select_character(unlocked_chars[0].get("id", ""))
+	# Hide details panel initially
+	character_details_panel.visible = false
+
+	_populate_character_grid()
 
 
 func _populate_character_grid() -> void:
@@ -47,12 +49,12 @@ func _populate_character_grid() -> void:
 
 
 func _on_character_card_clicked(char_data: Dictionary) -> void:
-	"""Handle character card selection."""
+	"""Handle character card selection - show details overlay."""
 	_select_character(char_data.get("id", ""))
 
 
 func _select_character(char_id: String) -> void:
-	"""Display details for selected character."""
+	"""Display details for selected character in full-screen overlay."""
 	selected_character_id = char_id
 
 	# Get character data
@@ -67,11 +69,23 @@ func _select_character(char_id: String) -> void:
 
 	# Create new details panel
 	character_details_instance = CharacterDetailsScene.instantiate()
-	character_details_panel.add_child(character_details_instance)
+	details_content.add_child(character_details_instance)
 	character_details_instance.display_character(char_data)
+
+	# Show the details overlay
+	character_details_panel.visible = true
+
+	# Hide main back button when showing details
+	back_button.visible = false
 
 	# Highlight selected card
 	_highlight_selected_card()
+
+
+func _on_close_details_pressed() -> void:
+	"""Close the details overlay and return to grid view."""
+	character_details_panel.visible = false
+	back_button.visible = true
 
 
 func _highlight_selected_card() -> void:

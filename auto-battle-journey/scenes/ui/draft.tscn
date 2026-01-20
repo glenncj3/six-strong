@@ -21,72 +21,89 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.1, 0.12, 0.18, 1)
 
-[node name="MainContainer" type="VBoxContainer" parent="."]
+[node name="MainContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 10
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="TopSection" type="VBoxContainer" parent="MainContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MainContainer"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
-[node name="InstructionLabel" type="Label" parent="MainContainer/TopSection"]
+[node name="TopSection" type="VBoxContainer" parent="MainContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_constants/separation = 8
+
+[node name="InstructionLabel" type="Label" parent="MainContainer/VBoxContainer/TopSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
 text = "SELECT CHARACTER 1 OF 3"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SelectedDisplay" type="HBoxContainer" parent="MainContainer/TopSection"]
-custom_minimum_size = Vector2(0, 180)
+[node name="SelectedTitle" type="Label" parent="MainContainer/VBoxContainer/TopSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "YOUR TEAM"
+horizontal_alignment = 1
+
+[node name="SelectedDisplay" type="HBoxContainer" parent="MainContainer/VBoxContainer/TopSection"]
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
-[node name="Spacer" type="Control" parent="MainContainer"]
+[node name="HSeparator" type="HSeparator" parent="MainContainer/VBoxContainer"]
 layout_mode = 2
-size_flags_vertical = 3
 
-[node name="OptionsTitle" type="Label" parent="MainContainer"]
+[node name="OptionsTitle" type="Label" parent="MainContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 16
 text = "AVAILABLE CHARACTERS"
 horizontal_alignment = 1
 
-[node name="OptionsContainer" type="HBoxContainer" parent="MainContainer"]
-custom_minimum_size = Vector2(0, 260)
+[node name="OptionsScroll" type="ScrollContainer" parent="MainContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="OptionsContainer" type="VBoxContainer" parent="MainContainer/VBoxContainer/OptionsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="BottomButtons" type="VBoxContainer" parent="MainContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 120)
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 24
+theme_override_constants/separation = 12
 
-[node name="BottomButtons" type="HBoxContainer" parent="MainContainer"]
-custom_minimum_size = Vector2(0, 60)
+[node name="RerollButton" type="Button" parent="MainContainer/VBoxContainer/BottomButtons"]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 30
-
-[node name="RerollButton" type="Button" parent="MainContainer/BottomButtons"]
-custom_minimum_size = Vector2(200, 50)
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 text = "REROLL (0 tokens)"
 
-[node name="ConfirmButton" type="Button" parent="MainContainer/BottomButtons"]
-custom_minimum_size = Vector2(200, 50)
+[node name="ConfirmButton" type="Button" parent="MainContainer/VBoxContainer/BottomButtons"]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 text = "START RUN"
 
 [node name="BackButton" type="Button" parent="."]
 layout_mode = 1
 anchors_preset = 0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 120.0
-offset_bottom = 60.0
-theme_override_font_sizes/font_size = 18
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 96.0
+offset_bottom = 50.0
+theme_override_font_sizes/font_size = 16
 text = "< BACK"

@@ -20,59 +20,98 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.14902, 0.152941, 0.2, 1)
 
-[node name="HSplitContainer" type="HSplitContainer" parent="."]
+[node name="MainContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 60.0
-offset_right = -16.0
-offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 2
-split_offset = 400
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="LeftPanel" type="VBoxContainer" parent="HSplitContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MainContainer"]
 layout_mode = 2
-size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="HSplitContainer/LeftPanel"]
+[node name="Title" type="Label" parent="MainContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "CHARACTER COLLECTION"
+horizontal_alignment = 1
 
-[node name="CharacterListScroll" type="ScrollContainer" parent="HSplitContainer/LeftPanel"]
+[node name="CharacterListScroll" type="ScrollContainer" parent="MainContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="CharacterGrid" type="GridContainer" parent="HSplitContainer/LeftPanel/CharacterListScroll"]
+[node name="CharacterGrid" type="GridContainer" parent="MainContainer/VBoxContainer/CharacterListScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 12
-columns = 3
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 2
 
-[node name="RightPanel" type="VBoxContainer" parent="HSplitContainer"]
+[node name="CharacterDetailsPanel" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DetailsBackground" type="ColorRect" parent="CharacterDetailsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.12, 0.16, 1)
+
+[node name="DetailsMargin" type="MarginContainer" parent="CharacterDetailsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="DetailsContainer" type="VBoxContainer" parent="CharacterDetailsPanel/DetailsMargin"]
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
-[node name="DetailsTitle" type="Label" parent="HSplitContainer/RightPanel"]
+[node name="DetailsTitle" type="Label" parent="CharacterDetailsPanel/DetailsMargin/DetailsContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "CHARACTER DETAILS"
+horizontal_alignment = 1
 
-[node name="CharacterDetailsPanel" type="Control" parent="HSplitContainer/RightPanel"]
+[node name="DetailsContent" type="Control" parent="CharacterDetailsPanel/DetailsMargin/DetailsContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="CloseDetailsButton" type="Button" parent="CharacterDetailsPanel"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 96.0
+offset_bottom = 50.0
+theme_override_font_sizes/font_size = 16
+text = "< BACK"
 
 [node name="BackButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 96.0
-offset_bottom = 47.0
-text = "BACK"
+offset_bottom = 50.0
+theme_override_font_sizes/font_size = 16
+text = "< BACK"
