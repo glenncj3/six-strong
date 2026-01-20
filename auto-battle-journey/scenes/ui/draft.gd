@@ -19,6 +19,11 @@ var selection_count: int = 0
 
 
 func _ready() -> void:
+	# Debug: verify all node references
+	print("Draft: Node check - instruction_label: %s" % (instruction_label != null))
+	print("Draft: Node check - confirm_button: %s" % (confirm_button != null))
+	print("Draft: Node check - reroll_button: %s" % (reroll_button != null))
+
 	reroll_button.pressed.connect(_on_reroll_pressed)
 	confirm_button.pressed.connect(_on_confirm_pressed)
 	back_button.pressed.connect(_on_back_pressed)
@@ -216,7 +221,7 @@ func _update_selected_display() -> void:
 		selected_display.add_child(card)
 		card.setup(char_data, true)
 		card.set_clickable(false)
-		card.custom_minimum_size = Vector2(120, 180)
+		card.custom_minimum_size = Vector2(100, 160)
 
 
 func _update_instruction() -> void:
@@ -225,6 +230,7 @@ func _update_instruction() -> void:
 		instruction_label.text = "SELECT CHARACTER %d OF %d" % [selection_count + 1, GameConstants.TEAM_SIZE]
 	else:
 		instruction_label.text = "TEAM COMPLETE - READY TO START"
+	print("Draft: Instruction updated to: %s" % instruction_label.text)
 
 
 func _regenerate_options() -> void:
@@ -234,11 +240,22 @@ func _regenerate_options() -> void:
 
 func _show_confirm_button() -> void:
 	"""Show the confirm button when team is complete."""
-	confirm_button.visible = true
-	reroll_button.visible = false
+	print("Draft: Showing confirm button (team complete)")
 
-	# Clear options since we're done selecting
-	UIHelpers.clear_children(options_container)
+	# Hide the options section entirely
+	var options_title = $MainContainer/OptionsTitle
+	if options_title:
+		options_title.visible = false
+	options_container.visible = false
+
+	# Hide reroll, show confirm
+	reroll_button.visible = false
+	confirm_button.visible = true
+
+	# Make the confirm button expand to fill center
+	confirm_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+
+	print("Draft: confirm_button.visible = %s" % confirm_button.visible)
 
 
 func _on_reroll_pressed() -> void:
@@ -271,13 +288,15 @@ func _on_confirm_pressed() -> void:
 	for char_data in drafted_characters:
 		char_ids.append(char_data.get("id", ""))
 
+	print("Draft: Character IDs: %s" % str(char_ids))
+
 	# Start run
 	RunManager.start_new_run(char_ids)
 
+	print("Draft: Run started, navigating to run_view...")
+
 	# Navigate to run view using SceneManager
-	print("Draft: Run started! (Would navigate to run_view here)")
-	# TODO: Will create run_view scene in Phase 5
-	SceneManager.go_to_main_menu()
+	SceneManager.go_to_run_view()
 
 
 func _on_back_pressed() -> void:

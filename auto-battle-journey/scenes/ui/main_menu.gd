@@ -50,8 +50,7 @@ func _on_play_pressed() -> void:
 	if RunManager.has_active_run():
 		print("MainMenu: Resuming active run...")
 		RunManager.load_run_state()
-		# TODO: Navigate to run_view scene (Phase 5)
-		print("MainMenu: Would navigate to run_view here")
+		SceneManager.go_to("run_view")
 	else:
 		print("MainMenu: Starting new run (draft)...")
 		SceneManager.go_to_draft()

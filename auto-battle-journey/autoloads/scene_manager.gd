@@ -13,8 +13,8 @@ const SCENES = {
 	"collection": "res://scenes/ui/collection.tscn",
 	"character_details": "res://scenes/ui/character_details.tscn",
 	"draft": "res://scenes/ui/draft.tscn",
+	"run_view": "res://scenes/ui/run_view.tscn",
 	# Add more scenes as they're created
-	# "run_view": "res://scenes/ui/run_view.tscn",
 	# "combat": "res://scenes/ui/combat.tscn",
 	# "results": "res://scenes/ui/results.tscn",
 }
@@ -97,6 +97,11 @@ func go_to_collection(fade: bool = true) -> void:
 func go_to_draft(fade: bool = true) -> void:
 	"""Convenience method: Go to draft screen."""
 	go_to("draft", fade)
+
+
+func go_to_run_view(fade: bool = true) -> void:
+	"""Convenience method: Go to run view screen."""
+	go_to("run_view", fade)
 
 
 # =============================================================================

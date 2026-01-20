@@ -281,3 +281,48 @@ func is_run_over() -> bool:
 func did_player_win() -> bool:
 	"""Check if player won (only valid if is_run_over() is true)."""
 	return wins >= GameConstants.WINS_FOR_VICTORY
+
+
+# =============================================================================
+# UTILITY METHODS
+# =============================================================================
+
+func get_phase_name() -> String:
+	"""Get current phase name for display."""
+	# Even rounds = encounter, odd rounds = combat
+	# Round 0 starts with encounter
+	var phase_index = current_round % 2
+	if phase_index == 0:
+		return "encounter"
+	else:
+		return "combat"
+
+
+func get_team_summary() -> Dictionary:
+	"""Get summary stats for the team."""
+	var summary = {
+		"total_health": 0,
+		"max_health": 0,
+		"average_level": 0.0,
+		"total_attack": 0
+	}
+
+	if team.is_empty():
+		return summary
+
+	for char_instance in team:
+		summary["total_health"] += char_instance.current_health
+		summary["max_health"] += char_instance.max_health
+		summary["average_level"] += char_instance.level
+		summary["total_attack"] += char_instance.basic_attack_damage
+
+	summary["average_level"] /= team.size()
+
+	return summary
+
+
+func get_character_by_index(index: int) -> CharacterInstance:
+	"""Get a team member by index (0-2)."""
+	if index >= 0 and index < team.size():
+		return team[index]
+	return null
