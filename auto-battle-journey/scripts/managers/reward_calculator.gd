@@ -35,7 +35,7 @@ static func calculate_reputation_loss(current_round: int) -> int:
 
 static func calculate_run_end_rewards(victory: bool) -> Dictionary:
 	"""
-	Calculate rewards at end of run.
+	Calculate basic rewards at end of run (legacy method).
 
 	Args:
 		victory: Whether the player won the run
@@ -47,6 +47,54 @@ static func calculate_run_end_rewards(victory: bool) -> Dictionary:
 		"gems": GameConstants.VICTORY_GEM_REWARD if victory else GameConstants.DEFEAT_GEM_REWARD,
 		"character_xp": GameConstants.RUN_CHARACTER_XP_REWARD
 	}
+
+
+static func calculate_gem_reward(victory: bool, wins: int, reputation: int) -> int:
+	"""
+	Calculate gem reward based on performance.
+
+	Args:
+		victory: Whether the player won the run
+		wins: Number of combat victories
+		reputation: Remaining reputation (only counts for victory)
+
+	Returns:
+		Total gem reward
+	"""
+	var base_reward = GameConstants.DEFEAT_GEM_REWARD
+	if victory:
+		base_reward = GameConstants.VICTORY_GEM_REWARD
+
+	# Bonus for wins (5 per win)
+	var win_bonus = wins * 5
+
+	# Bonus for remaining reputation (victory only, 2 per reputation)
+	var reputation_bonus = 0
+	if victory:
+		reputation_bonus = reputation * 2
+
+	return base_reward + win_bonus + reputation_bonus
+
+
+static func calculate_character_xp_reward(victory: bool, wins: int) -> int:
+	"""
+	Calculate character rank XP based on performance.
+
+	Args:
+		victory: Whether the player won the run
+		wins: Number of combat victories
+
+	Returns:
+		XP reward per character
+	"""
+	var base_xp = 25
+	if victory:
+		base_xp = 75
+
+	# Bonus for wins (5 per win)
+	var win_bonus = wins * 5
+
+	return base_xp + win_bonus
 
 
 static func apply_combat_victory_rewards(

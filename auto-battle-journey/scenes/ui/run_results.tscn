@@ -1,0 +1,206 @@
+[gd_scene load_steps=2 format=3 uid="uid://run_results1"]
+
+[ext_resource type="Script" uid="uid://run_results_s1" path="res://scenes/ui/run_results.gd" id="1_script"]
+
+[node name="RunResults" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.1, 0.12, 0.18, 1)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainContainer" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="TopSpacer" type="Control" parent="ScrollContainer/MainContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="ResultTitle" type="Label" parent="ScrollContainer/MainContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "VICTORY!"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="ScrollContainer/MainContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="StatsPanel" type="Panel" parent="ScrollContainer/MainContainer"]
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="ScrollContainer/MainContainer/StatsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="StatsContainer" type="VBoxContainer" parent="ScrollContainer/MainContainer/StatsPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StatsTitle" type="Label" parent="ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "RUN STATISTICS"
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer"]
+layout_mode = 2
+
+[node name="RoundsLabel" type="Label" parent="ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Rounds Completed: 0"
+horizontal_alignment = 1
+
+[node name="WinsLabel" type="Label" parent="ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Victories: 0"
+horizontal_alignment = 1
+
+[node name="LossesLabel" type="Label" parent="ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Defeats: 0"
+horizontal_alignment = 1
+
+[node name="GoldEarnedLabel" type="Label" parent="ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Gold Earned: 0"
+horizontal_alignment = 1
+
+[node name="ReputationLabel" type="Label" parent="ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Final Reputation: 0/20"
+horizontal_alignment = 1
+
+[node name="Spacer2" type="Control" parent="ScrollContainer/MainContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="RewardsPanel" type="Panel" parent="ScrollContainer/MainContainer"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="ScrollContainer/MainContainer/RewardsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="RewardsContainer" type="VBoxContainer" parent="ScrollContainer/MainContainer/RewardsPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RewardsTitle" type="Label" parent="ScrollContainer/MainContainer/RewardsPanel/MarginContainer/RewardsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "REWARDS"
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="ScrollContainer/MainContainer/RewardsPanel/MarginContainer/RewardsContainer"]
+layout_mode = 2
+
+[node name="GemsLabel" type="Label" parent="ScrollContainer/MainContainer/RewardsPanel/MarginContainer/RewardsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "+100 💎 Gems"
+horizontal_alignment = 1
+
+[node name="CharacterXPContainer" type="VBoxContainer" parent="ScrollContainer/MainContainer/RewardsPanel/MarginContainer/RewardsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Spacer3" type="Control" parent="ScrollContainer/MainContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="RankUpsPanel" type="Panel" parent="ScrollContainer/MainContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="ScrollContainer/MainContainer/RankUpsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="RankUpsContainer" type="VBoxContainer" parent="ScrollContainer/MainContainer/RankUpsPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RankUpsTitle" type="Label" parent="ScrollContainer/MainContainer/RankUpsPanel/MarginContainer/RankUpsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "RANK UPS!"
+horizontal_alignment = 1
+
+[node name="RankUpsList" type="VBoxContainer" parent="ScrollContainer/MainContainer/RankUpsPanel/MarginContainer/RankUpsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BottomSpacer" type="Control" parent="ScrollContainer/MainContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="ContinueButton" type="Button" parent="ScrollContainer/MainContainer"]
+custom_minimum_size = Vector2(280, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 24
+text = "CONTINUE"
+
+[node name="EndSpacer" type="Control" parent="ScrollContainer/MainContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2

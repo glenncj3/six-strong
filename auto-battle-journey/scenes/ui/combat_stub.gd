@@ -97,9 +97,29 @@ func _end_run() -> void:
 
 	print("CombatStub: Run is over! Victory: %s" % victory)
 
-	# TODO: Navigate to run_results scene (Phase 7)
-	print("CombatStub: Would navigate to run_results here")
+	# Store run data for results screen via SceneManager
+	SceneManager.set_scene_data("run_results", {
+		"round": RunManager.get_round(),
+		"wins": RunManager.get_wins(),
+		"losses": RunManager.get_losses(),
+		"gold": RunManager.get_gold(),
+		"reputation": RunManager.get_reputation(),
+		"starting_gold": RunManager.starting_gold,
+		"victory": victory,
+		"team": _capture_team_data()
+	})
 
-	# For now, end run and return to main menu
-	RunManager.end_run(victory)
-	SceneManager.go_to_main_menu()
+	# Navigate to results screen
+	SceneManager.go_to("run_results")
+
+
+func _capture_team_data() -> Array:
+	"""Capture team data before run ends."""
+	var team_data = []
+	for char_instance in RunManager.get_team():
+		team_data.append({
+			"id": char_instance.base_character_id,
+			"name": char_instance.get_character_name(),
+			"level": char_instance.level
+		})
+	return team_data

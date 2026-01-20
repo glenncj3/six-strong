@@ -12,6 +12,8 @@ extends Control
 @onready var phase_description = $CenterPanel/MarginContainer/VBoxContainer/PhaseDescription
 @onready var action_button = $CenterPanel/MarginContainer/VBoxContainer/ActionButton
 @onready var menu_button = $MenuButton
+@onready var concede_button = $ConcedeButton
+@onready var concede_confirm_dialog = $ConcedeConfirmDialog
 
 # Preload scenes
 const CharacterCardScene = preload("res://scenes/components/character_card.tscn")
@@ -28,6 +30,8 @@ func _ready() -> void:
 
 	action_button.pressed.connect(_on_action_button_pressed)
 	menu_button.pressed.connect(_on_menu_button_pressed)
+	concede_button.pressed.connect(_on_concede_button_pressed)
+	concede_confirm_dialog.confirmed.connect(_on_concede_confirmed)
 
 	# Initialize display
 	_update_all_displays()
@@ -156,8 +160,45 @@ func _simulate_encounter_completion() -> void:
 
 func _on_menu_button_pressed() -> void:
 	"""Open pause menu."""
-	# TODO: Create pause menu with forfeit option
+	# TODO: Create pause menu with additional options
 	print("RunView: Menu button pressed (pause menu not implemented)")
+
+
+func _on_concede_button_pressed() -> void:
+	"""Show concede confirmation dialog."""
+	concede_confirm_dialog.popup_centered()
+
+
+func _on_concede_confirmed() -> void:
+	"""Handle confirmed concede - treat as defeat."""
+	print("RunView: Player conceded the run")
+
+	# Store run data for results screen (same as defeat)
+	SceneManager.set_scene_data("run_results", {
+		"round": RunManager.get_round(),
+		"wins": RunManager.get_wins(),
+		"losses": RunManager.get_losses(),
+		"gold": RunManager.get_gold(),
+		"reputation": RunManager.get_reputation(),
+		"starting_gold": RunManager.starting_gold,
+		"victory": false,  # Concede is treated as defeat
+		"team": _capture_team_data()
+	})
+
+	# Navigate to results screen
+	SceneManager.go_to("run_results")
+
+
+func _capture_team_data() -> Array:
+	"""Capture team data for results screen."""
+	var team_data = []
+	for char_instance in RunManager.get_team():
+		team_data.append({
+			"id": char_instance.base_character_id,
+			"name": char_instance.get_character_name(),
+			"level": char_instance.level
+		})
+	return team_data
 
 
 func _on_round_changed(_new_round: int) -> void:

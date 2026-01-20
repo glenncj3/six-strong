@@ -172,3 +172,26 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 16
 text = "MENU"
+
+[node name="ConcedeButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -90.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 40.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 0.6, 0.6, 1)
+theme_override_font_sizes/font_size = 12
+text = "CONCEDE"
+
+[node name="ConcedeConfirmDialog" type="ConfirmationDialog" parent="."]
+title = "Concede Run?"
+position = Vector2i(0, 0)
+size = Vector2i(300, 120)
+dialog_text = "Are you sure you want to concede this run?
+
+You will receive defeat rewards based on your current progress."
+dialog_autowrap = true

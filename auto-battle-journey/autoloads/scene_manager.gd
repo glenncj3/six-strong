@@ -18,8 +18,7 @@ const SCENES = {
 	"encounter_execute": "res://scenes/ui/encounter_execute.tscn",
 	"combat_select": "res://scenes/ui/combat_select.tscn",
 	"combat_stub": "res://scenes/ui/combat_stub.tscn",
-	# Add more scenes as they're created
-	# "run_results": "res://scenes/ui/run_results.tscn",
+	"run_results": "res://scenes/ui/run_results.tscn",
 }
 
 # Reference to main scene (set after tree is ready)

@@ -148,20 +148,18 @@ func load_run_state() -> bool:
 
 func end_run(victory: bool) -> void:
 	"""
-	End the current run and award rewards.
+	End the current run and clear state.
+	Note: Rewards should be applied BEFORE calling this (in run_results).
 
 	Args:
-		victory: True if player won, false if defeated
+		victory: True if player won (10 combats), false if defeated (0 reputation)
 	"""
 	print("RunManager: Ending run - %s" % ("VICTORY" if victory else "DEFEAT"))
-
-	# Apply rewards via RewardCalculator
-	RewardCalculator.apply_run_end_rewards(_team_manager, victory)
 
 	# Clear run state
 	_clear_run_state()
 
-	print("RunManager: Run ended, rewards distributed")
+	print("RunManager: Run ended, state cleared")
 
 
 func _clear_run_state() -> void:
