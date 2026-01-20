@@ -1,5 +1,6 @@
 extends Control
 # Main Menu - entry point with navigation and currency display
+# Refactored to use SceneManager
 
 @onready var gems_label = $CurrencyDisplay/HBoxContainer/GemsLabel
 @onready var reroll_tokens_label = $CurrencyDisplay/HBoxContainer/RerollTokensLabel
@@ -32,16 +33,16 @@ func _ready() -> void:
 
 
 func _update_currency_display() -> void:
-	gems_label.text = "💎 %d" % PlayerAccount.get_gems()
-	reroll_tokens_label.text = "🎫 %d" % PlayerAccount.get_reroll_tokens()
+	gems_label.text = UIHelpers.format_currency(PlayerAccount.get_gems(), "💎")
+	reroll_tokens_label.text = UIHelpers.format_currency(PlayerAccount.get_reroll_tokens(), "🎫")
 
 
 func _on_gems_changed(new_amount: int) -> void:
-	gems_label.text = "💎 %d" % new_amount
+	gems_label.text = UIHelpers.format_currency(new_amount, "💎")
 
 
 func _on_reroll_tokens_changed(new_amount: int) -> void:
-	reroll_tokens_label.text = "🎫 %d" % new_amount
+	reroll_tokens_label.text = UIHelpers.format_currency(new_amount, "🎫")
 
 
 func _on_play_pressed() -> void:
@@ -49,16 +50,16 @@ func _on_play_pressed() -> void:
 	if RunManager.has_active_run():
 		print("MainMenu: Resuming active run...")
 		RunManager.load_run_state()
-		# TODO: Navigate to run_view scene (Phase 4)
+		# TODO: Navigate to run_view scene (Phase 5)
 		print("MainMenu: Would navigate to run_view here")
 	else:
 		print("MainMenu: Starting new run (draft)...")
-		get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/draft.tscn")
+		SceneManager.go_to_draft()
 
 
 func _on_collection_pressed() -> void:
 	print("MainMenu: Opening collection...")
-	get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/collection.tscn")
+	SceneManager.go_to_collection()
 
 
 func _on_quit_pressed() -> void:

@@ -2,6 +2,7 @@ extends Node
 # GameData Singleton
 # Loads and caches all master data (characters, items, skills, encounters)
 # This is the single source of truth for all game content definitions
+# Refactored to use JsonPersistence utility
 
 # Cached data dictionaries
 var characters: Dictionary = {}  # id -> character_data
@@ -23,7 +24,7 @@ func _ready() -> void:
 
 
 func load_all_data() -> void:
-	"""Load all master data from JSON files"""
+	"""Load all master data from JSON files."""
 	print("GameData: Loading all master data...")
 
 	_load_characters()
@@ -41,117 +42,135 @@ func load_all_data() -> void:
 
 
 func _load_characters() -> void:
-	var data = _load_json_file(CHARACTERS_PATH)
+	var data = JsonPersistence.load_json(CHARACTERS_PATH)
 	if data and data.has("characters"):
 		for char_data in data["characters"]:
-			characters[char_data["id"]] = char_data
+			if char_data.has("id"):
+				characters[char_data["id"]] = char_data
 
 
 func _load_items() -> void:
-	var data = _load_json_file(ITEMS_PATH)
+	var data = JsonPersistence.load_json(ITEMS_PATH)
 	if data and data.has("items"):
 		for item_data in data["items"]:
-			items[item_data["id"]] = item_data
+			if item_data.has("id"):
+				items[item_data["id"]] = item_data
 
 
 func _load_item_upgrades() -> void:
-	var data = _load_json_file(ITEM_UPGRADES_PATH)
+	var data = JsonPersistence.load_json(ITEM_UPGRADES_PATH)
 	if data and data.has("item_upgrades"):
-		for item_data in data["item_upgrades"]:
-			item_upgrades[item_data["id"]] = item_data
+		for upgrade_data in data["item_upgrades"]:
+			if upgrade_data.has("id"):
+				item_upgrades[upgrade_data["id"]] = upgrade_data
 
 
 func _load_skills() -> void:
-	var data = _load_json_file(SKILLS_PATH)
+	var data = JsonPersistence.load_json(SKILLS_PATH)
 	if data and data.has("skills"):
 		for skill_data in data["skills"]:
-			skills[skill_data["id"]] = skill_data
+			if skill_data.has("id"):
+				skills[skill_data["id"]] = skill_data
 
 
 func _load_encounter_types() -> void:
-	var data = _load_json_file(ENCOUNTERS_PATH)
+	var data = JsonPersistence.load_json(ENCOUNTERS_PATH)
 	if data and data.has("encounter_types"):
 		encounter_types = data["encounter_types"]
 
 
-func _load_json_file(path: String) -> Variant:
-	"""Generic JSON file loader with error handling"""
-	if not FileAccess.file_exists(path):
-		push_error("GameData: File not found: %s" % path)
-		return null
-
-	var file = FileAccess.open(path, FileAccess.READ)
-	if file == null:
-		push_error("GameData: Could not open file: %s" % path)
-		return null
-
-	var json_string = file.get_as_text()
-	file.close()
-
-	var json = JSON.new()
-	var parse_result = json.parse(json_string)
-
-	if parse_result != OK:
-		push_error("GameData: JSON parse error in %s at line %d: %s" % [path, json.get_error_line(), json.get_error_message()])
-		return null
-
-	return json.data
-
-
-# Public API for accessing game data
+# =============================================================================
+# PUBLIC API - Character Data
+# =============================================================================
 
 func get_character_by_id(id: String) -> Dictionary:
-	"""Get character data by ID"""
+	"""Get character data by ID."""
 	if characters.has(id):
 		return characters[id]
 	push_warning("GameData: Character not found: %s" % id)
 	return {}
 
 
+func get_all_characters() -> Array:
+	"""Get array of all character data."""
+	return characters.values()
+
+
+func has_character(id: String) -> bool:
+	"""Check if character exists."""
+	return characters.has(id)
+
+
+# =============================================================================
+# PUBLIC API - Item Data
+# =============================================================================
+
 func get_item_by_id(id: String) -> Dictionary:
-	"""Get item data by ID"""
+	"""Get item data by ID."""
 	if items.has(id):
 		return items[id]
 	push_warning("GameData: Item not found: %s" % id)
 	return {}
 
 
+func get_all_items() -> Array:
+	"""Get array of all item data."""
+	return items.values()
+
+
+func has_item(id: String) -> bool:
+	"""Check if item exists."""
+	return items.has(id)
+
+
+# =============================================================================
+# PUBLIC API - Item Upgrade Data
+# =============================================================================
+
 func get_item_upgrade_by_id(id: String) -> Dictionary:
-	"""Get item upgrade data by ID"""
+	"""Get item upgrade data by ID."""
 	if item_upgrades.has(id):
 		return item_upgrades[id]
 	push_warning("GameData: Item upgrade not found: %s" % id)
 	return {}
 
 
+func get_all_item_upgrades() -> Array:
+	"""Get array of all item upgrade data."""
+	return item_upgrades.values()
+
+
+func has_item_upgrade(id: String) -> bool:
+	"""Check if item upgrade exists."""
+	return item_upgrades.has(id)
+
+
+# =============================================================================
+# PUBLIC API - Skill Data
+# =============================================================================
+
 func get_skill_by_id(id: String) -> Dictionary:
-	"""Get skill data by ID"""
+	"""Get skill data by ID."""
 	if skills.has(id):
 		return skills[id]
 	push_warning("GameData: Skill not found: %s" % id)
 	return {}
 
 
-func get_all_characters() -> Array:
-	"""Get array of all character data"""
-	return characters.values()
-
-
-func get_all_items() -> Array:
-	"""Get array of all item data"""
-	return items.values()
-
-
-func get_all_item_upgrades() -> Array:
-	"""Get array of all item upgrade data"""
-	return item_upgrades.values()
-
-
 func get_all_skills() -> Array:
-	"""Get array of all skill data"""
+	"""Get array of all skill data."""
 	return skills.values()
 
 
+func has_skill(id: String) -> bool:
+	"""Check if skill exists."""
+	return skills.has(id)
+
+
+# =============================================================================
+# PUBLIC API - Encounter Data
+# =============================================================================
+
 func get_encounter_types() -> Array:
-	"""Get array of all encounter type definitions"""
+	"""Get array of all encounter type definitions."""
 	return encounter_types

@@ -251,10 +251,9 @@ func _ready() -> void:
 
 func _generate_and_display_options() -> void:
 	"""Generate 3 encounter options and display them"""
-	# Clear existing
-	for child in options_container.get_children():
-		child.queue_free()
-	
+	# Clear existing using UIHelpers
+	UIHelpers.clear_children(options_container)
+
 	# Generate options
 	encounter_options = EncounterFactory.generate_encounter_options(3)
 	
@@ -282,14 +281,13 @@ func _create_option_panel(encounter_data: Dictionary, index: int) -> void:
 	var content = VBoxContainer.new()
 	margin.add_child(content)
 	
-	# Image
+	# Image - use UIHelpers for safe texture loading
 	var image = TextureRect.new()
 	content.add_child(image)
 	image.custom_minimum_size = Vector2(180, 180)
 	image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	if ResourceLoader.exists(encounter_data["image_path"]):
-		image.texture = load(encounter_data["image_path"])
+	UIHelpers.set_texture_safe(image, encounter_data["image_path"])
 	
 	# Name
 	var name_label = Label.new()
@@ -353,19 +351,17 @@ func _get_reward_preview(encounter_data: Dictionary) -> String:
 func _on_encounter_selected(encounter_data: Dictionary) -> void:
 	"""Handle encounter selection"""
 	print("EncounterSelect: Selected %s" % encounter_data["name"])
-	
+
+	# Store selected encounter data for next scene via SceneManager
+	SceneManager.set_scene_data("selected_encounter", encounter_data)
+
 	# Navigate to encounter execution scene
-	var main = get_tree().get_root().get_node("Main")
-	
-	# Store selected encounter data for next scene
-	main.set_meta("selected_encounter", encounter_data)
-	
-	main.change_scene("res://scenes/ui/encounter_execute.tscn")
+	SceneManager.go_to("encounter_execute")
 
 
 func _on_back_pressed() -> void:
 	"""Return to run view (debug only)"""
-	get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/run_view.tscn")
+	SceneManager.go_to("run_view")
 ```
 
 **Claude Code Directive**:
@@ -417,12 +413,10 @@ var encounter_completed: bool = false
 func _ready() -> void:
 	complete_button.pressed.connect(_on_complete_pressed)
 	complete_button.disabled = true  # Enable after encounter interaction
-	
-	# Get selected encounter data from Main scene metadata
-	var main = get_tree().get_root().get_node("Main")
-	if main.has_meta("selected_encounter"):
-		encounter_data = main.get_meta("selected_encounter")
-		main.remove_meta("selected_encounter")
+
+	# Get selected encounter data from SceneManager
+	encounter_data = SceneManager.get_scene_data("selected_encounter", {})
+	if not encounter_data.is_empty():
 		_setup_encounter()
 	else:
 		push_error("EncounterExecute: No encounter data found!")
@@ -549,13 +543,12 @@ func _create_shop_item_row(item_sale: Dictionary) -> Control:
 	if item_data.is_empty():
 		return row
 	
-	# Icon
+	# Icon - use UIHelpers for safe texture loading
 	var icon = TextureRect.new()
 	icon.custom_minimum_size = Vector2(48, 48)
 	icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	if ResourceLoader.exists(item_data["image_path"]):
-		icon.texture = load(item_data["image_path"])
+	UIHelpers.set_texture_safe(icon, item_data["image_path"])
 	row.add_child(icon)
 	
 	# Info
@@ -592,21 +585,20 @@ func _create_shop_item_row(item_sale: Dictionary) -> Control:
 func _create_shop_skill_row(skill_sale: Dictionary) -> Control:
 	"""Create a row for a shop skill"""
 	var row = HBoxContainer.new()
-	
+
 	var skill_id = skill_sale["id"]
 	var cost = skill_sale["cost"]
-	
+
 	var skill_data = GameData.get_skill_by_id(skill_id)
 	if skill_data.is_empty():
 		return row
-	
-	# Icon
+
+	# Icon - use UIHelpers for safe texture loading
 	var icon = TextureRect.new()
 	icon.custom_minimum_size = Vector2(48, 48)
 	icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	if ResourceLoader.exists(skill_data["image_path"]):
-		icon.texture = load(skill_data["image_path"])
+	UIHelpers.set_texture_safe(icon, skill_data["image_path"])
 	row.add_child(icon)
 	
 	# Info
@@ -809,14 +801,14 @@ func _on_complete_pressed() -> void:
 	if not encounter_completed:
 		print("EncounterExecute: Encounter not ready to complete")
 		return
-	
+
 	print("EncounterExecute: Completing encounter...")
-	
+
 	# Save run state
 	RunManager.save_run_state()
-	
-	# Return to run view
-	get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/run_view.tscn")
+
+	# Return to run view using SceneManager
+	SceneManager.go_to("run_view")
 ```
 
 **Claude Code Directive**:
@@ -842,20 +834,20 @@ Replace the encounter simulation with real encounter selection.
 
 #### File: `scenes/ui/run_view.gd` (UPDATE)
 
-Replace the `_start_encounter_phase()` method:
+Replace the `_start_encounter_phase()` method to use SceneManager:
 
 ```gdscript
 func _start_encounter_phase() -> void:
 	"""Navigate to encounter selection"""
 	print("RunView: Starting encounter phase...")
-	get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/encounter_select.tscn")
+	SceneManager.go_to("encounter_select")
 ```
 
 Remove or comment out the `_simulate_encounter_completion()` method (no longer needed).
 
 **Claude Code Directive**:
 ```
-Update run_view.gd to navigate to encounter_select instead of simulating.
+Update run_view.gd to navigate to encounter_select using SceneManager.
 Remove the simulation method.
 ```
 

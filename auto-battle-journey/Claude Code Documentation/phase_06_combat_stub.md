@@ -177,10 +177,9 @@ func _ready() -> void:
 
 func _generate_and_display_options() -> void:
 	"""Generate 3 combat options and display them"""
-	# Clear existing
-	for child in options_container.get_children():
-		child.queue_free()
-	
+	# Clear existing using UIHelpers
+	UIHelpers.clear_children(options_container)
+
 	# Generate options
 	combat_options = RunManager.generate_combat_options(3)
 	
@@ -204,14 +203,13 @@ func _create_option_panel(combat_data: Dictionary) -> void:
 	margin.add_theme_constant_override("margin_top", 10)
 	margin.add_theme_constant_override("margin_bottom", 10)
 	
-	# Image
+	# Image - use UIHelpers for safe texture loading
 	var image = TextureRect.new()
 	margin.add_child(image)
 	image.custom_minimum_size = Vector2(128, 128)
 	image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	if ResourceLoader.exists(combat_data["image_path"]):
-		image.texture = load(combat_data["image_path"])
+	UIHelpers.set_texture_safe(image, combat_data["image_path"])
 	
 	# Info section
 	var info_vbox = VBoxContainer.new()
@@ -280,19 +278,17 @@ func _create_option_panel(combat_data: Dictionary) -> void:
 func _on_combat_selected(combat_data: Dictionary) -> void:
 	"""Handle combat selection"""
 	print("CombatSelect: Selected %s" % combat_data["name"])
-	
+
+	# Store selected combat data for next scene via SceneManager
+	SceneManager.set_scene_data("selected_combat", combat_data)
+
 	# Navigate to combat stub scene
-	var main = get_tree().get_root().get_node("Main")
-	
-	# Store selected combat data for next scene
-	main.set_meta("selected_combat", combat_data)
-	
-	main.change_scene("res://scenes/ui/combat_stub.tscn")
+	SceneManager.go_to("combat_stub")
 
 
 func _on_back_pressed() -> void:
 	"""Return to run view (debug only)"""
-	get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/run_view.tscn")
+	SceneManager.go_to("run_view")
 ```
 
 **Claude Code Directive**:
@@ -351,14 +347,12 @@ var combat_data: Dictionary = {}
 func _ready() -> void:
 	win_button.pressed.connect(_on_win_pressed)
 	lose_button.pressed.connect(_on_lose_pressed)
-	
+
 	result_label.text = ""
-	
-	# Get selected combat data from Main scene metadata
-	var main = get_tree().get_root().get_node("Main")
-	if main.has_meta("selected_combat"):
-		combat_data = main.get_meta("selected_combat")
-		main.remove_meta("selected_combat")
+
+	# Get selected combat data from SceneManager
+	combat_data = SceneManager.get_scene_data("selected_combat", {})
+	if not combat_data.is_empty():
 		_setup_display()
 	else:
 		push_error("CombatStub: No combat data found!")
@@ -425,23 +419,23 @@ func _complete_combat() -> void:
 	else:
 		# Advance to next round
 		RunManager.advance_round()
-		
+
 		# Return to run view (next round, encounter phase)
-		get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/run_view.tscn")
+		SceneManager.go_to("run_view")
 
 
 func _end_run() -> void:
 	"""Run is over, navigate to results"""
 	var victory = RunManager.did_player_win()
-	
+
 	print("CombatStub: Run is over! Victory: %s" % victory)
-	
+
 	# TODO: Navigate to run_results scene (Phase 7)
 	print("CombatStub: Would navigate to run_results here")
-	
+
 	# For now, end run and return to main menu
 	RunManager.end_run(victory)
-	get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/main_menu.tscn")
+	SceneManager.go_to_main_menu()
 ```
 
 **Claude Code Directive**:
@@ -466,13 +460,13 @@ Replace the combat simulation with real combat selection.
 
 #### File: `scenes/ui/run_view.gd` (UPDATE)
 
-Replace the `_start_combat_phase()` method:
+Replace the `_start_combat_phase()` method to use SceneManager:
 
 ```gdscript
 func _start_combat_phase() -> void:
 	"""Navigate to combat selection"""
 	print("RunView: Starting combat phase...")
-	get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/combat_select.tscn")
+	SceneManager.go_to("combat_select")
 ```
 
 Remove or comment out the `_simulate_combat_completion()` method (no longer needed).
@@ -481,7 +475,7 @@ Also remove or comment out the `_end_run()` method since it's now handled by com
 
 **Claude Code Directive**:
 ```
-Update run_view.gd to navigate to combat_select instead of simulating.
+Update run_view.gd to navigate to combat_select using SceneManager.
 Remove the combat simulation method and _end_run() method (now in combat_stub).
 Keep the _start_encounter_phase() method as it is.
 ```

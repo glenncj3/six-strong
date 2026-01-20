@@ -1,6 +1,7 @@
 extends Node
 # RunManager Singleton
 # Manages active run state, team, progression, and save/load
+# Refactored to use JsonPersistence and GameConstants
 
 signal run_started
 signal round_changed(new_round: int)
@@ -19,7 +20,7 @@ var team: Array[CharacterInstance] = []
 
 # Progression
 var current_round: int = 0
-var reputation: int = 20
+var reputation: int = GameConstants.STARTING_REPUTATION
 var wins: int = 0
 var losses: int = 0
 var starting_gold: int = 0
@@ -35,19 +36,19 @@ func _ready() -> void:
 
 
 func has_active_run() -> bool:
-	"""Check if there's a saved run to resume"""
-	return FileAccess.file_exists(SAVE_PATH)
+	"""Check if there's a saved run to resume."""
+	return JsonPersistence.file_exists(SAVE_PATH)
 
 
 func start_new_run(drafted_character_ids: Array) -> void:
 	"""
-	Start a new run with drafted characters
+	Start a new run with drafted characters.
 
 	Args:
-		drafted_character_ids: Array of 3 character IDs from PlayerAccount
+		drafted_character_ids: Array of character IDs from PlayerAccount
 	"""
-	if drafted_character_ids.size() != 3:
-		push_error("RunManager: Must draft exactly 3 characters")
+	if drafted_character_ids.size() != GameConstants.TEAM_SIZE:
+		push_error("RunManager: Must draft exactly %d characters" % GameConstants.TEAM_SIZE)
 		return
 
 	print("RunManager: Starting new run with characters: %s" % str(drafted_character_ids))
@@ -74,7 +75,7 @@ func start_new_run(drafted_character_ids: Array) -> void:
 
 	# Initialize run state
 	current_round = 0
-	reputation = 20
+	reputation = GameConstants.STARTING_REPUTATION
 	wins = 0
 	losses = 0
 	current_gold = starting_gold
@@ -90,7 +91,7 @@ func start_new_run(drafted_character_ids: Array) -> void:
 
 
 func save_run_state() -> void:
-	"""Save current run state to file"""
+	"""Save current run state to file."""
 	if not is_run_active:
 		return
 
@@ -110,52 +111,29 @@ func save_run_state() -> void:
 	for char_instance in team:
 		save_data["team"].append(char_instance.to_dict())
 
-	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file == null:
-		push_error("RunManager: Could not save run state")
-		return
-
-	var json_string = JSON.stringify(save_data, "\t")
-	file.store_string(json_string)
-	file.close()
-
-	print("RunManager: Run state saved (Round %d, Reputation %d)" % [current_round, reputation])
+	if JsonPersistence.save_json(SAVE_PATH, save_data):
+		print("RunManager: Run state saved (Round %d, Reputation %d)" % [current_round, reputation])
 
 
 func load_run_state() -> bool:
-	"""Load run state from file, returns true if successful"""
-	if not FileAccess.file_exists(SAVE_PATH):
+	"""Load run state from file, returns true if successful."""
+	var save_data = JsonPersistence.load_json(SAVE_PATH)
+	if save_data == null:
 		return false
-
-	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
-	if file == null:
-		push_error("RunManager: Could not load run state")
-		return false
-
-	var json_string = file.get_as_text()
-	file.close()
-
-	var json = JSON.new()
-	var parse_result = json.parse(json_string)
-	if parse_result != OK:
-		push_error("RunManager: Failed to parse run save file")
-		return false
-
-	var save_data = json.data
 
 	# Restore run state
-	run_id = save_data["run_id"]
-	current_round = save_data["round"]
-	reputation = save_data["reputation"]
-	wins = save_data["wins"]
-	losses = save_data["losses"]
-	starting_gold = save_data["starting_gold"]
-	current_gold = save_data["current_gold"]
-	encounter_history = save_data["encounter_history"]
+	run_id = save_data.get("run_id", "")
+	current_round = save_data.get("round", 0)
+	reputation = save_data.get("reputation", GameConstants.STARTING_REPUTATION)
+	wins = save_data.get("wins", 0)
+	losses = save_data.get("losses", 0)
+	starting_gold = save_data.get("starting_gold", 0)
+	current_gold = save_data.get("current_gold", 0)
+	encounter_history = save_data.get("encounter_history", [])
 
 	# Restore team
 	team.clear()
-	for char_data in save_data["team"]:
+	for char_data in save_data.get("team", []):
 		var char_instance = CharacterInstance.from_dict(char_data)
 		team.append(char_instance)
 
@@ -167,22 +145,25 @@ func load_run_state() -> bool:
 
 func end_run(victory: bool) -> void:
 	"""
-	End the current run and award rewards
+	End the current run and award rewards.
 
 	Args:
-		victory: True if player won (10 combats), false if defeated (0 reputation)
+		victory: True if player won, false if defeated
 	"""
 	print("RunManager: Ending run - %s" % ("VICTORY" if victory else "DEFEAT"))
 
-	# Award character rank XP (placeholder: 50 XP per character)
+	# Award character rank XP
 	for char_instance in team:
-		PlayerAccount.add_character_experience(char_instance.base_character_id, 50)
+		PlayerAccount.add_character_experience(
+			char_instance.base_character_id,
+			GameConstants.RUN_CHARACTER_XP_REWARD
+		)
 
-	# Award gems (placeholder)
+	# Award gems based on outcome
 	if victory:
-		PlayerAccount.add_gems(100)
+		PlayerAccount.add_gems(GameConstants.VICTORY_GEM_REWARD)
 	else:
-		PlayerAccount.add_gems(25)
+		PlayerAccount.add_gems(GameConstants.DEFEAT_GEM_REWARD)
 
 	# Clear run state
 	_clear_run_state()
@@ -191,12 +172,12 @@ func end_run(victory: bool) -> void:
 
 
 func _clear_run_state() -> void:
-	"""Clear all run state and delete save file"""
+	"""Clear all run state and delete save file."""
 	is_run_active = false
 	run_id = ""
 	team.clear()
 	current_round = 0
-	reputation = 20
+	reputation = GameConstants.STARTING_REPUTATION
 	wins = 0
 	losses = 0
 	starting_gold = 0
@@ -204,12 +185,13 @@ func _clear_run_state() -> void:
 	encounter_history.clear()
 
 	# Delete save file
-	if FileAccess.file_exists(SAVE_PATH):
-		DirAccess.remove_absolute(SAVE_PATH)
-		print("RunManager: Run save file deleted")
+	JsonPersistence.delete_file(SAVE_PATH)
+	print("RunManager: Run save file deleted")
 
 
-# Getters
+# =============================================================================
+# GETTERS
+# =============================================================================
 
 func get_team() -> Array[CharacterInstance]:
 	return team
@@ -235,24 +217,26 @@ func get_gold() -> int:
 	return current_gold
 
 
-# Run progression
+# =============================================================================
+# RUN PROGRESSION
+# =============================================================================
 
 func advance_round() -> void:
-	"""Move to next round (after encounter + combat)"""
+	"""Move to next round (after encounter + combat)."""
 	current_round += 1
 	round_changed.emit(current_round)
 	save_run_state()
 
 
 func add_gold(amount: int) -> void:
-	"""Add gold (from combat rewards, etc.)"""
+	"""Add gold (from combat rewards, etc.)."""
 	current_gold += amount
 	gold_changed.emit(current_gold)
 	save_run_state()
 
 
 func spend_gold(amount: int) -> bool:
-	"""Spend gold (returns false if not enough)"""
+	"""Spend gold (returns false if not enough)."""
 	if current_gold >= amount:
 		current_gold -= amount
 		gold_changed.emit(current_gold)
@@ -262,23 +246,23 @@ func spend_gold(amount: int) -> bool:
 
 
 func add_win() -> void:
-	"""Record a combat victory"""
+	"""Record a combat victory."""
 	wins += 1
-	# Award gold and XP (placeholder)
-	add_gold(20)
+	# Award gold and XP
+	add_gold(GameConstants.COMBAT_WIN_GOLD)
 	for char_instance in team:
-		char_instance.add_experience(30)
+		char_instance.add_experience(GameConstants.COMBAT_WIN_XP)
 	save_run_state()
 
 
 func add_loss() -> void:
-	"""Record a combat loss"""
+	"""Record a combat loss."""
 	losses += 1
 	save_run_state()
 
 
 func lose_reputation(amount: int) -> void:
-	"""Lose reputation (from combat loss)"""
+	"""Lose reputation (from combat loss)."""
 	reputation = max(0, reputation - amount)
 	reputation_changed.emit(reputation)
 	print("RunManager: Lost %d reputation (now %d)" % [amount, reputation])
@@ -286,8 +270,8 @@ func lose_reputation(amount: int) -> void:
 
 
 func is_run_over() -> bool:
-	"""Check if run is over (win or loss condition met)"""
-	if wins >= 10:
+	"""Check if run is over (win or loss condition met)."""
+	if wins >= GameConstants.WINS_FOR_VICTORY:
 		return true  # Victory
 	if reputation <= 0:
 		return true  # Defeat
@@ -295,5 +279,5 @@ func is_run_over() -> bool:
 
 
 func did_player_win() -> bool:
-	"""Check if player won (only valid if is_run_over() is true)"""
-	return wins >= 10
+	"""Check if player won (only valid if is_run_over() is true)."""
+	return wins >= GameConstants.WINS_FOR_VICTORY

@@ -1,6 +1,7 @@
 extends PanelContainer
 # CharacterCard - Reusable component for displaying character info
 # Used in: Collection, Draft, Run View
+# Refactored to use StatCalculator for DRY stat calculations
 
 signal card_clicked(character_data: Dictionary)
 
@@ -23,7 +24,7 @@ func _ready() -> void:
 
 func setup(char_data: Dictionary, with_equipped_items: bool = false) -> void:
 	"""
-	Configure the card with character data
+	Configure the card with character data.
 
 	Args:
 		char_data: Player's character data (from PlayerAccount)
@@ -32,61 +33,30 @@ func setup(char_data: Dictionary, with_equipped_items: bool = false) -> void:
 	character_data = char_data
 
 	# Get master character data
-	var char_master = GameData.get_character_by_id(char_data["id"])
+	var char_master = GameData.get_character_by_id(char_data.get("id", ""))
 	if char_master.is_empty():
-		push_error("CharacterCard: Character master data not found: %s" % char_data["id"])
+		push_error("CharacterCard: Character master data not found: %s" % char_data.get("id", ""))
 		return
 
-	# Set portrait
-	var portrait_path = char_master["image_path"]
-	if ResourceLoader.exists(portrait_path):
-		portrait.texture = load(portrait_path)
+	# Set portrait using UIHelpers
+	UIHelpers.set_texture_safe(portrait, char_master.get("image_path", ""))
 
 	# Set name
-	name_label.text = char_master["name"]
+	name_label.text = char_master.get("name", "Unknown")
 
-	# Calculate stats
-	var stats = _calculate_stats(char_master, char_data, with_equipped_items)
+	# Calculate stats using StatCalculator (single source of truth)
+	var stats = StatCalculator.calculate_character_stats(char_master, char_data, with_equipped_items)
 
 	# Display stats
-	health_label.text = "HP %d" % stats["health"]
-	attack_label.text = "ATK %d" % stats["basic_attack_damage"]
-	defense_label.text = "DEF %d" % stats["defense"]
-	speed_label.text = "SPD %d" % stats["speed"]
-	income_label.text = "INC %d" % stats["income"]
-
-
-func _calculate_stats(char_master: Dictionary, char_data: Dictionary, with_items: bool) -> Dictionary:
-	"""Calculate character stats, optionally including equipped items"""
-	var stats = {
-		"health": char_master["base_stats"]["health"],
-		"basic_attack_damage": char_master["base_stats"]["basic_attack_damage"],
-		"defense": char_master["base_stats"]["defense"],
-		"speed": char_master["base_stats"]["speed"],
-		"income": char_master["base_stats"]["income"]
-	}
-
-	# Apply rank stat boosts
-	if char_master.has("rank_rewards"):
-		for rank_reward in char_master["rank_rewards"]:
-			if rank_reward["rank"] <= char_data["rank"]:
-				if rank_reward.has("stat_boost"):
-					for stat_name in rank_reward["stat_boost"]:
-						stats[stat_name] += rank_reward["stat_boost"][stat_name]
-
-	# Apply equipped items if requested
-	if with_items and char_data.has("equipped_items"):
-		for item_id in char_data["equipped_items"]:
-			var item_data = GameData.get_item_by_id(item_id)
-			if item_data.has("stat_modifiers"):
-				for stat_name in item_data["stat_modifiers"]:
-					stats[stat_name] += item_data["stat_modifiers"][stat_name]
-
-	return stats
+	health_label.text = UIHelpers.format_stat(GameConstants.STAT_HEALTH, stats.get(GameConstants.STAT_HEALTH, 0))
+	attack_label.text = UIHelpers.format_stat(GameConstants.STAT_ATTACK, stats.get(GameConstants.STAT_ATTACK, 0))
+	defense_label.text = UIHelpers.format_stat(GameConstants.STAT_DEFENSE, stats.get(GameConstants.STAT_DEFENSE, 0))
+	speed_label.text = UIHelpers.format_stat(GameConstants.STAT_SPEED, stats.get(GameConstants.STAT_SPEED, 0))
+	income_label.text = UIHelpers.format_stat(GameConstants.STAT_INCOME, stats.get(GameConstants.STAT_INCOME, 0))
 
 
 func set_clickable(enabled: bool) -> void:
-	"""Enable or disable click interaction"""
+	"""Enable or disable click interaction."""
 	clickable = enabled
 	mouse_filter = MOUSE_FILTER_STOP if enabled else MOUSE_FILTER_IGNORE
 
@@ -98,7 +68,7 @@ func _on_gui_input(event: InputEvent) -> void:
 
 
 func highlight(enabled: bool) -> void:
-	"""Visually highlight the card (for selection states)"""
+	"""Visually highlight the card (for selection states)."""
 	if enabled:
 		modulate = Color(1.2, 1.2, 1.2)
 	else:

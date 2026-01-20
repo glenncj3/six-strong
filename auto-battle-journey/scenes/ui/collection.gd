@@ -1,5 +1,6 @@
 extends Control
 # Collection - Browse and manage character collection
+# Refactored to use SceneManager and UIHelpers
 
 @onready var character_grid: GridContainer = $HSplitContainer/LeftPanel/CharacterListScroll/CharacterGrid
 @onready var character_details_panel: Control = $HSplitContainer/RightPanel/CharacterDetailsPanel
@@ -20,14 +21,13 @@ func _ready() -> void:
 	# Select first character by default
 	var unlocked_chars = PlayerAccount.get_unlocked_characters()
 	if unlocked_chars.size() > 0:
-		_select_character(unlocked_chars[0]["id"])
+		_select_character(unlocked_chars[0].get("id", ""))
 
 
 func _populate_character_grid() -> void:
-	"""Create character cards for all unlocked characters"""
-	# Clear existing cards
-	for child in character_grid.get_children():
-		child.queue_free()
+	"""Create character cards for all unlocked characters."""
+	# Clear existing cards using UIHelpers
+	UIHelpers.clear_children(character_grid)
 
 	# Get unlocked characters
 	var unlocked_chars = PlayerAccount.get_unlocked_characters()
@@ -47,12 +47,12 @@ func _populate_character_grid() -> void:
 
 
 func _on_character_card_clicked(char_data: Dictionary) -> void:
-	"""Handle character card selection"""
-	_select_character(char_data["id"])
+	"""Handle character card selection."""
+	_select_character(char_data.get("id", ""))
 
 
 func _select_character(char_id: String) -> void:
-	"""Display details for selected character"""
+	"""Display details for selected character."""
 	selected_character_id = char_id
 
 	# Get character data
@@ -75,22 +75,20 @@ func _select_character(char_id: String) -> void:
 
 
 func _highlight_selected_card() -> void:
-	"""Highlight the currently selected character card"""
+	"""Highlight the currently selected character card."""
 	for card in character_grid.get_children():
-		if card.character_data["id"] == selected_character_id:
-			card.highlight(true)
-		else:
-			card.highlight(false)
+		var card_id = card.character_data.get("id", "")
+		card.highlight(card_id == selected_character_id)
 
 
 func refresh_display() -> void:
-	"""Refresh the entire collection display"""
+	"""Refresh the entire collection display."""
 	_populate_character_grid()
 	if not selected_character_id.is_empty():
 		_select_character(selected_character_id)
 
 
 func _on_back_pressed() -> void:
-	"""Return to main menu"""
+	"""Return to main menu."""
 	print("Collection: Back button pressed")
-	get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/main_menu.tscn")
+	SceneManager.go_to_main_menu()

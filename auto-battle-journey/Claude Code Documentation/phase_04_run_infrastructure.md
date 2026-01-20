@@ -70,6 +70,7 @@ RunView (Control)
 ```gdscript
 extends Control
 # RunView - Main UI during an active run
+# Uses UIHelpers for common UI operations and GameConstants for magic numbers
 
 @onready var round_label = $TopBar/MarginContainer/HBoxContainer/RoundLabel
 @onready var reputation_label = $TopBar/MarginContainer/HBoxContainer/ReputationLabel
@@ -116,12 +117,12 @@ func _update_top_bar() -> void:
 	var reputation = RunManager.get_reputation()
 	var wins = RunManager.get_wins()
 	var gold = RunManager.get_gold()
-	
+
 	round_label.text = "ROUND %d" % (round + 1)  # Display as 1-indexed
-	reputation_label.text = "❤️ REPUTATION: %d/20" % reputation
-	wins_label.text = "⭐ WINS: %d/10" % wins
-	gold_label.text = "💰 GOLD: %d" % gold
-	
+	reputation_label.text = "❤️ REPUTATION: %d/%d" % [reputation, GameConstants.STARTING_REPUTATION]
+	wins_label.text = "⭐ WINS: %d/%d" % [wins, GameConstants.WINS_FOR_VICTORY]
+	gold_label.text = UIHelpers.format_currency(gold, "💰")
+
 	# Color code reputation
 	if reputation <= 5:
 		reputation_label.modulate = Color.RED
@@ -133,10 +134,9 @@ func _update_top_bar() -> void:
 
 func _update_team_display() -> void:
 	"""Display all team members"""
-	# Clear existing cards
-	for child in team_container.get_children():
-		child.queue_free()
-	
+	# Clear existing cards using UIHelpers
+	UIHelpers.clear_children(team_container)
+
 	# Add card for each team member
 	var team = RunManager.get_team()
 	for char_instance in team:
@@ -159,16 +159,17 @@ func _update_team_display() -> void:
 
 
 func _update_card_with_runtime_stats(card: Node, char_instance: CharacterInstance) -> void:
-	"""Manually set card stats from CharacterInstance"""
+	"""Manually set card stats from CharacterInstance using runtime stats"""
 	# Access the stat labels in the card
 	var stats_container = card.get_node("MarginContainer/VBoxContainer/StatsContainer")
-	
+
+	# Use dictionary-based stats access for flexibility
 	stats_container.get_node("HealthLabel").text = "❤ %d/%d" % [char_instance.current_health, char_instance.max_health]
-	stats_container.get_node("AttackLabel").text = "⚔ %d" % char_instance.basic_attack_damage
-	stats_container.get_node("DefenseLabel").text = "🛡 %d" % char_instance.defense
-	stats_container.get_node("SpeedLabel").text = "⚡ %d" % char_instance.speed
-	stats_container.get_node("IncomeLabel").text = "💰 %d" % char_instance.income
-	
+	stats_container.get_node("AttackLabel").text = UIHelpers.format_stat(char_instance.stats, GameConstants.STAT_ATTACK, "⚔")
+	stats_container.get_node("DefenseLabel").text = UIHelpers.format_stat(char_instance.stats, GameConstants.STAT_DEFENSE, "🛡")
+	stats_container.get_node("SpeedLabel").text = UIHelpers.format_stat(char_instance.stats, GameConstants.STAT_SPEED, "⚡")
+	stats_container.get_node("IncomeLabel").text = UIHelpers.format_stat(char_instance.stats, GameConstants.STAT_INCOME, "💰")
+
 	# Show level in name
 	var name_label = card.get_node("MarginContainer/VBoxContainer/NameLabel")
 	name_label.text = "%s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
@@ -262,15 +263,15 @@ func _simulate_combat_completion() -> void:
 func _end_run() -> void:
 	"""Run is over, show results"""
 	print("RunView: Run is over!")
-	
+
 	var victory = RunManager.did_player_win()
-	
+
 	# TODO: Navigate to run_results scene (Phase 7)
 	print("RunView: Would navigate to run_results here (Victory: %s)" % victory)
-	
+
 	# For now, end run and return to main menu
 	RunManager.end_run(victory)
-	get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/main_menu.tscn")
+	SceneManager.go_to_main_menu()
 
 
 func _on_menu_button_pressed() -> void:
@@ -316,7 +317,7 @@ Connect the resume run functionality to actually load the run view.
 
 #### File: `scenes/ui/main_menu.gd` (UPDATE)
 
-Update the `_on_play_pressed()` method:
+Update the `_on_play_pressed()` method to use SceneManager:
 
 ```gdscript
 func _on_play_pressed() -> void:
@@ -324,15 +325,16 @@ func _on_play_pressed() -> void:
 	if RunManager.has_active_run():
 		print("MainMenu: Resuming active run...")
 		RunManager.load_run_state()
-		get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/run_view.tscn")
+		SceneManager.go_to("run_view")
 	else:
 		print("MainMenu: Starting new run (draft)...")
-		get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/draft.tscn")
+		SceneManager.go_to_draft()
 ```
 
 **Claude Code Directive**:
 ```
 Update main_menu.gd to properly navigate to run_view when resuming a run.
+Uses SceneManager for clean scene transitions instead of direct tree access.
 ```
 
 ---
@@ -343,32 +345,33 @@ Connect the draft completion to navigate to run view instead of main menu.
 
 #### File: `scenes/ui/draft.gd` (UPDATE)
 
-Update the `_on_confirm_pressed()` method:
+Update the `_on_confirm_pressed()` method to use SceneManager and GameConstants:
 
 ```gdscript
 func _on_confirm_pressed() -> void:
 	"""Start the run with drafted characters"""
-	if drafted_characters.size() != 3:
-		push_error("Draft: Must select exactly 3 characters")
+	if drafted_characters.size() != GameConstants.TEAM_SIZE:
+		push_error("Draft: Must select exactly %d characters" % GameConstants.TEAM_SIZE)
 		return
-	
+
 	print("Draft: Starting run with drafted team...")
-	
+
 	# Extract character IDs
 	var char_ids = []
 	for char_data in drafted_characters:
 		char_ids.append(char_data["id"])
-	
+
 	# Start run
 	RunManager.start_new_run(char_ids)
-	
-	# Navigate to run view
-	get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/run_view.tscn")
+
+	# Navigate to run view using SceneManager
+	SceneManager.go_to("run_view")
 ```
 
 **Claude Code Directive**:
 ```
 Update draft.gd to navigate to run_view instead of main menu after starting a run.
+Uses SceneManager for clean scene transitions and GameConstants.TEAM_SIZE.
 ```
 
 ---
@@ -516,6 +519,7 @@ don't have complex runtime state. Used primarily for organization and future ext
 class_name SkillInstance
 extends RefCounted
 # SkillInstance - Runtime representation of a skill
+# Uses StatCalculator for stat modifications (data-driven approach)
 
 var skill_id: String = ""
 var name: String = ""
@@ -527,57 +531,37 @@ var effects: Array = []
 func _init(skill_data_id: String) -> void:
 	"""Initialize from skill data"""
 	skill_id = skill_data_id
-	
+
 	var skill_data = GameData.get_skill_by_id(skill_id)
 	if skill_data.is_empty():
 		push_error("SkillInstance: Skill data not found: %s" % skill_id)
 		return
-	
+
 	name = skill_data["name"]
 	description = skill_data["description"]
 	image_path = skill_data["image_path"]
-	
+
 	if skill_data.has("effects"):
 		effects = skill_data["effects"].duplicate(true)
 
 
 func apply_to_character(char_instance: CharacterInstance) -> void:
-	"""Apply this skill's effects to a character"""
+	"""Apply this skill's effects to a character using StatCalculator"""
 	for effect in effects:
 		var effect_type = effect["type"]
 		var stat = effect["stat"]
 		var value = effect["value"]
-		
+
 		match effect_type:
 			"stat_add":
-				_modify_stat(char_instance, stat, value, false)
+				# Use StatCalculator for data-driven stat modification
+				StatCalculator.apply_modifier(char_instance.stats, stat, value, false)
 			"stat_multiply":
-				_modify_stat(char_instance, stat, value, true)
+				StatCalculator.apply_modifier(char_instance.stats, stat, value, true)
 
-
-func _modify_stat(char_instance: CharacterInstance, stat_name: String, value: float, multiply: bool) -> void:
-	"""Modify a character stat"""
-	match stat_name:
-		"health":
-			if multiply:
-				char_instance.max_health = int(char_instance.max_health * value)
-			else:
-				char_instance.max_health += int(value)
-		"basic_attack_damage":
-			if multiply:
-				char_instance.basic_attack_damage = int(char_instance.basic_attack_damage * value)
-			else:
-				char_instance.basic_attack_damage += int(value)
-		"speed":
-			if multiply:
-				char_instance.speed = int(char_instance.speed * value)
-			else:
-				char_instance.speed += int(value)
-		"defense":
-			if multiply:
-				char_instance.defense = int(char_instance.defense * value)
-			else:
-				char_instance.defense += int(value)
+	# Sync max_health if health was modified
+	if char_instance.stats.has(GameConstants.STAT_HEALTH):
+		char_instance.current_health = mini(char_instance.current_health, char_instance.max_health)
 
 
 func to_dict() -> Dictionary:
@@ -599,8 +583,9 @@ static func from_dict(data: Dictionary) -> SkillInstance:
 
 **Claude Code Directive**:
 ```
-Create the SkillInstance class. Similar to ItemInstance but with effect application
-logic. Will be used when characters learn skills during encounters.
+Create the SkillInstance class. Uses StatCalculator.apply_modifier() for
+data-driven stat modifications instead of hardcoded match statements.
+This approach is open for extension (adding new stats) without code changes.
 ```
 
 ---
