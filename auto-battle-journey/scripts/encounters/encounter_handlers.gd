@@ -11,6 +11,22 @@ extends RefCounted
 #   "on_complete": Callable (optional)  # Additional completion logic
 # }
 
+# =============================================================================
+# STANDARDIZED CONTEXT INTERFACE (Issue 5)
+# =============================================================================
+# All handlers receive the same context dictionary structure. Handlers should
+# check for the callbacks they need and ignore others.
+#
+# Expected context keys:
+#   "set_gold_label": Callable(label: Label)  - Store reference to gold label for updates
+#   "on_buy_item": Callable(item_id, cost, selector, button)  - Handle item purchase
+#   "on_buy_skill": Callable(skill_id, cost, selector, button)  - Handle skill purchase
+#   "on_xp_select": Callable(char_index, xp_amount, button)  - Handle XP award selection
+#   "on_encounter_complete": Callable()  - Signal that encounter can be completed
+#
+# Handlers that don't use a particular callback simply don't call it.
+# =============================================================================
+
 static var _handlers: Dictionary = {}
 static var _initialized: bool = false
 
@@ -132,28 +148,18 @@ static func should_complete_immediately(encounter_type: String) -> bool:
 
 static func _create_shop_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create shop encounter UI."""
-	var vbox = VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var vbox = UIHelpers.create_vbox_container()
 
-	var label = Label.new()
-	label.text = "Purchase items and skills with gold"
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(label)
+	vbox.add_child(UIHelpers.create_label("Purchase items and skills with gold", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
 
-	var gold_label = Label.new()
-	gold_label.text = "Your Gold: %d" % RunManager.get_gold()
-	gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	gold_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_GOLD_DISPLAY)
-	gold_label.modulate = GameConstants.COLOR_GOLD
+	var gold_label = UIHelpers.create_label("Your Gold: %d" % RunManager.get_gold(), GameConstants.FONT_SIZE_GOLD_DISPLAY, GameConstants.COLOR_GOLD, true)
 	vbox.add_child(gold_label)
 
 	# Store gold label reference in context for updates
 	if context.has("set_gold_label"):
 		context["set_gold_label"].call(gold_label)
 
-	var spacer = Control.new()
-	spacer.custom_minimum_size.y = 10
-	vbox.add_child(spacer)
+	vbox.add_child(UIHelpers.create_spacer(10))
 
 	var scroll = ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(600, 400)
@@ -212,27 +218,14 @@ static func _create_shop_ui(encounter_data: Dictionary, context: Dictionary) -> 
 
 static func _create_xp_reward_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create XP reward encounter UI."""
-	var vbox = VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 16)
+	var vbox = UIHelpers.create_vbox_container(16)
 
-	var label = Label.new()
-	label.text = "Choose a character to receive XP"
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
-	vbox.add_child(label)
+	vbox.add_child(UIHelpers.create_label("Choose a character to receive XP", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
 
 	var xp_amount = encounter_data["data"]["xp_amount"]
-	var xp_label = Label.new()
-	xp_label.text = "XP Award: +%d" % xp_amount
-	xp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	xp_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_REWARD)
-	xp_label.modulate = GameConstants.COLOR_SUCCESS
-	vbox.add_child(xp_label)
+	vbox.add_child(UIHelpers.create_label("XP Award: +%d" % xp_amount, GameConstants.FONT_SIZE_REWARD, GameConstants.COLOR_SUCCESS, true))
 
-	var spacer = Control.new()
-	spacer.custom_minimum_size.y = 20
-	vbox.add_child(spacer)
+	vbox.add_child(UIHelpers.create_spacer(20))
 
 	var team = RunManager.get_team()
 	var on_select = context.get("on_xp_select", Callable())
@@ -251,24 +244,12 @@ static func _create_xp_reward_ui(encounter_data: Dictionary, context: Dictionary
 
 static func _create_gold_reward_ui(encounter_data: Dictionary, _context: Dictionary) -> Control:
 	"""Create gold reward encounter UI."""
-	var vbox = VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 16)
+	var vbox = UIHelpers.create_vbox_container(16)
 
 	var gold_amount = encounter_data["data"]["gold_amount"]
 
-	var label = Label.new()
-	label.text = "You found gold!"
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
-	vbox.add_child(label)
-
-	var gold_label = Label.new()
-	gold_label.text = "+%d Gold" % gold_amount
-	gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	gold_label.add_theme_font_size_override("font_size", 48)
-	gold_label.modulate = GameConstants.COLOR_GOLD
-	vbox.add_child(gold_label)
+	vbox.add_child(UIHelpers.create_label("You found gold!", GameConstants.FONT_SIZE_HEADING, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("+%d Gold" % gold_amount, 48, GameConstants.COLOR_GOLD, true))
 
 	# Award gold immediately
 	RunManager.add_gold(gold_amount)
@@ -279,15 +260,9 @@ static func _create_gold_reward_ui(encounter_data: Dictionary, _context: Diction
 
 static func _create_health_restore_ui(encounter_data: Dictionary, _context: Dictionary) -> Control:
 	"""Create health restore encounter UI."""
-	var vbox = VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 16)
+	var vbox = UIHelpers.create_vbox_container(16)
 
-	var label = Label.new()
-	label.text = "Your team's health is restored!"
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
-	vbox.add_child(label)
+	vbox.add_child(UIHelpers.create_label("Your team's health is restored!", GameConstants.FONT_SIZE_HEADING, Color.WHITE, true))
 
 	var heal_percentage = encounter_data["data"]["heal_percentage"]
 	var team = RunManager.get_team()
@@ -296,16 +271,17 @@ static func _create_health_restore_ui(encounter_data: Dictionary, _context: Dict
 		var heal_amount = int(char_instance.max_health * heal_percentage)
 		char_instance.heal(heal_amount)
 
-		var char_label = Label.new()
-		char_label.text = "%s: +%d HP (%d/%d)" % [
-			char_instance.get_character_name(),
-			heal_amount,
-			char_instance.current_health,
-			char_instance.max_health
-		]
-		char_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		char_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
-		char_label.modulate = GameConstants.COLOR_SUCCESS
+		var char_label = UIHelpers.create_label(
+			"%s: +%d HP (%d/%d)" % [
+				char_instance.get_character_name(),
+				heal_amount,
+				char_instance.current_health,
+				char_instance.max_health
+			],
+			GameConstants.FONT_SIZE_BODY,
+			GameConstants.COLOR_SUCCESS,
+			true
+		)
 		vbox.add_child(char_label)
 
 	print("EncounterHandlers: Healed all characters by %d%%" % int(heal_percentage * 100))
@@ -315,57 +291,27 @@ static func _create_health_restore_ui(encounter_data: Dictionary, _context: Dict
 
 static func _create_skill_trainer_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create skill trainer encounter UI."""
-	var vbox = VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 12)
+	var vbox = UIHelpers.create_vbox_container(12)
 
 	var skill_id = encounter_data["data"]["skill_id"]
 	var skill_data = GameData.get_skill_by_id(skill_id)
 
 	if skill_data.is_empty():
-		var error_label = Label.new()
-		error_label.text = "No skill available..."
-		error_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		vbox.add_child(error_label)
+		vbox.add_child(UIHelpers.create_label("No skill available...", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
 		# Allow completion even with error
 		if context.has("on_encounter_complete"):
 			context["on_encounter_complete"].call()
 		return vbox
 
-	var label = Label.new()
-	label.text = "The trainer offers to teach:"
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
-	vbox.add_child(label)
-
-	var skill_name_label = Label.new()
-	skill_name_label.text = skill_data["name"]
-	skill_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	skill_name_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_REWARD)
-	skill_name_label.modulate = GameConstants.COLOR_SUCCESS
-	vbox.add_child(skill_name_label)
-
-	var skill_desc_label = Label.new()
-	skill_desc_label.text = skill_data["description"]
-	skill_desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	skill_desc_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
-	vbox.add_child(skill_desc_label)
+	vbox.add_child(UIHelpers.create_label("The trainer offers to teach:", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label(skill_data["name"], GameConstants.FONT_SIZE_REWARD, GameConstants.COLOR_SUCCESS, true))
+	vbox.add_child(UIHelpers.create_label(skill_data["description"], GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
 
 	if skill_data.has("level_requirement"):
-		var req_label = Label.new()
-		req_label.text = "(Requires Level %d)" % skill_data["level_requirement"]
-		req_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		req_label.modulate = GameConstants.COLOR_WARNING
-		vbox.add_child(req_label)
+		vbox.add_child(UIHelpers.create_label("(Requires Level %d)" % skill_data["level_requirement"], GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_WARNING, true))
 
-	var spacer = Control.new()
-	spacer.custom_minimum_size.y = 20
-	vbox.add_child(spacer)
-
-	var char_label = Label.new()
-	char_label.text = "Choose a character to learn this skill:"
-	char_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(char_label)
+	vbox.add_child(UIHelpers.create_spacer(20))
+	vbox.add_child(UIHelpers.create_label("Choose a character to learn this skill:", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
 
 	var team = RunManager.get_team()
 	var on_complete = context.get("on_encounter_complete", Callable())
@@ -404,60 +350,26 @@ static func _on_skill_trainer_selected(char_index: int, skill_id: String, button
 
 static func _create_gamble_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create gamble encounter UI."""
-	var vbox = VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 12)
+	var vbox = UIHelpers.create_vbox_container(12)
 
 	var bet = encounter_data["data"]["bet_amount"]
 	var multiplier = encounter_data["data"]["win_multiplier"]
 	var current_gold = RunManager.get_gold()
 
-	var label = Label.new()
-	label.text = "The gambler offers a wager..."
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
-	vbox.add_child(label)
+	vbox.add_child(UIHelpers.create_label("The gambler offers a wager...", GameConstants.FONT_SIZE_HEADING, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("Bet: %d Gold" % bet, GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("Win: %dx your bet (%d Gold)" % [multiplier, bet * multiplier], GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true))
+	vbox.add_child(UIHelpers.create_label("Lose: You lose your bet", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_DANGER, true))
+	vbox.add_child(UIHelpers.create_label("(50% chance to win)", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_MUTED, true))
 
-	var bet_label = Label.new()
-	bet_label.text = "Bet: %d Gold" % bet
-	bet_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	bet_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
-	vbox.add_child(bet_label)
-
-	var odds_label = Label.new()
-	odds_label.text = "Win: %dx your bet (%d Gold)" % [multiplier, bet * multiplier]
-	odds_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	odds_label.modulate = GameConstants.COLOR_SUCCESS
-	vbox.add_child(odds_label)
-
-	var lose_label = Label.new()
-	lose_label.text = "Lose: You lose your bet"
-	lose_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lose_label.modulate = GameConstants.COLOR_DANGER
-	vbox.add_child(lose_label)
-
-	var chance_label = Label.new()
-	chance_label.text = "(50% chance to win)"
-	chance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	chance_label.modulate = GameConstants.COLOR_MUTED
-	vbox.add_child(chance_label)
-
-	var gold_label = Label.new()
+	var gold_label = UIHelpers.create_label("Your Gold: %d" % current_gold, GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_GOLD, true)
 	gold_label.name = "GoldLabel"
-	gold_label.text = "Your Gold: %d" % current_gold
-	gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	gold_label.modulate = GameConstants.COLOR_GOLD
 	vbox.add_child(gold_label)
 
-	var spacer = Control.new()
-	spacer.custom_minimum_size.y = 20
-	vbox.add_child(spacer)
+	vbox.add_child(UIHelpers.create_spacer(20))
 
-	var result_label = Label.new()
+	var result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_REWARD, Color.WHITE, true)
 	result_label.name = "ResultLabel"
-	result_label.text = ""
-	result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	result_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_REWARD)
 	vbox.add_child(result_label)
 
 	var buttons_container = HBoxContainer.new()
@@ -539,52 +451,21 @@ static func _on_gamble_declined(container: Control, on_complete: Callable) -> vo
 
 static func _create_elite_challenge_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create elite challenge encounter UI."""
-	var vbox = VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 12)
+	var vbox = UIHelpers.create_vbox_container(12)
 
 	var xp_reward = encounter_data["data"]["xp_reward"]
 	var gold_reward = encounter_data["data"]["gold_reward"]
 
-	var label = Label.new()
-	label.text = "An elite challenge awaits!"
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
-	vbox.add_child(label)
+	vbox.add_child(UIHelpers.create_label("An elite challenge awaits!", GameConstants.FONT_SIZE_HEADING, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("Complete this trial for great rewards.", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
 
-	var desc_label = Label.new()
-	desc_label.text = "Complete this trial for great rewards."
-	desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	desc_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
-	vbox.add_child(desc_label)
+	vbox.add_child(UIHelpers.create_spacer(20))
 
-	var spacer = Control.new()
-	spacer.custom_minimum_size.y = 20
-	vbox.add_child(spacer)
+	vbox.add_child(UIHelpers.create_label("Rewards:", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("+%d XP to ALL characters" % xp_reward, GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true))
+	vbox.add_child(UIHelpers.create_label("+%d Gold" % gold_reward, GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_GOLD, true))
 
-	var rewards_label = Label.new()
-	rewards_label.text = "Rewards:"
-	rewards_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	rewards_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
-	vbox.add_child(rewards_label)
-
-	var xp_label = Label.new()
-	xp_label.text = "+%d XP to ALL characters" % xp_reward
-	xp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	xp_label.modulate = GameConstants.COLOR_SUCCESS
-	xp_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
-	vbox.add_child(xp_label)
-
-	var gold_label = Label.new()
-	gold_label.text = "+%d Gold" % gold_reward
-	gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	gold_label.modulate = GameConstants.COLOR_GOLD
-	gold_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
-	vbox.add_child(gold_label)
-
-	var spacer2 = Control.new()
-	spacer2.custom_minimum_size.y = 20
-	vbox.add_child(spacer2)
+	vbox.add_child(UIHelpers.create_spacer(20))
 
 	var on_complete = context.get("on_encounter_complete", Callable())
 

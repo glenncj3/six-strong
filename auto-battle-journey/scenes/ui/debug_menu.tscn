@@ -130,6 +130,57 @@ theme_override_font_sizes/font_size = 16
 text = "Run Controls"
 horizontal_alignment = 1
 
+[node name="RunStatusLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/RunSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "No active run"
+horizontal_alignment = 1
+
+[node name="GoldButtons" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/RunSection"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="AddGoldButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/RunSection/GoldButtons"]
+custom_minimum_size = Vector2(90, 35)
+layout_mode = 2
+text = "+50 Gold"
+
+[node name="RemoveGoldButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/RunSection/GoldButtons"]
+custom_minimum_size = Vector2(90, 35)
+layout_mode = 2
+text = "-50 Gold"
+
+[node name="XpRepButtons" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/RunSection"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="AddXpButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/RunSection/XpRepButtons"]
+custom_minimum_size = Vector2(90, 35)
+layout_mode = 2
+text = "+50 XP"
+
+[node name="LoseRepButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/RunSection/XpRepButtons"]
+custom_minimum_size = Vector2(90, 35)
+layout_mode = 2
+text = "-5 Rep"
+
+[node name="WinLossButtons" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/RunSection"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="AddWinButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/RunSection/WinLossButtons"]
+custom_minimum_size = Vector2(90, 35)
+layout_mode = 2
+text = "+1 Win"
+
+[node name="AddLossButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/RunSection/WinLossButtons"]
+custom_minimum_size = Vector2(90, 35)
+layout_mode = 2
+text = "+1 Loss"
+
 [node name="ClearRunButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/RunSection"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2

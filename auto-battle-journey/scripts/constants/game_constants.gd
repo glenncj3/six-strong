@@ -139,6 +139,11 @@ const COLOR_HIGHLIGHT := Color(1.3, 1.3, 1.0)
 const REPUTATION_CRITICAL_THRESHOLD := 5
 const REPUTATION_WARNING_THRESHOLD := 10
 
+# Combat difficulty colors (Issue 4)
+const COLOR_DIFFICULTY_EASY := Color(0.3, 1.0, 0.3)  # Green
+const COLOR_DIFFICULTY_MEDIUM := Color(1.0, 1.0, 0.3)  # Yellow
+const COLOR_DIFFICULTY_HARD := Color(1.0, 0.3, 0.3)  # Red
+
 # =============================================================================
 # EMOJI CONSTANTS
 # =============================================================================

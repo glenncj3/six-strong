@@ -40,6 +40,19 @@ func _ready() -> void:
 	print("RunView: Initialization complete")
 
 
+func _exit_tree() -> void:
+	"""Clean up signal connections when scene is freed (Issue 3 fallback)."""
+	# Disconnect from RunManager signals to prevent callbacks to freed nodes
+	if RunManager.round_changed.is_connected(_on_round_changed):
+		RunManager.round_changed.disconnect(_on_round_changed)
+	if RunManager.reputation_changed.is_connected(_on_reputation_changed):
+		RunManager.reputation_changed.disconnect(_on_reputation_changed)
+	if RunManager.gold_changed.is_connected(_on_gold_changed):
+		RunManager.gold_changed.disconnect(_on_gold_changed)
+	if RunManager.phase_changed.is_connected(_on_phase_changed):
+		RunManager.phase_changed.disconnect(_on_phase_changed)
+
+
 func _update_all_displays() -> void:
 	"""Update all UI elements with current run state."""
 	_update_top_bar()
@@ -221,37 +234,4 @@ func _on_phase_changed(_new_phase: String) -> void:
 	_setup_phase()
 
 
-# =============================================================================
-# DEBUG CONTROLS
-# =============================================================================
-# Debug Keys:
-# - E: Complete encounter phase (simulate)
-# - G: Add 50 gold
-# - X: Add 50 XP to first character
-# - L: Lose 5 reputation
-# - W: Add a win (for testing victory condition)
-
-func _input(event: InputEvent) -> void:
-	"""Debug controls for testing."""
-	if event is InputEventKey and event.pressed:
-		match event.keycode:
-			KEY_E:  # Complete encounter phase
-				if RunManager.is_encounter_phase():
-					print("RunView: [DEBUG] Completing encounter phase")
-					_simulate_encounter_completion()
-			KEY_G:  # Add gold
-				print("RunView: [DEBUG] Adding 50 gold")
-				RunManager.add_gold(50)
-			KEY_X:  # Add XP to first character
-				var team = RunManager.get_team()
-				if team.size() > 0:
-					print("RunView: [DEBUG] Adding 50 XP to first character")
-					team[0].add_experience(50)
-					_update_team_display()
-			KEY_L:  # Lose reputation
-				print("RunView: [DEBUG] Losing 5 reputation")
-				RunManager.lose_reputation(5)
-			KEY_W:  # Add a win (debug)
-				print("RunView: [DEBUG] Adding 1 win")
-				RunManager.add_win()
-				_update_all_displays()
+# Debug controls moved to debug_menu.gd (Issue 6)

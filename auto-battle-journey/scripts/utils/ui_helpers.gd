@@ -7,6 +7,71 @@ extends RefCounted
 # CONTAINER MANAGEMENT
 # =============================================================================
 
+# =============================================================================
+# VBOX AND SPACER HELPERS (Issue 2)
+# =============================================================================
+
+static func create_vbox_container(separation: int = GameConstants.CONTENT_SEPARATION, full_rect: bool = true) -> VBoxContainer:
+	"""
+	Create a configured VBoxContainer with standard settings.
+
+	Args:
+		separation: Vertical separation between children (default: CONTENT_SEPARATION)
+		full_rect: Whether to set PRESET_FULL_RECT anchor (default: true)
+
+	Returns:
+		Configured VBoxContainer
+	"""
+	var vbox = VBoxContainer.new()
+	if full_rect:
+		vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vbox.add_theme_constant_override("separation", separation)
+	return vbox
+
+
+static func create_spacer(height: int = 20) -> Control:
+	"""
+	Create a vertical spacer control.
+
+	Args:
+		height: Minimum height of the spacer (default: 20)
+
+	Returns:
+		Control configured as a spacer
+	"""
+	var spacer = Control.new()
+	spacer.custom_minimum_size.y = height
+	return spacer
+
+
+static func create_label(
+	text: String,
+	font_size: int = GameConstants.FONT_SIZE_BODY,
+	color: Color = Color.WHITE,
+	centered: bool = false
+) -> Label:
+	"""
+	Create a configured label with common settings.
+
+	Args:
+		text: Label text
+		font_size: Font size override (default: FONT_SIZE_BODY)
+		color: Text color via modulate (default: white)
+		centered: Whether to center the text horizontally (default: false)
+
+	Returns:
+		Configured Label node
+	"""
+	var label = Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", font_size)
+	if color != Color.WHITE:
+		label.modulate = color
+	if centered:
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	return label
+
+
 static func clear_children(container: Node) -> void:
 	"""
 	Remove and free all children from a container.
@@ -360,3 +425,129 @@ static func add_option_panel_labels(
 	desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc_label.custom_minimum_size.y = 40
+
+
+# =============================================================================
+# COMBAT OPTION PANEL (Issue 1 Extension)
+# =============================================================================
+
+static func create_combat_option_panel(combat_data: Dictionary, on_select: Callable) -> PanelContainer:
+	"""
+	Create a complete combat option panel with all standard elements.
+	Extends create_option_panel_base() for combat-specific layouts.
+
+	Args:
+		combat_data: Combat option dictionary with type, name, description, etc.
+		on_select: Callback when fight button is pressed (receives combat_data)
+
+	Returns:
+		Complete PanelContainer with combat option UI
+	"""
+	var panel = PanelContainer.new()
+
+	var hbox = HBoxContainer.new()
+	panel.add_child(hbox)
+	hbox.add_theme_constant_override("separation", 12)
+
+	# Left margin with image
+	var margin = MarginContainer.new()
+	hbox.add_child(margin)
+	margin.add_theme_constant_override("margin_left", GameConstants.PANEL_MARGIN)
+	margin.add_theme_constant_override("margin_right", GameConstants.PANEL_MARGIN)
+	margin.add_theme_constant_override("margin_top", GameConstants.PANEL_MARGIN)
+	margin.add_theme_constant_override("margin_bottom", GameConstants.PANEL_MARGIN)
+
+	# Image
+	var image = TextureRect.new()
+	margin.add_child(image)
+	image.custom_minimum_size = Vector2(GameConstants.COMBAT_IMAGE_SIZE, GameConstants.COMBAT_IMAGE_SIZE)
+	image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	set_texture_safe(image, combat_data.get("image_path", ""))
+
+	# Info section
+	var info_vbox = VBoxContainer.new()
+	hbox.add_child(info_vbox)
+	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_vbox.add_theme_constant_override("separation", 4)
+
+	# Name
+	var name_label = Label.new()
+	info_vbox.add_child(name_label)
+	name_label.text = combat_data.get("name", "Unknown")
+	name_label.add_theme_font_size_override("font_size", 20)
+
+	# Type
+	var type_label = Label.new()
+	info_vbox.add_child(type_label)
+	type_label.text = "[%s]" % combat_data.get("type", "").to_upper()
+	type_label.modulate = GameConstants.COLOR_DISABLED
+	type_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+
+	# Description
+	var desc_label = Label.new()
+	info_vbox.add_child(desc_label)
+	desc_label.text = combat_data.get("description", "")
+	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+
+	# Difficulty or Rank (type-specific)
+	if combat_data.get("type") == "ai":
+		var diff_label = Label.new()
+		info_vbox.add_child(diff_label)
+		diff_label.text = "Difficulty: %s" % combat_data.get("difficulty", "Unknown")
+		diff_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+		diff_label.modulate = get_difficulty_color(combat_data.get("difficulty", ""))
+
+	elif combat_data.get("type") == "ghost":
+		var rank_label = Label.new()
+		info_vbox.add_child(rank_label)
+		rank_label.text = "Player Rank: %d" % combat_data.get("rank", 0)
+		rank_label.modulate = GameConstants.COLOR_GHOST_RANK
+		rank_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+
+	# Rewards
+	var reward_label = Label.new()
+	info_vbox.add_child(reward_label)
+	reward_label.text = "Rewards: +%d Gold  +%d XP" % [
+		combat_data.get("reward_gold", 0),
+		combat_data.get("reward_xp", 0)
+	]
+	reward_label.modulate = GameConstants.COLOR_SUCCESS
+	reward_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+
+	# Spacer
+	var spacer = Control.new()
+	info_vbox.add_child(spacer)
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	# Fight button
+	var fight_button = Button.new()
+	info_vbox.add_child(fight_button)
+	fight_button.text = "FIGHT"
+	fight_button.custom_minimum_size = Vector2(100, 40)
+	if on_select.is_valid():
+		fight_button.pressed.connect(on_select.bind(combat_data))
+
+	return panel
+
+
+static func get_difficulty_color(difficulty: String) -> Color:
+	"""
+	Get the color for a combat difficulty level.
+
+	Args:
+		difficulty: Difficulty string ("Easy", "Medium", "Hard")
+
+	Returns:
+		Appropriate color from GameConstants
+	"""
+	match difficulty:
+		"Easy":
+			return GameConstants.COLOR_DIFFICULTY_EASY
+		"Medium":
+			return GameConstants.COLOR_DIFFICULTY_MEDIUM
+		"Hard":
+			return GameConstants.COLOR_DIFFICULTY_HARD
+		_:
+			return GameConstants.COLOR_DISABLED
