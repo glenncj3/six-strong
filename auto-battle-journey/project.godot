@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 GameData="*res://autoloads/game_data.gd"
 PlayerAccount="*res://autoloads/player_account.gd"
+RunManager="*res://autoloads/run_manager.gd"
 
 [rendering]
 

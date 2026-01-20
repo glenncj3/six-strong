@@ -21,6 +21,12 @@ func _ready() -> void:
 	collection_button.pressed.connect(_on_collection_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 
+	# Check for active run to resume
+	if RunManager.has_active_run():
+		play_button.text = "RESUME RUN"
+	else:
+		play_button.text = "PLAY"
+
 	# Focus play button
 	play_button.grab_focus()
 
@@ -39,10 +45,15 @@ func _on_reroll_tokens_changed(new_amount: int) -> void:
 
 
 func _on_play_pressed() -> void:
-	print("MainMenu: Play button pressed")
-	# TODO: Check for active run and resume, or start draft
-	# For now, just print
-	pass
+	# Check if there's an active run to resume
+	if RunManager.has_active_run():
+		print("MainMenu: Resuming active run...")
+		RunManager.load_run_state()
+		# TODO: Navigate to run_view scene (Phase 4)
+		print("MainMenu: Would navigate to run_view here")
+	else:
+		print("MainMenu: Starting new run (draft)...")
+		get_tree().get_root().get_node("Main").change_scene("res://scenes/ui/draft.tscn")
 
 
 func _on_collection_pressed() -> void:
@@ -52,3 +63,11 @@ func _on_collection_pressed() -> void:
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
+
+
+func _input(event: InputEvent) -> void:
+	# Debug: Press T to add reroll token
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_T:
+			PlayerAccount.add_reroll_token()
+			print("MainMenu: Added reroll token (Debug)")

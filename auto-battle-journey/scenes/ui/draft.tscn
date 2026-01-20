@@ -1,0 +1,95 @@
+[gd_scene load_steps=2 format=3 uid="uid://c5draft8scene1"]
+
+[ext_resource type="Script" uid="uid://draft1script01" path="res://scenes/ui/draft.gd" id="1_draft"]
+
+[node name="Draft" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_draft")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.1, 0.12, 0.18, 1)
+
+[node name="MainContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="TopSection" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="InstructionLabel" type="Label" parent="MainContainer/TopSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "SELECT CHARACTER 1 OF 3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SelectedDisplay" type="HBoxContainer" parent="MainContainer/TopSection"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="Spacer" type="Control" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OptionsTitle" type="Label" parent="MainContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "AVAILABLE CHARACTERS"
+horizontal_alignment = 1
+
+[node name="OptionsContainer" type="HBoxContainer" parent="MainContainer"]
+custom_minimum_size = Vector2(0, 320)
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 30
+
+[node name="Spacer2" type="Control" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomButtons" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 30
+
+[node name="RerollButton" type="Button" parent="MainContainer/BottomButtons"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "REROLL (0 tokens)"
+
+[node name="ConfirmButton" type="Button" parent="MainContainer/BottomButtons"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "START RUN"
+
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 120.0
+offset_bottom = 60.0
+theme_override_font_sizes/font_size = 18
+text = "< BACK"
