@@ -1,0 +1,155 @@
+{
+  "version": "1.0",
+  "description": "Asset mapping for Auto-Battle Journey - Update paths when adding new art",
+
+  "content_sprites": {
+    "characters": {
+      "char_warrior_001": "res://assets/characters/knight.png",
+      "char_mage_001": "res://assets/characters/mage.png",
+      "char_rogue_001": "res://assets/characters/rogue.png",
+      "char_cleric_001": "res://assets/characters/cleric.png",
+      "char_ranger_001": "res://assets/characters/ranger.png",
+      "char_paladin_001": "res://assets/characters/paladin.png",
+      "char_necromancer_001": "res://assets/characters/necromancer.png",
+      "char_berserker_001": "res://assets/characters/berserker.png",
+      "char_elementalist_001": "res://assets/characters/elementalist.png",
+      "char_assassin_001": "res://assets/characters/assassin.png"
+    },
+    "items": {
+      "item_weapon_sword_001": "res://assets/items/sword_iron.png",
+      "item_weapon_staff_001": "res://assets/items/staff_oak.png",
+      "item_weapon_dagger_001": "res://assets/items/dagger_steel.png",
+      "item_weapon_bow_001": "res://assets/items/bow_hunting.png",
+      "item_weapon_mace_001": "res://assets/items/mace_iron.png",
+      "item_armor_plate_001": "res://assets/items/armor_plate.png",
+      "item_armor_leather_001": "res://assets/items/armor_leather.png",
+      "item_armor_robe_001": "res://assets/items/armor_robe.png",
+      "item_accessory_ring_001": "res://assets/items/ring_power.png",
+      "item_accessory_amulet_001": "res://assets/items/amulet_protection.png"
+    },
+    "skills": {
+      "skill_fireball": "res://assets/skills/fireball.png",
+      "skill_heal": "res://assets/skills/heal.png",
+      "skill_shield": "res://assets/skills/shield.png",
+      "skill_backstab": "res://assets/skills/backstab.png",
+      "skill_multishot": "res://assets/skills/multishot.png",
+      "skill_smite": "res://assets/skills/smite.png"
+    },
+    "encounters": {
+      "combat": "res://assets/encounters/combat.png",
+      "elite_combat": "res://assets/encounters/elite_combat.png",
+      "boss": "res://assets/encounters/boss.png",
+      "shop": "res://assets/encounters/shop.png",
+      "treasure": "res://assets/encounters/treasure.png",
+      "rest": "res://assets/encounters/rest.png",
+      "event": "res://assets/encounters/event.png"
+    }
+  },
+
+  "ui_chrome": {
+    "panels": {
+      "dark_panel": {
+        "texture": "res://assets/ui/panels/panel_dark.png",
+        "margins": { "left": 12, "top": 12, "right": 12, "bottom": 12 },
+        "content_margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 }
+      },
+      "warm_panel": {
+        "texture": "res://assets/ui/panels/panel_warm.png",
+        "margins": { "left": 12, "top": 12, "right": 12, "bottom": 12 },
+        "content_margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 }
+      },
+      "card_common": {
+        "texture": "res://assets/ui/cards/card_common.png",
+        "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 },
+        "content_margins": { "left": 4, "top": 4, "right": 4, "bottom": 4 }
+      },
+      "card_uncommon": {
+        "texture": "res://assets/ui/cards/card_uncommon.png",
+        "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 },
+        "content_margins": { "left": 4, "top": 4, "right": 4, "bottom": 4 }
+      },
+      "card_rare": {
+        "texture": "res://assets/ui/cards/card_rare.png",
+        "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 },
+        "content_margins": { "left": 4, "top": 4, "right": 4, "bottom": 4 }
+      },
+      "card_epic": {
+        "texture": "res://assets/ui/cards/card_epic.png",
+        "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 },
+        "content_margins": { "left": 4, "top": 4, "right": 4, "bottom": 4 }
+      },
+      "card_legendary": {
+        "texture": "res://assets/ui/cards/card_legendary.png",
+        "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 },
+        "content_margins": { "left": 4, "top": 4, "right": 4, "bottom": 4 }
+      }
+    },
+    "buttons": {
+      "primary": {
+        "normal": {
+          "texture": "res://assets/ui/buttons/btn_primary_normal.png",
+          "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 }
+        },
+        "hover": {
+          "texture": "res://assets/ui/buttons/btn_primary_hover.png",
+          "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 }
+        },
+        "pressed": {
+          "texture": "res://assets/ui/buttons/btn_primary_pressed.png",
+          "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 }
+        },
+        "disabled": {
+          "texture": "res://assets/ui/buttons/btn_primary_disabled.png",
+          "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 }
+        }
+      },
+      "secondary": {
+        "normal": {
+          "texture": "res://assets/ui/buttons/btn_secondary_normal.png",
+          "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 }
+        },
+        "hover": {
+          "texture": "res://assets/ui/buttons/btn_secondary_hover.png",
+          "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 }
+        },
+        "pressed": {
+          "texture": "res://assets/ui/buttons/btn_secondary_pressed.png",
+          "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 }
+        },
+        "disabled": {
+          "texture": "res://assets/ui/buttons/btn_secondary_disabled.png",
+          "margins": { "left": 8, "top": 8, "right": 8, "bottom": 8 }
+        }
+      }
+    },
+    "progress_bars": {
+      "health": {
+        "background": {
+          "texture": "res://assets/ui/bars/bar_health_bg.png",
+          "margins": { "left": 4, "top": 4, "right": 4, "bottom": 4 }
+        },
+        "fill": {
+          "texture": "res://assets/ui/bars/bar_health_fill.png",
+          "margins": { "left": 4, "top": 4, "right": 4, "bottom": 4 }
+        }
+      },
+      "experience": {
+        "background": {
+          "texture": "res://assets/ui/bars/bar_xp_bg.png",
+          "margins": { "left": 4, "top": 4, "right": 4, "bottom": 4 }
+        },
+        "fill": {
+          "texture": "res://assets/ui/bars/bar_xp_fill.png",
+          "margins": { "left": 4, "top": 4, "right": 4, "bottom": 4 }
+        }
+      }
+    }
+  },
+
+  "fallbacks": {
+    "missing_character": "res://assets/ui/placeholder_character.png",
+    "missing_item": "res://assets/ui/placeholder_item.png",
+    "missing_skill": "res://assets/ui/placeholder_skill.png",
+    "missing_panel": null
+  }
+}
