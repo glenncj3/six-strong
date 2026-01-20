@@ -16,10 +16,6 @@ extends Control
 # Preload scenes
 const CharacterCardScene = preload("res://scenes/components/character_card.tscn")
 
-# Phase tracking
-enum Phase { ENCOUNTER, COMBAT }
-var current_phase: Phase = Phase.ENCOUNTER
-
 
 func _ready() -> void:
 	print("RunView: Scene loaded, initializing...")
@@ -28,6 +24,7 @@ func _ready() -> void:
 	RunManager.round_changed.connect(_on_round_changed)
 	RunManager.reputation_changed.connect(_on_reputation_changed)
 	RunManager.gold_changed.connect(_on_gold_changed)
+	RunManager.phase_changed.connect(_on_phase_changed)
 
 	action_button.pressed.connect(_on_action_button_pressed)
 	menu_button.pressed.connect(_on_menu_button_pressed)
@@ -111,34 +108,28 @@ func _update_card_with_runtime_stats(card: Node, char_instance: CharacterInstanc
 
 func _setup_phase() -> void:
 	"""Setup UI for current phase."""
-	match current_phase:
-		Phase.ENCOUNTER:
-			phase_label.text = "ENCOUNTER PHASE"
-			phase_description.text = "Select an encounter to improve your team."
-			action_button.text = "CHOOSE ENCOUNTER"
-		Phase.COMBAT:
-			phase_label.text = "COMBAT PHASE"
-			phase_description.text = "Select a battle to fight."
-			action_button.text = "CHOOSE COMBAT"
+	if RunManager.is_encounter_phase():
+		phase_label.text = "ENCOUNTER PHASE"
+		phase_description.text = "Select an encounter to improve your team."
+		action_button.text = "CHOOSE ENCOUNTER"
+	else:
+		phase_label.text = "COMBAT PHASE"
+		phase_description.text = "Select a battle to fight."
+		action_button.text = "CHOOSE COMBAT"
 
 
 func _on_action_button_pressed() -> void:
 	"""Handle phase action button."""
-	match current_phase:
-		Phase.ENCOUNTER:
-			_start_encounter_phase()
-		Phase.COMBAT:
-			_start_combat_phase()
+	if RunManager.is_encounter_phase():
+		_start_encounter_phase()
+	else:
+		_start_combat_phase()
 
 
 func _start_encounter_phase() -> void:
 	"""Navigate to encounter selection."""
 	print("RunView: Starting encounter phase...")
-	# TODO: Navigate to encounter_select scene (Phase 5)
-	print("RunView: Would navigate to encounter_select here")
-
-	# For now, simulate completing encounter
-	_simulate_encounter_completion()
+	SceneManager.go_to("encounter_select")
 
 
 func _start_combat_phase() -> void:
@@ -161,11 +152,8 @@ func _simulate_encounter_completion() -> void:
 		team[0].add_experience(30)
 	RunManager.add_gold(10)
 
-	# Save state
-	RunManager.save_run_state()
-
-	# Move to combat phase
-	current_phase = Phase.COMBAT
+	# Move to combat phase (RunManager handles save)
+	RunManager.complete_encounter()
 	_setup_phase()
 	_update_all_displays()
 
@@ -177,10 +165,7 @@ func _simulate_combat_completion() -> void:
 	# For now, always win
 	RunManager.add_win()
 
-	# Save state
-	RunManager.save_run_state()
-
-	# Advance round
+	# Advance round (RunManager handles save and sets phase to ENCOUNTER)
 	RunManager.advance_round()
 
 	# Check if run is over
@@ -188,8 +173,7 @@ func _simulate_combat_completion() -> void:
 		_end_run()
 		return
 
-	# Move to next encounter phase
-	current_phase = Phase.ENCOUNTER
+	# Update UI for new phase
 	_setup_phase()
 	_update_all_displays()
 
@@ -229,6 +213,11 @@ func _on_gold_changed(_new_gold: int) -> void:
 	_update_top_bar()
 
 
+func _on_phase_changed(_new_phase: String) -> void:
+	"""Handle phase change signal."""
+	_setup_phase()
+
+
 # =============================================================================
 # DEBUG CONTROLS
 # =============================================================================
@@ -244,11 +233,11 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
 			KEY_E:  # Complete encounter phase
-				if current_phase == Phase.ENCOUNTER:
+				if RunManager.is_encounter_phase():
 					print("RunView: [DEBUG] Completing encounter phase")
 					_simulate_encounter_completion()
 			KEY_C:  # Complete combat phase
-				if current_phase == Phase.COMBAT:
+				if RunManager.is_combat_phase():
 					print("RunView: [DEBUG] Completing combat phase")
 					_simulate_combat_completion()
 			KEY_G:  # Add gold

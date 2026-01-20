@@ -5,7 +5,9 @@
       "Bash(dir /s \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\")",
       "Bash(dir:*)",
       "Bash(tree:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(python:*)",
+      "Bash(magick -version:*)"
     ]
   }
 }

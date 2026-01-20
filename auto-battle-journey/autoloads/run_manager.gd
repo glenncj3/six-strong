@@ -7,9 +7,14 @@ signal run_started
 signal round_changed(new_round: int)
 signal reputation_changed(new_reputation: int)
 signal gold_changed(new_gold: int)
+signal phase_changed(new_phase: String)
 
 # Save file path
 const SAVE_PATH = "user://active_run.json"
+
+# Phase constants
+const PHASE_ENCOUNTER = "encounter"
+const PHASE_COMBAT = "combat"
 
 # Run state
 var is_run_active: bool = false
@@ -20,6 +25,7 @@ var team: Array[CharacterInstance] = []
 
 # Progression
 var current_round: int = 0
+var current_phase: String = PHASE_ENCOUNTER
 var reputation: int = GameConstants.STARTING_REPUTATION
 var wins: int = 0
 var losses: int = 0
@@ -75,6 +81,7 @@ func start_new_run(drafted_character_ids: Array) -> void:
 
 	# Initialize run state
 	current_round = 0
+	current_phase = PHASE_ENCOUNTER
 	reputation = GameConstants.STARTING_REPUTATION
 	wins = 0
 	losses = 0
@@ -98,6 +105,7 @@ func save_run_state() -> void:
 	var save_data = {
 		"run_id": run_id,
 		"round": current_round,
+		"phase": current_phase,
 		"reputation": reputation,
 		"wins": wins,
 		"losses": losses,
@@ -124,6 +132,7 @@ func load_run_state() -> bool:
 	# Restore run state
 	run_id = save_data.get("run_id", "")
 	current_round = save_data.get("round", 0)
+	current_phase = save_data.get("phase", PHASE_ENCOUNTER)
 	reputation = save_data.get("reputation", GameConstants.STARTING_REPUTATION)
 	wins = save_data.get("wins", 0)
 	losses = save_data.get("losses", 0)
@@ -177,6 +186,7 @@ func _clear_run_state() -> void:
 	run_id = ""
 	team.clear()
 	current_round = 0
+	current_phase = PHASE_ENCOUNTER
 	reputation = GameConstants.STARTING_REPUTATION
 	wins = 0
 	losses = 0
@@ -217,6 +227,18 @@ func get_gold() -> int:
 	return current_gold
 
 
+func get_phase() -> String:
+	return current_phase
+
+
+func is_encounter_phase() -> bool:
+	return current_phase == PHASE_ENCOUNTER
+
+
+func is_combat_phase() -> bool:
+	return current_phase == PHASE_COMBAT
+
+
 # =============================================================================
 # RUN PROGRESSION
 # =============================================================================
@@ -224,8 +246,28 @@ func get_gold() -> int:
 func advance_round() -> void:
 	"""Move to next round (after encounter + combat)."""
 	current_round += 1
+	current_phase = PHASE_ENCOUNTER
 	round_changed.emit(current_round)
+	phase_changed.emit(current_phase)
 	save_run_state()
+
+
+func set_phase(phase: String) -> void:
+	"""Set the current phase."""
+	if phase != PHASE_ENCOUNTER and phase != PHASE_COMBAT:
+		push_error("RunManager: Invalid phase: %s" % phase)
+		return
+	current_phase = phase
+	phase_changed.emit(current_phase)
+	save_run_state()
+
+
+func complete_encounter() -> void:
+	"""Complete encounter phase and switch to combat."""
+	current_phase = PHASE_COMBAT
+	phase_changed.emit(current_phase)
+	save_run_state()
+	print("RunManager: Encounter complete, switching to combat phase")
 
 
 func add_gold(amount: int) -> void:
@@ -289,13 +331,7 @@ func did_player_win() -> bool:
 
 func get_phase_name() -> String:
 	"""Get current phase name for display."""
-	# Even rounds = encounter, odd rounds = combat
-	# Round 0 starts with encounter
-	var phase_index = current_round % 2
-	if phase_index == 0:
-		return "encounter"
-	else:
-		return "combat"
+	return current_phase
 
 
 func get_team_summary() -> Dictionary:

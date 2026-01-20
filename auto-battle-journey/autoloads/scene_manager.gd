@@ -14,14 +14,20 @@ const SCENES = {
 	"character_details": "res://scenes/ui/character_details.tscn",
 	"draft": "res://scenes/ui/draft.tscn",
 	"run_view": "res://scenes/ui/run_view.tscn",
+	"encounter_select": "res://scenes/ui/encounter_select.tscn",
+	"encounter_execute": "res://scenes/ui/encounter_execute.tscn",
 	# Add more scenes as they're created
-	# "combat": "res://scenes/ui/combat.tscn",
-	# "results": "res://scenes/ui/results.tscn",
+	# "combat_select": "res://scenes/ui/combat_select.tscn",
+	# "combat_execute": "res://scenes/ui/combat_execute.tscn",
+	# "run_results": "res://scenes/ui/run_results.tscn",
 }
 
 # Reference to main scene (set after tree is ready)
 var _main_node: Node = null
 var _is_transitioning: bool = false
+
+# Scene data storage for passing data between scenes
+var _scene_data: Dictionary = {}
 
 
 func _ready() -> void:
@@ -121,3 +127,58 @@ func get_scene_path(scene_name: String) -> String:
 func has_scene(scene_name: String) -> bool:
 	"""Check if a scene name is registered."""
 	return SCENES.has(scene_name)
+
+
+# =============================================================================
+# SCENE DATA PASSING
+# =============================================================================
+
+func set_scene_data(key: String, data: Variant) -> void:
+	"""
+	Store data to be retrieved by the next scene.
+	Data persists until explicitly cleared or retrieved with clear flag.
+
+	Args:
+		key: Unique identifier for the data
+		data: Any data to store (Dictionary, Array, etc.)
+	"""
+	_scene_data[key] = data
+
+
+func get_scene_data(key: String, default: Variant = null, clear: bool = true) -> Variant:
+	"""
+	Retrieve data stored for this scene.
+
+	Args:
+		key: The data key to retrieve
+		default: Value to return if key not found
+		clear: If true, removes the data after retrieval (default: true)
+
+	Returns:
+		The stored data, or default if not found
+	"""
+	if not _scene_data.has(key):
+		return default
+
+	var data = _scene_data[key]
+	if clear:
+		_scene_data.erase(key)
+	return data
+
+
+func has_scene_data(key: String) -> bool:
+	"""Check if scene data exists for a key."""
+	return _scene_data.has(key)
+
+
+func clear_scene_data(key: String = "") -> void:
+	"""
+	Clear scene data.
+
+	Args:
+		key: Specific key to clear, or empty string to clear all
+	"""
+	if key.is_empty():
+		_scene_data.clear()
+	elif _scene_data.has(key):
+		_scene_data.erase(key)
