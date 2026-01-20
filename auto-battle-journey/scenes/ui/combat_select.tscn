@@ -1,0 +1,82 @@
+[gd_scene load_steps=2 format=3 uid="uid://combat_select1"]
+
+[ext_resource type="Script" uid="uid://combat_sel_s1" path="res://scenes/ui/combat_select.gd" id="1_script"]
+
+[node name="CombatSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.12, 0.1, 0.18, 1)
+
+[node name="MainContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="TopMargin" type="MarginContainer" parent="MainContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+
+[node name="TitleContainer" type="VBoxContainer" parent="MainContainer/TopMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="MainContainer/TopMargin/TitleContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "CHOOSE A BATTLE"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="MainContainer/TopMargin/TitleContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 16
+text = "Select your opponent"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OptionsMargin" type="MarginContainer" parent="MainContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 16
+
+[node name="OptionsContainer" type="VBoxContainer" parent="MainContainer/ScrollContainer/OptionsMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="BackButton" type="Button" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 130.0
+offset_bottom = 50.0
+theme_override_font_sizes/font_size = 16
+text = "< BACK (Debug)"

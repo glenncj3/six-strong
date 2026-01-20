@@ -50,6 +50,10 @@ func _run() -> void:
 	_create_placeholder("res://assets/encounters/chest.png", 128, 128, Color.GOLD)
 	_create_placeholder("res://assets/encounters/fountain.png", 128, 128, Color.CYAN)
 
+	# Combat icons (128x128)
+	_create_placeholder("res://assets/combat/ai_enemy.png", 128, 128, Color.CRIMSON)
+	_create_placeholder("res://assets/combat/player_ghost.png", 128, 128, Color.MEDIUM_PURPLE)
+
 	print("Placeholder assets generated successfully!")
 	print("Refresh the FileSystem dock in Godot to see the new files.")
 

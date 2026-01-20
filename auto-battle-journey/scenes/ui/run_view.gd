@@ -135,11 +135,7 @@ func _start_encounter_phase() -> void:
 func _start_combat_phase() -> void:
 	"""Navigate to combat selection."""
 	print("RunView: Starting combat phase...")
-	# TODO: Navigate to combat_select scene (Phase 6)
-	print("RunView: Would navigate to combat_select here")
-
-	# For now, simulate completing combat
-	_simulate_combat_completion()
+	SceneManager.go_to("combat_select")
 
 
 func _simulate_encounter_completion() -> void:
@@ -156,40 +152,6 @@ func _simulate_encounter_completion() -> void:
 	RunManager.complete_encounter()
 	_setup_phase()
 	_update_all_displays()
-
-
-func _simulate_combat_completion() -> void:
-	"""Temporary: Simulate completing combat."""
-	print("RunView: Simulating combat completion...")
-
-	# For now, always win
-	RunManager.add_win()
-
-	# Advance round (RunManager handles save and sets phase to ENCOUNTER)
-	RunManager.advance_round()
-
-	# Check if run is over
-	if RunManager.is_run_over():
-		_end_run()
-		return
-
-	# Update UI for new phase
-	_setup_phase()
-	_update_all_displays()
-
-
-func _end_run() -> void:
-	"""Run is over, show results."""
-	print("RunView: Run is over!")
-
-	var victory = RunManager.did_player_win()
-
-	# TODO: Navigate to run_results scene (Phase 7)
-	print("RunView: Would navigate to run_results here (Victory: %s)" % victory)
-
-	# For now, end run and return to main menu
-	RunManager.end_run(victory)
-	SceneManager.go_to_main_menu()
 
 
 func _on_menu_button_pressed() -> void:
@@ -222,11 +184,11 @@ func _on_phase_changed(_new_phase: String) -> void:
 # DEBUG CONTROLS
 # =============================================================================
 # Debug Keys:
-# - E: Complete encounter phase
-# - C: Complete combat phase
+# - E: Complete encounter phase (simulate)
 # - G: Add 50 gold
 # - X: Add 50 XP to first character
 # - L: Lose 5 reputation
+# - W: Add a win (for testing victory condition)
 
 func _input(event: InputEvent) -> void:
 	"""Debug controls for testing."""
@@ -236,10 +198,6 @@ func _input(event: InputEvent) -> void:
 				if RunManager.is_encounter_phase():
 					print("RunView: [DEBUG] Completing encounter phase")
 					_simulate_encounter_completion()
-			KEY_C:  # Complete combat phase
-				if RunManager.is_combat_phase():
-					print("RunView: [DEBUG] Completing combat phase")
-					_simulate_combat_completion()
 			KEY_G:  # Add gold
 				print("RunView: [DEBUG] Adding 50 gold")
 				RunManager.add_gold(50)
@@ -252,3 +210,7 @@ func _input(event: InputEvent) -> void:
 			KEY_L:  # Lose reputation
 				print("RunView: [DEBUG] Losing 5 reputation")
 				RunManager.lose_reputation(5)
+			KEY_W:  # Add a win (debug)
+				print("RunView: [DEBUG] Adding 1 win")
+				RunManager.add_win()
+				_update_all_displays()

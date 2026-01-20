@@ -16,9 +16,9 @@ const SCENES = {
 	"run_view": "res://scenes/ui/run_view.tscn",
 	"encounter_select": "res://scenes/ui/encounter_select.tscn",
 	"encounter_execute": "res://scenes/ui/encounter_execute.tscn",
+	"combat_select": "res://scenes/ui/combat_select.tscn",
+	"combat_stub": "res://scenes/ui/combat_stub.tscn",
 	# Add more scenes as they're created
-	# "combat_select": "res://scenes/ui/combat_select.tscn",
-	# "combat_execute": "res://scenes/ui/combat_execute.tscn",
 	# "run_results": "res://scenes/ui/run_results.tscn",
 }
 

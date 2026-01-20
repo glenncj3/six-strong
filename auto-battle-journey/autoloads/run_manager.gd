@@ -288,12 +288,8 @@ func spend_gold(amount: int) -> bool:
 
 
 func add_win() -> void:
-	"""Record a combat victory."""
+	"""Record a combat victory (rewards handled by apply_combat_rewards)."""
 	wins += 1
-	# Award gold and XP
-	add_gold(GameConstants.COMBAT_WIN_GOLD)
-	for char_instance in team:
-		char_instance.add_experience(GameConstants.COMBAT_WIN_XP)
 	save_run_state()
 
 
@@ -362,3 +358,96 @@ func get_character_by_index(index: int) -> CharacterInstance:
 	if index >= 0 and index < team.size():
 		return team[index]
 	return null
+
+
+# =============================================================================
+# COMBAT GENERATION
+# =============================================================================
+
+func generate_combat_options(count: int) -> Array:
+	"""
+	Generate random combat options (AI enemies or Player Ghosts).
+
+	Args:
+		count: Number of options to generate (usually 3)
+
+	Returns:
+		Array of combat option dictionaries
+	"""
+	var options = []
+
+	for i in range(count):
+		var is_player_ghost = randf() > 0.5  # 50% chance of player ghost
+
+		if is_player_ghost:
+			options.append(_generate_player_ghost_option())
+		else:
+			options.append(_generate_ai_combat_option())
+
+	return options
+
+
+func _generate_ai_combat_option() -> Dictionary:
+	"""Generate an AI enemy combat option."""
+	var difficulties = ["Easy", "Medium", "Hard"]
+	var difficulty = difficulties[randi() % difficulties.size()]
+
+	var difficulty_index = difficulties.find(difficulty)
+	var base_reward = 20 + (difficulty_index * 10)
+
+	return {
+		"type": "ai",
+		"name": "AI Enemy (%s)" % difficulty,
+		"description": "Fight an AI-controlled enemy.",
+		"image_path": "res://assets/combat/ai_enemy.png",
+		"difficulty": difficulty,
+		"reward_gold": base_reward,
+		"reward_xp": base_reward + 10
+	}
+
+
+func _generate_player_ghost_option() -> Dictionary:
+	"""
+	Generate a player ghost combat option.
+	TODO: Replace with actual ghost team loading from server
+	"""
+	var rank = randi_range(1, 10)
+	var base_reward = 25 + (rank * 5)
+
+	return {
+		"type": "ghost",
+		"name": "Player Ghost (Rank %d)" % rank,
+		"description": "Fight another player's team.",
+		"image_path": "res://assets/combat/player_ghost.png",
+		"rank": rank,
+		"reward_gold": base_reward,
+		"reward_xp": base_reward + 15
+	}
+
+
+func apply_combat_rewards(won: bool, combat_data: Dictionary) -> void:
+	"""
+	Apply combat rewards or penalties.
+
+	Args:
+		won: True if player won, false if lost
+		combat_data: The combat option data
+	"""
+	if won:
+		# Award gold and XP
+		var reward_gold = combat_data.get("reward_gold", 20)
+		var reward_xp = combat_data.get("reward_xp", 30)
+
+		add_gold(reward_gold)
+
+		# Distribute XP to all team members
+		for char_instance in team:
+			char_instance.add_experience(reward_xp)
+
+		print("RunManager: Victory! Awarded %d gold, %d XP per character" % [reward_gold, reward_xp])
+	else:
+		# Lose reputation equal to round number
+		var reputation_loss = current_round + 1  # +1 because displayed as 1-indexed
+		lose_reputation(reputation_loss)
+
+		print("RunManager: Defeat! Lost %d reputation" % reputation_loss)
