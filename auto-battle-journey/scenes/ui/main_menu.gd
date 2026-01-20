@@ -2,6 +2,8 @@ extends Control
 # Main Menu - entry point with navigation and currency display
 # Refactored to use SceneManager
 
+const DebugMenuScene = preload("res://scenes/ui/debug_menu.tscn")
+
 @onready var gems_label = $CurrencyDisplay/HBoxContainer/GemsLabel
 @onready var reroll_tokens_label = $CurrencyDisplay/HBoxContainer/RerollTokensLabel
 @onready var play_button = $MarginContainer/VBoxContainer/ButtonContainer/PlayButton
@@ -66,8 +68,19 @@ func _on_quit_pressed() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	# Debug: Press T to add reroll token
+	# Debug controls
 	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_T:
-			PlayerAccount.add_reroll_token()
-			print("MainMenu: Added reroll token (Debug)")
+		match event.keycode:
+			KEY_T:
+				PlayerAccount.add_reroll_token()
+				_update_currency_display()
+				print("MainMenu: Added reroll token (Debug)")
+			KEY_D:
+				_open_debug_menu()
+
+
+func _open_debug_menu() -> void:
+	"""Open the debug menu overlay."""
+	var debug_menu = DebugMenuScene.instantiate()
+	add_child(debug_menu)
+	print("MainMenu: Opened debug menu")

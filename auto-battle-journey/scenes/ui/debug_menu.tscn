@@ -1,0 +1,145 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/debug_menu.gd" id="1_debug"]
+
+[node name="DebugMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_debug")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -280.0
+offset_right = 200.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "DEBUG MENU"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="GemsSection" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GemsLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/GemsSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Gems: 1000"
+horizontal_alignment = 1
+
+[node name="GemsButtons" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/GemsSection"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="AddGemsButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/GemsSection/GemsButtons"]
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+text = "+100"
+
+[node name="RemoveGemsButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/GemsSection/GemsButtons"]
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+text = "-100"
+
+[node name="TokensSection" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TokensLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TokensSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Tokens: 0"
+horizontal_alignment = 1
+
+[node name="AddTokenButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/TokensSection"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "+1 Token"
+
+[node name="HSeparator2" type="HSeparator" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CharacterSection" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CharacterLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/CharacterSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Characters"
+horizontal_alignment = 1
+
+[node name="UnlockAllButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/CharacterSection"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Unlock All Characters"
+
+[node name="RankUpAllButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/CharacterSection"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Rank Up All"
+
+[node name="HSeparator3" type="HSeparator" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="RunSection" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RunLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/RunSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Run Controls"
+horizontal_alignment = 1
+
+[node name="ClearRunButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/RunSection"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Clear Active Run"
+
+[node name="HSeparator4" type="HSeparator" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CloseButton" type="Button" parent="Panel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "CLOSE"

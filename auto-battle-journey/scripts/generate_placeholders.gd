@@ -12,7 +12,12 @@ func _run() -> void:
 		"mage": Color.BLUE,
 		"rogue": Color.GREEN,
 		"cleric": Color.YELLOW,
-		"ranger": Color.PURPLE
+		"ranger": Color.PURPLE,
+		"berserker": Color.ORANGE,
+		"paladin": Color.WHITE,
+		"necromancer": Color.DARK_VIOLET,
+		"monk": Color.TAN,
+		"assassin": Color.BLACK
 	}
 
 	for char_name in characters:
@@ -27,7 +32,18 @@ func _run() -> void:
 		"short_bow": Color.DARK_GREEN,
 		"leather_armor": Color.SIENNA,
 		"flaming_sword": Color.ORANGE_RED,
-		"iron_sword": Color.SILVER
+		"iron_sword": Color.SILVER,
+		"battle_axe": Color.DARK_RED,
+		"holy_mace": Color.GOLD,
+		"skull_staff": Color.DARK_SLATE_GRAY,
+		"fighting_gloves": Color.SANDY_BROWN,
+		"poison_blade": Color.DARK_MAGENTA,
+		"chainmail": Color.DARK_GRAY,
+		"lucky_charm": Color.YELLOW_GREEN,
+		"arcane_staff": Color.MEDIUM_PURPLE,
+		"shadow_cloak": Color.DIM_GRAY,
+		"plate_armor": Color.LIGHT_STEEL_BLUE,
+		"vampiric_blade": Color.DARK_RED
 	}
 
 	for item_name in items:
@@ -38,7 +54,15 @@ func _run() -> void:
 		"power_strike": Color.CRIMSON,
 		"dodge": Color.DODGER_BLUE,
 		"iron_skin": Color.SLATE_GRAY,
-		"vitality": Color.LIME_GREEN
+		"vitality": Color.LIME_GREEN,
+		"arcane_blast": Color.MEDIUM_PURPLE,
+		"quick_shot": Color.LIGHT_GREEN,
+		"rage": Color.ORANGE_RED,
+		"life_drain": Color.DARK_RED,
+		"inner_peace": Color.LIGHT_BLUE,
+		"backstab": Color.BLACK,
+		"battle_cry": Color.GOLD,
+		"swiftness": Color.CYAN
 	}
 
 	for skill_name in skills:
@@ -49,6 +73,9 @@ func _run() -> void:
 	_create_placeholder("res://assets/encounters/training.png", 128, 128, Color.DODGER_BLUE)
 	_create_placeholder("res://assets/encounters/chest.png", 128, 128, Color.GOLD)
 	_create_placeholder("res://assets/encounters/fountain.png", 128, 128, Color.CYAN)
+	_create_placeholder("res://assets/encounters/trainer.png", 128, 128, Color.LIME_GREEN)
+	_create_placeholder("res://assets/encounters/gambler.png", 128, 128, Color.HOT_PINK)
+	_create_placeholder("res://assets/encounters/elite.png", 128, 128, Color.CRIMSON)
 
 	# Combat icons (128x128)
 	_create_placeholder("res://assets/combat/ai_enemy.png", 128, 128, Color.CRIMSON)

@@ -5,59 +5,104 @@
       "name": "Rusty Sword",
       "description": "A weathered blade. Better than nothing.",
       "image_path": "res://assets/items/rusty_sword.png",
-      "stat_modifiers": {
-        "basic_attack_damage": 3
-      }
+      "stat_modifiers": {"basic_attack_damage": 3},
+      "slot": "weapon"
     },
     {
       "id": "item_rusty_dagger",
       "name": "Rusty Dagger",
       "description": "A small, quick blade.",
       "image_path": "res://assets/items/rusty_dagger.png",
-      "stat_modifiers": {
-        "basic_attack_damage": 2,
-        "speed": 1
-      }
+      "stat_modifiers": {"basic_attack_damage": 2, "speed": 1},
+      "slot": "weapon"
     },
     {
       "id": "item_wooden_staff",
       "name": "Wooden Staff",
       "description": "A simple magical focus.",
       "image_path": "res://assets/items/wooden_staff.png",
-      "stat_modifiers": {
-        "basic_attack_damage": 4,
-        "defense": 1
-      }
+      "stat_modifiers": {"basic_attack_damage": 4, "defense": 1},
+      "slot": "weapon"
     },
     {
       "id": "item_prayer_book",
       "name": "Prayer Book",
       "description": "Divine protection through faith.",
       "image_path": "res://assets/items/prayer_book.png",
-      "stat_modifiers": {
-        "defense": 3,
-        "health": 10
-      }
+      "stat_modifiers": {"defense": 3, "health": 10},
+      "slot": "weapon"
     },
     {
       "id": "item_short_bow",
       "name": "Short Bow",
       "description": "Quick and deadly at range.",
       "image_path": "res://assets/items/short_bow.png",
-      "stat_modifiers": {
-        "basic_attack_damage": 5,
-        "speed": 2
-      }
+      "stat_modifiers": {"basic_attack_damage": 5, "speed": 2},
+      "slot": "weapon"
     },
     {
       "id": "item_leather_armor",
       "name": "Leather Armor",
       "description": "Basic protection.",
       "image_path": "res://assets/items/leather_armor.png",
-      "stat_modifiers": {
-        "defense": 2,
-        "health": 5
-      }
+      "stat_modifiers": {"defense": 2, "health": 5},
+      "slot": "armor"
+    },
+    {
+      "id": "item_battle_axe",
+      "name": "Battle Axe",
+      "description": "Heavy and brutal.",
+      "image_path": "res://assets/items/battle_axe.png",
+      "stat_modifiers": {"basic_attack_damage": 6},
+      "slot": "weapon"
+    },
+    {
+      "id": "item_holy_mace",
+      "name": "Holy Mace",
+      "description": "Blessed by the divine.",
+      "image_path": "res://assets/items/holy_mace.png",
+      "stat_modifiers": {"basic_attack_damage": 4, "defense": 2},
+      "slot": "weapon"
+    },
+    {
+      "id": "item_skull_staff",
+      "name": "Skull Staff",
+      "description": "Channels dark energy.",
+      "image_path": "res://assets/items/skull_staff.png",
+      "stat_modifiers": {"basic_attack_damage": 5, "health": 5},
+      "slot": "weapon"
+    },
+    {
+      "id": "item_fighting_gloves",
+      "name": "Fighting Gloves",
+      "description": "For those who fight with their fists.",
+      "image_path": "res://assets/items/fighting_gloves.png",
+      "stat_modifiers": {"basic_attack_damage": 2, "speed": 2, "defense": 1},
+      "slot": "weapon"
+    },
+    {
+      "id": "item_poison_blade",
+      "name": "Poison Blade",
+      "description": "Coated in deadly toxin.",
+      "image_path": "res://assets/items/poison_blade.png",
+      "stat_modifiers": {"basic_attack_damage": 6, "speed": 1},
+      "slot": "weapon"
+    },
+    {
+      "id": "item_chainmail",
+      "name": "Chainmail",
+      "description": "Solid metal protection.",
+      "image_path": "res://assets/items/chainmail.png",
+      "stat_modifiers": {"defense": 4, "health": 10, "speed": -1},
+      "slot": "armor"
+    },
+    {
+      "id": "item_lucky_charm",
+      "name": "Lucky Charm",
+      "description": "A mysterious trinket.",
+      "image_path": "res://assets/items/lucky_charm.png",
+      "stat_modifiers": {"income": 2},
+      "slot": "accessory"
     }
   ]
 }

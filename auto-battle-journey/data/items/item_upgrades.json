@@ -3,12 +3,10 @@
     {
       "id": "itemup_flaming_sword",
       "name": "Flaming Sword",
-      "description": "Replaces equipped weapon with burning fury.",
+      "description": "A blade wreathed in fire.",
       "image_path": "res://assets/items/flaming_sword.png",
       "replaces_slot": "weapon",
-      "stat_modifiers": {
-        "basic_attack_damage": 15
-      },
+      "stat_modifiers": {"basic_attack_damage": 15},
       "level_requirement": 4
     },
     {
@@ -17,10 +15,44 @@
       "description": "A reliable, well-forged blade.",
       "image_path": "res://assets/items/iron_sword.png",
       "replaces_slot": "weapon",
-      "stat_modifiers": {
-        "basic_attack_damage": 8
-      },
+      "stat_modifiers": {"basic_attack_damage": 8},
       "level_requirement": 2
+    },
+    {
+      "id": "itemup_arcane_staff",
+      "name": "Arcane Staff",
+      "description": "Pulses with magical energy.",
+      "image_path": "res://assets/items/arcane_staff.png",
+      "replaces_slot": "weapon",
+      "stat_modifiers": {"basic_attack_damage": 12, "defense": 2},
+      "level_requirement": 3
+    },
+    {
+      "id": "itemup_shadow_cloak",
+      "name": "Shadow Cloak",
+      "description": "Melts into darkness.",
+      "image_path": "res://assets/items/shadow_cloak.png",
+      "replaces_slot": "armor",
+      "stat_modifiers": {"speed": 4, "defense": 3},
+      "level_requirement": 3
+    },
+    {
+      "id": "itemup_plate_armor",
+      "name": "Plate Armor",
+      "description": "Heavy but impenetrable.",
+      "image_path": "res://assets/items/plate_armor.png",
+      "replaces_slot": "armor",
+      "stat_modifiers": {"defense": 10, "health": 25, "speed": -2},
+      "level_requirement": 4
+    },
+    {
+      "id": "itemup_vampiric_blade",
+      "name": "Vampiric Blade",
+      "description": "Drains life from foes.",
+      "image_path": "res://assets/items/vampiric_blade.png",
+      "replaces_slot": "weapon",
+      "stat_modifiers": {"basic_attack_damage": 10, "health": 15},
+      "level_requirement": 5
     }
   ]
 }

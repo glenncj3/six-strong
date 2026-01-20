@@ -9,7 +9,10 @@ var encounter_weights: Dictionary = {
 	"shop": 1.0,
 	"xp_reward": 1.0,
 	"gold_reward": 0.8,
-	"health_restore": 0.6
+	"health_restore": 0.6,
+	"skill_trainer": 0.7,
+	"gamble": 0.5,
+	"elite_challenge": 0.4
 }
 
 
@@ -122,6 +125,30 @@ func _create_encounter_data(encounter_type: String) -> Dictionary:
 				"heal_percentage": GameConstants.HEALTH_RESTORE_PERCENTAGE
 			}
 
+		"skill_trainer":
+			encounter_data["name"] = "Skill Trainer"
+			encounter_data["description"] = "Learn a random skill for free!"
+			encounter_data["image_path"] = "res://assets/encounters/trainer.png"
+			encounter_data["data"] = _generate_skill_trainer_data()
+
+		"gamble":
+			encounter_data["name"] = "Mysterious Gambler"
+			encounter_data["description"] = "Risk gold for a chance at greater rewards."
+			encounter_data["image_path"] = "res://assets/encounters/gambler.png"
+			encounter_data["data"] = {
+				"bet_amount": randi_range(20, 40),
+				"win_multiplier": 3
+			}
+
+		"elite_challenge":
+			encounter_data["name"] = "Elite Challenge"
+			encounter_data["description"] = "A difficult trial with great rewards."
+			encounter_data["image_path"] = "res://assets/encounters/elite.png"
+			encounter_data["data"] = {
+				"xp_reward": randi_range(80, 120),
+				"gold_reward": randi_range(40, 60)
+			}
+
 	return encounter_data
 
 
@@ -165,3 +192,16 @@ func apply_scaling(encounter_data: Dictionary, round_num: int) -> void:
 			encounter_data["data"]["xp_amount"] = int(encounter_data["data"]["xp_amount"] * scale_factor)
 		"gold_reward":
 			encounter_data["data"]["gold_amount"] = int(encounter_data["data"]["gold_amount"] * scale_factor)
+		"elite_challenge":
+			encounter_data["data"]["xp_reward"] = int(encounter_data["data"]["xp_reward"] * scale_factor)
+			encounter_data["data"]["gold_reward"] = int(encounter_data["data"]["gold_reward"] * scale_factor)
+
+
+func _generate_skill_trainer_data() -> Dictionary:
+	"""Generate a random skill for the trainer to offer."""
+	var all_skills = GameData.get_all_skills()
+	all_skills.shuffle()
+
+	if all_skills.size() > 0:
+		return {"skill_id": all_skills[0]["id"]}
+	return {"skill_id": ""}

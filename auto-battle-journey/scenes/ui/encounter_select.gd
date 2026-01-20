@@ -108,6 +108,19 @@ func _get_reward_preview(encounter_data: Dictionary) -> String:
 			return "+%d Gold" % encounter_data["data"]["gold_amount"]
 		"health_restore":
 			return "Restore 50%% HP"
+		"skill_trainer":
+			var skill_data = GameData.get_skill_by_id(encounter_data["data"]["skill_id"])
+			if not skill_data.is_empty():
+				return "Free: %s" % skill_data["name"]
+			return "Free Skill"
+		"gamble":
+			var bet = encounter_data["data"]["bet_amount"]
+			var mult = encounter_data["data"]["win_multiplier"]
+			return "Bet %d, Win %d" % [bet, bet * mult]
+		"elite_challenge":
+			var xp = encounter_data["data"]["xp_reward"]
+			var gold = encounter_data["data"]["gold_reward"]
+			return "+%d XP (all), +%d Gold" % [xp, gold]
 		_:
 			return ""
 
