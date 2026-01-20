@@ -2,17 +2,17 @@ extends Control
 # RunResults - Display run completion results and rewards
 
 @onready var result_title = $ScrollContainer/MainContainer/ResultTitle
-@onready var rounds_label = $ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer/RoundsLabel
-@onready var wins_label = $ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer/WinsLabel
-@onready var losses_label = $ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer/LossesLabel
-@onready var gold_earned_label = $ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer/GoldEarnedLabel
-@onready var reputation_label = $ScrollContainer/MainContainer/StatsPanel/MarginContainer/StatsContainer/ReputationLabel
+@onready var rounds_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/RoundsLabel
+@onready var wins_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/WinsLabel
+@onready var losses_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/LossesLabel
+@onready var gold_earned_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/GoldEarnedLabel
+@onready var reputation_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/ReputationLabel
 
-@onready var gems_label = $ScrollContainer/MainContainer/RewardsPanel/MarginContainer/RewardsContainer/GemsLabel
-@onready var character_xp_container = $ScrollContainer/MainContainer/RewardsPanel/MarginContainer/RewardsContainer/CharacterXPContainer
+@onready var gems_label = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer/GemsLabel
+@onready var character_xp_container = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer/CharacterXPContainer
 
-@onready var rank_ups_panel = $ScrollContainer/MainContainer/RankUpsPanel
-@onready var rank_ups_list = $ScrollContainer/MainContainer/RankUpsPanel/MarginContainer/RankUpsContainer/RankUpsList
+@onready var rank_ups_panel = $ScrollContainer/MainContainer/RankUpsPanelContainer
+@onready var rank_ups_list = $ScrollContainer/MainContainer/RankUpsPanelContainer/RankUpsPanel/RankUpsContainer/RankUpsList
 
 @onready var continue_button = $ScrollContainer/MainContainer/ContinueButton
 
@@ -151,25 +151,44 @@ func _display_rank_ups() -> void:
 		var rank_up_container = VBoxContainer.new()
 		rank_ups_list.add_child(rank_up_container)
 
-		# Character name and rank change
-		var name_label = Label.new()
-		name_label.text = "%s RANKED UP!" % rank_up["name"]
-		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		name_label.add_theme_font_size_override("font_size", 20)
-		name_label.modulate = GameConstants.COLOR_GOLD
-		rank_up_container.add_child(name_label)
+		# Create clickable header button
+		var header_button = Button.new()
+		header_button.text = "%s RANKED UP!  [+]" % rank_up["name"]
+		header_button.add_theme_font_size_override("font_size", 18)
+		header_button.add_theme_color_override("font_color", GameConstants.COLOR_GOLD)
+		header_button.flat = true
+		header_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		rank_up_container.add_child(header_button)
 
+		# Rank change label (always visible)
 		var rank_label = Label.new()
 		rank_label.text = "Rank %d -> Rank %d" % [rank_up["old_rank"], rank_up["new_rank"]]
 		rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		rank_up_container.add_child(rank_label)
 
-		# Show unlocked content
-		_display_rank_rewards(rank_up_container, rank_up["id"], rank_up["new_rank"])
+		# Collapsible details container (hidden by default)
+		var details_container = VBoxContainer.new()
+		details_container.visible = false
+		rank_up_container.add_child(details_container)
+
+		# Connect header button to toggle details
+		header_button.pressed.connect(_toggle_rank_details.bind(header_button, details_container, rank_up["name"]))
+
+		# Populate details with unlocked content
+		_display_rank_rewards(details_container, rank_up["id"], rank_up["new_rank"])
 
 		# Add separator
 		var separator = HSeparator.new()
 		rank_ups_list.add_child(separator)
+
+
+func _toggle_rank_details(header_button: Button, details_container: VBoxContainer, char_name: String) -> void:
+	"""Toggle visibility of rank-up details."""
+	details_container.visible = not details_container.visible
+	if details_container.visible:
+		header_button.text = "%s RANKED UP!  [-]" % char_name
+	else:
+		header_button.text = "%s RANKED UP!  [+]" % char_name
 
 
 func _display_rank_rewards(container: VBoxContainer, char_id: String, new_rank: int) -> void:
