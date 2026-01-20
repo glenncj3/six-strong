@@ -1,8 +1,11 @@
 extends Control
 # Draft - Character selection for starting a run
 # Refactored to use SceneManager, UIHelpers, and GameConstants
+# Updated with compact horizontal option panels and small team cards
 
+@onready var background: ColorRect = $Background
 @onready var instruction_label = $MainContainer/VBoxContainer/TopSection/InstructionLabel
+@onready var selected_title = $MainContainer/VBoxContainer/TopSection/SelectedTitle
 @onready var selected_display = $MainContainer/VBoxContainer/TopSection/SelectedDisplay
 @onready var options_container = $MainContainer/VBoxContainer/OptionsScroll/OptionsContainer
 @onready var options_title = $MainContainer/VBoxContainer/OptionsTitle
@@ -20,10 +23,7 @@ var selection_count: int = 0
 
 
 func _ready() -> void:
-	# Debug: verify all node references
-	print("Draft: Node check - instruction_label: %s" % (instruction_label != null))
-	print("Draft: Node check - confirm_button: %s" % (confirm_button != null))
-	print("Draft: Node check - reroll_button: %s" % (reroll_button != null))
+	_apply_visual_styling()
 
 	reroll_button.pressed.connect(_on_reroll_pressed)
 	confirm_button.pressed.connect(_on_confirm_pressed)
@@ -34,6 +34,22 @@ func _ready() -> void:
 	_generate_options()
 	_update_instruction()
 	_update_reroll_button()
+
+
+func _apply_visual_styling() -> void:
+	"""Apply fantasy aesthetic styling."""
+	# Background
+	background.color = GameConstants.COLOR_BG_DARK
+
+	# Style buttons
+	UIStyles.apply_button_styles(reroll_button)
+	UIStyles.apply_button_styles(confirm_button)
+	UIStyles.apply_button_styles(back_button)
+
+	# Text colors
+	instruction_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	selected_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
+	options_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
 
 
 func _generate_options() -> void:
@@ -81,10 +97,10 @@ func _generate_options() -> void:
 	# Generate 1 random option (must be unique from the 2 owned options)
 	all_chars.shuffle()
 	var random_char = null
-	for char in all_chars:
-		var char_id = char.get("id", "")
+	for character in all_chars:
+		var char_id = character.get("id", "")
 		if char_id not in option_ids and char_id not in drafted_ids:
-			random_char = char
+			random_char = character
 			break
 
 	if random_char == null:
@@ -125,26 +141,84 @@ func _generate_options() -> void:
 
 
 func _create_option_panel(option: Dictionary) -> void:
-	"""Create a selectable character option panel for portrait layout."""
+	"""Create a compact horizontal character option panel."""
+	var char_data = option["char_data"]
+	var char_master = GameData.get_character_by_id(char_data.get("id", ""))
+
+	# Main panel with styling
 	var panel = PanelContainer.new()
-	# Full width for portrait mobile, height based on content
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Use custom_minimum_size for consistent height (Godot 4 doesn't have custom_maximum_size on Control)
+	panel.custom_minimum_size.y = UIScaler.get_draft_option_height()
+	UIStyles.apply_panel_style(panel, UIStyles.create_dark_panel())
 	options_container.add_child(panel)
 
-	var vbox = VBoxContainer.new()
-	panel.add_child(vbox)
+	# Margin container
+	var margin = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_bottom", 8)
+	panel.add_child(margin)
 
-	# Character card
-	var card = CharacterCardScene.instantiate()
-	vbox.add_child(card)
-	card.setup(option["char_data"], true)
-	card.set_clickable(false)
+	# Horizontal layout: portrait left, info + button right
+	var hbox = HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 12)
+	margin.add_child(hbox)
+
+	# Portrait (left side)
+	var portrait = TextureRect.new()
+	portrait.custom_minimum_size = Vector2(100, 100)
+	portrait.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	UIHelpers.set_texture_safe(portrait, char_master.get("image_path", ""))
+	hbox.add_child(portrait)
+
+	# Info section (right side)
+	var info_vbox = VBoxContainer.new()
+	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_vbox.add_theme_constant_override("separation", 4)
+	hbox.add_child(info_vbox)
+
+	# Character name
+	var name_label = Label.new()
+	name_label.text = char_master.get("name", "Unknown")
+	name_label.add_theme_font_size_override("font_size", 18)
+	name_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	info_vbox.add_child(name_label)
+
+	# Compact stats row (HP:X ATK:Y DEF:Z SPD:W)
+	var stats = StatCalculator.calculate_character_stats(char_master, char_data, true)
+	var stats_label = Label.new()
+	stats_label.text = "HP:%d  ATK:%d  DEF:%d  SPD:%d" % [
+		stats.get(GameConstants.STAT_HEALTH, 0),
+		stats.get(GameConstants.STAT_ATTACK, 0),
+		stats.get(GameConstants.STAT_DEFENSE, 0),
+		stats.get(GameConstants.STAT_SPEED, 0)
+	]
+	stats_label.add_theme_font_size_override("font_size", 12)
+	stats_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
+	info_vbox.add_child(stats_label)
+
+	# Income row
+	var income_label = Label.new()
+	income_label.text = "Income: +%d gold/round" % stats.get(GameConstants.STAT_INCOME, 0)
+	income_label.add_theme_font_size_override("font_size", 11)
+	income_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
+	info_vbox.add_child(income_label)
+
+	# Spacer
+	var spacer = Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	info_vbox.add_child(spacer)
 
 	# Select/Unlock button
 	var button = Button.new()
-	vbox.add_child(button)
+	button.custom_minimum_size = Vector2(0, 40)
+	UIStyles.apply_button_styles(button)
+	info_vbox.add_child(button)
 
-	var char_id = option["char_data"].get("id", "")
+	var char_id = char_data.get("id", "")
 
 	if option["is_owned"]:
 		button.text = "SELECT"
@@ -213,17 +287,17 @@ func _on_unlock_and_select(char_data: Dictionary, cost: int) -> void:
 
 
 func _update_selected_display() -> void:
-	"""Update the display showing drafted characters."""
+	"""Update the display showing drafted characters using SMALL cards."""
 	# Clear existing using UIHelpers
 	UIHelpers.clear_children(selected_display)
 
-	# Add card for each drafted character (smaller for portrait mode)
+	# Add SMALL card for each drafted character
 	for char_data in drafted_characters:
 		var card = CharacterCardScene.instantiate()
 		selected_display.add_child(card)
 		card.setup(char_data, true)
 		card.set_clickable(false)
-		card.custom_minimum_size = Vector2(GameConstants.CHARACTER_CARD_SMALL_WIDTH, GameConstants.CHARACTER_CARD_SMALL_HEIGHT)
+		card.set_card_size(UIScaler.CardSize.SMALL)
 
 
 func _update_instruction() -> void:

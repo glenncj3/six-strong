@@ -1,13 +1,19 @@
 extends Control
 # RunView - Main UI during an active run
 # Uses UIHelpers for common UI operations and GameConstants for magic numbers
+# Updated with fantasy aesthetic styling
 
+@onready var background = $Background
+@onready var top_bar = $TopBar
 @onready var round_label = $TopBar/MarginContainer/VBoxContainer/RoundLabel
 @onready var reputation_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/ReputationLabel
 @onready var wins_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/WinsLabel
 @onready var gold_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/GoldLabel
 
+@onready var team_panel = $TeamPanel
+@onready var team_title = $TeamPanel/MarginContainer/VBoxContainer/TeamTitle
 @onready var team_container = $TeamPanel/MarginContainer/VBoxContainer/TeamContainer
+@onready var center_panel = $CenterPanel
 @onready var phase_label = $CenterPanel/MarginContainer/VBoxContainer/PhaseLabel
 @onready var phase_description = $CenterPanel/MarginContainer/VBoxContainer/PhaseDescription
 @onready var action_button = $CenterPanel/MarginContainer/VBoxContainer/ActionButton
@@ -21,6 +27,9 @@ const CharacterCardScene = preload("res://scenes/components/character_card.tscn"
 
 func _ready() -> void:
 	print("RunView: Scene loaded, initializing...")
+
+	# Apply visual styling
+	_apply_visual_styling()
 
 	# Connect signals
 	RunManager.round_changed.connect(_on_round_changed)
@@ -38,6 +47,47 @@ func _ready() -> void:
 	_setup_phase()
 
 	print("RunView: Initialization complete")
+
+
+func _apply_visual_styling() -> void:
+	"""Apply fantasy aesthetic styling."""
+	# Background
+	background.color = GameConstants.COLOR_BG_DARK
+
+	# Top bar panel styling (Panel uses "panel" stylebox)
+	top_bar.add_theme_stylebox_override("panel", UIStyles.create_warm_panel())
+
+	# Team panel styling
+	team_panel.add_theme_stylebox_override("panel", UIStyles.create_dark_panel())
+
+	# Center panel styling
+	center_panel.add_theme_stylebox_override("panel", UIStyles.create_dark_panel())
+
+	# Text colors
+	round_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
+	team_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	phase_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
+	phase_description.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
+
+	# Stat labels
+	reputation_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	wins_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	gold_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+
+	# Button styling
+	UIStyles.apply_button_styles(action_button)
+	UIStyles.apply_button_styles(menu_button)
+
+	# Concede button - special styling (danger action)
+	var concede_style = UIStyles.create_panel_style(
+		GameConstants.COLOR_RUBY,
+		GameConstants.COLOR_BORDER_SILVER,
+		UIStyles.BORDER_WIDTH_THIN,
+		UIStyles.CORNER_RADIUS_SMALL,
+		false
+	)
+	concede_button.add_theme_stylebox_override("normal", concede_style)
+	concede_button.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 
 
 func _exit_tree() -> void:
@@ -81,7 +131,7 @@ func _update_top_bar() -> void:
 
 
 func _update_team_display() -> void:
-	"""Display all team members."""
+	"""Display all team members using SMALL cards."""
 	# Clear existing cards using UIHelpers
 	UIHelpers.clear_children(team_container)
 
@@ -101,6 +151,7 @@ func _update_team_display() -> void:
 
 		card.setup(display_data, false)  # Don't calculate with items (already in stats)
 		card.set_clickable(false)
+		card.set_card_size(UIScaler.CardSize.SMALL)
 
 		# Manually update stats from instance
 		_update_card_with_runtime_stats(card, char_instance)

@@ -2,11 +2,15 @@ extends PanelContainer
 # CharacterCard - Reusable component for displaying character info
 # Used in: Collection, Draft, Run View
 # Refactored to use StatCalculator for DRY stat calculations
+# Supports multiple size variants: NORMAL, SMALL, MINI
 
 signal card_clicked(character_data: Dictionary)
 
+@onready var margin_container: MarginContainer = $MarginContainer
+@onready var vbox: VBoxContainer = $MarginContainer/VBoxContainer
 @onready var portrait: TextureRect = $MarginContainer/VBoxContainer/Portrait
 @onready var name_label: Label = $MarginContainer/VBoxContainer/NameLabel
+@onready var stats_container: VBoxContainer = $MarginContainer/VBoxContainer/StatsContainer
 @onready var health_label: Label = $MarginContainer/VBoxContainer/StatsContainer/HealthLabel
 @onready var attack_label: Label = $MarginContainer/VBoxContainer/StatsContainer/AttackLabel
 @onready var defense_label: Label = $MarginContainer/VBoxContainer/StatsContainer/DefenseLabel
@@ -15,6 +19,7 @@ signal card_clicked(character_data: Dictionary)
 
 var character_data: Dictionary = {}
 var clickable: bool = true
+var current_size: UIScaler.CardSize = UIScaler.CardSize.NORMAL
 
 
 func _ready() -> void:
@@ -73,3 +78,89 @@ func highlight(enabled: bool) -> void:
 		modulate = Color(1.2, 1.2, 1.2)
 	else:
 		modulate = Color.WHITE
+
+
+func set_card_size(card_size_variant: UIScaler.CardSize) -> void:
+	"""
+	Set the card to a specific size variant.
+
+	Args:
+		card_size_variant: UIScaler.CardSize enum (NORMAL, SMALL, MINI)
+	"""
+	current_size = card_size_variant
+	var new_size = UIScaler.get_character_card_size(card_size_variant)
+	custom_minimum_size = new_size
+
+	match card_size_variant:
+		UIScaler.CardSize.NORMAL:
+			_apply_normal_size()
+		UIScaler.CardSize.SMALL:
+			_apply_small_size()
+		UIScaler.CardSize.MINI:
+			_apply_mini_size()
+
+	# Apply fantasy panel styling
+	UIStyles.apply_panel_style(self, UIStyles.create_dark_panel())
+
+
+func _apply_normal_size() -> void:
+	"""Apply normal size styling (200x280)."""
+	margin_container.add_theme_constant_override("margin_left", 8)
+	margin_container.add_theme_constant_override("margin_top", 8)
+	margin_container.add_theme_constant_override("margin_right", 8)
+	margin_container.add_theme_constant_override("margin_bottom", 8)
+	vbox.add_theme_constant_override("separation", 6)
+
+	portrait.custom_minimum_size = Vector2(160, 160)
+
+	name_label.add_theme_font_size_override("font_size", 14)
+	name_label.visible = true
+
+	stats_container.visible = true
+	for label in stats_container.get_children():
+		if label is Label:
+			label.add_theme_font_size_override("font_size", 11)
+
+
+func _apply_small_size() -> void:
+	"""Apply small size styling (100x140)."""
+	margin_container.add_theme_constant_override("margin_left", 4)
+	margin_container.add_theme_constant_override("margin_top", 4)
+	margin_container.add_theme_constant_override("margin_right", 4)
+	margin_container.add_theme_constant_override("margin_bottom", 4)
+	vbox.add_theme_constant_override("separation", 2)
+
+	portrait.custom_minimum_size = Vector2(80, 80)
+
+	name_label.add_theme_font_size_override("font_size", 10)
+	name_label.visible = true
+
+	# Hide individual stats in small mode
+	stats_container.visible = false
+
+
+func _apply_mini_size() -> void:
+	"""Apply mini size styling (80x110)."""
+	margin_container.add_theme_constant_override("margin_left", 2)
+	margin_container.add_theme_constant_override("margin_top", 2)
+	margin_container.add_theme_constant_override("margin_right", 2)
+	margin_container.add_theme_constant_override("margin_bottom", 2)
+	vbox.add_theme_constant_override("separation", 1)
+
+	portrait.custom_minimum_size = Vector2(60, 60)
+
+	name_label.add_theme_font_size_override("font_size", 9)
+	name_label.visible = true
+
+	# Hide stats in mini mode
+	stats_container.visible = false
+
+
+func apply_rarity_border(rarity: String = "common") -> void:
+	"""
+	Apply rarity-based border color.
+
+	Args:
+		rarity: "common", "uncommon", "rare", "epic", "legendary"
+	"""
+	UIStyles.apply_panel_style(self, UIStyles.create_card_panel(rarity))

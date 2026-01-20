@@ -1,10 +1,15 @@
 extends Control
 # Collection - Browse and manage character collection
 # Portrait mobile layout with full-screen details overlay
+# Updated with fantasy aesthetic styling
 
+@onready var background = $Background
+@onready var title_label = $MainContainer/VBoxContainer/Title
 @onready var character_grid: GridContainer = $MainContainer/VBoxContainer/CharacterListScroll/CharacterGrid
 @onready var character_details_panel: Panel = $CharacterDetailsPanel
+@onready var details_background = $CharacterDetailsPanel/DetailsBackground
 @onready var details_content: Control = $CharacterDetailsPanel/DetailsMargin/DetailsContainer/DetailsContent
+@onready var details_title = $CharacterDetailsPanel/DetailsMargin/DetailsContainer/DetailsTitle
 @onready var close_details_button: Button = $CharacterDetailsPanel/CloseDetailsButton
 @onready var back_button: Button = $BackButton
 
@@ -17,6 +22,8 @@ var selected_character_id: String = ""
 
 
 func _ready() -> void:
+	_apply_visual_styling()
+
 	back_button.pressed.connect(_on_back_pressed)
 	close_details_button.pressed.connect(_on_close_details_pressed)
 
@@ -24,6 +31,21 @@ func _ready() -> void:
 	character_details_panel.visible = false
 
 	_populate_character_grid()
+
+
+func _apply_visual_styling() -> void:
+	"""Apply fantasy aesthetic styling."""
+	# Backgrounds
+	background.color = GameConstants.COLOR_BG_DARK
+	details_background.color = GameConstants.COLOR_BG_DARK
+
+	# Title styling
+	title_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	details_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+
+	# Button styling
+	UIStyles.apply_button_styles(back_button)
+	UIStyles.apply_button_styles(close_details_button)
 
 
 func _populate_character_grid() -> void:
@@ -43,6 +65,7 @@ func _populate_character_grid() -> void:
 
 		# Setup card with equipped items
 		card.setup(char_data, true)
+		card.set_card_size(UIScaler.CardSize.NORMAL)
 
 		# Connect click signal
 		card.card_clicked.connect(_on_character_card_clicked)

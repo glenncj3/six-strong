@@ -122,27 +122,62 @@ const FONT_SIZE_REWARD := 32
 const FONT_SIZE_GOLD_DISPLAY := 20
 
 # =============================================================================
-# COLOR CONSTANTS
+# COLOR CONSTANTS - FANTASY AESTHETIC (Hearthstone-inspired)
 # =============================================================================
 
-const COLOR_GOLD := Color(1.0, 0.84, 0.0)
-const COLOR_SUCCESS := Color(0.3, 1.0, 0.3)
-const COLOR_ERROR := Color(1.0, 0.5, 0.5)
-const COLOR_DANGER := Color(1.0, 0.3, 0.3)
-const COLOR_WARNING := Color(1.0, 0.7, 0.3)
-const COLOR_DISABLED := Color(0.7, 0.7, 0.7)
-const COLOR_MUTED := Color(0.8, 0.8, 0.8)
-const COLOR_GHOST_RANK := Color(0.5, 0.5, 1.0)
-const COLOR_HIGHLIGHT := Color(1.3, 1.3, 1.0)
+# --- Background Colors ---
+const COLOR_BG_DARK := Color("#1E1C2E")       # Dark purple-black (main background)
+const COLOR_BG_MEDIUM := Color("#292438")     # Medium purple (secondary areas)
+const COLOR_BG_LIGHT := Color("#383148")      # Light purple (tertiary/hover)
+
+# --- Panel Colors ---
+const COLOR_PANEL_DARK := Color("#2E2420")    # Mahogany (panel backgrounds)
+const COLOR_PANEL_WARM := Color("#3D2E24")    # Warm brown (elevated panels)
+
+# --- Accent Colors ---
+const COLOR_GOLD := Color("#D9A621")          # Primary gold accent
+const COLOR_SILVER := Color("#BFC4D1")        # Silver accent
+const COLOR_SAPPHIRE := Color("#2D5A8A")      # Button background
+const COLOR_SAPPHIRE_LIGHT := Color("#3D6A9A") # Button hover
+const COLOR_SAPPHIRE_DARK := Color("#1D4A7A") # Button pressed
+const COLOR_EMERALD := Color("#2A7A4A")       # Success/health
+const COLOR_RUBY := Color("#8A2A3A")          # Danger/damage
+const COLOR_AMETHYST := Color("#6A3A8A")      # Magic/special
+
+# --- Text Colors ---
+const COLOR_TEXT_LIGHT := Color("#F2EBD9")    # Warm parchment (primary text)
+const COLOR_TEXT_MUTED := Color("#B8A88A")    # Muted tan (secondary text)
+const COLOR_TEXT_GOLD := Color("#FFD54F")     # Golden highlight text
+
+# --- Border Colors ---
+const COLOR_BORDER_GOLD := Color("#B88726")   # Antique gold borders
+const COLOR_BORDER_SILVER := Color("#8A8A9A") # Tarnished silver borders
+
+# --- Rarity Colors ---
+const COLOR_RARITY_COMMON := Color("#9A9A9A")     # Gray
+const COLOR_RARITY_UNCOMMON := Color("#4A8A4A")  # Green
+const COLOR_RARITY_RARE := Color("#4A6AAA")      # Blue
+const COLOR_RARITY_EPIC := Color("#8A4A9A")      # Purple
+const COLOR_RARITY_LEGENDARY := Color("#D9A621") # Gold
+
+# --- Legacy Color Constants (for compatibility) ---
+const COLOR_SUCCESS := Color("#2A7A4A")
+const COLOR_ERROR := Color("#8A2A3A")
+const COLOR_DANGER := Color("#8A2A3A")
+const COLOR_WARNING := Color("#D9A621")
+const COLOR_DISABLED := Color("#6A6A6A")
+const COLOR_MUTED := Color("#B8A88A")
+const COLOR_GHOST_RANK := Color("#6A3A8A")
+const COLOR_HIGHLIGHT := Color("#FFD54F")
 
 # Reputation color thresholds
 const REPUTATION_CRITICAL_THRESHOLD := 5
 const REPUTATION_WARNING_THRESHOLD := 10
 
-# Combat difficulty colors (Issue 4)
-const COLOR_DIFFICULTY_EASY := Color(0.3, 1.0, 0.3)  # Green
-const COLOR_DIFFICULTY_MEDIUM := Color(1.0, 1.0, 0.3)  # Yellow
-const COLOR_DIFFICULTY_HARD := Color(1.0, 0.3, 0.3)  # Red
+# Combat difficulty colors
+const COLOR_DIFFICULTY_EASY := Color("#2A7A4A")    # Emerald green
+const COLOR_DIFFICULTY_MEDIUM := Color("#D9A621") # Gold
+const COLOR_DIFFICULTY_HARD := Color("#8A2A3A")   # Ruby red
 
 # =============================================================================
 # EMOJI CONSTANTS

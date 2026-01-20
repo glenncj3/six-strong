@@ -1,9 +1,12 @@
 extends Control
 # Main Menu - entry point with navigation and currency display
-# Refactored to use SceneManager
+# Refactored to use SceneManager with fantasy aesthetic
 
 const DebugMenuScene = preload("res://scenes/ui/debug_menu.tscn")
 
+@onready var background = $Background
+@onready var title_label = $MarginContainer/VBoxContainer/Title
+@onready var subtitle_label = $MarginContainer/VBoxContainer/Subtitle
 @onready var gems_label = $CurrencyDisplay/HBoxContainer/GemsLabel
 @onready var reroll_tokens_label = $CurrencyDisplay/HBoxContainer/RerollTokensLabel
 @onready var play_button = $MarginContainer/VBoxContainer/ButtonContainer/PlayButton
@@ -12,6 +15,9 @@ const DebugMenuScene = preload("res://scenes/ui/debug_menu.tscn")
 
 
 func _ready() -> void:
+	# Apply visual styling
+	_apply_visual_styling()
+
 	# Update currency display
 	_update_currency_display()
 
@@ -32,6 +38,25 @@ func _ready() -> void:
 
 	# Focus play button
 	play_button.grab_focus()
+
+
+func _apply_visual_styling() -> void:
+	"""Apply fantasy aesthetic styling to the menu."""
+	# Background
+	background.color = GameConstants.COLOR_BG_DARK
+
+	# Title styling
+	title_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
+	subtitle_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
+
+	# Currency labels
+	gems_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	reroll_tokens_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+
+	# Style buttons with fantasy aesthetic
+	UIStyles.apply_button_styles(play_button)
+	UIStyles.apply_button_styles(collection_button)
+	UIStyles.apply_button_styles(quit_button)
 
 
 func _update_currency_display() -> void:
