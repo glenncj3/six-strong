@@ -2,6 +2,7 @@ extends Control
 # CombatSelect - Choose from 3 combat options
 
 @onready var options_container = $MainContainer/ScrollContainer/OptionsMargin/OptionsContainer
+@onready var team_display_container = $MainContainer/TeamDisplayContainer
 @onready var back_button = $BackButton
 
 var combat_options: Array = []
@@ -11,7 +12,15 @@ func _ready() -> void:
 	back_button.pressed.connect(_on_back_pressed)
 	back_button.visible = false  # Only for testing
 
+	_setup_team_display()
 	_generate_and_display_options()
+
+
+func _setup_team_display() -> void:
+	"""Display the player's team at the top of the screen."""
+	var team = RunManager.get_team()
+	if team.size() > 0:
+		UIHelpers.populate_team_display(team_display_container, team, "YOUR TEAM")
 
 
 func _generate_and_display_options() -> void:

@@ -551,3 +551,195 @@ static func get_difficulty_color(difficulty: String) -> Color:
 			return GameConstants.COLOR_DIFFICULTY_HARD
 		_:
 			return GameConstants.COLOR_DISABLED
+
+
+# =============================================================================
+# ENCOUNTER OPTION PANEL
+# =============================================================================
+
+static func create_encounter_option_panel(encounter_data: Dictionary, on_select: Callable) -> PanelContainer:
+	"""
+	Create a complete encounter option panel with horizontal layout (matching combat panels).
+
+	Args:
+		encounter_data: Encounter option dictionary with type, name, description, etc.
+		on_select: Callback when select button is pressed (receives encounter_data)
+
+	Returns:
+		Complete PanelContainer with encounter option UI
+	"""
+	var panel = PanelContainer.new()
+
+	var hbox = HBoxContainer.new()
+	panel.add_child(hbox)
+	hbox.add_theme_constant_override("separation", 12)
+
+	# Left margin with image
+	var margin = MarginContainer.new()
+	hbox.add_child(margin)
+	margin.add_theme_constant_override("margin_left", GameConstants.PANEL_MARGIN)
+	margin.add_theme_constant_override("margin_right", GameConstants.PANEL_MARGIN)
+	margin.add_theme_constant_override("margin_top", GameConstants.PANEL_MARGIN)
+	margin.add_theme_constant_override("margin_bottom", GameConstants.PANEL_MARGIN)
+
+	# Image
+	var image = TextureRect.new()
+	margin.add_child(image)
+	image.custom_minimum_size = Vector2(GameConstants.COMBAT_IMAGE_SIZE, GameConstants.COMBAT_IMAGE_SIZE)
+	image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	set_texture_safe(image, encounter_data.get("image_path", ""))
+
+	# Info section
+	var info_vbox = VBoxContainer.new()
+	hbox.add_child(info_vbox)
+	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_vbox.add_theme_constant_override("separation", 4)
+
+	# Name
+	var name_label = Label.new()
+	info_vbox.add_child(name_label)
+	name_label.text = encounter_data.get("name", "Unknown")
+	name_label.add_theme_font_size_override("font_size", 20)
+
+	# Type
+	var type_label = Label.new()
+	info_vbox.add_child(type_label)
+	type_label.text = "[%s]" % encounter_data.get("type", "").to_upper().replace("_", " ")
+	type_label.modulate = GameConstants.COLOR_DISABLED
+	type_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+
+	# Description
+	var desc_label = Label.new()
+	info_vbox.add_child(desc_label)
+	desc_label.text = encounter_data.get("description", "")
+	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+
+	# Reward preview
+	var reward_label = Label.new()
+	info_vbox.add_child(reward_label)
+	reward_label.text = _get_encounter_reward_preview(encounter_data)
+	reward_label.modulate = GameConstants.COLOR_SUCCESS
+	reward_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+
+	# Spacer
+	var spacer = Control.new()
+	info_vbox.add_child(spacer)
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	# Select button
+	var select_button = Button.new()
+	info_vbox.add_child(select_button)
+	select_button.text = "SELECT"
+	select_button.custom_minimum_size = Vector2(100, 40)
+	if on_select.is_valid():
+		select_button.pressed.connect(on_select.bind(encounter_data))
+
+	return panel
+
+
+static func _get_encounter_reward_preview(encounter_data: Dictionary) -> String:
+	"""Get a preview of rewards for this encounter."""
+	var encounter_type = encounter_data.get("type", "")
+	var data = encounter_data.get("data", {})
+
+	match encounter_type:
+		"shop":
+			var item_count = data.get("items", []).size()
+			var skill_count = data.get("skills", []).size()
+			return "%d items, %d skills" % [item_count, skill_count]
+		"xp_reward":
+			return "+%d XP" % data.get("xp_amount", 0)
+		"gold_reward":
+			return "+%d Gold" % data.get("gold_amount", 0)
+		"health_restore":
+			return "Restore 50%% HP"
+		"skill_trainer":
+			var skill_data = GameData.get_skill_by_id(data.get("skill_id", ""))
+			if not skill_data.is_empty():
+				return "Free: %s" % skill_data["name"]
+			return "Free Skill"
+		"gamble":
+			var bet = data.get("bet_amount", 0)
+			var mult = data.get("win_multiplier", 2)
+			return "Bet %d, Win %d" % [bet, bet * mult]
+		"elite_challenge":
+			var xp = data.get("xp_reward", 0)
+			var gold = data.get("gold_reward", 0)
+			return "+%d XP (all), +%d Gold" % [xp, gold]
+		_:
+			return ""
+
+
+# =============================================================================
+# TEAM DISPLAY COMPONENT
+# =============================================================================
+
+const CharacterCardScene = preload("res://scenes/components/character_card.tscn")
+
+static func populate_team_display(parent_container: Control, team: Array, title_text: String = "YOUR TEAM") -> void:
+	"""
+	Populate a container with a team display showing the player's characters.
+	The parent_container must already be in the scene tree.
+
+	Args:
+		parent_container: Container already in the scene tree to populate
+		team: Array of CharacterInstance objects from RunManager.get_team()
+		title_text: Title to show above the team (default: "YOUR TEAM")
+	"""
+	clear_children(parent_container)
+
+	var container = VBoxContainer.new()
+	parent_container.add_child(container)
+	container.add_theme_constant_override("separation", 8)
+
+	# Title
+	var title = Label.new()
+	container.add_child(title)
+	title.text = title_text
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
+	title.modulate = GameConstants.COLOR_TEXT_LIGHT
+
+	# Cards container (horizontal)
+	var cards_container = HBoxContainer.new()
+	container.add_child(cards_container)
+	cards_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	cards_container.add_theme_constant_override("separation", 8)
+
+	# Add cards for each team member
+	for char_instance in team:
+		var card = CharacterCardScene.instantiate()
+		cards_container.add_child(card)
+
+		# Setup card with character data
+		var display_data = {
+			"id": char_instance.base_character_id,
+			"rank": 1,
+			"experience": char_instance.experience,
+			"equipped_items": char_instance.equipped_items
+		}
+
+		card.setup(display_data, false)
+		card.set_clickable(false)
+		card.set_card_size(UIScaler.CardSize.SMALL)
+
+		# Update with runtime stats
+		_update_card_runtime_stats(card, char_instance)
+
+
+static func _update_card_runtime_stats(card: Node, char_instance) -> void:
+	"""Update card display with runtime character stats."""
+	var stats_container = card.get_node("MarginContainer/VBoxContainer/StatsContainer")
+
+	# Update health to show current/max
+	stats_container.get_node("HealthLabel").text = "HP %d/%d" % [char_instance.current_health, char_instance.max_health]
+	stats_container.get_node("AttackLabel").text = format_stat(GameConstants.STAT_ATTACK, char_instance.stats.get(GameConstants.STAT_ATTACK, 0))
+	stats_container.get_node("DefenseLabel").text = format_stat(GameConstants.STAT_DEFENSE, char_instance.stats.get(GameConstants.STAT_DEFENSE, 0))
+	stats_container.get_node("SpeedLabel").text = format_stat(GameConstants.STAT_SPEED, char_instance.stats.get(GameConstants.STAT_SPEED, 0))
+	stats_container.get_node("IncomeLabel").text = format_stat(GameConstants.STAT_INCOME, char_instance.stats.get(GameConstants.STAT_INCOME, 0))
+
+	# Show level in name
+	var name_label = card.get_node("MarginContainer/VBoxContainer/NameLabel")
+	name_label.text = "%s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
