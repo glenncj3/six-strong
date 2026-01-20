@@ -1,0 +1,111 @@
+{
+  "characters": [
+    {
+      "id": "char_warrior_001",
+      "name": "Brave Knight",
+      "image_path": "res://assets/characters/knight.png",
+      "base_stats": {
+        "basic_attack_damage": 10,
+        "speed": 5,
+        "defense": 8,
+        "health": 100,
+        "income": 3
+      },
+      "rank_rewards": [
+        {
+          "rank": 1,
+          "rewards": [
+            {"type": "item", "id": "item_rusty_sword"}
+          ]
+        },
+        {
+          "rank": 2,
+          "stat_boost": {"basic_attack_damage": 2},
+          "rewards": [
+            {"type": "skill", "id": "skill_power_strike", "level_requirement": 3}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "char_mage_001",
+      "name": "Mystic Sage",
+      "image_path": "res://assets/characters/mage.png",
+      "base_stats": {
+        "basic_attack_damage": 15,
+        "speed": 4,
+        "defense": 3,
+        "health": 70,
+        "income": 4
+      },
+      "rank_rewards": [
+        {
+          "rank": 1,
+          "rewards": [
+            {"type": "item", "id": "item_wooden_staff"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "char_rogue_001",
+      "name": "Shadow Thief",
+      "image_path": "res://assets/characters/rogue.png",
+      "base_stats": {
+        "basic_attack_damage": 8,
+        "speed": 10,
+        "defense": 4,
+        "health": 80,
+        "income": 5
+      },
+      "rank_rewards": [
+        {
+          "rank": 1,
+          "rewards": [
+            {"type": "item", "id": "item_rusty_dagger"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "char_cleric_001",
+      "name": "Holy Priest",
+      "image_path": "res://assets/characters/cleric.png",
+      "base_stats": {
+        "basic_attack_damage": 6,
+        "speed": 4,
+        "defense": 6,
+        "health": 90,
+        "income": 3
+      },
+      "rank_rewards": [
+        {
+          "rank": 1,
+          "rewards": [
+            {"type": "item", "id": "item_prayer_book"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "char_ranger_001",
+      "name": "Forest Scout",
+      "image_path": "res://assets/characters/ranger.png",
+      "base_stats": {
+        "basic_attack_damage": 12,
+        "speed": 7,
+        "defense": 5,
+        "health": 85,
+        "income": 4
+      },
+      "rank_rewards": [
+        {
+          "rank": 1,
+          "rewards": [
+            {"type": "item", "id": "item_short_bow"}
+          ]
+        }
+      ]
+    }
+  ]
+}

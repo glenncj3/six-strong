@@ -1,0 +1,69 @@
+{
+  "items": [
+    {
+      "id": "item_rusty_sword",
+      "name": "Rusty Sword",
+      "description": "A weathered blade. Better than nothing.",
+      "image_path": "res://assets/items/rusty_sword.png",
+      "stat_modifiers": {
+        "basic_attack_damage": 3
+      },
+      "slot": "weapon"
+    },
+    {
+      "id": "item_rusty_dagger",
+      "name": "Rusty Dagger",
+      "description": "A small, quick blade.",
+      "image_path": "res://assets/items/rusty_dagger.png",
+      "stat_modifiers": {
+        "basic_attack_damage": 2,
+        "speed": 1
+      },
+      "slot": "weapon"
+    },
+    {
+      "id": "item_wooden_staff",
+      "name": "Wooden Staff",
+      "description": "A simple magical focus.",
+      "image_path": "res://assets/items/wooden_staff.png",
+      "stat_modifiers": {
+        "basic_attack_damage": 4,
+        "defense": 1
+      },
+      "slot": "weapon"
+    },
+    {
+      "id": "item_prayer_book",
+      "name": "Prayer Book",
+      "description": "Divine protection through faith.",
+      "image_path": "res://assets/items/prayer_book.png",
+      "stat_modifiers": {
+        "defense": 3,
+        "health": 10
+      },
+      "slot": "weapon"
+    },
+    {
+      "id": "item_short_bow",
+      "name": "Short Bow",
+      "description": "Quick and deadly at range.",
+      "image_path": "res://assets/items/short_bow.png",
+      "stat_modifiers": {
+        "basic_attack_damage": 5,
+        "speed": 2
+      },
+      "slot": "weapon"
+    },
+    {
+      "id": "item_leather_armor",
+      "name": "Leather Armor",
+      "description": "Basic protection.",
+      "image_path": "res://assets/items/leather_armor.png",
+      "stat_modifiers": {
+        "defense": 2,
+        "health": 5
+      },
+      "slot": "armor"
+    }
+  ]
+}

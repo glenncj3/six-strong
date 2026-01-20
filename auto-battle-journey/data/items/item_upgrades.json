@@ -1,0 +1,26 @@
+{
+  "item_upgrades": [
+    {
+      "id": "itemup_flaming_sword",
+      "name": "Flaming Sword",
+      "description": "Replaces equipped weapon with burning fury.",
+      "image_path": "res://assets/items/flaming_sword.png",
+      "replaces_slot": "weapon",
+      "stat_modifiers": {
+        "basic_attack_damage": 15
+      },
+      "level_requirement": 4
+    },
+    {
+      "id": "itemup_iron_sword",
+      "name": "Iron Sword",
+      "description": "A reliable, well-forged blade.",
+      "image_path": "res://assets/items/iron_sword.png",
+      "replaces_slot": "weapon",
+      "stat_modifiers": {
+        "basic_attack_damage": 8
+      },
+      "level_requirement": 2
+    }
+  ]
+}

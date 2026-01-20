@@ -1,0 +1,60 @@
+{
+  "skills": [
+    {
+      "id": "skill_power_strike",
+      "name": "Power Strike",
+      "description": "Increases attack damage by 20%.",
+      "image_path": "res://assets/skills/power_strike.png",
+      "effects": [
+        {
+          "type": "stat_multiply",
+          "stat": "basic_attack_damage",
+          "value": 1.2
+        }
+      ],
+      "level_requirement": 3
+    },
+    {
+      "id": "skill_dodge",
+      "name": "Dodge",
+      "description": "Increases speed by 15%.",
+      "image_path": "res://assets/skills/dodge.png",
+      "effects": [
+        {
+          "type": "stat_multiply",
+          "stat": "speed",
+          "value": 1.15
+        }
+      ],
+      "level_requirement": 2
+    },
+    {
+      "id": "skill_iron_skin",
+      "name": "Iron Skin",
+      "description": "Increases defense by 3.",
+      "image_path": "res://assets/skills/iron_skin.png",
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "defense",
+          "value": 3
+        }
+      ],
+      "level_requirement": 4
+    },
+    {
+      "id": "skill_vitality",
+      "name": "Vitality",
+      "description": "Increases max health by 20.",
+      "image_path": "res://assets/skills/vitality.png",
+      "effects": [
+        {
+          "type": "stat_add",
+          "stat": "health",
+          "value": 20
+        }
+      ],
+      "level_requirement": 1
+    }
+  ]
+}

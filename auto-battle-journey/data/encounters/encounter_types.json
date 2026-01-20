@@ -1,0 +1,16 @@
+{
+  "encounter_types": [
+    {
+      "type": "shop",
+      "name": "Traveling Merchant",
+      "description": "Buy items and upgrades with gold.",
+      "image_path": "res://assets/encounters/merchant.png"
+    },
+    {
+      "type": "xp_reward",
+      "name": "Training Dummy",
+      "description": "Practice combat and gain experience.",
+      "image_path": "res://assets/encounters/training.png"
+    }
+  ]
+}

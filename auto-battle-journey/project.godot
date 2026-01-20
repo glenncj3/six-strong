@@ -11,8 +11,14 @@ config_version=5
 [application]
 
 config/name="Auto-Battle Journey"
+run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.5", "Mobile")
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameData="*res://autoloads/game_data.gd"
+PlayerAccount="*res://autoloads/player_account.gd"
 
 [rendering]
 
