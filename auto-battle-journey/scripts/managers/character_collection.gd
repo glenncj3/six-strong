@@ -54,9 +54,29 @@ static func from_dict(data: Dictionary) -> CharacterCollection:
 	if data.has("characters"):
 		for char_data in data["characters"]:
 			if char_data.has("id"):
+				# Ensure all required fields exist (migration for old saves)
+				_ensure_character_fields(char_data)
 				collection._characters[char_data["id"]] = char_data
 
 	return collection
+
+
+static func _ensure_character_fields(char_data: Dictionary) -> void:
+	"""Ensure character data has all required fields with defaults."""
+	if not char_data.has("fame"):
+		char_data["fame"] = 0
+	if not char_data.has("prestige"):
+		char_data["prestige"] = 1
+	if not char_data.has("unlocked"):
+		char_data["unlocked"] = true
+	if not char_data.has("equipped_items"):
+		char_data["equipped_items"] = []
+	if not char_data.has("unlocked_items"):
+		char_data["unlocked_items"] = []
+	if not char_data.has("unlocked_item_upgrades"):
+		char_data["unlocked_item_upgrades"] = []
+	if not char_data.has("unlocked_skills"):
+		char_data["unlocked_skills"] = []
 
 
 func to_array() -> Array:
