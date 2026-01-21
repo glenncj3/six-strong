@@ -141,13 +141,13 @@ alignment = 1
 [node name="PhaseLabel" type="Label" parent="CenterPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
-text = "ENCOUNTER PHASE"
+text = "COMBAT PHASE"
 horizontal_alignment = 1
 
 [node name="PhaseDescription" type="Label" parent="CenterPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "Select an encounter to improve your team."
+text = "Select a battle to fight."
 horizontal_alignment = 1
 autowrap_mode = 2
 
@@ -155,7 +155,29 @@ autowrap_mode = 2
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "CHOOSE ENCOUNTER"
+text = "CHOOSE COMBAT"
+
+[node name="EncounterOptionsScroll" type="ScrollContainer" parent="CenterPanel/MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="EncounterOptionsContainer" type="VBoxContainer" parent="CenterPanel/MarginContainer/VBoxContainer/EncounterOptionsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="CombatOptionsScroll" type="ScrollContainer" parent="CenterPanel/MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="CombatOptionsContainer" type="VBoxContainer" parent="CenterPanel/MarginContainer/VBoxContainer/CombatOptionsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
 
 [node name="MenuButton" type="Button" parent="."]
 layout_mode = 1

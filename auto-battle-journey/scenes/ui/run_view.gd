@@ -17,6 +17,10 @@ extends Control
 @onready var phase_label = $CenterPanel/MarginContainer/VBoxContainer/PhaseLabel
 @onready var phase_description = $CenterPanel/MarginContainer/VBoxContainer/PhaseDescription
 @onready var action_button = $CenterPanel/MarginContainer/VBoxContainer/ActionButton
+@onready var encounter_options_scroll = $CenterPanel/MarginContainer/VBoxContainer/EncounterOptionsScroll
+@onready var encounter_options_container = $CenterPanel/MarginContainer/VBoxContainer/EncounterOptionsScroll/EncounterOptionsContainer
+@onready var combat_options_scroll = $CenterPanel/MarginContainer/VBoxContainer/CombatOptionsScroll
+@onready var combat_options_container = $CenterPanel/MarginContainer/VBoxContainer/CombatOptionsScroll/CombatOptionsContainer
 @onready var menu_button = $MenuButton
 @onready var concede_button = $ConcedeButton
 @onready var concede_confirm_dialog = $ConcedeConfirmDialog
@@ -37,7 +41,6 @@ func _ready() -> void:
 	RunManager.gold_changed.connect(_on_gold_changed)
 	RunManager.phase_changed.connect(_on_phase_changed)
 
-	action_button.pressed.connect(_on_action_button_pressed)
 	menu_button.pressed.connect(_on_menu_button_pressed)
 	concede_button.pressed.connect(_on_concede_button_pressed)
 	concede_confirm_dialog.confirmed.connect(_on_concede_confirmed)
@@ -75,7 +78,6 @@ func _apply_visual_styling() -> void:
 	gold_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 
 	# Button styling
-	UIStyles.apply_button_styles(action_button)
 	UIStyles.apply_button_styles(menu_button)
 
 	# Concede button - special styling (danger action)
@@ -176,34 +178,65 @@ func _update_card_with_runtime_stats(card: Node, char_instance: CharacterInstanc
 
 func _setup_phase() -> void:
 	"""Setup UI for current phase."""
+	# Hide all options first
+	phase_label.visible = false
+	phase_description.visible = false
+	action_button.visible = false
+	encounter_options_scroll.visible = false
+	combat_options_scroll.visible = false
+
 	if RunManager.is_encounter_phase():
-		phase_label.text = "ENCOUNTER PHASE"
-		phase_description.text = "Select an encounter to improve your team."
-		action_button.text = "CHOOSE ENCOUNTER"
+		# Show encounter options directly
+		encounter_options_scroll.visible = true
+		_generate_encounter_options()
 	else:
-		phase_label.text = "COMBAT PHASE"
-		phase_description.text = "Select a battle to fight."
-		action_button.text = "CHOOSE COMBAT"
+		# Show combat options directly
+		combat_options_scroll.visible = true
+		_generate_combat_options()
 
 
-func _on_action_button_pressed() -> void:
-	"""Handle phase action button."""
-	if RunManager.is_encounter_phase():
-		_start_encounter_phase()
-	else:
-		_start_combat_phase()
+func _generate_encounter_options() -> void:
+	"""Generate and display 3 encounter options directly in run_view."""
+	UIHelpers.clear_children(encounter_options_container)
+
+	var encounter_options = EncounterFactory.generate_encounter_options(3)
+
+	for encounter_data in encounter_options:
+		var panel = UIHelpers.create_encounter_option_panel(encounter_data, _on_encounter_selected)
+		encounter_options_container.add_child(panel)
 
 
-func _start_encounter_phase() -> void:
-	"""Navigate to encounter selection."""
-	print("RunView: Starting encounter phase...")
-	SceneManager.go_to("encounter_select")
+func _on_encounter_selected(encounter_data: Dictionary) -> void:
+	"""Handle encounter selection - go directly to encounter execution."""
+	print("RunView: Selected encounter %s" % encounter_data["name"])
+
+	# Store selected encounter data for next scene
+	SceneManager.set_scene_data("selected_encounter", encounter_data)
+
+	# Navigate directly to encounter execution
+	SceneManager.go_to("encounter_execute")
 
 
-func _start_combat_phase() -> void:
-	"""Navigate to combat selection."""
-	print("RunView: Starting combat phase...")
-	SceneManager.go_to("combat_select")
+func _generate_combat_options() -> void:
+	"""Generate and display 3 combat options directly in run_view."""
+	UIHelpers.clear_children(combat_options_container)
+
+	var combat_options = RunManager.generate_combat_options(3)
+
+	for combat_data in combat_options:
+		var panel = UIHelpers.create_combat_option_panel(combat_data, _on_combat_selected)
+		combat_options_container.add_child(panel)
+
+
+func _on_combat_selected(combat_data: Dictionary) -> void:
+	"""Handle combat selection - go directly to combat."""
+	print("RunView: Selected combat %s" % combat_data["name"])
+
+	# Store selected combat data for next scene
+	SceneManager.set_scene_data("selected_combat", combat_data)
+
+	# Navigate directly to combat
+	SceneManager.go_to("combat_stub")
 
 
 func _simulate_encounter_completion() -> void:
