@@ -125,8 +125,8 @@ func _generate_options() -> void:
 		random_char_data = {
 			"id": random_char_id,
 			"unlocked": false,
-			"rank": 1,
-			"experience": 0,
+			"prestige": 1,
+			"fame": 0,
 			"equipped_items": [],
 			"unlocked_items": [],
 			"unlocked_item_upgrades": [],

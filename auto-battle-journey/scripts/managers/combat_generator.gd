@@ -36,13 +36,20 @@ func _generate_ai_option() -> CombatOption:
 	var base_reward = GameConstants.AI_BASE_REWARD_GOLD + (difficulty_index * GameConstants.AI_REWARD_PER_DIFFICULTY)
 	var xp_reward = base_reward + GameConstants.AI_BONUS_XP
 
+	# Get colors based on difficulty
+	var colors = _get_difficulty_colors(difficulty)
+
 	return CombatOption.create_ai(
 		"AI Enemy (%s)" % difficulty,
 		"Fight an AI-controlled enemy.",
 		"res://assets/combat/ai_enemy.png",
 		difficulty,
 		base_reward,
-		xp_reward
+		xp_reward,
+		colors.bg,
+		colors.hover,
+		colors.pressed,
+		colors.border
 	)
 
 
@@ -51,18 +58,56 @@ func _generate_player_ghost_option() -> CombatOption:
 	Generate a player ghost combat option.
 	TODO: Replace with actual ghost team loading from server
 	"""
-	var rank = randi_range(1, 10)
-	var base_reward = GameConstants.GHOST_BASE_REWARD_GOLD + (rank * GameConstants.GHOST_REWARD_PER_RANK)
+	var prestige = randi_range(1, 10)
+	var base_reward = GameConstants.GHOST_BASE_REWARD_GOLD + (prestige * GameConstants.GHOST_REWARD_PER_PRESTIGE)
 	var xp_reward = base_reward + GameConstants.GHOST_BONUS_XP
 
+	# Ghost uses amethyst purple
 	return CombatOption.create_ghost(
-		"Player Ghost (Rank %d)" % rank,
+		"Player Ghost (Prestige %d)" % prestige,
 		"Fight another player's team.",
 		"res://assets/combat/player_ghost.png",
-		rank,
+		prestige,
 		base_reward,
-		xp_reward
+		xp_reward,
+		Color("#6A3A8A"),  # bg - amethyst purple
+		Color("#8A5AAA"),  # hover
+		Color("#4A1A6A"),  # pressed
+		Color("#B88726")   # border - gold
 	)
+
+
+func _get_difficulty_colors(difficulty: String) -> Dictionary:
+	"""Get panel colors based on combat difficulty."""
+	match difficulty:
+		"Easy":
+			return {
+				"bg": Color("#2A7A4A"),      # Emerald green
+				"hover": Color("#3A9A5A"),
+				"pressed": Color("#1A6A3A"),
+				"border": Color("#B88726")
+			}
+		"Medium":
+			return {
+				"bg": Color("#8A6A21"),      # Gold-brown
+				"hover": Color("#AA8A41"),
+				"pressed": Color("#6A4A01"),
+				"border": Color("#B88726")
+			}
+		"Hard":
+			return {
+				"bg": Color("#8A2A3A"),      # Ruby red
+				"hover": Color("#AA4A5A"),
+				"pressed": Color("#6A1A2A"),
+				"border": Color("#B88726")
+			}
+		_:
+			return {
+				"bg": Color("#3D2E24"),      # Default warm brown
+				"hover": Color("#5D4E44"),
+				"pressed": Color("#2D1E14"),
+				"border": Color("#B88726")
+			}
 
 
 # =============================================================================

@@ -5,7 +5,7 @@ extends RefCounted
 # Uses Dictionary for O(1) character lookups instead of Array
 
 signal character_unlocked(char_id: String)
-signal character_ranked_up(char_id: String, new_rank: int)
+signal character_prestige_up(char_id: String, new_prestige: int)
 
 # Characters stored as Dictionary for O(1) lookup: id -> character_data
 var _characters: Dictionary = {}
@@ -133,20 +133,20 @@ func _create_character_data(char_id: String) -> Dictionary:
 		push_error("CharacterCollection: Master data not found: %s" % char_id)
 		return {}
 
-	# Get rank 1 unlocked items
+	# Get prestige 1 unlocked items
 	var unlocked_items: Array = []
-	if char_master.has("rank_rewards") and char_master["rank_rewards"].size() > 0:
-		var rank_1_rewards = char_master["rank_rewards"][0]
-		if rank_1_rewards.has("rewards"):
-			for reward in rank_1_rewards["rewards"]:
+	if char_master.has("prestige_rewards") and char_master["prestige_rewards"].size() > 0:
+		var prestige_1_rewards = char_master["prestige_rewards"][0]
+		if prestige_1_rewards.has("rewards"):
+			for reward in prestige_1_rewards["rewards"]:
 				if reward.get("type") == "item":
 					unlocked_items.append(reward["id"])
 
 	return {
 		"id": char_id,
 		"unlocked": true,
-		"rank": 1,
-		"experience": 0,
+		"prestige": 1,
+		"fame": 0,
 		"equipped_items": unlocked_items.duplicate(),  # Auto-equip starting items
 		"unlocked_items": unlocked_items,
 		"unlocked_item_upgrades": [],
@@ -158,43 +158,43 @@ func _create_character_data(char_id: String) -> Dictionary:
 # PROGRESSION
 # =============================================================================
 
-func add_character_experience(char_id: String, xp: int) -> void:
-	"""Add experience to a character, may cause rank up."""
+func add_character_fame(char_id: String, fame: int) -> void:
+	"""Add fame to a character, may increase prestige."""
 	if not _characters.has(char_id):
 		push_warning("CharacterCollection: Character not found: %s" % char_id)
 		return
 
 	var char_data = _characters[char_id]
-	char_data["experience"] += xp
+	char_data["fame"] += fame
 
-	# Check for rank up
-	while char_data["experience"] >= GameConstants.XP_PER_RANK:
-		char_data["experience"] -= GameConstants.XP_PER_RANK
-		char_data["rank"] += 1
-		print("CharacterCollection: %s ranked up to %d!" % [char_id, char_data["rank"]])
-		_apply_rank_rewards(char_id, char_data["rank"])
-		character_ranked_up.emit(char_id, char_data["rank"])
+	# Check for prestige increase
+	while char_data["fame"] >= GameConstants.FAME_PER_PRESTIGE:
+		char_data["fame"] -= GameConstants.FAME_PER_PRESTIGE
+		char_data["prestige"] += 1
+		print("CharacterCollection: %s prestige increased to %d!" % [char_id, char_data["prestige"]])
+		_apply_prestige_rewards(char_id, char_data["prestige"])
+		character_prestige_up.emit(char_id, char_data["prestige"])
 
 	_notify_change()
 
 
-func _apply_rank_rewards(char_id: String, new_rank: int) -> void:
-	"""Apply rewards for reaching a new rank."""
+func _apply_prestige_rewards(char_id: String, new_prestige: int) -> void:
+	"""Apply rewards for reaching a new prestige level."""
 	var char_master = GameData.get_character_by_id(char_id)
 	if char_master.is_empty():
 		return
 
 	var char_data = _characters[char_id]
 
-	if not char_master.has("rank_rewards"):
+	if not char_master.has("prestige_rewards"):
 		return
 
-	for rank_reward in char_master["rank_rewards"]:
-		if rank_reward.get("rank") == new_rank:
-			print("CharacterCollection: Applying rank %d rewards for %s" % [new_rank, char_id])
+	for prestige_reward in char_master["prestige_rewards"]:
+		if prestige_reward.get("prestige") == new_prestige:
+			print("CharacterCollection: Applying prestige %d rewards for %s" % [new_prestige, char_id])
 
-			if rank_reward.has("rewards"):
-				for reward in rank_reward["rewards"]:
+			if prestige_reward.has("rewards"):
+				for reward in prestige_reward["rewards"]:
 					_apply_reward(char_data, reward)
 			break
 

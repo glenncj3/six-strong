@@ -447,10 +447,14 @@ static func create_combat_option_panel(combat_data: Dictionary, on_select: Calla
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL  # Fill equal portion of container
 	panel.clip_contents = true
 
-	# Setup clickable panel with appropriate styles
-	var combat_type = combat_data.get("type", "ai")
-	var difficulty = combat_data.get("difficulty", "Medium")
-	var styles = UIStyles.get_combat_panel_styles(combat_type, difficulty)
+	# Get colors from data (with defaults)
+	var bg_color = Color(combat_data.get("bg_color", "#3D2E24"))
+	var hover_color = Color(combat_data.get("hover_color", "#5D4E44"))
+	var pressed_color = Color(combat_data.get("pressed_color", "#2D1E14"))
+	var border_color = Color(combat_data.get("border_color", "#B88726"))
+
+	# Setup clickable panel with styles from data
+	var styles = UIStyles.create_clickable_panel_styles(bg_color, hover_color, pressed_color, border_color)
 	panel.setup(combat_data, styles)
 
 	# Connect panel click to callback
@@ -513,11 +517,11 @@ static func create_combat_option_panel(combat_data: Dictionary, on_select: Calla
 		diff_label.modulate = get_difficulty_color(combat_data.get("difficulty", ""))
 
 	elif combat_data.get("type") == "ghost":
-		var rank_label = Label.new()
-		info_vbox.add_child(rank_label)
-		rank_label.text = "Player Rank: %d" % combat_data.get("rank", 0)
-		rank_label.modulate = GameConstants.COLOR_GHOST_RANK
-		rank_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+		var prestige_label = Label.new()
+		info_vbox.add_child(prestige_label)
+		prestige_label.text = "Player Prestige: %d" % combat_data.get("prestige", 0)
+		prestige_label.modulate = GameConstants.COLOR_GHOST_PRESTIGE
+		prestige_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
 
 	# Rewards
 	var reward_label = Label.new()
@@ -573,9 +577,14 @@ static func create_encounter_option_panel(encounter_data: Dictionary, on_select:
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL  # Fill equal portion of container
 	panel.clip_contents = true
 
-	# Setup clickable panel with appropriate styles
-	var encounter_type = encounter_data.get("type", "shop")
-	var styles = UIStyles.get_encounter_panel_styles(encounter_type)
+	# Get colors from data (with defaults)
+	var bg_color = Color(encounter_data.get("bg_color", "#3D2E24"))
+	var hover_color = Color(encounter_data.get("hover_color", "#5D4E44"))
+	var pressed_color = Color(encounter_data.get("pressed_color", "#2D1E14"))
+	var border_color = Color(encounter_data.get("border_color", "#B88726"))
+
+	# Setup clickable panel with styles from data
+	var styles = UIStyles.create_clickable_panel_styles(bg_color, hover_color, pressed_color, border_color)
 	panel.setup(encounter_data, styles)
 
 	# Connect panel click to callback

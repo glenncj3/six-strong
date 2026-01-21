@@ -7,7 +7,7 @@ extends Node
 signal gems_changed(new_amount: int)
 signal reroll_tokens_changed(new_amount: int)
 signal character_unlocked(char_id: String)
-signal character_ranked_up(char_id: String, new_rank: int)
+signal character_prestige_up(char_id: String, new_prestige: int)
 
 # Save file path
 const SAVE_PATH = "user://player_account.json"
@@ -110,7 +110,7 @@ func _setup_manager_connections() -> void:
 	_safe_connect(_currency.gems_changed, _on_gems_changed)
 	_safe_connect(_currency.reroll_tokens_changed, _on_reroll_tokens_changed)
 	_safe_connect(_collection.character_unlocked, _on_character_unlocked)
-	_safe_connect(_collection.character_ranked_up, _on_character_ranked_up)
+	_safe_connect(_collection.character_prestige_up, _on_character_prestige_up)
 
 
 func _safe_connect(sig: Signal, handler: Callable) -> void:
@@ -128,8 +128,8 @@ func _on_reroll_tokens_changed(amount: int) -> void:
 func _on_character_unlocked(char_id: String) -> void:
 	character_unlocked.emit(char_id)
 
-func _on_character_ranked_up(char_id: String, new_rank: int) -> void:
-	character_ranked_up.emit(char_id, new_rank)
+func _on_character_prestige_up(char_id: String, new_prestige: int) -> void:
+	character_prestige_up.emit(char_id, new_prestige)
 
 
 # =============================================================================
@@ -205,8 +205,8 @@ func unequip_item(char_id: String, item_id: String) -> bool:
 # PROGRESSION API (Delegated to CharacterCollection)
 # =============================================================================
 
-func add_character_experience(char_id: String, xp: int) -> void:
-	_collection.add_character_experience(char_id, xp)
+func add_character_fame(char_id: String, fame: int) -> void:
+	_collection.add_character_fame(char_id, fame)
 
 
 func unlock_content_for_character(char_id: String, content_type: String, content_id: String, cost: int) -> bool:

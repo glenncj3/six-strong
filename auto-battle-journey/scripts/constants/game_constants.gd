@@ -40,7 +40,7 @@ const FONT_SIZE_TINY := 12
 # =============================================================================
 
 # Account progression
-const XP_PER_RANK := 100  # XP needed to rank up a character (persistent)
+const FAME_PER_PRESTIGE := 100  # Fame needed to increase a character's prestige (persistent)
 const XP_PER_LEVEL := 100  # XP needed to level up during a run
 
 # Starting resources
@@ -58,7 +58,7 @@ const CHARACTER_UNLOCK_COST := 500  # Gems to unlock a new character in draft
 # Run rewards
 const VICTORY_GEM_REWARD := 100
 const DEFEAT_GEM_REWARD := 25
-const RUN_CHARACTER_XP_REWARD := 50  # XP awarded to each character at run end
+const RUN_CHARACTER_FAME_REWARD := 50  # Fame awarded to each character at run end
 
 # Combat rewards
 const COMBAT_WIN_GOLD := 20
@@ -167,7 +167,7 @@ const COLOR_DANGER := Color("#8A2A3A")
 const COLOR_WARNING := Color("#D9A621")
 const COLOR_DISABLED := Color("#6A6A6A")
 const COLOR_MUTED := Color("#B8A88A")
-const COLOR_GHOST_RANK := Color("#6A3A8A")
+const COLOR_GHOST_PRESTIGE := Color("#6A3A8A")
 const COLOR_HIGHLIGHT := Color("#FFD54F")
 
 # Reputation color thresholds
@@ -178,60 +178,6 @@ const REPUTATION_WARNING_THRESHOLD := 10
 const COLOR_DIFFICULTY_EASY := Color("#2A7A4A")    # Emerald green
 const COLOR_DIFFICULTY_MEDIUM := Color("#D9A621") # Gold
 const COLOR_DIFFICULTY_HARD := Color("#8A2A3A")   # Ruby red
-
-# =============================================================================
-# CLICKABLE PANEL COLORS - Normal/Hover/Pressed states
-# =============================================================================
-
-# Combat panel colors by type/difficulty
-const COLOR_COMBAT_EASY_NORMAL := Color("#2A7A4A")    # Emerald green
-const COLOR_COMBAT_EASY_HOVER := Color("#3A9A5A")
-const COLOR_COMBAT_EASY_PRESSED := Color("#1A6A3A")
-
-const COLOR_COMBAT_MEDIUM_NORMAL := Color("#8A6A21")  # Gold-brown
-const COLOR_COMBAT_MEDIUM_HOVER := Color("#AA8A41")
-const COLOR_COMBAT_MEDIUM_PRESSED := Color("#6A4A01")
-
-const COLOR_COMBAT_HARD_NORMAL := Color("#8A2A3A")    # Ruby red
-const COLOR_COMBAT_HARD_HOVER := Color("#AA4A5A")
-const COLOR_COMBAT_HARD_PRESSED := Color("#6A1A2A")
-
-const COLOR_COMBAT_GHOST_NORMAL := Color("#6A3A8A")   # Amethyst purple
-const COLOR_COMBAT_GHOST_HOVER := Color("#8A5AAA")
-const COLOR_COMBAT_GHOST_PRESSED := Color("#4A1A6A")
-
-# Encounter panel colors by type
-const COLOR_ENCOUNTER_SHOP_NORMAL := Color("#5A4A3A")    # Warm brown (commerce)
-const COLOR_ENCOUNTER_SHOP_HOVER := Color("#7A6A5A")
-const COLOR_ENCOUNTER_SHOP_PRESSED := Color("#3A2A1A")
-
-const COLOR_ENCOUNTER_XP_NORMAL := Color("#2D5A8A")      # Sapphire blue (growth)
-const COLOR_ENCOUNTER_XP_HOVER := Color("#4D7AAA")
-const COLOR_ENCOUNTER_XP_PRESSED := Color("#1D4A7A")
-
-const COLOR_ENCOUNTER_GOLD_NORMAL := Color("#8A7A21")    # Gold (wealth)
-const COLOR_ENCOUNTER_GOLD_HOVER := Color("#AA9A41")
-const COLOR_ENCOUNTER_GOLD_PRESSED := Color("#6A5A01")
-
-const COLOR_ENCOUNTER_HEALTH_NORMAL := Color("#2A7A4A")  # Emerald green (life)
-const COLOR_ENCOUNTER_HEALTH_HOVER := Color("#4A9A6A")
-const COLOR_ENCOUNTER_HEALTH_PRESSED := Color("#1A5A3A")
-
-const COLOR_ENCOUNTER_SKILL_NORMAL := Color("#6A3A8A")   # Amethyst purple (magic)
-const COLOR_ENCOUNTER_SKILL_HOVER := Color("#8A5AAA")
-const COLOR_ENCOUNTER_SKILL_PRESSED := Color("#4A1A6A")
-
-const COLOR_ENCOUNTER_GAMBLE_NORMAL := Color("#8A2A3A")  # Ruby red (risk)
-const COLOR_ENCOUNTER_GAMBLE_HOVER := Color("#AA4A5A")
-const COLOR_ENCOUNTER_GAMBLE_PRESSED := Color("#6A1A2A")
-
-const COLOR_ENCOUNTER_ELITE_NORMAL := Color("#8A5A2A")   # Warm orange (challenge)
-const COLOR_ENCOUNTER_ELITE_HOVER := Color("#AA7A4A")
-const COLOR_ENCOUNTER_ELITE_PRESSED := Color("#6A3A1A")
-
-# Border colors for clickable panels
-const COLOR_PANEL_BORDER_NORMAL := Color("#B88726")      # Gold border
-const COLOR_PANEL_BORDER_HOVER := Color("#D9A621")       # Brighter gold on hover
 
 # =============================================================================
 # EMOJI CONSTANTS
@@ -255,7 +201,7 @@ const AI_BASE_REWARD_GOLD := 20
 const AI_REWARD_PER_DIFFICULTY := 10
 const AI_BONUS_XP := 10
 const GHOST_BASE_REWARD_GOLD := 25
-const GHOST_REWARD_PER_RANK := 5
+const GHOST_REWARD_PER_PRESTIGE := 5
 const GHOST_BONUS_XP := 15
 
 # =============================================================================

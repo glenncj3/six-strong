@@ -5,8 +5,8 @@ extends Panel
 
 @onready var portrait: TextureRect = $MarginContainer/VBoxContainer/TopBar/Portrait
 @onready var name_label: Label = $MarginContainer/VBoxContainer/TopBar/InfoContainer/NameLabel
-@onready var rank_label: Label = $MarginContainer/VBoxContainer/TopBar/InfoContainer/RankLabel
-@onready var rank_progress_bar: ProgressBar = $MarginContainer/VBoxContainer/TopBar/InfoContainer/RankProgressBar
+@onready var prestige_label: Label = $MarginContainer/VBoxContainer/TopBar/InfoContainer/RankLabel
+@onready var prestige_progress_bar: ProgressBar = $MarginContainer/VBoxContainer/TopBar/InfoContainer/RankProgressBar
 
 @onready var health_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/HealthValue
 @onready var attack_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/AttackValue
@@ -40,14 +40,14 @@ func _apply_visual_styling() -> void:
 	add_theme_stylebox_override("panel", style)
 
 	# Style the progress bar
-	UIStyles.apply_progress_bar_styles(rank_progress_bar, GameConstants.COLOR_GOLD)
+	UIStyles.apply_progress_bar_styles(prestige_progress_bar, GameConstants.COLOR_GOLD)
 
 	# Style the back button
 	UIStyles.apply_button_styles(back_button)
 
 	# Apply text colors
 	name_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
-	rank_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
+	prestige_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
 
 
 func display_character(char_data: Dictionary) -> void:
@@ -63,13 +63,13 @@ func display_character(char_data: Dictionary) -> void:
 	# Set portrait using UIHelpers
 	UIHelpers.set_texture_safe(portrait, char_master.get("image_path", ""))
 
-	# Set name and rank
+	# Set name and prestige
 	name_label.text = char_master.get("name", "Unknown")
-	rank_label.text = "Rank %d" % char_data.get("rank", 1)
+	prestige_label.text = "Prestige %d" % char_data.get("prestige", 1)
 
-	# Set rank progress
-	rank_progress_bar.max_value = GameConstants.XP_PER_RANK
-	rank_progress_bar.value = char_data.get("experience", 0)
+	# Set prestige progress (fame)
+	prestige_progress_bar.max_value = GameConstants.FAME_PER_PRESTIGE
+	prestige_progress_bar.value = char_data.get("fame", 0)
 
 	# Calculate and display stats using StatCalculator
 	_update_stats_display(char_master, char_data)

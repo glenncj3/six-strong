@@ -41,11 +41,11 @@ static func calculate_run_end_rewards(victory: bool) -> Dictionary:
 		victory: Whether the player won the run
 
 	Returns:
-		Dictionary with "gems" and "character_xp" rewards
+		Dictionary with "gems" and "character_fame" rewards
 	"""
 	return {
 		"gems": GameConstants.VICTORY_GEM_REWARD if victory else GameConstants.DEFEAT_GEM_REWARD,
-		"character_xp": GameConstants.RUN_CHARACTER_XP_REWARD
+		"character_fame": GameConstants.RUN_CHARACTER_FAME_REWARD
 	}
 
 
@@ -76,25 +76,25 @@ static func calculate_gem_reward(victory: bool, wins: int, reputation: int) -> i
 	return base_reward + win_bonus + reputation_bonus
 
 
-static func calculate_character_xp_reward(victory: bool, wins: int) -> int:
+static func calculate_character_fame_reward(victory: bool, wins: int) -> int:
 	"""
-	Calculate character rank XP based on performance.
+	Calculate character fame based on performance.
 
 	Args:
 		victory: Whether the player won the run
 		wins: Number of combat victories
 
 	Returns:
-		XP reward per character
+		Fame reward per character
 	"""
-	var base_xp = 25
+	var base_fame = 25
 	if victory:
-		base_xp = 75
+		base_fame = 75
 
 	# Bonus for wins (5 per win)
 	var win_bonus = wins * 5
 
-	return base_xp + win_bonus
+	return base_fame + win_bonus
 
 
 static func apply_combat_victory_rewards(
@@ -136,14 +136,14 @@ static func apply_run_end_rewards(
 	"""
 	var rewards = calculate_run_end_rewards(victory)
 
-	# Award character rank XP
+	# Award character fame (for prestige progression)
 	for char_instance in team_manager.get_team():
-		PlayerAccount.add_character_experience(
+		PlayerAccount.add_character_fame(
 			char_instance.base_character_id,
-			rewards["character_xp"]
+			rewards["character_fame"]
 		)
 
 	# Award gems
 	PlayerAccount.add_gems(rewards["gems"])
 
-	print("RewardCalculator: Run ended - Awarded %d gems, %d XP per character" % [rewards["gems"], rewards["character_xp"]])
+	print("RewardCalculator: Run ended - Awarded %d gems, %d fame per character" % [rewards["gems"], rewards["character_fame"]])

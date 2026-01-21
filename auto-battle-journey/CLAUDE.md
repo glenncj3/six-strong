@@ -57,10 +57,10 @@ Players build a team of 3 characters, navigate through encounters to improve the
 #### Account Progression (Persistent)
 
 - **Character Collection**: Unlock characters using gems
-- **Character Ranks**: Increase through XP earned across multiple runs
-- **Rank Rewards**: Each rank unlocks new items, item upgrades, and skills (some level-gated)
+- **Character Prestige**: Increase through Fame earned across multiple runs
+- **Prestige Rewards**: Each prestige level unlocks new items, item upgrades, and skills (some level-gated)
 - **Starting Loadouts**: Equip items before runs to improve starting stats
-- **Currencies**: Gems (unlock content), Reroll Tokens (reroll draft options)
+- **Currencies**: Gems (unlock content), Reroll Tokens (reroll draft options), Fame (earned post-run, increases character prestige)
 
 #### Run Progression (Per-Session)
 
@@ -104,7 +104,7 @@ Each round consists of **Encounter → Combat**:
 **Combat Phase**
 - Choose from 3 combat options:
   - AI Enemies: Name, description, art, difficulty, rewards
-  - Ghost Players: Asynchronous human opponent teams with name, description, art, rank, rewards
+  - Ghost Players: Asynchronous human opponent teams with name, description, art, prestige, rewards
 - Combat is 100% automated (no player input once started)
 - All 3 characters fight together as a team
 - Win: Gain XP and gold based on performance + other rewards
@@ -119,8 +119,8 @@ Each round consists of **Encounter → Combat**:
 
 - Display run statistics (rounds, wins, losses, final gold)
 - Award gems
-- Award character rank XP to the 3 characters used (persistent progression)
-- Characters may rank up, unlocking new content
+- Award Fame to the 3 characters used (persistent progression toward prestige)
+- Characters may increase prestige, unlocking new content
 - Return to main menu
 
 ### Key Mechanics
@@ -129,8 +129,8 @@ Each round consists of **Encounter → Combat**:
 
 Each character has:
 - **Base Stats**: Health, attack damage, speed, defense, income
-- **Rank** (persistent): Unlocks content and may boost base stats
-- **Level** (per-run): Gates when rank-unlocked content can appear
+- **Prestige** (persistent): Unlocks content and may boost base stats (increased by earning Fame)
+- **Level** (per-run): Gates when prestige-unlocked content can appear
 - **Items** (3 types):
   - Starting items (equipped before run, improve base stats)
   - Item upgrades (found in run, replace starting items, strictly better)
@@ -147,7 +147,7 @@ Each character has:
 
 - Characters are cloned at run start
 - All run modifications happen to clones
-- Account data only updated at run end (rank XP awards)
+- Account data only updated at run end (Fame awards)
 - Run state auto-saves after each encounter/combat
 
 ### Design Philosophy
@@ -155,7 +155,7 @@ Each character has:
 - **The Bazaar-inspired**: Tight encounter/combat loop with market-style character improvement
 - **Highly extensible**: Encounters designed as modular plugins
 - **Data-driven**: All content defined in JSON (characters, items, skills, encounters)
-- **Meta-progression**: Account grows stronger through character ranks unlocking more powerful options
+- **Meta-progression**: Account grows stronger through character prestige unlocking more powerful options
 
 ## Mobile UI Design
 

@@ -11,22 +11,22 @@
         "health": 100,
         "income": 3
       },
-      "rank_rewards": [
+      "prestige_rewards": [
         {
-          "rank": 1,
+          "prestige": 1,
           "rewards": [
             {"type": "item", "id": "item_rusty_sword"}
           ]
         },
         {
-          "rank": 2,
+          "prestige": 2,
           "stat_boost": {"basic_attack_damage": 2},
           "rewards": [
             {"type": "skill", "id": "skill_power_strike", "level_requirement": 3}
           ]
         },
         {
-          "rank": 3,
+          "prestige": 3,
           "rewards": [
             {"type": "item_upgrade", "id": "itemup_iron_sword"}
           ]
@@ -44,15 +44,15 @@
         "health": 70,
         "income": 4
       },
-      "rank_rewards": [
+      "prestige_rewards": [
         {
-          "rank": 1,
+          "prestige": 1,
           "rewards": [
             {"type": "item", "id": "item_wooden_staff"}
           ]
         },
         {
-          "rank": 2,
+          "prestige": 2,
           "stat_boost": {"basic_attack_damage": 3},
           "rewards": [
             {"type": "skill", "id": "skill_arcane_blast", "level_requirement": 2}
@@ -71,15 +71,15 @@
         "health": 80,
         "income": 5
       },
-      "rank_rewards": [
+      "prestige_rewards": [
         {
-          "rank": 1,
+          "prestige": 1,
           "rewards": [
             {"type": "item", "id": "item_rusty_dagger"}
           ]
         },
         {
-          "rank": 2,
+          "prestige": 2,
           "stat_boost": {"speed": 2},
           "rewards": [
             {"type": "skill", "id": "skill_dodge", "level_requirement": 2}
@@ -98,15 +98,15 @@
         "health": 90,
         "income": 3
       },
-      "rank_rewards": [
+      "prestige_rewards": [
         {
-          "rank": 1,
+          "prestige": 1,
           "rewards": [
             {"type": "item", "id": "item_prayer_book"}
           ]
         },
         {
-          "rank": 2,
+          "prestige": 2,
           "stat_boost": {"health": 15},
           "rewards": [
             {"type": "skill", "id": "skill_vitality", "level_requirement": 1}
@@ -125,15 +125,15 @@
         "health": 85,
         "income": 4
       },
-      "rank_rewards": [
+      "prestige_rewards": [
         {
-          "rank": 1,
+          "prestige": 1,
           "rewards": [
             {"type": "item", "id": "item_short_bow"}
           ]
         },
         {
-          "rank": 2,
+          "prestige": 2,
           "stat_boost": {"speed": 1, "basic_attack_damage": 1},
           "rewards": [
             {"type": "skill", "id": "skill_quick_shot", "level_requirement": 3}
@@ -152,15 +152,15 @@
         "health": 110,
         "income": 2
       },
-      "rank_rewards": [
+      "prestige_rewards": [
         {
-          "rank": 1,
+          "prestige": 1,
           "rewards": [
             {"type": "item", "id": "item_battle_axe"}
           ]
         },
         {
-          "rank": 2,
+          "prestige": 2,
           "stat_boost": {"basic_attack_damage": 4},
           "rewards": [
             {"type": "skill", "id": "skill_rage", "level_requirement": 2}
@@ -179,15 +179,15 @@
         "health": 105,
         "income": 3
       },
-      "rank_rewards": [
+      "prestige_rewards": [
         {
-          "rank": 1,
+          "prestige": 1,
           "rewards": [
             {"type": "item", "id": "item_holy_mace"}
           ]
         },
         {
-          "rank": 2,
+          "prestige": 2,
           "stat_boost": {"defense": 3},
           "rewards": [
             {"type": "skill", "id": "skill_iron_skin", "level_requirement": 4}
@@ -206,15 +206,15 @@
         "health": 75,
         "income": 5
       },
-      "rank_rewards": [
+      "prestige_rewards": [
         {
-          "rank": 1,
+          "prestige": 1,
           "rewards": [
             {"type": "item", "id": "item_skull_staff"}
           ]
         },
         {
-          "rank": 2,
+          "prestige": 2,
           "stat_boost": {"basic_attack_damage": 2, "health": 10},
           "rewards": [
             {"type": "skill", "id": "skill_life_drain", "level_requirement": 3}
@@ -233,15 +233,15 @@
         "health": 85,
         "income": 3
       },
-      "rank_rewards": [
+      "prestige_rewards": [
         {
-          "rank": 1,
+          "prestige": 1,
           "rewards": [
             {"type": "item", "id": "item_fighting_gloves"}
           ]
         },
         {
-          "rank": 2,
+          "prestige": 2,
           "stat_boost": {"speed": 2, "defense": 2},
           "rewards": [
             {"type": "skill", "id": "skill_inner_peace", "level_requirement": 2}
@@ -260,15 +260,15 @@
         "health": 65,
         "income": 4
       },
-      "rank_rewards": [
+      "prestige_rewards": [
         {
-          "rank": 1,
+          "prestige": 1,
           "rewards": [
             {"type": "item", "id": "item_poison_blade"}
           ]
         },
         {
-          "rank": 2,
+          "prestige": 2,
           "stat_boost": {"basic_attack_damage": 3, "speed": 1},
           "rewards": [
             {"type": "skill", "id": "skill_backstab", "level_requirement": 4}

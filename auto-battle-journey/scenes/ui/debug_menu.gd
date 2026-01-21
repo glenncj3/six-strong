@@ -14,7 +14,7 @@ extends Control
 @onready var remove_gems_button = $Panel/MarginContainer/VBoxContainer/GemsSection/GemsButtons/RemoveGemsButton
 @onready var add_token_button = $Panel/MarginContainer/VBoxContainer/TokensSection/AddTokenButton
 @onready var unlock_all_button = $Panel/MarginContainer/VBoxContainer/CharacterSection/UnlockAllButton
-@onready var rank_up_all_button = $Panel/MarginContainer/VBoxContainer/CharacterSection/RankUpAllButton
+@onready var prestige_up_all_button = $Panel/MarginContainer/VBoxContainer/CharacterSection/RankUpAllButton
 
 # Run controls (Issue 6)
 @onready var run_status_label = $Panel/MarginContainer/VBoxContainer/RunSection/RunStatusLabel
@@ -34,7 +34,7 @@ func _ready() -> void:
 	remove_gems_button.pressed.connect(_on_remove_gems)
 	add_token_button.pressed.connect(_on_add_token)
 	unlock_all_button.pressed.connect(_on_unlock_all)
-	rank_up_all_button.pressed.connect(_on_rank_up_all)
+	prestige_up_all_button.pressed.connect(_on_prestige_up_all)
 
 	# Run controls (Issue 6)
 	add_gold_button.pressed.connect(_on_add_gold)
@@ -96,15 +96,15 @@ func _on_unlock_all() -> void:
 	print("DebugMenu: Unlocked %d characters" % unlocked_count)
 
 
-func _on_rank_up_all() -> void:
-	"""Add 100 XP to all owned characters."""
-	var ranked_count = 0
+func _on_prestige_up_all() -> void:
+	"""Add 100 fame to all owned characters."""
+	var prestige_count = 0
 
 	for char_data in PlayerAccount.player_data["characters"]:
-		PlayerAccount.add_character_experience(char_data["id"], 100)
-		ranked_count += 1
+		PlayerAccount.add_character_fame(char_data["id"], 100)
+		prestige_count += 1
 
-	print("DebugMenu: Added 100 XP to %d characters" % ranked_count)
+	print("DebugMenu: Added 100 fame to %d characters" % prestige_count)
 
 
 func _on_clear_run() -> void:

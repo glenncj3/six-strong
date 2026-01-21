@@ -26,8 +26,8 @@ static func calculate_character_stats(
 	"""
 	var stats = _get_base_stats(char_master)
 
-	# Apply rank stat boosts
-	_apply_rank_boosts(stats, char_master, char_data.get("rank", 1))
+	# Apply prestige stat boosts
+	_apply_prestige_boosts(stats, char_master, char_data.get("prestige", 1))
 
 	# Apply equipped items if requested
 	if include_items and char_data.has("equipped_items"):
@@ -61,8 +61,8 @@ static func calculate_runtime_stats(
 	"""
 	var stats = _get_base_stats(char_master)
 
-	# Apply rank stat boosts
-	_apply_rank_boosts(stats, char_master, char_data.get("rank", 1))
+	# Apply prestige stat boosts
+	_apply_prestige_boosts(stats, char_master, char_data.get("prestige", 1))
 
 	# Apply equipped items
 	for item_id in equipped_items:
@@ -142,15 +142,15 @@ static func _get_base_stats(char_master: Dictionary) -> Dictionary:
 	}
 
 
-static func _apply_rank_boosts(stats: Dictionary, char_master: Dictionary, current_rank: int) -> void:
-	"""Apply all rank boosts up to and including current rank."""
-	if not char_master.has("rank_rewards"):
+static func _apply_prestige_boosts(stats: Dictionary, char_master: Dictionary, current_prestige: int) -> void:
+	"""Apply all prestige boosts up to and including current prestige."""
+	if not char_master.has("prestige_rewards"):
 		return
 
-	for rank_reward in char_master["rank_rewards"]:
-		if rank_reward.get("rank", 0) <= current_rank:
-			if rank_reward.has("stat_boost"):
-				_apply_stat_modifiers(stats, rank_reward["stat_boost"])
+	for prestige_reward in char_master["prestige_rewards"]:
+		if prestige_reward.get("prestige", 0) <= current_prestige:
+			if prestige_reward.has("stat_boost"):
+				_apply_stat_modifiers(stats, prestige_reward["stat_boost"])
 
 
 static func clone_stats(stats: Dictionary) -> Dictionary:
