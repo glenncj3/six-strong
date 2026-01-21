@@ -1,0 +1,78 @@
+[gd_scene load_steps=2 format=3 uid="uid://cl2efy4241ng7"]
+
+[ext_resource type="Script" path="res://scenes/components/character_detail.gd" id="1_script"]
+
+[node name="CharacterDetail" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="MainContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TopSection" type="HBoxContainer" parent="MarginContainer/MainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="InfoContainer" type="VBoxContainer" parent="MarginContainer/MainContainer/TopSection"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="HeaderContainer" type="HBoxContainer" parent="MarginContainer/MainContainer/TopSection/InfoContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="MarginContainer/MainContainer/TopSection/InfoContainer/HeaderContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+text = "<"
+
+[node name="NameLabel" type="Label" parent="MarginContainer/MainContainer/TopSection/InfoContainer/HeaderContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 16
+text = "Character Name"
+vertical_alignment = 1
+
+[node name="StatsContainer" type="VBoxContainer" parent="MarginContainer/MainContainer/TopSection/InfoContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="Portrait" type="TextureRect" parent="MarginContainer/MainContainer/TopSection"]
+custom_minimum_size = Vector2(140, 140)
+layout_mode = 2
+size_flags_horizontal = 0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BottomSection" type="HBoxContainer" parent="MarginContainer/MainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 24
+
+[node name="ItemsContainer" type="GridContainer" parent="MarginContainer/MainContainer/BottomSection"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 3
+
+[node name="SkillsContainer" type="GridContainer" parent="MarginContainer/MainContainer/BottomSection"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 4

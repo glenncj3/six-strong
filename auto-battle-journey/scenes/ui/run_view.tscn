@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://drunview1scene"]
+[gd_scene load_steps=3 format=3 uid="uid://drunview1scene"]
 
 [ext_resource type="Script" path="res://scenes/ui/run_view.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://bp4pnkmmn3d7a" path="res://scenes/components/team_display.tscn" id="2_team_display"]
 
 [node name="RunView" type="Control"]
 layout_mode = 3
@@ -73,7 +74,7 @@ theme_override_font_sizes/font_size = 14
 text = "💰 9"
 horizontal_alignment = 1
 
-[node name="TeamPanel" type="Panel" parent="."]
+[node name="TeamDisplay" parent="." instance=ExtResource("2_team_display")]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.04
@@ -82,34 +83,6 @@ anchor_right = 0.96
 anchor_bottom = 0.98
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="TeamPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 8
-
-[node name="VBoxContainer" type="VBoxContainer" parent="TeamPanel/MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="TeamTitle" type="Label" parent="TeamPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "YOUR TEAM"
-horizontal_alignment = 1
-
-[node name="TeamContainer" type="HBoxContainer" parent="TeamPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 8
-alignment = 1
 
 [node name="CenterPanel" type="Panel" parent="."]
 layout_mode = 1

@@ -10,9 +10,7 @@ extends Control
 @onready var wins_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/WinsLabel
 @onready var gold_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/GoldLabel
 
-@onready var team_panel = $TeamPanel
-@onready var team_title = $TeamPanel/MarginContainer/VBoxContainer/TeamTitle
-@onready var team_container = $TeamPanel/MarginContainer/VBoxContainer/TeamContainer
+@onready var team_display = $TeamDisplay
 @onready var center_panel = $CenterPanel
 @onready var phase_label = $CenterPanel/MarginContainer/VBoxContainer/PhaseLabel
 @onready var phase_description = $CenterPanel/MarginContainer/VBoxContainer/PhaseDescription
@@ -24,8 +22,8 @@ extends Control
 @onready var concede_button = $ConcedeButton
 @onready var concede_confirm_dialog = $ConcedeConfirmDialog
 
-# Preload scenes
-const CharacterCardScene = preload("res://scenes/components/character_card.tscn")
+var _concede_dialog_open: bool = false
+
 
 
 func _ready() -> void:
@@ -42,6 +40,8 @@ func _ready() -> void:
 
 	concede_button.pressed.connect(_on_concede_button_pressed)
 	concede_confirm_dialog.confirmed.connect(_on_concede_confirmed)
+	concede_confirm_dialog.canceled.connect(_on_concede_dialog_closed)
+	concede_confirm_dialog.close_requested.connect(_on_concede_dialog_closed)
 
 	# Initialize display
 	_update_all_displays()
@@ -58,15 +58,11 @@ func _apply_visual_styling() -> void:
 	# Top bar panel styling (Panel uses "panel" stylebox)
 	top_bar.add_theme_stylebox_override("panel", UIStyles.create_warm_panel())
 
-	# Team panel styling
-	team_panel.add_theme_stylebox_override("panel", UIStyles.create_dark_panel())
-
-	# Center panel styling
+	# Center panel styling (TeamDisplay handles its own styling)
 	center_panel.add_theme_stylebox_override("panel", UIStyles.create_dark_panel())
 
 	# Text colors
 	round_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
-	team_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	phase_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 	phase_description.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
 
@@ -128,47 +124,9 @@ func _update_top_bar() -> void:
 
 
 func _update_team_display() -> void:
-	"""Display all team members using SMALL cards."""
-	# Clear existing cards using UIHelpers
-	UIHelpers.clear_children(team_container)
-
-	# Add card for each team member
+	"""Setup the team display component with current team."""
 	var team = RunManager.get_team()
-	for char_instance in team:
-		var card = CharacterCardScene.instantiate()
-		team_container.add_child(card)
-
-		# Create temporary character data for display
-		var display_data = {
-			"id": char_instance.base_character_id,
-			"rank": 1,  # Not relevant for runtime display
-			"experience": char_instance.experience,
-			"equipped_items": char_instance.equipped_items
-		}
-
-		card.setup(display_data, false)  # Don't calculate with items (already in stats)
-		card.set_clickable(false)
-		card.set_card_size(UIScaler.CardSize.SMALL)
-
-		# Manually update stats from instance
-		_update_card_with_runtime_stats(card, char_instance)
-
-
-func _update_card_with_runtime_stats(card: Node, char_instance: CharacterInstance) -> void:
-	"""Manually set card stats from CharacterInstance using runtime stats."""
-	# Access the stat labels in the card
-	var stats_container = card.get_node("MarginContainer/VBoxContainer/StatsContainer")
-
-	# Update health to show current/max
-	stats_container.get_node("HealthLabel").text = "HP %d/%d" % [char_instance.current_health, char_instance.max_health]
-	stats_container.get_node("AttackLabel").text = UIHelpers.format_stat(GameConstants.STAT_ATTACK, char_instance.stats.get(GameConstants.STAT_ATTACK, 0))
-	stats_container.get_node("DefenseLabel").text = UIHelpers.format_stat(GameConstants.STAT_DEFENSE, char_instance.stats.get(GameConstants.STAT_DEFENSE, 0))
-	stats_container.get_node("SpeedLabel").text = UIHelpers.format_stat(GameConstants.STAT_SPEED, char_instance.stats.get(GameConstants.STAT_SPEED, 0))
-	stats_container.get_node("IncomeLabel").text = UIHelpers.format_stat(GameConstants.STAT_INCOME, char_instance.stats.get(GameConstants.STAT_INCOME, 0))
-
-	# Show level in name
-	var name_label = card.get_node("MarginContainer/VBoxContainer/NameLabel")
-	name_label.text = "%s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
+	team_display.setup(team, "YOUR TEAM")
 
 
 func _setup_phase() -> void:
@@ -252,12 +210,17 @@ func _simulate_encounter_completion() -> void:
 
 func _on_concede_button_pressed() -> void:
 	"""Show concede confirmation dialog."""
+	_concede_dialog_open = true
 	concede_confirm_dialog.popup_centered()
 
 
 func _on_concede_confirmed() -> void:
 	"""Handle confirmed concede - treat as defeat."""
-	print("RunView: Player conceded the run")
+	# Safety check - only proceed if we intentionally opened the dialog
+	if not _concede_dialog_open:
+		return
+
+	_concede_dialog_open = false
 
 	# Store run data for results screen (same as defeat)
 	SceneManager.set_scene_data("run_results", {
@@ -273,6 +236,11 @@ func _on_concede_confirmed() -> void:
 
 	# Navigate to results screen
 	SceneManager.go_to("run_results")
+
+
+func _on_concede_dialog_closed() -> void:
+	"""Handle dialog closed without confirmation (canceled or X button)."""
+	_concede_dialog_open = false
 
 
 func _capture_team_data() -> Array:
