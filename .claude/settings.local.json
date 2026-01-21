@@ -26,7 +26,14 @@
       "Bash(cmd /c \"C:\\\\Windows\\\\godot.bat --headless --path C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey --script res://tests/test_options_panel_sizing.gd\")",
       "Bash(cmd /c \"C:\\\\Windows\\\\godot.bat --headless --path C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey --script res://tests/test_options_panel_sizing.gd > C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\test_output.txt 2>&1 & type C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\test_output.txt\")",
       "Bash(\"C:\\\\Program Files\\\\Godot\\\\Godot_v4.5.1-stable_win64.exe\" --headless --path \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\" --script res://tests/test_options_panel_sizing.gd)",
-      "Bash(\"C:\\\\Program Files\\\\Godot\\\\Godot_v4.5.1-stable_win64.exe\" --headless --path \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\" --quit)"
+      "Bash(\"C:\\\\Program Files\\\\Godot\\\\Godot_v4.5.1-stable_win64.exe\" --headless --path \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\" --quit)",
+      "Bash(cmd /c \"where godot 2>nul\")",
+      "Bash(cmd /c \"dir /s /b C:\\\\Godot*.exe 2>nul\")",
+      "Bash(cmd /c \"dir /s /b C:\\\\Users\\\\glenn\\\\Downloads\\\\*godot*.exe 2>nul\")",
+      "Bash(cmd /c \"dir /s /b C:\\\\Users\\\\glenn\\\\scoop\\\\*godot*.exe 2>nul\")",
+      "Bash(cmd /c \"dir /s /b C:\\\\Users\\\\glenn\\\\AppData\\\\Local\\\\*godot*.exe 2>nul\")",
+      "Bash(del \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\\\\test_hover.gd\")",
+      "Bash(cmd /c del \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\\\\test_hover.gd\")"
     ]
   }
 }
