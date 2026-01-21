@@ -12,7 +12,9 @@
       "Bash(cmd /c \"cd /d C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey && godot --headless --quit 2>&1\")",
       "Bash(cmd /c \"cd /d C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey && godot --headless --script res://scripts/constants/game_constants.gd --quit 2>&1\")",
       "Bash(cmd /c \"cd /d \"\"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\"\" && dir /b scripts\\\\managers\")",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
