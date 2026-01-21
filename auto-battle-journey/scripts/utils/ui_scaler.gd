@@ -150,8 +150,23 @@ static func get_section_max_height(section_name: String) -> float:
 
 
 static func get_draft_option_height() -> float:
-	"""Get height for draft option panels (~19% viewport)."""
-	return vh(19)  # ~243px
+	"""Get height for draft option panels (~20% viewport)."""
+	return vh(20)  # ~256px
+
+
+static func get_option_panel_height() -> float:
+	"""Get height for encounter/combat option panels (~20% viewport)."""
+	return vh(20)  # ~256px
+
+
+static func get_option_info_max_height() -> float:
+	"""
+	Get maximum height for the info section inside option panels.
+	Accounts for panel height minus margins and padding.
+	Panel: 256px, margins: ~20px total = ~236px available.
+	Subtract button height (40px) and spacing = ~180px for info content.
+	"""
+	return vh(14)  # ~180px
 
 
 static func get_button_height(size: String = "normal") -> float:

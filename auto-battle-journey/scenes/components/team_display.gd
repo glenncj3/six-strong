@@ -4,6 +4,8 @@ extends PanelContainer
 # Focus: Shows detailed view of a single character
 # Follows SOLID/DRY - composes reusable sub-components
 
+signal overview_shown  # Emitted when returning to overview mode (tiles recreated)
+
 enum DisplayMode { OVERVIEW, FOCUS }
 
 const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
@@ -90,8 +92,10 @@ func _show_overview() -> void:
 	character_tiles.clear()
 
 	# Calculate tile size (just under 1/3 of available width)
-	var available_width = size.x - 24  # Account for margins
+	# Use a minimum width fallback if size not yet calculated
+	var available_width = max(size.x, 680) - 24  # Account for margins, min ~720 screen
 	var tile_size = floor((available_width - 16) / 3.0)  # 16 = spacing between tiles
+	tile_size = max(tile_size, 180)  # Minimum tile size for readability
 
 	# Create tiles for each character
 	for char_instance in team:
@@ -100,6 +104,9 @@ func _show_overview() -> void:
 		tile.setup(char_instance, tile_size)
 		tile.tile_clicked.connect(_on_character_tile_clicked)
 		character_tiles.append(tile)
+
+	# Notify listeners that overview is shown (tiles recreated)
+	overview_shown.emit()
 
 
 func _show_focus(char_instance: CharacterInstance) -> void:

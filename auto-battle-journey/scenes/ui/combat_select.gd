@@ -2,7 +2,7 @@ extends Control
 # CombatSelect - Choose from 3 combat options
 
 @onready var options_container = $MainContainer/ScrollContainer/OptionsMargin/OptionsContainer
-@onready var team_display_container = $MainContainer/TeamDisplayContainer
+@onready var team_display_container = $TeamDisplayContainer
 @onready var back_button = $BackButton
 
 var combat_options: Array = []

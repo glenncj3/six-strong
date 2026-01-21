@@ -1,62 +1,68 @@
 extends Control
 # Draft - Character selection for starting a run
-# Refactored to use SceneManager, UIHelpers, and GameConstants
-# Updated with compact horizontal option panels and small team cards
+# Uses two TeamDisplay panels for consistent UI:
+# - Options panel: shows draftable characters
+# - Team panel: shows already drafted characters
 
 @onready var background: ColorRect = $Background
 @onready var instruction_label = $MainContainer/VBoxContainer/TopSection/InstructionLabel
-@onready var selected_title = $MainContainer/VBoxContainer/TopSection/SelectedTitle
-@onready var selected_display = $MainContainer/VBoxContainer/TopSection/SelectedDisplay
-@onready var options_container = $MainContainer/VBoxContainer/OptionsScroll/OptionsContainer
-@onready var options_title = $MainContainer/VBoxContainer/OptionsTitle
-@onready var reroll_button = $MainContainer/VBoxContainer/BottomButtons/RerollButton
+@onready var options_section = $MainContainer/VBoxContainer/ContentScroll/ContentContainer/OptionsSection
+@onready var options_display_container = $MainContainer/VBoxContainer/ContentScroll/ContentContainer/OptionsSection/OptionsDisplayContainer
+@onready var team_display_container = $TeamDisplayContainer
 @onready var confirm_button = $MainContainer/VBoxContainer/BottomButtons/ConfirmButton
 @onready var back_button = $BackButton
 
 # Preload scenes
-const CharacterCardScene = preload("res://scenes/components/character_card.tscn")
+const TeamDisplayScene = preload("res://scenes/components/team_display.tscn")
 
 # Draft state
-var drafted_characters: Array = []
-var current_options: Array = []
+var drafted_characters: Array = []  # Character data dictionaries
+var drafted_instances: Array = []  # CharacterInstance objects for your team display
+var current_options: Array = []  # Option dictionaries with char_data, is_owned, etc.
+var option_instances: Array = []  # CharacterInstance objects for options display
 var selection_count: int = 0
+
+# UI state
+var options_team_display: Node = null
+var your_team_display: Node = null
+var select_buttons: Array = []  # SELECT buttons for each option
 
 
 func _ready() -> void:
 	_apply_visual_styling()
 
-	reroll_button.pressed.connect(_on_reroll_pressed)
 	confirm_button.pressed.connect(_on_confirm_pressed)
 	back_button.pressed.connect(_on_back_pressed)
 
-	confirm_button.visible = false
+	# Hide team display until characters are drafted
+	team_display_container.visible = false
 
+	_setup_options_display()
 	_generate_options()
 	_update_instruction()
-	_update_reroll_button()
 
 
 func _apply_visual_styling() -> void:
 	"""Apply fantasy aesthetic styling."""
-	# Background
 	background.color = GameConstants.COLOR_BG_DARK
 
-	# Style buttons
-	UIStyles.apply_button_styles(reroll_button)
 	UIStyles.apply_button_styles(confirm_button)
 	UIStyles.apply_button_styles(back_button)
 
-	# Text colors
 	instruction_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
-	selected_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
-	options_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
+
+
+func _setup_options_display() -> void:
+	"""Create the options TeamDisplay."""
+	options_team_display = TeamDisplayScene.instantiate()
+	options_display_container.add_child(options_team_display)
+	# We'll set it up when options are generated
 
 
 func _generate_options() -> void:
 	"""Generate 3 unique character options (2 owned, 1 random)."""
-	# Clear existing options using UIHelpers
-	UIHelpers.clear_children(options_container)
 	current_options.clear()
+	option_instances.clear()
 
 	# Get IDs of already drafted characters
 	var drafted_ids: Array[String] = []
@@ -133,104 +139,99 @@ func _generate_options() -> void:
 		"unlock_cost": GameConstants.CHARACTER_UNLOCK_COST
 	})
 
-	# Create UI for each option
+	# Create CharacterInstance objects for the options display
 	for option in current_options:
-		_create_option_panel(option)
+		var char_instance = CharacterInstance.new(option["char_data"])
+		option_instances.append(char_instance)
+
+	# Update the options TeamDisplay
+	_update_options_display()
 
 	print("Draft: Generated %d unique options" % current_options.size())
 
 
-func _create_option_panel(option: Dictionary) -> void:
-	"""Create a compact horizontal character option panel."""
-	var char_data = option["char_data"]
-	var char_master = GameData.get_character_by_id(char_data.get("id", ""))
+func _update_options_display() -> void:
+	"""Update the options TeamDisplay with current options."""
+	if options_team_display and option_instances.size() > 0:
+		# Connect to overview_shown signal to add buttons whenever tiles are created
+		if not options_team_display.overview_shown.is_connected(_on_options_overview_shown):
+			options_team_display.overview_shown.connect(_on_options_overview_shown)
 
-	# Main panel with styling
-	var panel = PanelContainer.new()
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	# Use custom_minimum_size for consistent height (Godot 4 doesn't have custom_maximum_size on Control)
-	panel.custom_minimum_size.y = UIScaler.get_draft_option_height()
-	UIStyles.apply_panel_style(panel, UIStyles.create_dark_panel())
-	options_container.add_child(panel)
+		options_team_display.setup(option_instances, "AVAILABLE CHARACTERS")
+		# Buttons will be added via the overview_shown signal
 
-	# Margin container
-	var margin = MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 8)
-	margin.add_theme_constant_override("margin_top", 8)
-	margin.add_theme_constant_override("margin_right", 8)
-	margin.add_theme_constant_override("margin_bottom", 8)
-	panel.add_child(margin)
 
-	# Horizontal layout: portrait left, info + button right
-	var hbox = HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 12)
-	margin.add_child(hbox)
+func _on_options_overview_shown() -> void:
+	"""Add SELECT buttons when overview is shown (initial or returning from details)."""
+	# Wait a frame for tiles to be fully ready
+	await get_tree().process_frame
+	_create_select_buttons()
 
-	# Portrait (left side)
-	var portrait = TextureRect.new()
-	portrait.custom_minimum_size = Vector2(100, 100)
-	portrait.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	UIHelpers.set_texture_safe(portrait, char_master.get("image_path", ""))
-	hbox.add_child(portrait)
 
-	# Info section (right side)
-	var info_vbox = VBoxContainer.new()
-	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info_vbox.add_theme_constant_override("separation", 4)
-	hbox.add_child(info_vbox)
+func _create_select_buttons() -> void:
+	"""Create SELECT buttons inside each character tile."""
+	select_buttons.clear()
 
-	# Character name
-	var name_label = Label.new()
-	name_label.text = char_master.get("name", "Unknown")
-	name_label.add_theme_font_size_override("font_size", 18)
-	name_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
-	info_vbox.add_child(name_label)
+	if not options_team_display:
+		return
 
-	# Compact stats row (HP:X ATK:Y DEF:Z SPD:W)
-	var stats = StatCalculator.calculate_character_stats(char_master, char_data, true)
-	var stats_label = Label.new()
-	stats_label.text = "HP:%d  ATK:%d  DEF:%d  SPD:%d" % [
-		stats.get(GameConstants.STAT_HEALTH, 0),
-		stats.get(GameConstants.STAT_ATTACK, 0),
-		stats.get(GameConstants.STAT_DEFENSE, 0),
-		stats.get(GameConstants.STAT_SPEED, 0)
-	]
-	stats_label.add_theme_font_size_override("font_size", 12)
-	stats_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
-	info_vbox.add_child(stats_label)
+	# Use TeamDisplay's character_tiles array directly
+	var tiles = options_team_display.character_tiles
 
-	# Income row
-	var income_label = Label.new()
-	income_label.text = "Income: +%d gold/round" % stats.get(GameConstants.STAT_INCOME, 0)
-	income_label.add_theme_font_size_override("font_size", 11)
-	income_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
-	info_vbox.add_child(income_label)
+	if tiles.is_empty():
+		return
 
-	# Spacer
-	var spacer = Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	info_vbox.add_child(spacer)
+	for i in range(min(tiles.size(), current_options.size())):
+		var tile = tiles[i]
+		var option = current_options[i]
 
-	# Select/Unlock button
-	var button = Button.new()
-	button.custom_minimum_size = Vector2(0, 40)
-	UIStyles.apply_button_styles(button)
-	info_vbox.add_child(button)
+		if not is_instance_valid(tile):
+			continue
 
-	var char_id = char_data.get("id", "")
+		# Get the VBoxContainer inside the tile
+		var vbox = tile.get_node_or_null("MarginContainer/VBoxContainer")
+		if not vbox:
+			continue
 
+		# Skip if button already exists (vbox normally has 2 children: Portrait and NameLabel)
+		if vbox.get_child_count() > 2:
+			continue
+
+		# Add a spacer to push button to bottom
+		var spacer = Control.new()
+		spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		vbox.add_child(spacer)
+
+		# Create the button
+		var button = Button.new()
+		button.custom_minimum_size = Vector2(0, 36)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+		# Set button text based on ownership
+		if option["is_owned"]:
+			button.text = "SELECT"
+		else:
+			button.text = "UNLOCK (%d)" % option["unlock_cost"]
+
+		UIStyles.apply_button_styles(button)
+		button.pressed.connect(_on_option_button_pressed.bind(i))
+
+		vbox.add_child(button)
+		select_buttons.append(button)
+
+
+func _on_option_button_pressed(option_index: int) -> void:
+	"""Handle SELECT/UNLOCK button press for an option."""
+	if option_index < 0 or option_index >= current_options.size():
+		return
+
+	var option = current_options[option_index]
+
+	# Check if owned or needs unlock
 	if option["is_owned"]:
-		button.text = "SELECT"
-		button.pressed.connect(_on_character_selected.bind(option["char_data"]))
+		_on_character_selected(option["char_data"])
 	else:
-		button.text = "UNLOCK (%d gems)" % option["unlock_cost"]
-		button.pressed.connect(_on_unlock_and_select.bind(option["char_data"], option["unlock_cost"]))
-
-	# Disable button if character already drafted
-	if _is_character_drafted(char_id):
-		button.disabled = true
-		button.text = "SELECTED"
+		_on_unlock_and_select(option["char_data"], option["unlock_cost"])
 
 
 func _is_character_drafted(char_id: String) -> bool:
@@ -254,17 +255,26 @@ func _on_character_selected(char_data: Dictionary) -> void:
 		return
 
 	drafted_characters.append(char_data)
+
+	# Create a CharacterInstance for the team display
+	var char_instance = CharacterInstance.new(char_data)
+	drafted_instances.append(char_instance)
+
 	selection_count += 1
 
 	print("Draft: Selected %s (%d/%d)" % [char_id, selection_count, GameConstants.TEAM_SIZE])
 
-	_update_selected_display()
+	# Return options display to overview mode
+	if options_team_display:
+		options_team_display.refresh()
+
+	_update_team_display()
 	_update_instruction()
 
 	if selection_count == GameConstants.TEAM_SIZE:
-		_show_confirm_button()
+		_show_confirm_state()
 	else:
-		_regenerate_options()
+		_generate_options()
 
 
 func _on_unlock_and_select(char_data: Dictionary, cost: int) -> void:
@@ -286,18 +296,20 @@ func _on_unlock_and_select(char_data: Dictionary, cost: int) -> void:
 	_on_character_selected(unlocked_char_data)
 
 
-func _update_selected_display() -> void:
-	"""Update the display showing drafted characters using SMALL cards."""
-	# Clear existing using UIHelpers
-	UIHelpers.clear_children(selected_display)
+func _update_team_display() -> void:
+	"""Update the team display with drafted characters."""
+	if drafted_instances.is_empty():
+		team_display_container.visible = false
+		return
 
-	# Add SMALL card for each drafted character
-	for char_data in drafted_characters:
-		var card = CharacterCardScene.instantiate()
-		selected_display.add_child(card)
-		card.setup(char_data, true)
-		card.set_clickable(false)
-		card.set_card_size(UIScaler.CardSize.SMALL)
+	team_display_container.visible = true
+
+	# Create team display if needed
+	if your_team_display == null:
+		your_team_display = TeamDisplayScene.instantiate()
+		team_display_container.add_child(your_team_display)
+
+	your_team_display.setup(drafted_instances, "YOUR TEAM")
 
 
 func _update_instruction() -> void:
@@ -309,45 +321,24 @@ func _update_instruction() -> void:
 	print("Draft: Instruction updated to: %s" % instruction_label.text)
 
 
-func _regenerate_options() -> void:
-	"""Regenerate options after a selection."""
-	_generate_options()
+func _show_confirm_state() -> void:
+	"""Show confirm state when team is complete."""
+	print("Draft: Showing confirm state (team complete)")
 
+	# Hide options section (display + buttons)
+	options_section.visible = false
 
-func _show_confirm_button() -> void:
-	"""Show the confirm button when team is complete."""
-	print("Draft: Showing confirm button (team complete)")
-
-	# Hide the options section entirely
-	if options_title:
-		options_title.visible = false
-	options_container.get_parent().visible = false  # Hide the ScrollContainer
-
-	# Hide reroll, show confirm
-	reroll_button.visible = false
+	# Show confirm button
 	confirm_button.visible = true
-
-	# Make the confirm button expand to fill center
-	confirm_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-
-	print("Draft: confirm_button.visible = %s" % confirm_button.visible)
 
 
 func _on_reroll_pressed() -> void:
-	"""Handle reroll button press."""
+	"""Handle reroll button press (backend kept for future use)."""
 	if PlayerAccount.spend_reroll_token():
 		print("Draft: Rerolling options...")
 		_generate_options()
-		_update_reroll_button()
 	else:
 		print("Draft: No reroll tokens available")
-
-
-func _update_reroll_button() -> void:
-	"""Update reroll button text with token count."""
-	var tokens = PlayerAccount.get_reroll_tokens()
-	reroll_button.text = "REROLL (%d tokens)" % tokens
-	reroll_button.disabled = (tokens == 0)
 
 
 func _on_confirm_pressed() -> void:

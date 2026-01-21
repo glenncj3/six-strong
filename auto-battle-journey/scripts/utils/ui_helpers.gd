@@ -444,6 +444,8 @@ static func create_combat_option_panel(combat_data: Dictionary, on_select: Calla
 		Complete PanelContainer with combat option UI
 	"""
 	var panel = PanelContainer.new()
+	panel.custom_minimum_size.y = UIScaler.get_option_panel_height()
+	panel.clip_contents = true
 
 	var hbox = HBoxContainer.new()
 	panel.add_child(hbox)
@@ -490,6 +492,7 @@ static func create_combat_option_panel(combat_data: Dictionary, on_select: Calla
 	desc_label.text = combat_data.get("description", "")
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+	desc_label.max_lines_visible = 2  # Limit to prevent overflow
 
 	# Difficulty or Rank (type-specific)
 	if combat_data.get("type") == "ai":
@@ -569,6 +572,8 @@ static func create_encounter_option_panel(encounter_data: Dictionary, on_select:
 		Complete PanelContainer with encounter option UI
 	"""
 	var panel = PanelContainer.new()
+	panel.custom_minimum_size.y = UIScaler.get_option_panel_height()
+	panel.clip_contents = true
 
 	var hbox = HBoxContainer.new()
 	panel.add_child(hbox)
@@ -615,6 +620,7 @@ static func create_encounter_option_panel(encounter_data: Dictionary, on_select:
 	desc_label.text = encounter_data.get("description", "")
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+	desc_label.max_lines_visible = 2  # Limit to prevent overflow
 
 	# Reward preview
 	var reward_label = Label.new()
