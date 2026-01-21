@@ -685,9 +685,10 @@ static func _get_encounter_reward_preview(encounter_data: Dictionary) -> String:
 # TEAM DISPLAY COMPONENT
 # =============================================================================
 
-const CharacterCardScene = preload("res://scenes/components/character_card.tscn")
+# Note: CharacterCardScene is loaded at runtime to avoid circular dependency
+# (character_card.gd uses UIHelpers, so we can't preload it here)
 
-static func populate_team_display(parent_container: Control, team: Array, title_text: String = "YOUR TEAM") -> void:
+static func populate_team_display(parent_container: Control, team: Array, title_text: String = "YOUR TEAM", on_card_clicked: Callable = Callable()) -> void:
 	"""
 	Populate a container with a team display showing the player's characters.
 	The parent_container must already be in the scene tree.
@@ -696,12 +697,18 @@ static func populate_team_display(parent_container: Control, team: Array, title_
 		parent_container: Container already in the scene tree to populate
 		team: Array of CharacterInstance objects from RunManager.get_team()
 		title_text: Title to show above the team (default: "YOUR TEAM")
+		on_card_clicked: Optional callback when a card is clicked (receives CharacterInstance)
 	"""
+	print("UIHelpers.populate_team_display() - team size: %d" % team.size())
 	clear_children(parent_container)
+
+	# Set parent to pass mouse events so cards can receive them
+	parent_container.mouse_filter = Control.MOUSE_FILTER_PASS
 
 	var container = VBoxContainer.new()
 	parent_container.add_child(container)
 	container.add_theme_constant_override("separation", 8)
+	container.mouse_filter = Control.MOUSE_FILTER_PASS
 
 	# Title
 	var title = Label.new()
@@ -710,29 +717,38 @@ static func populate_team_display(parent_container: Control, team: Array, title_
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
 	title.modulate = GameConstants.COLOR_TEXT_LIGHT
+	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	# Cards container (horizontal)
 	var cards_container = HBoxContainer.new()
 	container.add_child(cards_container)
 	cards_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	cards_container.add_theme_constant_override("separation", 8)
+	cards_container.mouse_filter = Control.MOUSE_FILTER_PASS
 
 	# Add cards for each team member
+	var character_card_scene = load("res://scenes/components/character_card.tscn")
 	for char_instance in team:
-		var card = CharacterCardScene.instantiate()
+		var card = character_card_scene.instantiate()
 		cards_container.add_child(card)
 
 		# Setup card with character data
 		var display_data = {
 			"id": char_instance.base_character_id,
-			"rank": 1,
+			"prestige": 1,
 			"experience": char_instance.experience,
 			"equipped_items": char_instance.equipped_items
 		}
 
 		card.setup(display_data, false)
-		card.set_clickable(false)
 		card.set_card_size(UIScaler.CardSize.SMALL)
+
+		# Enable clickable with hover feedback
+		card.set_clickable(true)
+
+		# Connect click callback if provided
+		if on_card_clicked.is_valid():
+			card.card_clicked.connect(func(_data): on_card_clicked.call(char_instance))
 
 		# Update with runtime stats
 		_update_card_runtime_stats(card, char_instance)
