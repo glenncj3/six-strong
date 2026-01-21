@@ -199,12 +199,14 @@ static func apply_button_styles(button: Button) -> void:
 	button.add_theme_stylebox_override("hover", create_button_hover())
 	button.add_theme_stylebox_override("pressed", create_button_pressed())
 	button.add_theme_stylebox_override("disabled", create_button_disabled())
+	button.add_theme_stylebox_override("focus", create_button_normal())
 
 	# Text colors
 	button.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	button.add_theme_color_override("font_hover_color", GameConstants.COLOR_TEXT_GOLD)
 	button.add_theme_color_override("font_pressed_color", GameConstants.COLOR_TEXT_LIGHT)
 	button.add_theme_color_override("font_disabled_color", GameConstants.COLOR_DISABLED)
+	button.add_theme_color_override("font_focus_color", GameConstants.COLOR_TEXT_LIGHT)
 
 
 # =============================================================================

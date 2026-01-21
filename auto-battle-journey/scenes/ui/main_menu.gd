@@ -36,8 +36,6 @@ func _ready() -> void:
 	else:
 		play_button.text = "PLAY"
 
-	# Focus play button
-	play_button.grab_focus()
 
 
 func _apply_visual_styling() -> void:
