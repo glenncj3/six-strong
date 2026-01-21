@@ -11,6 +11,21 @@ var skill_id: String = ""
 var is_compact: bool = false
 
 
+func _ready() -> void:
+	# Allow parent to receive hover events by making display children transparent to mouse
+	_set_children_mouse_filter_ignore()
+
+
+func _set_children_mouse_filter_ignore() -> void:
+	# All child Control nodes default to MOUSE_FILTER_STOP in Godot 4.x,
+	# which blocks mouse events from reaching the parent PanelContainer.
+	# Set ALL children (containers AND leaves) to IGNORE so hover/click events propagate.
+	margin_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	skill_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
 func setup(skill_data_id: String) -> void:
 	"""Configure the skill icon"""
 	skill_id = skill_data_id

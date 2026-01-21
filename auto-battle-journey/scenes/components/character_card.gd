@@ -20,11 +20,68 @@ signal card_clicked(character_data: Dictionary)
 var character_data: Dictionary = {}
 var clickable: bool = true
 var current_size: UIScaler.CardSize = UIScaler.CardSize.NORMAL
+var _styles: Dictionary = {}
+var _is_hovered: bool = false
+var _is_pressed: bool = false
 
 
 func _ready() -> void:
+	# Allow parent to receive hover events by making display children transparent to mouse
+	_set_children_mouse_filter_ignore()
+
 	if clickable:
 		gui_input.connect(_on_gui_input)
+		mouse_entered.connect(_on_mouse_entered)
+		mouse_exited.connect(_on_mouse_exited)
+	_init_styles()
+
+
+func _set_children_mouse_filter_ignore() -> void:
+	# All child Control nodes default to MOUSE_FILTER_STOP in Godot 4.x,
+	# which blocks mouse events from reaching the parent PanelContainer.
+	# Set ALL children (containers AND leaves) to IGNORE so hover/click events propagate.
+	margin_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stats_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for label in stats_container.get_children():
+		if label is Label:
+			label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func _init_styles() -> void:
+	_styles = UIStyles.create_clickable_panel_styles(
+		GameConstants.COLOR_PANEL_DARK,
+		GameConstants.COLOR_PANEL_DARK.lightened(0.15),
+		GameConstants.COLOR_PANEL_DARK.darkened(0.1)
+	)
+	_apply_state_style()
+
+
+func _on_mouse_entered() -> void:
+	_is_hovered = true
+	_apply_state_style()
+
+
+func _on_mouse_exited() -> void:
+	_is_hovered = false
+	_is_pressed = false
+	_apply_state_style()
+
+
+func _apply_state_style() -> void:
+	if _styles.is_empty() or not clickable:
+		return
+	var style: StyleBoxFlat
+	if _is_pressed and _is_hovered:
+		style = _styles.get("pressed", _styles.get("normal"))
+	elif _is_hovered:
+		style = _styles.get("hover", _styles.get("normal"))
+	else:
+		style = _styles.get("normal")
+	if style:
+		add_theme_stylebox_override("panel", style)
 
 
 func setup(char_data: Dictionary, with_equipped_items: bool = false) -> void:
@@ -64,12 +121,27 @@ func set_clickable(enabled: bool) -> void:
 	"""Enable or disable click interaction."""
 	clickable = enabled
 	mouse_filter = MOUSE_FILTER_STOP if enabled else MOUSE_FILTER_IGNORE
+	if enabled and not mouse_entered.is_connected(_on_mouse_entered):
+		mouse_entered.connect(_on_mouse_entered)
+		mouse_exited.connect(_on_mouse_exited)
+	elif not enabled:
+		if mouse_entered.is_connected(_on_mouse_entered):
+			mouse_entered.disconnect(_on_mouse_entered)
+			mouse_exited.disconnect(_on_mouse_exited)
+	_apply_state_style()
 
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
-		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			card_clicked.emit(character_data)
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_is_pressed = true
+				_apply_state_style()
+			else:
+				if _is_pressed and _is_hovered:
+					card_clicked.emit(character_data)
+				_is_pressed = false
+				_apply_state_style()
 
 
 func highlight(enabled: bool) -> void:
@@ -99,8 +171,8 @@ func set_card_size(card_size_variant: UIScaler.CardSize) -> void:
 		UIScaler.CardSize.MINI:
 			_apply_mini_size()
 
-	# Apply fantasy panel styling
-	UIStyles.apply_panel_style(self, UIStyles.create_dark_panel())
+	# Apply panel styling with hover support
+	_apply_state_style()
 
 
 func _apply_normal_size() -> void:

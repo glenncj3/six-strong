@@ -16,8 +16,21 @@ var is_compact: bool = false
 
 
 func _ready() -> void:
+	# Allow parent to receive hover events by making display children transparent to mouse
+	_set_children_mouse_filter_ignore()
+
 	if clickable:
 		gui_input.connect(_on_gui_input)
+
+
+func _set_children_mouse_filter_ignore() -> void:
+	# All child Control nodes default to MOUSE_FILTER_STOP in Godot 4.x,
+	# which blocks mouse events from reaching the parent PanelContainer.
+	# Set ALL children (containers AND leaves) to IGNORE so hover/click events propagate.
+	margin_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	item_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	item_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func setup(item_id: String = "") -> void:

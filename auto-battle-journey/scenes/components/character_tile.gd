@@ -12,11 +12,63 @@ signal tile_clicked(char_instance: CharacterInstance)
 
 var char_instance: CharacterInstance = null
 var clickable: bool = true
+var _styles: Dictionary = {}
+var _is_hovered: bool = false
+var _is_pressed: bool = false
 
 
 func _ready() -> void:
+	# Allow parent to receive hover events by making display children transparent to mouse
+	_set_children_mouse_filter_ignore()
+
 	gui_input.connect(_on_gui_input)
-	UIStyles.apply_panel_style(self, UIStyles.create_dark_panel())
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+	_init_styles()
+
+
+func _init_styles() -> void:
+	_styles = UIStyles.create_clickable_panel_styles(
+		GameConstants.COLOR_PANEL_DARK,
+		GameConstants.COLOR_PANEL_DARK.lightened(0.15),
+		GameConstants.COLOR_PANEL_DARK.darkened(0.1)
+	)
+	_apply_state_style()
+
+
+func _on_mouse_entered() -> void:
+	_is_hovered = true
+	_apply_state_style()
+
+
+func _on_mouse_exited() -> void:
+	_is_hovered = false
+	_is_pressed = false
+	_apply_state_style()
+
+
+func _apply_state_style() -> void:
+	if _styles.is_empty() or not clickable:
+		return
+	var style: StyleBoxFlat
+	if _is_pressed and _is_hovered:
+		style = _styles.get("pressed", _styles.get("normal"))
+	elif _is_hovered:
+		style = _styles.get("hover", _styles.get("normal"))
+	else:
+		style = _styles.get("normal")
+	if style:
+		add_theme_stylebox_override("panel", style)
+
+
+func _set_children_mouse_filter_ignore() -> void:
+	# All child Control nodes default to MOUSE_FILTER_STOP in Godot 4.x,
+	# which blocks mouse events from reaching the parent PanelContainer.
+	# Set ALL children (containers AND leaves) to IGNORE so hover/click events propagate.
+	margin_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func setup(character_instance: CharacterInstance, tile_size: float) -> void:
@@ -61,8 +113,15 @@ func _on_gui_input(event: InputEvent) -> void:
 	if not clickable:
 		return
 	if event is InputEventMouseButton:
-		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			tile_clicked.emit(char_instance)
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_is_pressed = true
+				_apply_state_style()
+			else:
+				if _is_pressed and _is_hovered:
+					tile_clicked.emit(char_instance)
+				_is_pressed = false
+				_apply_state_style()
 
 
 func highlight(enabled: bool) -> void:
