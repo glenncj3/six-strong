@@ -21,7 +21,6 @@ extends Control
 @onready var encounter_options_container = $CenterPanel/MarginContainer/VBoxContainer/EncounterOptionsScroll/EncounterOptionsContainer
 @onready var combat_options_scroll = $CenterPanel/MarginContainer/VBoxContainer/CombatOptionsScroll
 @onready var combat_options_container = $CenterPanel/MarginContainer/VBoxContainer/CombatOptionsScroll/CombatOptionsContainer
-@onready var menu_button = $MenuButton
 @onready var concede_button = $ConcedeButton
 @onready var concede_confirm_dialog = $ConcedeConfirmDialog
 
@@ -41,7 +40,6 @@ func _ready() -> void:
 	RunManager.gold_changed.connect(_on_gold_changed)
 	RunManager.phase_changed.connect(_on_phase_changed)
 
-	menu_button.pressed.connect(_on_menu_button_pressed)
 	concede_button.pressed.connect(_on_concede_button_pressed)
 	concede_confirm_dialog.confirmed.connect(_on_concede_confirmed)
 
@@ -76,9 +74,6 @@ func _apply_visual_styling() -> void:
 	reputation_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	wins_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	gold_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
-
-	# Button styling
-	UIStyles.apply_button_styles(menu_button)
 
 	# Concede button - special styling (danger action)
 	var concede_style = UIStyles.create_panel_style(
@@ -253,12 +248,6 @@ func _simulate_encounter_completion() -> void:
 	RunManager.complete_encounter()
 	_setup_phase()
 	_update_all_displays()
-
-
-func _on_menu_button_pressed() -> void:
-	"""Open pause menu."""
-	# TODO: Create pause menu with additional options
-	print("RunView: Menu button pressed (pause menu not implemented)")
 
 
 func _on_concede_button_pressed() -> void:
