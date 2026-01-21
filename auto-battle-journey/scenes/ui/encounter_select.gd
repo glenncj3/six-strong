@@ -1,7 +1,7 @@
 extends Control
 # EncounterSelect - Choose from 3 encounter options
 
-@onready var options_container = $MainContainer/ScrollContainer/OptionsMargin/OptionsContainer
+@onready var options_container = $OptionsWrapper/MainContainer/ScrollContainer/OptionsMargin/OptionsContainer
 @onready var team_display_container = $TeamDisplayContainer
 @onready var back_button = $BackButton
 

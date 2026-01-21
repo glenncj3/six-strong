@@ -29,6 +29,7 @@ var _pending_overview: bool = false  # Flag to transition to overview on next fr
 
 func _ready() -> void:
 	UIStyles.apply_panel_style(self, UIStyles.create_dark_panel())
+	self_modulate.a = 0  # Make panel background invisible for debugging
 	title_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 
 	# Create the detail popup (shared instance)

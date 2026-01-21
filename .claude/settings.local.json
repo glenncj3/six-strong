@@ -14,7 +14,10 @@
       "Bash(cmd /c \"cd /d \"\"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\"\" && dir /b scripts\\\\managers\")",
       "Bash(findstr:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(C:Windowsgodot.bat --headless --check-only)",
+      "Bash(powershell.exe:*)",
+      "Bash(Select-Object -First 50)"
     ]
   }
 }

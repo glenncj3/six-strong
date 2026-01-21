@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://drunview1scene"]
+[gd_scene load_steps=4 format=3 uid="uid://drunview1scene"]
 
 [ext_resource type="Script" path="res://scenes/ui/run_view.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://bp4pnkmmn3d7a" path="res://scenes/components/team_display.tscn" id="2_team_display"]
+[ext_resource type="PackedScene" uid="uid://options_panel_1" path="res://scenes/components/options_panel.tscn" id="3_options_panel"]
 
 [node name="RunView" type="Control"]
 layout_mode = 3
@@ -74,6 +75,16 @@ theme_override_font_sizes/font_size = 14
 text = "💰 9"
 horizontal_alignment = 1
 
+[node name="OptionsPanel" parent="." instance=ExtResource("3_options_panel")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.04
+anchor_top = 0.1
+anchor_right = 0.96
+anchor_bottom = 0.52
+grow_horizontal = 2
+grow_vertical = 2
+
 [node name="TeamDisplay" parent="." instance=ExtResource("2_team_display")]
 layout_mode = 1
 anchors_preset = -1
@@ -83,74 +94,6 @@ anchor_right = 0.96
 anchor_bottom = 0.98
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="CenterPanel" type="Panel" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.04
-anchor_top = 0.09
-anchor_right = 0.96
-anchor_bottom = 0.52
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="CenterPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterPanel/MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 16
-alignment = 1
-
-[node name="PhaseLabel" type="Label" parent="CenterPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "COMBAT PHASE"
-horizontal_alignment = 1
-
-[node name="PhaseDescription" type="Label" parent="CenterPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Select a battle to fight."
-horizontal_alignment = 1
-autowrap_mode = 2
-
-[node name="ActionButton" type="Button" parent="CenterPanel/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "CHOOSE COMBAT"
-
-[node name="EncounterOptionsScroll" type="ScrollContainer" parent="CenterPanel/MarginContainer/VBoxContainer"]
-visible = false
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
-
-[node name="EncounterOptionsContainer" type="VBoxContainer" parent="CenterPanel/MarginContainer/VBoxContainer/EncounterOptionsScroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="CombatOptionsScroll" type="ScrollContainer" parent="CenterPanel/MarginContainer/VBoxContainer"]
-visible = false
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
-
-[node name="CombatOptionsContainer" type="VBoxContainer" parent="CenterPanel/MarginContainer/VBoxContainer/CombatOptionsScroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
 
 [node name="ConcedeButton" type="Button" parent="."]
 layout_mode = 1

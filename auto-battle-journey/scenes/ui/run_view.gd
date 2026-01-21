@@ -11,14 +11,7 @@ extends Control
 @onready var gold_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/GoldLabel
 
 @onready var team_display = $TeamDisplay
-@onready var center_panel = $CenterPanel
-@onready var phase_label = $CenterPanel/MarginContainer/VBoxContainer/PhaseLabel
-@onready var phase_description = $CenterPanel/MarginContainer/VBoxContainer/PhaseDescription
-@onready var action_button = $CenterPanel/MarginContainer/VBoxContainer/ActionButton
-@onready var encounter_options_scroll = $CenterPanel/MarginContainer/VBoxContainer/EncounterOptionsScroll
-@onready var encounter_options_container = $CenterPanel/MarginContainer/VBoxContainer/EncounterOptionsScroll/EncounterOptionsContainer
-@onready var combat_options_scroll = $CenterPanel/MarginContainer/VBoxContainer/CombatOptionsScroll
-@onready var combat_options_container = $CenterPanel/MarginContainer/VBoxContainer/CombatOptionsScroll/CombatOptionsContainer
+@onready var options_panel = $OptionsPanel
 @onready var concede_button = $ConcedeButton
 @onready var concede_confirm_dialog = $ConcedeConfirmDialog
 
@@ -58,13 +51,8 @@ func _apply_visual_styling() -> void:
 	# Top bar panel styling (Panel uses "panel" stylebox)
 	top_bar.add_theme_stylebox_override("panel", UIStyles.create_warm_panel())
 
-	# Center panel styling (TeamDisplay handles its own styling)
-	center_panel.add_theme_stylebox_override("panel", UIStyles.create_dark_panel())
-
 	# Text colors
 	round_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
-	phase_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
-	phase_description.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
 
 	# Stat labels
 	reputation_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
@@ -131,32 +119,25 @@ func _update_team_display() -> void:
 
 func _setup_phase() -> void:
 	"""Setup UI for current phase."""
-	# Hide all options first
-	phase_label.visible = false
-	phase_description.visible = false
-	action_button.visible = false
-	encounter_options_scroll.visible = false
-	combat_options_scroll.visible = false
+	var options_container = options_panel.get_options_container()
+	UIHelpers.clear_children(options_container)
 
 	if RunManager.is_encounter_phase():
-		# Show encounter options directly
-		encounter_options_scroll.visible = true
 		_generate_encounter_options()
 	else:
-		# Show combat options directly
-		combat_options_scroll.visible = true
 		_generate_combat_options()
 
 
 func _generate_encounter_options() -> void:
 	"""Generate and display 3 encounter options directly in run_view."""
-	UIHelpers.clear_children(encounter_options_container)
+	var options_container = options_panel.get_options_container()
+	UIHelpers.clear_children(options_container)
 
 	var encounter_options = EncounterFactory.generate_encounter_options(3)
 
 	for encounter_data in encounter_options:
 		var panel = UIHelpers.create_encounter_option_panel(encounter_data, _on_encounter_selected)
-		encounter_options_container.add_child(panel)
+		options_container.add_child(panel)
 
 
 func _on_encounter_selected(encounter_data: Dictionary) -> void:
@@ -172,13 +153,14 @@ func _on_encounter_selected(encounter_data: Dictionary) -> void:
 
 func _generate_combat_options() -> void:
 	"""Generate and display 3 combat options directly in run_view."""
-	UIHelpers.clear_children(combat_options_container)
+	var options_container = options_panel.get_options_container()
+	UIHelpers.clear_children(options_container)
 
 	var combat_options = RunManager.generate_combat_options(3)
 
 	for combat_data in combat_options:
 		var panel = UIHelpers.create_combat_option_panel(combat_data, _on_combat_selected)
-		combat_options_container.add_child(panel)
+		options_container.add_child(panel)
 
 
 func _on_combat_selected(combat_data: Dictionary) -> void:
@@ -190,22 +172,6 @@ func _on_combat_selected(combat_data: Dictionary) -> void:
 
 	# Navigate directly to combat
 	SceneManager.go_to("combat_stub")
-
-
-func _simulate_encounter_completion() -> void:
-	"""Temporary: Simulate completing an encounter."""
-	print("RunView: Simulating encounter completion...")
-
-	# Award some XP and gold
-	var team = RunManager.get_team()
-	if team.size() > 0:
-		team[0].add_experience(30)
-	RunManager.add_gold(10)
-
-	# Move to combat phase (RunManager handles save)
-	RunManager.complete_encounter()
-	_setup_phase()
-	_update_all_displays()
 
 
 func _on_concede_button_pressed() -> void:
@@ -273,6 +239,3 @@ func _on_gold_changed(_new_gold: int) -> void:
 func _on_phase_changed(_new_phase: String) -> void:
 	"""Handle phase change signal."""
 	_setup_phase()
-
-
-# Debug controls moved to debug_menu.gd (Issue 6)

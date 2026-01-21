@@ -155,18 +155,18 @@ static func get_draft_option_height() -> float:
 
 
 static func get_option_panel_height() -> float:
-	"""Get height for encounter/combat option panels (~20% viewport)."""
-	return vh(20)  # ~256px
+	"""Get height for encounter/combat option panels (~10% viewport)."""
+	return vh(10)  # ~128px - fits 3 panels without scrollbar
 
 
 static func get_option_info_max_height() -> float:
 	"""
 	Get maximum height for the info section inside option panels.
 	Accounts for panel height minus margins and padding.
-	Panel: 256px, margins: ~20px total = ~236px available.
-	Subtract button height (40px) and spacing = ~180px for info content.
+	Panel: 154px, margins: ~20px total = ~134px available.
+	Subtract button height (40px) and spacing = ~90px for info content.
 	"""
-	return vh(14)  # ~180px
+	return vh(7)  # ~90px
 
 
 static func get_button_height(size: String = "normal") -> float:

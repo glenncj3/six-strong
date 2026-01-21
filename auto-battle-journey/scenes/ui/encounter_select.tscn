@@ -21,54 +21,36 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.1, 0.12, 0.18, 1)
 
-[node name="MainContainer" type="VBoxContainer" parent="."]
+[node name="OptionsWrapper" type="MarginContainer" parent="."]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 0
 anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_bottom = 0.55
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 12
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_right = 6
 
-[node name="TopMargin" type="MarginContainer" parent="MainContainer"]
+[node name="MainContainer" type="VBoxContainer" parent="OptionsWrapper"]
 layout_mode = 2
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_right = 16
-
-[node name="TitleContainer" type="VBoxContainer" parent="MainContainer/TopMargin"]
-layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="Title" type="Label" parent="MainContainer/TopMargin/TitleContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "CHOOSE AN ENCOUNTER"
-horizontal_alignment = 1
-
-[node name="Subtitle" type="Label" parent="MainContainer/TopMargin/TitleContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
-theme_override_font_sizes/font_size = 14
-text = "Select one to proceed"
-horizontal_alignment = 1
-
-[node name="ScrollContainer" type="ScrollContainer" parent="MainContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="OptionsWrapper/MainContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="OptionsMargin" type="MarginContainer" parent="MainContainer/ScrollContainer"]
+[node name="OptionsMargin" type="MarginContainer" parent="OptionsWrapper/MainContainer/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_right = 16
 theme_override_constants/margin_top = 8
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_bottom = 8
 
-[node name="OptionsContainer" type="VBoxContainer" parent="MainContainer/ScrollContainer/OptionsMargin"]
+[node name="OptionsContainer" type="VBoxContainer" parent="OptionsWrapper/MainContainer/ScrollContainer/OptionsMargin"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="TeamDisplayContainer" type="MarginContainer" parent="."]
 layout_mode = 1
