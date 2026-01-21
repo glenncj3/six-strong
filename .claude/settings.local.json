@@ -17,7 +17,16 @@
       "Bash(git commit:*)",
       "Bash(C:Windowsgodot.bat --headless --check-only)",
       "Bash(powershell.exe:*)",
-      "Bash(Select-Object -First 50)"
+      "Bash(Select-Object -First 50)",
+      "Bash(where:*)",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey && C:\\\\Windows\\\\godot.bat --headless --quit\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey && C:\\\\Windows\\\\godot.bat --headless --script res://scripts/utils/headless_test.gd\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey && C:\\\\Windows\\\\godot.bat --headless --path . --check-only\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey && C:\\\\Windows\\\\godot.bat --headless --script res://tests/test_options_panel_sizing.gd 2>&1\")",
+      "Bash(cmd /c \"C:\\\\Windows\\\\godot.bat --headless --path C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey --script res://tests/test_options_panel_sizing.gd\")",
+      "Bash(cmd /c \"C:\\\\Windows\\\\godot.bat --headless --path C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey --script res://tests/test_options_panel_sizing.gd > C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\test_output.txt 2>&1 & type C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\test_output.txt\")",
+      "Bash(\"C:\\\\Program Files\\\\Godot\\\\Godot_v4.5.1-stable_win64.exe\" --headless --path \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\" --script res://tests/test_options_panel_sizing.gd)",
+      "Bash(\"C:\\\\Program Files\\\\Godot\\\\Godot_v4.5.1-stable_win64.exe\" --headless --path \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\" --quit)"
     ]
   }
 }

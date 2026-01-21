@@ -444,7 +444,7 @@ static func create_combat_option_panel(combat_data: Dictionary, on_select: Calla
 		Complete PanelContainer with combat option UI
 	"""
 	var panel = PanelContainer.new()
-	panel.custom_minimum_size.y = UIScaler.get_option_panel_height()
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL  # Fill equal portion of container
 	panel.clip_contents = true
 
 	var hbox = HBoxContainer.new()
@@ -572,7 +572,7 @@ static func create_encounter_option_panel(encounter_data: Dictionary, on_select:
 		Complete PanelContainer with encounter option UI
 	"""
 	var panel = PanelContainer.new()
-	panel.custom_minimum_size.y = UIScaler.get_option_panel_height()
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL  # Fill equal portion of container
 	panel.clip_contents = true
 
 	var hbox = HBoxContainer.new()
