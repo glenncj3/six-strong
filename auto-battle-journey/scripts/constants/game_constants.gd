@@ -180,6 +180,60 @@ const COLOR_DIFFICULTY_MEDIUM := Color("#D9A621") # Gold
 const COLOR_DIFFICULTY_HARD := Color("#8A2A3A")   # Ruby red
 
 # =============================================================================
+# CLICKABLE PANEL COLORS - Normal/Hover/Pressed states
+# =============================================================================
+
+# Combat panel colors by type/difficulty
+const COLOR_COMBAT_EASY_NORMAL := Color("#2A7A4A")    # Emerald green
+const COLOR_COMBAT_EASY_HOVER := Color("#3A9A5A")
+const COLOR_COMBAT_EASY_PRESSED := Color("#1A6A3A")
+
+const COLOR_COMBAT_MEDIUM_NORMAL := Color("#8A6A21")  # Gold-brown
+const COLOR_COMBAT_MEDIUM_HOVER := Color("#AA8A41")
+const COLOR_COMBAT_MEDIUM_PRESSED := Color("#6A4A01")
+
+const COLOR_COMBAT_HARD_NORMAL := Color("#8A2A3A")    # Ruby red
+const COLOR_COMBAT_HARD_HOVER := Color("#AA4A5A")
+const COLOR_COMBAT_HARD_PRESSED := Color("#6A1A2A")
+
+const COLOR_COMBAT_GHOST_NORMAL := Color("#6A3A8A")   # Amethyst purple
+const COLOR_COMBAT_GHOST_HOVER := Color("#8A5AAA")
+const COLOR_COMBAT_GHOST_PRESSED := Color("#4A1A6A")
+
+# Encounter panel colors by type
+const COLOR_ENCOUNTER_SHOP_NORMAL := Color("#5A4A3A")    # Warm brown (commerce)
+const COLOR_ENCOUNTER_SHOP_HOVER := Color("#7A6A5A")
+const COLOR_ENCOUNTER_SHOP_PRESSED := Color("#3A2A1A")
+
+const COLOR_ENCOUNTER_XP_NORMAL := Color("#2D5A8A")      # Sapphire blue (growth)
+const COLOR_ENCOUNTER_XP_HOVER := Color("#4D7AAA")
+const COLOR_ENCOUNTER_XP_PRESSED := Color("#1D4A7A")
+
+const COLOR_ENCOUNTER_GOLD_NORMAL := Color("#8A7A21")    # Gold (wealth)
+const COLOR_ENCOUNTER_GOLD_HOVER := Color("#AA9A41")
+const COLOR_ENCOUNTER_GOLD_PRESSED := Color("#6A5A01")
+
+const COLOR_ENCOUNTER_HEALTH_NORMAL := Color("#2A7A4A")  # Emerald green (life)
+const COLOR_ENCOUNTER_HEALTH_HOVER := Color("#4A9A6A")
+const COLOR_ENCOUNTER_HEALTH_PRESSED := Color("#1A5A3A")
+
+const COLOR_ENCOUNTER_SKILL_NORMAL := Color("#6A3A8A")   # Amethyst purple (magic)
+const COLOR_ENCOUNTER_SKILL_HOVER := Color("#8A5AAA")
+const COLOR_ENCOUNTER_SKILL_PRESSED := Color("#4A1A6A")
+
+const COLOR_ENCOUNTER_GAMBLE_NORMAL := Color("#8A2A3A")  # Ruby red (risk)
+const COLOR_ENCOUNTER_GAMBLE_HOVER := Color("#AA4A5A")
+const COLOR_ENCOUNTER_GAMBLE_PRESSED := Color("#6A1A2A")
+
+const COLOR_ENCOUNTER_ELITE_NORMAL := Color("#8A5A2A")   # Warm orange (challenge)
+const COLOR_ENCOUNTER_ELITE_HOVER := Color("#AA7A4A")
+const COLOR_ENCOUNTER_ELITE_PRESSED := Color("#6A3A1A")
+
+# Border colors for clickable panels
+const COLOR_PANEL_BORDER_NORMAL := Color("#B88726")      # Gold border
+const COLOR_PANEL_BORDER_HOVER := Color("#D9A621")       # Brighter gold on hover
+
+# =============================================================================
 # EMOJI CONSTANTS
 # =============================================================================
 

@@ -431,21 +431,31 @@ static func add_option_panel_labels(
 # COMBAT OPTION PANEL (Issue 1 Extension)
 # =============================================================================
 
-static func create_combat_option_panel(combat_data: Dictionary, on_select: Callable) -> PanelContainer:
+static func create_combat_option_panel(combat_data: Dictionary, on_select: Callable) -> ClickableOptionPanel:
 	"""
 	Create a complete combat option panel with all standard elements.
-	Extends create_option_panel_base() for combat-specific layouts.
+	The entire panel is clickable with hover/pressed states.
 
 	Args:
 		combat_data: Combat option dictionary with type, name, description, etc.
-		on_select: Callback when fight button is pressed (receives combat_data)
+		on_select: Callback when panel is clicked (receives combat_data)
 
 	Returns:
-		Complete PanelContainer with combat option UI
+		Complete ClickableOptionPanel with combat option UI
 	"""
-	var panel = PanelContainer.new()
+	var panel = ClickableOptionPanel.new()
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL  # Fill equal portion of container
 	panel.clip_contents = true
+
+	# Setup clickable panel with appropriate styles
+	var combat_type = combat_data.get("type", "ai")
+	var difficulty = combat_data.get("difficulty", "Medium")
+	var styles = UIStyles.get_combat_panel_styles(combat_type, difficulty)
+	panel.setup(combat_data, styles)
+
+	# Connect panel click to callback
+	if on_select.is_valid():
+		panel.panel_clicked.connect(on_select)
 
 	var hbox = HBoxContainer.new()
 	panel.add_child(hbox)
@@ -519,19 +529,6 @@ static func create_combat_option_panel(combat_data: Dictionary, on_select: Calla
 	reward_label.modulate = GameConstants.COLOR_SUCCESS
 	reward_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
 
-	# Spacer
-	var spacer = Control.new()
-	info_vbox.add_child(spacer)
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-
-	# Fight button
-	var fight_button = Button.new()
-	info_vbox.add_child(fight_button)
-	fight_button.text = "FIGHT"
-	fight_button.custom_minimum_size = Vector2(100, 40)
-	if on_select.is_valid():
-		fight_button.pressed.connect(on_select.bind(combat_data))
-
 	return panel
 
 
@@ -560,20 +557,30 @@ static func get_difficulty_color(difficulty: String) -> Color:
 # ENCOUNTER OPTION PANEL
 # =============================================================================
 
-static func create_encounter_option_panel(encounter_data: Dictionary, on_select: Callable) -> PanelContainer:
+static func create_encounter_option_panel(encounter_data: Dictionary, on_select: Callable) -> ClickableOptionPanel:
 	"""
 	Create a complete encounter option panel with horizontal layout (matching combat panels).
+	The entire panel is clickable with hover/pressed states.
 
 	Args:
 		encounter_data: Encounter option dictionary with type, name, description, etc.
-		on_select: Callback when select button is pressed (receives encounter_data)
+		on_select: Callback when panel is clicked (receives encounter_data)
 
 	Returns:
-		Complete PanelContainer with encounter option UI
+		Complete ClickableOptionPanel with encounter option UI
 	"""
-	var panel = PanelContainer.new()
+	var panel = ClickableOptionPanel.new()
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL  # Fill equal portion of container
 	panel.clip_contents = true
+
+	# Setup clickable panel with appropriate styles
+	var encounter_type = encounter_data.get("type", "shop")
+	var styles = UIStyles.get_encounter_panel_styles(encounter_type)
+	panel.setup(encounter_data, styles)
+
+	# Connect panel click to callback
+	if on_select.is_valid():
+		panel.panel_clicked.connect(on_select)
 
 	var hbox = HBoxContainer.new()
 	panel.add_child(hbox)
@@ -628,19 +635,6 @@ static func create_encounter_option_panel(encounter_data: Dictionary, on_select:
 	reward_label.text = _get_encounter_reward_preview(encounter_data)
 	reward_label.modulate = GameConstants.COLOR_SUCCESS
 	reward_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
-
-	# Spacer
-	var spacer = Control.new()
-	info_vbox.add_child(spacer)
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-
-	# Select button
-	var select_button = Button.new()
-	info_vbox.add_child(select_button)
-	select_button.text = "SELECT"
-	select_button.custom_minimum_size = Vector2(100, 40)
-	if on_select.is_valid():
-		select_button.pressed.connect(on_select.bind(encounter_data))
 
 	return panel
 
