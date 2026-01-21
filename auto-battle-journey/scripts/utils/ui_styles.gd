@@ -322,8 +322,7 @@ static func create_clickable_panel_styles(
 	normal_color: Color,
 	hover_color: Color,
 	pressed_color: Color,
-	border_color: Color = GameConstants.COLOR_PANEL_BORDER_NORMAL,
-	hover_border_color: Color = GameConstants.COLOR_PANEL_BORDER_HOVER
+	border_color: Color = GameConstants.COLOR_BORDER_GOLD
 ) -> Dictionary:
 	"""
 	Create a set of styles for clickable panels (normal, hover, pressed states).
@@ -332,12 +331,14 @@ static func create_clickable_panel_styles(
 		normal_color: Background color for normal state
 		hover_color: Background color for hover state
 		pressed_color: Background color for pressed state
-		border_color: Border color for normal/pressed states
-		hover_border_color: Border color for hover state
+		border_color: Border color for all states
 
 	Returns:
 		Dictionary with "normal", "hover", "pressed" StyleBoxFlat entries
 	"""
+	# Brighter border on hover
+	var hover_border_color = border_color.lightened(0.2)
+
 	var normal_style = create_panel_style(
 		normal_color,
 		border_color,
@@ -367,113 +368,3 @@ static func create_clickable_panel_styles(
 		"hover": hover_style,
 		"pressed": pressed_style
 	}
-
-
-static func get_combat_panel_styles(combat_type: String, difficulty: String = "") -> Dictionary:
-	"""
-	Get clickable panel styles for a combat option based on type and difficulty.
-
-	Args:
-		combat_type: "ai" or "ghost"
-		difficulty: For AI combats: "Easy", "Medium", "Hard"
-
-	Returns:
-		Dictionary with "normal", "hover", "pressed" StyleBoxFlat entries
-	"""
-	if combat_type == "ghost":
-		return create_clickable_panel_styles(
-			GameConstants.COLOR_COMBAT_GHOST_NORMAL,
-			GameConstants.COLOR_COMBAT_GHOST_HOVER,
-			GameConstants.COLOR_COMBAT_GHOST_PRESSED
-		)
-
-	# AI combat - based on difficulty
-	match difficulty:
-		"Easy":
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_COMBAT_EASY_NORMAL,
-				GameConstants.COLOR_COMBAT_EASY_HOVER,
-				GameConstants.COLOR_COMBAT_EASY_PRESSED
-			)
-		"Medium":
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_COMBAT_MEDIUM_NORMAL,
-				GameConstants.COLOR_COMBAT_MEDIUM_HOVER,
-				GameConstants.COLOR_COMBAT_MEDIUM_PRESSED
-			)
-		"Hard":
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_COMBAT_HARD_NORMAL,
-				GameConstants.COLOR_COMBAT_HARD_HOVER,
-				GameConstants.COLOR_COMBAT_HARD_PRESSED
-			)
-		_:
-			# Default to medium for unknown difficulty
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_COMBAT_MEDIUM_NORMAL,
-				GameConstants.COLOR_COMBAT_MEDIUM_HOVER,
-				GameConstants.COLOR_COMBAT_MEDIUM_PRESSED
-			)
-
-
-static func get_encounter_panel_styles(encounter_type: String) -> Dictionary:
-	"""
-	Get clickable panel styles for an encounter option based on type.
-
-	Args:
-		encounter_type: "shop", "xp_reward", "gold_reward", "health_restore",
-		                "skill_trainer", "gamble", "elite_challenge"
-
-	Returns:
-		Dictionary with "normal", "hover", "pressed" StyleBoxFlat entries
-	"""
-	match encounter_type:
-		"shop":
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_ENCOUNTER_SHOP_NORMAL,
-				GameConstants.COLOR_ENCOUNTER_SHOP_HOVER,
-				GameConstants.COLOR_ENCOUNTER_SHOP_PRESSED
-			)
-		"xp_reward":
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_ENCOUNTER_XP_NORMAL,
-				GameConstants.COLOR_ENCOUNTER_XP_HOVER,
-				GameConstants.COLOR_ENCOUNTER_XP_PRESSED
-			)
-		"gold_reward":
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_ENCOUNTER_GOLD_NORMAL,
-				GameConstants.COLOR_ENCOUNTER_GOLD_HOVER,
-				GameConstants.COLOR_ENCOUNTER_GOLD_PRESSED
-			)
-		"health_restore":
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_ENCOUNTER_HEALTH_NORMAL,
-				GameConstants.COLOR_ENCOUNTER_HEALTH_HOVER,
-				GameConstants.COLOR_ENCOUNTER_HEALTH_PRESSED
-			)
-		"skill_trainer":
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_ENCOUNTER_SKILL_NORMAL,
-				GameConstants.COLOR_ENCOUNTER_SKILL_HOVER,
-				GameConstants.COLOR_ENCOUNTER_SKILL_PRESSED
-			)
-		"gamble":
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_ENCOUNTER_GAMBLE_NORMAL,
-				GameConstants.COLOR_ENCOUNTER_GAMBLE_HOVER,
-				GameConstants.COLOR_ENCOUNTER_GAMBLE_PRESSED
-			)
-		"elite_challenge":
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_ENCOUNTER_ELITE_NORMAL,
-				GameConstants.COLOR_ENCOUNTER_ELITE_HOVER,
-				GameConstants.COLOR_ENCOUNTER_ELITE_PRESSED
-			)
-		_:
-			# Default to shop style for unknown types
-			return create_clickable_panel_styles(
-				GameConstants.COLOR_ENCOUNTER_SHOP_NORMAL,
-				GameConstants.COLOR_ENCOUNTER_SHOP_HOVER,
-				GameConstants.COLOR_ENCOUNTER_SHOP_PRESSED
-			)

@@ -86,12 +86,17 @@ func _weighted_random_select(items: Array, weights: Array) -> Variant:
 
 func _create_encounter_data(encounter_type: String) -> Dictionary:
 	"""Create encounter data based on type."""
+	var colors = _get_encounter_colors(encounter_type)
 	var encounter_data = {
 		"type": encounter_type,
 		"name": "",
 		"description": "",
 		"image_path": "",
-		"data": {}  # Type-specific data
+		"data": {},  # Type-specific data
+		"bg_color": colors.bg.to_html(),
+		"hover_color": colors.hover.to_html(),
+		"pressed_color": colors.pressed.to_html(),
+		"border_color": colors.border.to_html()
 	}
 
 	match encounter_type:
@@ -150,6 +155,67 @@ func _create_encounter_data(encounter_type: String) -> Dictionary:
 			}
 
 	return encounter_data
+
+
+func _get_encounter_colors(encounter_type: String) -> Dictionary:
+	"""Get panel colors based on encounter type."""
+	match encounter_type:
+		"shop":
+			return {
+				"bg": Color("#5A4A3A"),      # Warm brown (commerce)
+				"hover": Color("#7A6A5A"),
+				"pressed": Color("#3A2A1A"),
+				"border": Color("#B88726")
+			}
+		"xp_reward":
+			return {
+				"bg": Color("#2D5A8A"),      # Sapphire blue (growth)
+				"hover": Color("#4D7AAA"),
+				"pressed": Color("#1D4A7A"),
+				"border": Color("#B88726")
+			}
+		"gold_reward":
+			return {
+				"bg": Color("#8A7A21"),      # Gold (wealth)
+				"hover": Color("#AA9A41"),
+				"pressed": Color("#6A5A01"),
+				"border": Color("#B88726")
+			}
+		"health_restore":
+			return {
+				"bg": Color("#2A7A4A"),      # Emerald green (life)
+				"hover": Color("#4A9A6A"),
+				"pressed": Color("#1A5A3A"),
+				"border": Color("#B88726")
+			}
+		"skill_trainer":
+			return {
+				"bg": Color("#6A3A8A"),      # Amethyst purple (magic)
+				"hover": Color("#8A5AAA"),
+				"pressed": Color("#4A1A6A"),
+				"border": Color("#B88726")
+			}
+		"gamble":
+			return {
+				"bg": Color("#8A2A3A"),      # Ruby red (risk)
+				"hover": Color("#AA4A5A"),
+				"pressed": Color("#6A1A2A"),
+				"border": Color("#B88726")
+			}
+		"elite_challenge":
+			return {
+				"bg": Color("#8A5A2A"),      # Warm orange (challenge)
+				"hover": Color("#AA7A4A"),
+				"pressed": Color("#6A3A1A"),
+				"border": Color("#B88726")
+			}
+		_:
+			return {
+				"bg": Color("#3D2E24"),      # Default warm brown
+				"hover": Color("#5D4E44"),
+				"pressed": Color("#2D1E14"),
+				"border": Color("#B88726")
+			}
 
 
 func _generate_shop_inventory() -> Dictionary:

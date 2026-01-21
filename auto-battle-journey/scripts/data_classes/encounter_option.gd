@@ -9,13 +9,23 @@ var description: String = ""
 var image_path: String = ""
 var data: Dictionary = {}  # Type-specific data (items, skills, xp_amount, etc.)
 
+# Panel colors for clickable UI
+var bg_color: Color = Color("#3D2E24")
+var hover_color: Color = Color("#5D4E44")
+var pressed_color: Color = Color("#2D1E14")
+var border_color: Color = Color("#B88726")
+
 
 static func create(
 	p_type: String,
 	p_name: String,
 	p_description: String,
 	p_image_path: String,
-	p_data: Dictionary = {}
+	p_data: Dictionary = {},
+	p_bg_color: Color = Color("#3D2E24"),
+	p_hover_color: Color = Color("#5D4E44"),
+	p_pressed_color: Color = Color("#2D1E14"),
+	p_border_color: Color = Color("#B88726")
 ) -> EncounterOption:
 	"""Factory method to create an EncounterOption."""
 	var option = EncounterOption.new()
@@ -24,6 +34,10 @@ static func create(
 	option.description = p_description
 	option.image_path = p_image_path
 	option.data = p_data
+	option.bg_color = p_bg_color
+	option.hover_color = p_hover_color
+	option.pressed_color = p_pressed_color
+	option.border_color = p_border_color
 	return option
 
 
@@ -34,19 +48,27 @@ func to_dict() -> Dictionary:
 		"name": name,
 		"description": description,
 		"image_path": image_path,
-		"data": data
+		"data": data,
+		"bg_color": bg_color.to_html(),
+		"hover_color": hover_color.to_html(),
+		"pressed_color": pressed_color.to_html(),
+		"border_color": border_color.to_html()
 	}
 
 
 static func from_dict(dict: Dictionary) -> EncounterOption:
 	"""Create from dictionary for loading saved data."""
-	return create(
-		dict.get("type", ""),
-		dict.get("name", ""),
-		dict.get("description", ""),
-		dict.get("image_path", ""),
-		dict.get("data", {})
-	)
+	var option = EncounterOption.new()
+	option.type = dict.get("type", "")
+	option.name = dict.get("name", "")
+	option.description = dict.get("description", "")
+	option.image_path = dict.get("image_path", "")
+	option.data = dict.get("data", {})
+	option.bg_color = Color(dict.get("bg_color", "#3D2E24"))
+	option.hover_color = Color(dict.get("hover_color", "#5D4E44"))
+	option.pressed_color = Color(dict.get("pressed_color", "#2D1E14"))
+	option.border_color = Color(dict.get("border_color", "#B88726"))
+	return option
 
 
 # =============================================================================
