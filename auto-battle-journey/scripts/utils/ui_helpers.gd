@@ -3,6 +3,9 @@ extends RefCounted
 # UIHelpers - Common UI utility functions
 # Eliminates repeated patterns across UI code
 
+# Type of option panel to create
+enum OptionPanelType { COMBAT, ENCOUNTER }
+
 # =============================================================================
 # CONTAINER MANAGEMENT
 # =============================================================================
@@ -442,98 +445,125 @@ static func add_option_panel_labels(
 
 
 # =============================================================================
-# COMBAT OPTION PANEL (Issue 1 Extension)
+# OPTION PANEL CREATION (Unified - DRY-3)
 # =============================================================================
 
-static func create_combat_option_panel(combat_data: Dictionary, on_select: Callable) -> ClickableOptionPanel:
+static func create_option_panel(data: Dictionary, panel_type: OptionPanelType, on_select: Callable) -> ClickableOptionPanel:
 	"""
-	Create a complete combat option panel with all standard elements.
+	Create an option panel for combat or encounter selection.
 	The entire panel is clickable with hover/pressed states.
 
 	Args:
-		combat_data: Combat option dictionary with type, name, description, etc.
-		on_select: Callback when panel is clicked (receives combat_data)
+		data: Option data dictionary with type, name, description, etc.
+		panel_type: COMBAT or ENCOUNTER
+		on_select: Callback when panel is clicked (receives data)
 
 	Returns:
-		Complete ClickableOptionPanel with combat option UI
+		Configured ClickableOptionPanel
 	"""
 	var panel = ClickableOptionPanel.new()
-	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL  # Fill equal portion of container
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	panel.clip_contents = true
 
-	# Get colors from data (with defaults)
-	var bg_color = Color(combat_data.get("bg_color", "#3D2E24"))
-	var hover_color = Color(combat_data.get("hover_color", "#5D4E44"))
-	var pressed_color = Color(combat_data.get("pressed_color", "#2D1E14"))
-	var border_color = Color(combat_data.get("border_color", "#B88726"))
+	# Common style setup from data (with defaults)
+	var bg_color = Color(data.get("bg_color", "#3D2E24"))
+	var hover_color = Color(data.get("hover_color", "#5D4E44"))
+	var pressed_color = Color(data.get("pressed_color", "#2D1E14"))
+	var border_color = Color(data.get("border_color", "#B88726"))
 
-	# Setup clickable panel with styles from data
 	var styles = UIStyles.create_clickable_panel_styles(bg_color, hover_color, pressed_color, border_color)
-	panel.setup(combat_data, styles)
+	panel.setup(data, styles)
 
-	# Connect panel click to callback
 	if on_select.is_valid():
 		panel.panel_clicked.connect(on_select)
 
+	# Common structure
 	var hbox = HBoxContainer.new()
 	panel.add_child(hbox)
 	hbox.add_theme_constant_override("separation", 12)
 
-	# Left margin with image
-	var margin = MarginContainer.new()
+	# Image section
+	var margin = _create_option_image_section(data)
 	hbox.add_child(margin)
+
+	# Info section with common labels
+	var info_vbox = _create_option_info_section(data, panel_type)
+	hbox.add_child(info_vbox)
+
+	# Type-specific labels
+	match panel_type:
+		OptionPanelType.COMBAT:
+			_add_combat_labels(info_vbox, data)
+		OptionPanelType.ENCOUNTER:
+			_add_encounter_labels(info_vbox, data)
+
+	return panel
+
+
+static func _create_option_image_section(data: Dictionary) -> MarginContainer:
+	"""Create the image section for an option panel."""
+	var margin = MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", GameConstants.PANEL_MARGIN)
 	margin.add_theme_constant_override("margin_right", GameConstants.PANEL_MARGIN)
 	margin.add_theme_constant_override("margin_top", GameConstants.PANEL_MARGIN)
 	margin.add_theme_constant_override("margin_bottom", GameConstants.PANEL_MARGIN)
 
-	# Image
 	var image = TextureRect.new()
 	margin.add_child(image)
 	image.custom_minimum_size = Vector2(GameConstants.COMBAT_IMAGE_SIZE, GameConstants.COMBAT_IMAGE_SIZE)
 	image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	set_texture_safe(image, combat_data.get("image_path", ""))
+	set_texture_safe(image, data.get("image_path", ""))
 
-	# Info section
+	return margin
+
+
+static func _create_option_info_section(data: Dictionary, panel_type: OptionPanelType) -> VBoxContainer:
+	"""Create the info section (name, type, description) for an option panel."""
 	var info_vbox = VBoxContainer.new()
-	hbox.add_child(info_vbox)
 	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info_vbox.add_theme_constant_override("separation", 4)
 
 	# Name
 	var name_label = Label.new()
 	info_vbox.add_child(name_label)
-	name_label.text = combat_data.get("name", "Unknown")
+	name_label.text = data.get("name", "Unknown")
 	name_label.add_theme_font_size_override("font_size", 20)
 
-	# Type
+	# Type (encounter types replace underscores with spaces)
 	var type_label = Label.new()
 	info_vbox.add_child(type_label)
-	type_label.text = "[%s]" % combat_data.get("type", "").to_upper()
+	var type_text = data.get("type", "").to_upper()
+	if panel_type == OptionPanelType.ENCOUNTER:
+		type_text = type_text.replace("_", " ")
+	type_label.text = "[%s]" % type_text
 	type_label.modulate = GameConstants.COLOR_DISABLED
 	type_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
 
 	# Description
 	var desc_label = Label.new()
 	info_vbox.add_child(desc_label)
-	desc_label.text = combat_data.get("description", "")
+	desc_label.text = data.get("description", "")
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
-	desc_label.max_lines_visible = 2  # Limit to prevent overflow
+	desc_label.max_lines_visible = 2
 
-	# Difficulty or Rank (type-specific)
-	if combat_data.get("type") == "ai":
+	return info_vbox
+
+
+static func _add_combat_labels(info_vbox: VBoxContainer, data: Dictionary) -> void:
+	"""Add combat-specific labels (difficulty/prestige and rewards)."""
+	# Difficulty or prestige based on combat type
+	if data.get("type") == "ai":
 		var diff_label = Label.new()
 		info_vbox.add_child(diff_label)
-		diff_label.text = "Difficulty: %s" % combat_data.get("difficulty", "Unknown")
+		diff_label.text = "Difficulty: %s" % data.get("difficulty", "Unknown")
 		diff_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
-		diff_label.modulate = get_difficulty_color(combat_data.get("difficulty", ""))
-
-	elif combat_data.get("type") == "ghost":
+		diff_label.modulate = get_difficulty_color(data.get("difficulty", ""))
+	elif data.get("type") == "ghost":
 		var prestige_label = Label.new()
 		info_vbox.add_child(prestige_label)
-		prestige_label.text = "Player Prestige: %d" % combat_data.get("prestige", 0)
+		prestige_label.text = "Player Prestige: %d" % data.get("prestige", 0)
 		prestige_label.modulate = GameConstants.COLOR_GHOST_PRESTIGE
 		prestige_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
 
@@ -541,13 +571,26 @@ static func create_combat_option_panel(combat_data: Dictionary, on_select: Calla
 	var reward_label = Label.new()
 	info_vbox.add_child(reward_label)
 	reward_label.text = "Rewards: +%d Gold  +%d XP" % [
-		combat_data.get("reward_gold", 0),
-		combat_data.get("reward_xp", 0)
+		data.get("reward_gold", 0),
+		data.get("reward_xp", 0)
 	]
 	reward_label.modulate = GameConstants.COLOR_SUCCESS
 	reward_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
 
-	return panel
+
+static func _add_encounter_labels(info_vbox: VBoxContainer, data: Dictionary) -> void:
+	"""Add encounter-specific labels (reward preview)."""
+	var reward_label = Label.new()
+	info_vbox.add_child(reward_label)
+	reward_label.text = _get_encounter_reward_preview(data)
+	reward_label.modulate = GameConstants.COLOR_SUCCESS
+	reward_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+
+
+# Backwards-compatible aliases
+static func create_combat_option_panel(combat_data: Dictionary, on_select: Callable) -> ClickableOptionPanel:
+	"""Create a combat option panel. Alias for create_option_panel with COMBAT type."""
+	return create_option_panel(combat_data, OptionPanelType.COMBAT, on_select)
 
 
 static func get_difficulty_color(difficulty: String) -> Color:
@@ -571,95 +614,9 @@ static func get_difficulty_color(difficulty: String) -> Color:
 			return GameConstants.COLOR_DISABLED
 
 
-# =============================================================================
-# ENCOUNTER OPTION PANEL
-# =============================================================================
-
 static func create_encounter_option_panel(encounter_data: Dictionary, on_select: Callable) -> ClickableOptionPanel:
-	"""
-	Create a complete encounter option panel with horizontal layout (matching combat panels).
-	The entire panel is clickable with hover/pressed states.
-
-	Args:
-		encounter_data: Encounter option dictionary with type, name, description, etc.
-		on_select: Callback when panel is clicked (receives encounter_data)
-
-	Returns:
-		Complete ClickableOptionPanel with encounter option UI
-	"""
-	var panel = ClickableOptionPanel.new()
-	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL  # Fill equal portion of container
-	panel.clip_contents = true
-
-	# Get colors from data (with defaults)
-	var bg_color = Color(encounter_data.get("bg_color", "#3D2E24"))
-	var hover_color = Color(encounter_data.get("hover_color", "#5D4E44"))
-	var pressed_color = Color(encounter_data.get("pressed_color", "#2D1E14"))
-	var border_color = Color(encounter_data.get("border_color", "#B88726"))
-
-	# Setup clickable panel with styles from data
-	var styles = UIStyles.create_clickable_panel_styles(bg_color, hover_color, pressed_color, border_color)
-	panel.setup(encounter_data, styles)
-
-	# Connect panel click to callback
-	if on_select.is_valid():
-		panel.panel_clicked.connect(on_select)
-
-	var hbox = HBoxContainer.new()
-	panel.add_child(hbox)
-	hbox.add_theme_constant_override("separation", 12)
-
-	# Left margin with image
-	var margin = MarginContainer.new()
-	hbox.add_child(margin)
-	margin.add_theme_constant_override("margin_left", GameConstants.PANEL_MARGIN)
-	margin.add_theme_constant_override("margin_right", GameConstants.PANEL_MARGIN)
-	margin.add_theme_constant_override("margin_top", GameConstants.PANEL_MARGIN)
-	margin.add_theme_constant_override("margin_bottom", GameConstants.PANEL_MARGIN)
-
-	# Image
-	var image = TextureRect.new()
-	margin.add_child(image)
-	image.custom_minimum_size = Vector2(GameConstants.COMBAT_IMAGE_SIZE, GameConstants.COMBAT_IMAGE_SIZE)
-	image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	set_texture_safe(image, encounter_data.get("image_path", ""))
-
-	# Info section
-	var info_vbox = VBoxContainer.new()
-	hbox.add_child(info_vbox)
-	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info_vbox.add_theme_constant_override("separation", 4)
-
-	# Name
-	var name_label = Label.new()
-	info_vbox.add_child(name_label)
-	name_label.text = encounter_data.get("name", "Unknown")
-	name_label.add_theme_font_size_override("font_size", 20)
-
-	# Type
-	var type_label = Label.new()
-	info_vbox.add_child(type_label)
-	type_label.text = "[%s]" % encounter_data.get("type", "").to_upper().replace("_", " ")
-	type_label.modulate = GameConstants.COLOR_DISABLED
-	type_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
-
-	# Description
-	var desc_label = Label.new()
-	info_vbox.add_child(desc_label)
-	desc_label.text = encounter_data.get("description", "")
-	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
-	desc_label.max_lines_visible = 2  # Limit to prevent overflow
-
-	# Reward preview
-	var reward_label = Label.new()
-	info_vbox.add_child(reward_label)
-	reward_label.text = _get_encounter_reward_preview(encounter_data)
-	reward_label.modulate = GameConstants.COLOR_SUCCESS
-	reward_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
-
-	return panel
+	"""Create an encounter option panel. Alias for create_option_panel with ENCOUNTER type."""
+	return create_option_panel(encounter_data, OptionPanelType.ENCOUNTER, on_select)
 
 
 static func _get_encounter_reward_preview(encounter_data: Dictionary) -> String:
