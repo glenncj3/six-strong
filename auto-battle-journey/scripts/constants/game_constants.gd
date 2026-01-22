@@ -244,3 +244,80 @@ const HEALTH_RESTORE_PERCENTAGE := 0.5
 
 # Scaling per round
 const ROUND_SCALE_FACTOR := 0.1
+
+# =============================================================================
+# SKILL STAT NAMES
+# =============================================================================
+
+# Core skill stats
+const SKILL_STAT_DAMAGE := "damage"
+const SKILL_STAT_SPEED := "speed"
+const SKILL_STAT_CRIT := "crit"
+
+# Buff stats (improve self or other skills/items)
+const SKILL_STAT_DAMAGE_BUFF := "damageBuff"
+const SKILL_STAT_SPEED_BUFF := "speedBuff"
+const SKILL_STAT_CRIT_BUFF := "critBuff"
+
+# Character bonus
+const SKILL_STAT_BONUS_MANA := "bonusMana"
+
+# All valid skill stats (for validation)
+const ALL_SKILL_STATS := [
+	SKILL_STAT_DAMAGE,
+	SKILL_STAT_SPEED,
+	SKILL_STAT_CRIT,
+	SKILL_STAT_DAMAGE_BUFF,
+	SKILL_STAT_SPEED_BUFF,
+	SKILL_STAT_CRIT_BUFF,
+	SKILL_STAT_BONUS_MANA
+]
+
+# Display names for skill stats (used in UI)
+const SKILL_STAT_DISPLAY_NAMES := {
+	SKILL_STAT_DAMAGE: "DMG",
+	SKILL_STAT_SPEED: "SPD",
+	SKILL_STAT_CRIT: "CRIT",
+	SKILL_STAT_DAMAGE_BUFF: "+DMG",
+	SKILL_STAT_SPEED_BUFF: "+SPD",
+	SKILL_STAT_CRIT_BUFF: "+CRIT",
+	SKILL_STAT_BONUS_MANA: "+MP"
+}
+
+# Skill types (synergy flags)
+const SKILL_TYPE_FIRE := "fire"
+const SKILL_TYPE_ICE := "ice"
+const SKILL_TYPE_LIGHTNING := "lightning"
+const SKILL_TYPE_EARTH := "earth"
+const SKILL_TYPE_HOLY := "holy"
+const SKILL_TYPE_SHADOW := "shadow"
+
+const ALL_SKILL_TYPES := [
+	SKILL_TYPE_FIRE,
+	SKILL_TYPE_ICE,
+	SKILL_TYPE_LIGHTNING,
+	SKILL_TYPE_EARTH,
+	SKILL_TYPE_HOLY,
+	SKILL_TYPE_SHADOW
+]
+
+const SKILL_TYPE_DISPLAY_NAMES := {
+	SKILL_TYPE_FIRE: "Fire",
+	SKILL_TYPE_ICE: "Ice",
+	SKILL_TYPE_LIGHTNING: "Lightning",
+	SKILL_TYPE_EARTH: "Earth",
+	SKILL_TYPE_HOLY: "Holy",
+	SKILL_TYPE_SHADOW: "Shadow"
+}
+
+# Default skill stat values (used when creating skill stat blocks)
+static func get_default_skill_stats() -> Dictionary:
+	return {
+		SKILL_STAT_DAMAGE: 0,
+		SKILL_STAT_SPEED: 0.0,
+		SKILL_STAT_CRIT: 0,
+		SKILL_STAT_DAMAGE_BUFF: 0,
+		SKILL_STAT_SPEED_BUFF: 0.0,
+		SKILL_STAT_CRIT_BUFF: 0,
+		SKILL_STAT_BONUS_MANA: 0
+	}
