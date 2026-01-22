@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bymqj3g8kvhda"]
+[gd_scene load_steps=3 format=3 uid="uid://bymqj3g8kvhda"]
 
 [ext_resource type="Script" uid="uid://bq8bii4lhnafe" path="res://scenes/ui/main_menu.gd" id="1_menu"]
+[ext_resource type="FontFile" path="res://fonts/CinzelDecorative-Bold.ttf" id="2_font"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -44,6 +45,7 @@ size_flags_vertical = 3
 
 [node name="Title" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 48
 text = "AUTO BATTLER"
 horizontal_alignment = 1
