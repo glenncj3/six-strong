@@ -1,23 +1,25 @@
-extends PanelContainer
+extends CompactableIconBase
 # ItemSlot - Reusable component for displaying item slots
 # Shows equipped item or empty slot
 # Supports compact mode for space-constrained layouts
 
 signal slot_clicked(item_id: String)
 
-@onready var margin_container: MarginContainer = $MarginContainer
-@onready var vbox: VBoxContainer = $MarginContainer/VBoxContainer
+@onready var _margin_container: MarginContainer = $MarginContainer
+@onready var _vbox: VBoxContainer = $MarginContainer/VBoxContainer
 @onready var item_icon: TextureRect = $MarginContainer/VBoxContainer/ItemIcon
 @onready var item_name: Label = $MarginContainer/VBoxContainer/ItemName
 
 var equipped_item_id: String = ""
 var clickable: bool = true
-var is_compact: bool = false
 
 
-func _ready() -> void:
-	# Allow parent to receive hover events by making display children transparent to mouse
-	UIHelpers.set_children_mouse_filter_ignore(self)
+func _on_ready() -> void:
+	# Set base class references
+	margin_container = _margin_container
+	vbox = _vbox
+	_icon = item_icon
+	_label = item_name
 
 	if clickable:
 		gui_input.connect(_on_gui_input)
@@ -86,42 +88,17 @@ func highlight(enabled: bool) -> void:
 			modulate = Color.WHITE
 
 
-func set_compact(enabled: bool) -> void:
-	"""
-	Enable or disable compact mode.
-	Compact mode hides the label and reduces margins.
+func _get_compact_size() -> Vector2:
+	return UIScaler.get_item_slot_size(true)
 
-	Args:
-		enabled: Whether to enable compact mode
-	"""
-	is_compact = enabled
 
-	if enabled:
-		# Compact: hide label, reduce margins
-		var compact_size = UIScaler.get_item_slot_size(true)
-		custom_minimum_size = compact_size
+func _get_normal_size() -> Vector2:
+	return UIScaler.get_item_slot_size(false)
 
-		margin_container.add_theme_constant_override("margin_left", 2)
-		margin_container.add_theme_constant_override("margin_top", 2)
-		margin_container.add_theme_constant_override("margin_right", 2)
-		margin_container.add_theme_constant_override("margin_bottom", 2)
 
-		item_icon.custom_minimum_size = Vector2(UIScaler.get_item_icon_size(true), UIScaler.get_item_icon_size(true))
-		item_name.visible = false
-		vbox.add_theme_constant_override("separation", 0)
-	else:
-		# Normal: show label, normal margins
-		var normal_size = UIScaler.get_item_slot_size(false)
-		custom_minimum_size = normal_size
+func _get_compact_icon_size() -> float:
+	return UIScaler.get_item_icon_size(true)
 
-		margin_container.add_theme_constant_override("margin_left", 4)
-		margin_container.add_theme_constant_override("margin_top", 4)
-		margin_container.add_theme_constant_override("margin_right", 4)
-		margin_container.add_theme_constant_override("margin_bottom", 4)
 
-		item_icon.custom_minimum_size = Vector2(UIScaler.get_item_icon_size(false), UIScaler.get_item_icon_size(false))
-		item_name.visible = true
-		vbox.add_theme_constant_override("separation", 4)
-
-	# Apply fantasy panel styling
-	UIStyles.apply_panel_style(self, UIStyles.create_subtle_panel())
+func _get_normal_icon_size() -> float:
+	return UIScaler.get_item_icon_size(false)
