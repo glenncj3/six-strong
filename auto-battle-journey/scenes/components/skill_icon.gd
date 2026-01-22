@@ -18,20 +18,24 @@ func _on_ready() -> void:
 	_label = skill_name
 
 
-func setup(skill_data_id: String) -> void:
-	"""Configure the skill icon"""
-	skill_id = skill_data_id
+func setup(skill_data: Dictionary) -> void:
+	"""
+	Configure the skill icon with skill data.
 
-	var skill_data = GameData.get_skill_by_id(skill_id)
+	Args:
+		skill_data: Skill data dictionary (from GameData or provided directly)
+	"""
 	if skill_data.is_empty():
-		push_error("SkillIcon: Skill not found: %s" % skill_id)
+		push_error("SkillIcon: Empty skill data provided")
 		return
+
+	skill_id = skill_data.get("id", "")
 
 	# Set icon using UIHelpers for safe texture loading
 	UIHelpers.set_texture_safe(icon, skill_data.get("image_path", ""))
 
 	# Set name
-	skill_name.text = skill_data["name"]
+	skill_name.text = skill_data.get("name", "Unknown")
 
 
 func set_locked(locked: bool) -> void:

@@ -123,21 +123,27 @@ func _populate_items() -> void:
 	UIHelpers.clear_children(items_container)
 
 	# Combine equipped items and upgrades for display
-	var all_items: Array[String] = []
-	all_items.append_array(char_instance.equipped_items)
-	all_items.append_array(char_instance.equipped_item_upgrades)
+	var all_item_ids: Array[String] = []
+	all_item_ids.append_array(char_instance.equipped_items)
+	all_item_ids.append_array(char_instance.equipped_item_upgrades)
 
 	# Create 9 slots (3x3 grid) - use normal size for better visibility
 	for i in range(9):
 		var slot = ItemSlotScene.instantiate()
 		items_container.add_child(slot)
 
-		var item_id = all_items[i] if i < all_items.size() else ""
-		slot.setup(item_id)
-		slot.set_compact(false)  # Use full size for detail view
-		slot.set_clickable(not item_id.is_empty())
-
+		var item_id = all_item_ids[i] if i < all_item_ids.size() else ""
+		var item_data = {}
 		if not item_id.is_empty():
+			item_data = GameData.get_item_by_id(item_id)
+			if item_data.is_empty():
+				item_data = GameData.get_item_upgrade_by_id(item_id)
+
+		slot.setup(item_data)
+		slot.set_compact(false)  # Use full size for detail view
+		slot.set_clickable(not item_data.is_empty())
+
+		if not item_data.is_empty():
 			slot.slot_clicked.connect(_on_item_slot_clicked)
 
 
@@ -147,9 +153,13 @@ func _populate_skills() -> void:
 
 	# Show learned skills - use normal size for detail view
 	for skill_id in char_instance.learned_skills:
+		var skill_data = GameData.get_skill_by_id(skill_id)
+		if skill_data.is_empty():
+			continue
+
 		var skill_icon = SkillIconScene.instantiate()
 		skills_container.add_child(skill_icon)
-		skill_icon.setup(skill_id)
+		skill_icon.setup(skill_data)
 		skill_icon.set_compact(false)  # Use full size for detail view
 
 		# Make clickable

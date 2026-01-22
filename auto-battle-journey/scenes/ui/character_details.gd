@@ -110,9 +110,13 @@ func _display_equipped_items(char_data: Dictionary) -> void:
 
 	# Add slot for each equipped item (compact mode)
 	for item_id in equipped:
+		var item_data = GameData.get_item_by_id(item_id)
+		if item_data.is_empty():
+			continue
+
 		var item_slot = ItemSlotScene.instantiate()
 		equipped_items_container.add_child(item_slot)
-		item_slot.setup(item_id)
+		item_slot.setup(item_data)
 		item_slot.set_compact(true)
 		item_slot.slot_clicked.connect(_on_equipped_item_clicked)
 
@@ -144,7 +148,7 @@ func _display_unlocked_items(char_data: Dictionary) -> void:
 		# Item slot (compact)
 		var item_slot = ItemSlotScene.instantiate()
 		item_container.add_child(item_slot)
-		item_slot.setup(item_id)
+		item_slot.setup(item_data)
 		item_slot.set_compact(true)
 
 		# Small equip/unequip button
@@ -177,9 +181,13 @@ func _display_unlocked_skills(char_data: Dictionary) -> void:
 
 	# Add each unlocked skill (compact mode)
 	for skill_id in unlocked:
+		var skill_data = GameData.get_skill_by_id(skill_id)
+		if skill_data.is_empty():
+			continue
+
 		var skill_icon = SkillIconScene.instantiate()
 		skills_grid.add_child(skill_icon)
-		skill_icon.setup(skill_id)
+		skill_icon.setup(skill_data)
 		skill_icon.set_compact(true)
 
 	# If no skills unlocked, show placeholder text

@@ -25,19 +25,19 @@ func _on_ready() -> void:
 		gui_input.connect(_on_gui_input)
 
 
-func setup(item_id: String = "") -> void:
+func setup(item_data: Dictionary = {}) -> void:
 	"""
-	Configure the slot
+	Configure the slot with item data.
 
 	Args:
-		item_id: ID of equipped item, or empty string for empty slot
+		item_data: Item data dictionary, or empty dict for empty slot
 	"""
-	equipped_item_id = item_id
-
-	if item_id.is_empty():
+	if item_data.is_empty():
+		equipped_item_id = ""
 		_show_empty_slot()
 	else:
-		_show_equipped_item(item_id)
+		equipped_item_id = item_data.get("id", "")
+		_show_equipped_item(item_data)
 
 
 func _show_empty_slot() -> void:
@@ -47,19 +47,13 @@ func _show_empty_slot() -> void:
 	modulate = GameConstants.COLOR_DISABLED
 
 
-func _show_equipped_item(item_id: String) -> void:
+func _show_equipped_item(item_data: Dictionary) -> void:
 	"""Display an equipped item"""
-	var item_data = GameData.get_item_by_id(item_id)
-	if item_data.is_empty():
-		push_error("ItemSlot: Item not found: %s" % item_id)
-		_show_empty_slot()
-		return
-
 	# Set icon using UIHelpers for safe texture loading
 	UIHelpers.set_texture_safe(item_icon, item_data.get("image_path", ""))
 
 	# Set name
-	item_name.text = item_data["name"]
+	item_name.text = item_data.get("name", "Unknown")
 
 	# Normal color for equipped items
 	modulate = Color.WHITE

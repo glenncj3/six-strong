@@ -26,7 +26,7 @@ func _ready() -> void:
 
 
 func show_item(item_id: String) -> void:
-	"""Show details for an item."""
+	"""Show details for an item by ID (convenience wrapper)."""
 	var item_data = GameData.get_item_by_id(item_id)
 	if item_data.is_empty():
 		# Try item upgrade
@@ -34,6 +34,15 @@ func show_item(item_id: String) -> void:
 
 	if item_data.is_empty():
 		push_error("DetailPopup: Item not found: %s" % item_id)
+		return
+
+	show_item_data(item_data)
+
+
+func show_item_data(item_data: Dictionary) -> void:
+	"""Show details for an item using provided data."""
+	if item_data.is_empty():
+		push_error("DetailPopup: Empty item data provided")
 		return
 
 	_setup_display(
@@ -47,10 +56,19 @@ func show_item(item_id: String) -> void:
 
 
 func show_skill(skill_id: String) -> void:
-	"""Show details for a skill."""
+	"""Show details for a skill by ID (convenience wrapper)."""
 	var skill_data = GameData.get_skill_by_id(skill_id)
 	if skill_data.is_empty():
 		push_error("DetailPopup: Skill not found: %s" % skill_id)
+		return
+
+	show_skill_data(skill_data)
+
+
+func show_skill_data(skill_data: Dictionary) -> void:
+	"""Show details for a skill using provided data."""
+	if skill_data.is_empty():
+		push_error("DetailPopup: Empty skill data provided")
 		return
 
 	# Convert effects array to display format
