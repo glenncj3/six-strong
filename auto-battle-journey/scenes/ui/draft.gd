@@ -38,6 +38,14 @@ func _ready() -> void:
 	_setup_options_display()
 	draft_manager.generate_options()
 	_update_instruction()
+	_play_entrance_animations()
+
+
+func _play_entrance_animations() -> void:
+	"""Play entrance animations."""
+	AnimationManager.fade_in(instruction_label, GameConstants.ANIM_DURATION_NORMAL, 0.0)
+	AnimationManager.fade_in(back_button, GameConstants.ANIM_DURATION_FAST, 0.05)
+	AnimationManager.fade_in(options_section, GameConstants.ANIM_DURATION_NORMAL, 0.1)
 
 
 func _setup_draft_manager() -> void:

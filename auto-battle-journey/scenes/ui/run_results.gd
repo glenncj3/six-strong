@@ -34,6 +34,15 @@ func _ready() -> void:
 		_capture_run_data()
 
 	_display_results()
+	_play_entrance_animations()
+
+
+func _play_entrance_animations() -> void:
+	"""Play entrance animations with dramatic reveal."""
+	AnimationManager.fade_in(result_title, GameConstants.ANIM_DURATION_SLOW, 0.0)
+	AnimationManager.fade_in(rounds_label.get_parent().get_parent().get_parent(), GameConstants.ANIM_DURATION_NORMAL, 0.2)
+	AnimationManager.fade_in(gems_label.get_parent().get_parent().get_parent(), GameConstants.ANIM_DURATION_NORMAL, 0.35)
+	AnimationManager.fade_in(continue_button, GameConstants.ANIM_DURATION_NORMAL, 0.5)
 
 
 func _capture_run_data() -> void:

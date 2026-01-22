@@ -21,8 +21,16 @@ func _ready() -> void:
 	combat_data = SceneManager.get_scene_data("selected_combat", {})
 	if not combat_data.is_empty():
 		_setup_display()
+		_play_entrance_animations()
 	else:
 		push_error("CombatStub: No combat data found!")
+
+
+func _play_entrance_animations() -> void:
+	"""Play entrance animations."""
+	AnimationManager.fade_in(title_label, GameConstants.ANIM_DURATION_NORMAL, 0.0)
+	AnimationManager.fade_in(opponent_label, GameConstants.ANIM_DURATION_NORMAL, 0.1)
+	AnimationManager.fade_in(win_button.get_parent(), GameConstants.ANIM_DURATION_NORMAL, 0.2)
 
 
 func _setup_display() -> void:

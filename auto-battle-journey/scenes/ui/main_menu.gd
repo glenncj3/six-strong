@@ -1,8 +1,11 @@
 extends Control
 # Main Menu - entry point with navigation and currency display
 # Refactored to use SceneManager with fantasy aesthetic
+# Now includes entrance animations and enhanced button effects
 
 const DebugMenuScene = preload("res://scenes/ui/debug_menu.tscn")
+const ButtonEffectsScript = preload("res://scripts/effects/button_effects.gd")
+const AmbientParticlesScene = preload("res://scenes/effects/ambient_particles.tscn")
 
 @onready var background = $Background
 @onready var title_label = $MarginContainer/VBoxContainer/Title
@@ -12,11 +15,16 @@ const DebugMenuScene = preload("res://scenes/ui/debug_menu.tscn")
 @onready var play_button = $MarginContainer/VBoxContainer/ButtonContainer/PlayButton
 @onready var collection_button = $MarginContainer/VBoxContainer/ButtonContainer/CollectionButton
 @onready var quit_button = $MarginContainer/VBoxContainer/ButtonContainer/QuitButton
+@onready var currency_display = $CurrencyDisplay
+@onready var button_container = $MarginContainer/VBoxContainer/ButtonContainer
 
 
 func _ready() -> void:
 	# Apply visual styling
 	_apply_visual_styling()
+
+	# Apply button interaction effects
+	_apply_button_effects()
 
 	# Update currency display
 	_update_currency_display()
@@ -35,6 +43,12 @@ func _ready() -> void:
 		play_button.text = "RESUME RUN"
 	else:
 		play_button.text = "PLAY"
+
+	# Play entrance animations
+	_play_entrance_animations()
+
+	# Add ambient effects
+	_setup_ambient_effects()
 
 
 
@@ -55,6 +69,42 @@ func _apply_visual_styling() -> void:
 	UIStyles.apply_button_styles(play_button)
 	UIStyles.apply_button_styles(collection_button)
 	UIStyles.apply_button_styles(quit_button)
+
+
+func _apply_button_effects() -> void:
+	"""Apply hover/press scale effects to buttons."""
+	ButtonEffectsScript.apply_effects(play_button)
+	ButtonEffectsScript.apply_effects(collection_button)
+	ButtonEffectsScript.apply_effects(quit_button)
+
+
+func _play_entrance_animations() -> void:
+	"""Play entrance animations for menu elements."""
+	# Title - fade in
+	AnimationManager.fade_in(title_label, GameConstants.ANIM_DURATION_NORMAL, 0.0)
+
+	# Subtitle - fade in with delay
+	AnimationManager.fade_in(subtitle_label, GameConstants.ANIM_DURATION_NORMAL, 0.1)
+
+	# Currency display - fade in
+	AnimationManager.fade_in(currency_display, GameConstants.ANIM_DURATION_NORMAL, 0.05)
+
+	# Buttons - cascade fade in (safe for container layouts)
+	var buttons = [play_button, collection_button, quit_button]
+	var base_delay = 0.15
+	for i in range(buttons.size()):
+		var delay = base_delay + (i * 0.08)
+		AnimationManager.fade_in(buttons[i], GameConstants.ANIM_DURATION_NORMAL, delay)
+
+
+func _setup_ambient_effects() -> void:
+	"""Add ambient visual effects."""
+	# Add particles as Node2D child - renders after background in tree order
+	var particles = AmbientParticlesScene.instantiate()
+	background.add_sibling(particles)  # Add right after background node
+
+	# More visible pulse on play button
+	AnimationManager.pulse(play_button, 0.7, 1.0, 1.5)
 
 
 func _update_currency_display() -> void:

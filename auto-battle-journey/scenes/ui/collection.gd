@@ -32,6 +32,19 @@ func _ready() -> void:
 	character_details_panel.visible = false
 
 	_populate_character_list()
+	_play_entrance_animations()
+
+
+func _play_entrance_animations() -> void:
+	"""Play entrance animations for UI elements."""
+	AnimationManager.fade_in(title_label, GameConstants.ANIM_DURATION_NORMAL, 0.0)
+	AnimationManager.fade_in(back_button, GameConstants.ANIM_DURATION_FAST, 0.05)
+
+	# Cascade fade in character tiles
+	var delay = 0.1
+	for tile in character_tiles:
+		AnimationManager.fade_in(tile, GameConstants.ANIM_DURATION_NORMAL, delay)
+		delay += 0.03
 
 
 func _apply_visual_styling() -> void:

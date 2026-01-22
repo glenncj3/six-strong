@@ -23,8 +23,15 @@ func _ready() -> void:
 	encounter_data = SceneManager.get_scene_data("selected_encounter", {})
 	if not encounter_data.is_empty():
 		_setup_encounter()
+		_play_entrance_animations()
 	else:
 		push_error("EncounterExecute: No encounter data found!")
+
+
+func _play_entrance_animations() -> void:
+	"""Play entrance animations."""
+	AnimationManager.fade_in(title_label, GameConstants.ANIM_DURATION_NORMAL, 0.0)
+	AnimationManager.fade_in(content_container, GameConstants.ANIM_DURATION_NORMAL, 0.1)
 
 
 func _setup_encounter() -> void:

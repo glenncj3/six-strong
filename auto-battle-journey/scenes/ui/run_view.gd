@@ -5,14 +5,14 @@ extends Control
 
 @onready var background = $Background
 @onready var top_bar = $TopBar
-@onready var round_label = $TopBar/MarginContainer/VBoxContainer/RoundLabel
-@onready var reputation_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/ReputationLabel
-@onready var wins_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/WinsLabel
-@onready var gold_label = $TopBar/MarginContainer/VBoxContainer/StatsGrid/GoldLabel
+@onready var round_label = $TopBar/MarginContainer/HBoxContainer/LeftSection/RoundLabel
+@onready var reputation_label = $TopBar/MarginContainer/HBoxContainer/StatsContainer/ReputationLabel
+@onready var wins_label = $TopBar/MarginContainer/HBoxContainer/StatsContainer/WinsLabel
+@onready var gold_label = $TopBar/MarginContainer/HBoxContainer/StatsContainer/GoldLabel
 
 @onready var team_display = $TeamDisplay
 @onready var options_panel = $OptionsPanel
-@onready var concede_button = $ConcedeButton
+@onready var concede_button = $TopBar/MarginContainer/HBoxContainer/RightSection/ConcedeButton
 @onready var concede_confirm_dialog = $ConcedeConfirmDialog
 
 var _concede_dialog_open: bool = false
@@ -39,8 +39,16 @@ func _ready() -> void:
 	# Initialize display
 	_update_all_displays()
 	_setup_phase()
+	_play_entrance_animations()
 
 	print("RunView: Initialization complete")
+
+
+func _play_entrance_animations() -> void:
+	"""Play entrance animations."""
+	AnimationManager.fade_in(top_bar, GameConstants.ANIM_DURATION_NORMAL, 0.0)
+	AnimationManager.fade_in(team_display, GameConstants.ANIM_DURATION_NORMAL, 0.1)
+	AnimationManager.fade_in(options_panel, GameConstants.ANIM_DURATION_NORMAL, 0.15)
 
 
 func _apply_visual_styling() -> void:
@@ -51,24 +59,41 @@ func _apply_visual_styling() -> void:
 	# Top bar panel styling (Panel uses "panel" stylebox)
 	top_bar.add_theme_stylebox_override("panel", UIStyles.create_warm_panel())
 
-	# Text colors
+	# Round label - gold, left-aligned
 	round_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 
-	# Stat labels
+	# Stat labels - light parchment
 	reputation_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	wins_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	gold_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 
-	# Concede button - special styling (danger action)
-	var concede_style = UIStyles.create_panel_style(
-		GameConstants.COLOR_RUBY,
-		GameConstants.COLOR_BORDER_SILVER,
-		UIStyles.BORDER_WIDTH_THIN,
-		UIStyles.CORNER_RADIUS_SMALL,
-		false
-	)
-	concede_button.add_theme_stylebox_override("normal", concede_style)
-	concede_button.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	# Concede button - small red square with white X
+	_style_concede_button()
+
+
+func _style_concede_button() -> void:
+	"""Style the concede button as a compact red square with white X."""
+	var normal_style = StyleBoxFlat.new()
+	normal_style.bg_color = GameConstants.COLOR_RUBY
+	normal_style.corner_radius_top_left = UIStyles.CORNER_RADIUS_SMALL
+	normal_style.corner_radius_top_right = UIStyles.CORNER_RADIUS_SMALL
+	normal_style.corner_radius_bottom_left = UIStyles.CORNER_RADIUS_SMALL
+	normal_style.corner_radius_bottom_right = UIStyles.CORNER_RADIUS_SMALL
+
+	var hover_style = normal_style.duplicate()
+	hover_style.bg_color = GameConstants.COLOR_RUBY.lightened(0.15)
+
+	var pressed_style = normal_style.duplicate()
+	pressed_style.bg_color = GameConstants.COLOR_RUBY.darkened(0.2)
+
+	concede_button.add_theme_stylebox_override("normal", normal_style)
+	concede_button.add_theme_stylebox_override("hover", hover_style)
+	concede_button.add_theme_stylebox_override("pressed", pressed_style)
+	concede_button.add_theme_stylebox_override("focus", normal_style)
+	concede_button.add_theme_color_override("font_color", Color.WHITE)
+	concede_button.add_theme_color_override("font_hover_color", Color.WHITE)
+	concede_button.add_theme_color_override("font_pressed_color", GameConstants.COLOR_TEXT_LIGHT)
+	concede_button.add_theme_font_size_override("font_size", 16)
 
 
 func _exit_tree() -> void:
@@ -98,7 +123,7 @@ func _update_top_bar() -> void:
 	var gold = RunManager.get_gold()
 
 	round_label.text = "ROUND %d" % (round_num + 1)  # Display as 1-indexed
-	reputation_label.text = "%s %d/%d" % [GameConstants.EMOJI_HEART, rep, GameConstants.STARTING_REPUTATION]
+	reputation_label.text = "%s %d" % [GameConstants.EMOJI_HEART, rep]
 	wins_label.text = "%s %d/%d" % [GameConstants.EMOJI_STAR, wins, GameConstants.WINS_FOR_VICTORY]
 	gold_label.text = "%s %d" % [GameConstants.EMOJI_GOLD, gold]
 
@@ -231,9 +256,17 @@ func _on_reputation_changed(_new_reputation: int) -> void:
 	_update_top_bar()
 
 
-func _on_gold_changed(_new_gold: int) -> void:
-	"""Handle gold change signal."""
+func _on_gold_changed(new_gold: int) -> void:
+	"""Handle gold change signal with visual feedback."""
+	var old_text = gold_label.text
 	_update_top_bar()
+
+	# Spawn gold particle burst at gold label position
+	if gold_label.is_inside_tree():
+		var burst = ParticlePresets.create_gold_burst(6)
+		burst.position = gold_label.global_position + gold_label.size / 2
+		get_tree().root.add_child(burst)
+		burst.emitting = true
 
 
 func _on_phase_changed(_new_phase: String) -> void:

@@ -401,3 +401,81 @@ static func get_default_item_stats() -> Dictionary:
 		ITEM_STAT_CRIT_BUFF: 0,
 		ITEM_STAT_BONUS_MANA: 0
 	}
+
+# =============================================================================
+# ANIMATION CONSTANTS
+# =============================================================================
+
+# Animation timing durations
+const ANIM_DURATION_INSTANT := 0.1
+const ANIM_DURATION_FAST := 0.2
+const ANIM_DURATION_NORMAL := 0.3
+const ANIM_DURATION_SLOW := 0.5
+const ANIM_DURATION_DRAMATIC := 0.8
+
+# Standard easing and transition types
+const ANIM_EASE_STANDARD := Tween.EASE_OUT
+const ANIM_TRANS_STANDARD := Tween.TRANS_CUBIC
+const ANIM_TRANS_BOUNCE := Tween.TRANS_BACK
+
+# Cascade animation delay between elements
+const CASCADE_DELAY := 0.05
+
+# =============================================================================
+# VISUAL EFFECT CONSTANTS
+# =============================================================================
+
+# Button interaction scaling
+const HOVER_SCALE := 1.03
+const PRESS_SCALE := 0.95
+
+# Card interaction effects
+const CARD_HOVER_LIFT := 4.0
+const CARD_HOVER_SCALE := 1.05
+const CARD_TILT_DEGREES := 3.0
+
+# =============================================================================
+# GLOW COLORS (for rarity-based effects)
+# =============================================================================
+
+const GLOW_COLOR_LEGENDARY := Color("#FFD700")
+const GLOW_COLOR_EPIC := Color("#9932CC")
+const GLOW_COLOR_RARE := Color("#4169E1")
+const GLOW_COLOR_UNCOMMON := Color("#32CD32")
+const GLOW_COLOR_COMMON := Color("#808080")
+
+# =============================================================================
+# PARTICLE EFFECT CONSTANTS
+# =============================================================================
+
+const PARTICLE_RATE_SUBTLE := 5
+const PARTICLE_RATE_NORMAL := 15
+const PARTICLE_RATE_INTENSE := 30
+
+# =============================================================================
+# SCREEN SHAKE CONSTANTS
+# =============================================================================
+
+const SHAKE_INTENSITY_MICRO := 2.0
+const SHAKE_INTENSITY_LIGHT := 5.0
+const SHAKE_INTENSITY_MEDIUM := 10.0
+const SHAKE_INTENSITY_HEAVY := 20.0
+const SHAKE_DURATION_SHORT := 0.1
+const SHAKE_DURATION_NORMAL := 0.2
+const SHAKE_DURATION_LONG := 0.4
+
+# =============================================================================
+# TRANSITION TYPES
+# =============================================================================
+
+enum TransitionType {
+	FADE,          # Default fade to black, fade in
+	SLIDE_LEFT,    # Slide out left, slide in from right
+	SLIDE_RIGHT,   # Slide out right, slide in from left
+	SLIDE_UP,      # Slide out up, slide in from bottom
+	SLIDE_DOWN,    # Slide out down, slide in from top
+	SCALE,         # Scale down old, scale up new
+	DISSOLVE,      # Particle-based dissolve effect
+	WIPE_RADIAL,   # Radial wipe from center
+	WIPE_HORIZONTAL # Horizontal wipe
+}

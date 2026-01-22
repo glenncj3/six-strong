@@ -2,12 +2,15 @@ class_name ClickablePanelBase
 extends PanelContainer
 ## Base class for PanelContainers with hover/click interaction.
 ## Provides consistent mouse interaction across components.
+## Uses InteractiveScale for scale animations.
 ##
 ## Usage:
 ##   1. Extend this class
 ##   2. Call setup_styles() with your style dictionary
 ##   3. Override _handle_click() to handle click events
 ##   4. Override _on_ready() for additional initialization
+
+const InteractiveScaleClass = preload("res://scripts/effects/interactive_scale.gd")
 
 signal panel_clicked(data: Variant)
 
@@ -17,8 +20,15 @@ var _is_pressed: bool = false
 var _click_data: Variant = null
 var clickable: bool = true
 
+# Animation settings
+var enable_scale_animation: bool = true
+var hover_scale: float = 1.0  # No scale on hover (prevents container clipping)
+var press_scale: float = 0.96  # Subtle press feedback
+var _scaler = null  # InteractiveScale instance
+
 
 func _ready() -> void:
+	_scaler = InteractiveScaleClass.new(self, hover_scale, press_scale)
 	if clickable:
 		_setup_mouse_interaction()
 	_on_ready()
@@ -46,12 +56,16 @@ func _on_mouse_entered() -> void:
 		return
 	_is_hovered = true
 	_apply_state_style()
+	if enable_scale_animation:
+		_scaler.hover()
 
 
 func _on_mouse_exited() -> void:
 	_is_hovered = false
 	_is_pressed = false
 	_apply_state_style()
+	if enable_scale_animation:
+		_scaler.unhover()
 
 
 func _apply_state_style() -> void:
@@ -79,11 +93,15 @@ func _on_gui_input(event: InputEvent) -> void:
 			if event.pressed:
 				_is_pressed = true
 				_apply_state_style()
+				if enable_scale_animation:
+					_scaler.press()
 			else:
 				if _is_pressed and _is_hovered:
 					_handle_click()
 				_is_pressed = false
 				_apply_state_style()
+				if enable_scale_animation:
+					_scaler.release(_is_hovered)
 
 
 func _handle_click() -> void:

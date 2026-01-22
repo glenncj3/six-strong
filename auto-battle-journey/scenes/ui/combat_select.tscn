@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://combat_select1"]
 
-[ext_resource type="Script" uid="uid://combat_sel_s1" path="res://scenes/ui/combat_select.gd" id="1_script"]
+[ext_resource type="Script" path="res://scenes/ui/combat_select.gd" id="1_script"]
 
 [node name="CombatSelect" type="Control"]
 layout_mode = 3
