@@ -33,7 +33,12 @@
       "Bash(cmd /c \"dir /s /b C:\\\\Users\\\\glenn\\\\scoop\\\\*godot*.exe 2>nul\")",
       "Bash(cmd /c \"dir /s /b C:\\\\Users\\\\glenn\\\\AppData\\\\Local\\\\*godot*.exe 2>nul\")",
       "Bash(del \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\\\\test_hover.gd\")",
-      "Bash(cmd /c del \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\\\\test_hover.gd\")"
+      "Bash(cmd /c del \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\\\\auto-battle-journey\\\\test_hover.gd\")",
+      "Bash(git -C \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\" diff)",
+      "Bash(git -C \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\" log --oneline -5)",
+      "Bash(git -C \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\" add auto-battle-journey/CLAUDE.md)",
+      "Bash(git -C \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\" commit -m \"$\\(cat <<''EOF''\nDocument full Godot executable path and headless commands in CLAUDE.md\n\nGodot is not in PATH on this system, so commands need the full path.\nAdded working headless validation command for project testing.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
