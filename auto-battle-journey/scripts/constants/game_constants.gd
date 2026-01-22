@@ -115,6 +115,47 @@ static func get_default_stats() -> Dictionary:
 		STAT_STARTING_ITEM_SLOTS: 0
 	}
 
+# =============================================================================
+# CHARACTER CLASS TYPES
+# =============================================================================
+
+const CLASS_TYPE_WARRIOR := "warrior"
+const CLASS_TYPE_MAGE := "mage"
+const CLASS_TYPE_ROGUE := "rogue"
+const CLASS_TYPE_CLERIC := "cleric"
+const CLASS_TYPE_RANGER := "ranger"
+const CLASS_TYPE_BERSERKER := "berserker"
+const CLASS_TYPE_PALADIN := "paladin"
+const CLASS_TYPE_NECROMANCER := "necromancer"
+const CLASS_TYPE_MONK := "monk"
+const CLASS_TYPE_ASSASSIN := "assassin"
+
+const ALL_CLASS_TYPES := [
+	CLASS_TYPE_WARRIOR,
+	CLASS_TYPE_MAGE,
+	CLASS_TYPE_ROGUE,
+	CLASS_TYPE_CLERIC,
+	CLASS_TYPE_RANGER,
+	CLASS_TYPE_BERSERKER,
+	CLASS_TYPE_PALADIN,
+	CLASS_TYPE_NECROMANCER,
+	CLASS_TYPE_MONK,
+	CLASS_TYPE_ASSASSIN
+]
+
+const CLASS_TYPE_DISPLAY_NAMES := {
+	CLASS_TYPE_WARRIOR: "Warrior",
+	CLASS_TYPE_MAGE: "Mage",
+	CLASS_TYPE_ROGUE: "Rogue",
+	CLASS_TYPE_CLERIC: "Cleric",
+	CLASS_TYPE_RANGER: "Ranger",
+	CLASS_TYPE_BERSERKER: "Berserker",
+	CLASS_TYPE_PALADIN: "Paladin",
+	CLASS_TYPE_NECROMANCER: "Necromancer",
+	CLASS_TYPE_MONK: "Monk",
+	CLASS_TYPE_ASSASSIN: "Assassin"
+}
+
 
 # =============================================================================
 # UI CONSTANTS
@@ -284,30 +325,30 @@ const SKILL_STAT_DISPLAY_NAMES := {
 	SKILL_STAT_BONUS_MANA: "+MP"
 }
 
-# Skill types (synergy flags)
-const SKILL_TYPE_FIRE := "fire"
-const SKILL_TYPE_ICE := "ice"
-const SKILL_TYPE_LIGHTNING := "lightning"
-const SKILL_TYPE_EARTH := "earth"
-const SKILL_TYPE_HOLY := "holy"
-const SKILL_TYPE_SHADOW := "shadow"
+# Element types (synergy flags for skills and items)
+const ELEMENT_TYPE_FIRE := "fire"
+const ELEMENT_TYPE_ICE := "ice"
+const ELEMENT_TYPE_LIGHTNING := "lightning"
+const ELEMENT_TYPE_EARTH := "earth"
+const ELEMENT_TYPE_HOLY := "holy"
+const ELEMENT_TYPE_SHADOW := "shadow"
 
-const ALL_SKILL_TYPES := [
-	SKILL_TYPE_FIRE,
-	SKILL_TYPE_ICE,
-	SKILL_TYPE_LIGHTNING,
-	SKILL_TYPE_EARTH,
-	SKILL_TYPE_HOLY,
-	SKILL_TYPE_SHADOW
+const ALL_ELEMENT_TYPES := [
+	ELEMENT_TYPE_FIRE,
+	ELEMENT_TYPE_ICE,
+	ELEMENT_TYPE_LIGHTNING,
+	ELEMENT_TYPE_EARTH,
+	ELEMENT_TYPE_HOLY,
+	ELEMENT_TYPE_SHADOW
 ]
 
-const SKILL_TYPE_DISPLAY_NAMES := {
-	SKILL_TYPE_FIRE: "Fire",
-	SKILL_TYPE_ICE: "Ice",
-	SKILL_TYPE_LIGHTNING: "Lightning",
-	SKILL_TYPE_EARTH: "Earth",
-	SKILL_TYPE_HOLY: "Holy",
-	SKILL_TYPE_SHADOW: "Shadow"
+const ELEMENT_TYPE_DISPLAY_NAMES := {
+	ELEMENT_TYPE_FIRE: "Fire",
+	ELEMENT_TYPE_ICE: "Ice",
+	ELEMENT_TYPE_LIGHTNING: "Lightning",
+	ELEMENT_TYPE_EARTH: "Earth",
+	ELEMENT_TYPE_HOLY: "Holy",
+	ELEMENT_TYPE_SHADOW: "Shadow"
 }
 
 # Default skill stat values (used when creating skill stat blocks)
@@ -320,4 +361,43 @@ static func get_default_skill_stats() -> Dictionary:
 		SKILL_STAT_SPEED_BUFF: 0.0,
 		SKILL_STAT_CRIT_BUFF: 0,
 		SKILL_STAT_BONUS_MANA: 0
+	}
+
+# =============================================================================
+# ITEM STAT NAMES
+# =============================================================================
+
+# Item stats (type uses ALL_ELEMENT_TYPES for synergies)
+const ITEM_STAT_SPEED := "speed"
+const ITEM_STAT_DAMAGE_BUFF := "damageBuff"
+const ITEM_STAT_SPEED_BUFF := "speedBuff"
+const ITEM_STAT_CRIT_BUFF := "critBuff"
+const ITEM_STAT_BONUS_MANA := "bonusMana"
+
+# All valid item stats (for validation)
+const ALL_ITEM_STATS := [
+	ITEM_STAT_SPEED,
+	ITEM_STAT_DAMAGE_BUFF,
+	ITEM_STAT_SPEED_BUFF,
+	ITEM_STAT_CRIT_BUFF,
+	ITEM_STAT_BONUS_MANA
+]
+
+# Display names for item stats (used in UI)
+const ITEM_STAT_DISPLAY_NAMES := {
+	ITEM_STAT_SPEED: "SPD",
+	ITEM_STAT_DAMAGE_BUFF: "+DMG",
+	ITEM_STAT_SPEED_BUFF: "+SPD",
+	ITEM_STAT_CRIT_BUFF: "+CRIT",
+	ITEM_STAT_BONUS_MANA: "+MP"
+}
+
+# Default item stat values (used when creating item stat blocks)
+static func get_default_item_stats() -> Dictionary:
+	return {
+		ITEM_STAT_SPEED: 0.0,
+		ITEM_STAT_DAMAGE_BUFF: 0,
+		ITEM_STAT_SPEED_BUFF: 0.0,
+		ITEM_STAT_CRIT_BUFF: 0,
+		ITEM_STAT_BONUS_MANA: 0
 	}
