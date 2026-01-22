@@ -25,9 +25,32 @@ A roguelike auto-battler inspired by The Bazaar, featuring character collection,
 
 ## Godot Commands
 
-- Open Godot Editor: `godot --editor`
-- Run the game: `godot --path . res://main.tscn`
-- Export for Windows: `godot --export "Windows Desktop" ./build/game.exe`
+**Important**: Godot is not in PATH. Use the full executable path:
+```
+"C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe"
+```
+
+The Godot project is in the nested directory:
+```
+C:\Users\glenn\Dev\auto-battle-journey\auto-battle-journey
+```
+
+### Common Commands
+
+- **Validate project loads (headless)**:
+  ```
+  "C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe" --headless --path "C:\Users\glenn\Dev\auto-battle-journey\auto-battle-journey" --quit
+  ```
+
+- **Open Godot Editor**:
+  ```
+  "C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe" --editor --path "C:\Users\glenn\Dev\auto-battle-journey\auto-battle-journey"
+  ```
+
+- **Run the game**:
+  ```
+  "C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe" --path "C:\Users\glenn\Dev\auto-battle-journey\auto-battle-journey" res://main.tscn
+  ```
 
 ## Code Conventions
 
