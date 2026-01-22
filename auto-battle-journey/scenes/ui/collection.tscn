@@ -38,6 +38,7 @@ theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="MainContainer/VBoxContainer"]
 layout_mode = 2
+theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 24
 text = "CHARACTER COLLECTION"
 horizontal_alignment = 1
@@ -90,6 +91,7 @@ theme_override_constants/separation = 8
 
 [node name="DetailsTitle" type="Label" parent="CharacterDetailsPanel/DetailsMargin/DetailsContainer"]
 layout_mode = 2
+theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 20
 text = "CHARACTER DETAILS"
 horizontal_alignment = 1

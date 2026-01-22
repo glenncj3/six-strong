@@ -39,6 +39,7 @@ alignment = 1
 
 [node name="Title" type="Label" parent="MainContainer"]
 layout_mode = 2
+theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 36
 text = "COMBAT"
 horizontal_alignment = 1
@@ -89,6 +90,7 @@ text = "LOSE"
 
 [node name="ResultLabel" type="Label" parent="MainContainer"]
 layout_mode = 2
+theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 28
 text = ""
 horizontal_alignment = 1

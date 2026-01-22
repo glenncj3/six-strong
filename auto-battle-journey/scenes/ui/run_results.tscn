@@ -60,6 +60,7 @@ layout_mode = 2
 [node name="ResultTitle" type="Label" parent="ScrollContainer/MainContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 48
 text = "VICTORY!"
 horizontal_alignment = 1
@@ -83,6 +84,7 @@ theme_override_constants/separation = 8
 
 [node name="StatsTitle" type="Label" parent="ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer"]
 layout_mode = 2
+theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 20
 text = "RUN STATISTICS"
 horizontal_alignment = 1
@@ -135,6 +137,7 @@ theme_override_constants/separation = 8
 
 [node name="RewardsTitle" type="Label" parent="ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer"]
 layout_mode = 2
+theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 20
 text = "REWARDS"
 horizontal_alignment = 1
@@ -168,6 +171,7 @@ theme_override_constants/separation = 8
 
 [node name="RankUpsTitle" type="Label" parent="ScrollContainer/MainContainer/RankUpsPanelContainer/RankUpsPanel/RankUpsContainer"]
 layout_mode = 2
+theme_type_variation = "HeaderLabel"
 theme_override_colors/font_color = Color(1, 0.84, 0, 1)
 theme_override_font_sizes/font_size = 24
 text = "RANK UPS!"

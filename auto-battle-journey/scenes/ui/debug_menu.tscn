@@ -47,6 +47,7 @@ theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 28
 text = "DEBUG MENU"
 horizontal_alignment = 1

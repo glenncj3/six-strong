@@ -42,6 +42,7 @@ text = "<"
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
+theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 16
 text = "Character Name"
 vertical_alignment = 1
