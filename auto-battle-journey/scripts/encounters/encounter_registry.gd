@@ -8,7 +8,8 @@ extends RefCounted
 # {
 #   "create_ui": Callable,  # (encounter_data, context) -> Control
 #   "immediate_complete": bool,  # Whether to enable complete button immediately
-#   "on_complete": Callable (optional)  # Additional completion logic
+#   "on_complete": Callable (optional),  # Additional completion logic
+#   "get_reward_preview": Callable (optional)  # (encounter_data) -> String
 # }
 
 static var _handlers: Dictionary = {}
@@ -30,43 +31,50 @@ static func _register_default_handlers() -> void:
 	# Shop encounter
 	register("shop", {
 		"create_ui": EncounterUIFactory._create_shop_ui,
-		"immediate_complete": true
+		"immediate_complete": true,
+		"get_reward_preview": EncounterUIFactory._get_shop_preview
 	})
 
 	# XP reward encounter
 	register("xp_reward", {
 		"create_ui": EncounterUIFactory._create_xp_reward_ui,
-		"immediate_complete": true
+		"immediate_complete": true,
+		"get_reward_preview": EncounterUIFactory._get_xp_reward_preview
 	})
 
 	# Gold reward encounter
 	register("gold_reward", {
 		"create_ui": EncounterUIFactory._create_gold_reward_ui,
-		"immediate_complete": true
+		"immediate_complete": true,
+		"get_reward_preview": EncounterUIFactory._get_gold_reward_preview
 	})
 
 	# Health restore encounter
 	register("health_restore", {
 		"create_ui": EncounterUIFactory._create_health_restore_ui,
-		"immediate_complete": true
+		"immediate_complete": true,
+		"get_reward_preview": EncounterUIFactory._get_health_restore_preview
 	})
 
 	# Skill trainer encounter
 	register("skill_trainer", {
 		"create_ui": EncounterUIFactory._create_skill_trainer_ui,
-		"immediate_complete": false  # Must select a character
+		"immediate_complete": false,  # Must select a character
+		"get_reward_preview": EncounterUIFactory._get_skill_trainer_preview
 	})
 
 	# Gamble encounter
 	register("gamble", {
 		"create_ui": EncounterUIFactory._create_gamble_ui,
-		"immediate_complete": false  # Must gamble or decline
+		"immediate_complete": false,  # Must gamble or decline
+		"get_reward_preview": EncounterUIFactory._get_gamble_preview
 	})
 
 	# Elite challenge encounter
 	register("elite_challenge", {
 		"create_ui": EncounterUIFactory._create_elite_challenge_ui,
-		"immediate_complete": false  # Must click complete challenge
+		"immediate_complete": false,  # Must click complete challenge
+		"get_reward_preview": EncounterUIFactory._get_elite_challenge_preview
 	})
 
 
@@ -98,6 +106,31 @@ static func should_complete_immediately(encounter_type: String) -> bool:
 	_ensure_initialized()
 	var handler = _handlers.get(encounter_type, {})
 	return handler.get("immediate_complete", false)
+
+
+static func get_reward_preview(encounter_data: Dictionary) -> String:
+	"""
+	Get the reward preview text for an encounter.
+	Uses the registered get_reward_preview callback if available.
+
+	Args:
+		encounter_data: The encounter option data
+
+	Returns:
+		Reward preview string, or empty string if no preview available
+	"""
+	_ensure_initialized()
+
+	var encounter_type = encounter_data.get("type", "")
+	if not _handlers.has(encounter_type):
+		return ""
+
+	var handler = _handlers[encounter_type]
+	var preview_func: Callable = handler.get("get_reward_preview", Callable())
+	if preview_func.is_valid():
+		return preview_func.call(encounter_data)
+
+	return ""
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:

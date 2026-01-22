@@ -12,6 +12,60 @@ extends RefCounted
 
 
 # =============================================================================
+# REWARD PREVIEW FUNCTIONS (OCP-1: Data-driven reward previews)
+# =============================================================================
+
+static func _get_shop_preview(encounter_data: Dictionary) -> String:
+	"""Get reward preview for shop encounter."""
+	var data = encounter_data.get("data", {})
+	var item_count = data.get("items", []).size()
+	var skill_count = data.get("skills", []).size()
+	return "%d items, %d skills" % [item_count, skill_count]
+
+
+static func _get_xp_reward_preview(encounter_data: Dictionary) -> String:
+	"""Get reward preview for XP reward encounter."""
+	var data = encounter_data.get("data", {})
+	return "+%d XP" % data.get("xp_amount", 0)
+
+
+static func _get_gold_reward_preview(encounter_data: Dictionary) -> String:
+	"""Get reward preview for gold reward encounter."""
+	var data = encounter_data.get("data", {})
+	return "+%d Gold" % data.get("gold_amount", 0)
+
+
+static func _get_health_restore_preview(_encounter_data: Dictionary) -> String:
+	"""Get reward preview for health restore encounter."""
+	return "Restore 50% HP"
+
+
+static func _get_skill_trainer_preview(encounter_data: Dictionary) -> String:
+	"""Get reward preview for skill trainer encounter."""
+	var data = encounter_data.get("data", {})
+	var skill_data = GameData.get_skill_by_id(data.get("skill_id", ""))
+	if not skill_data.is_empty():
+		return "Free: %s" % skill_data["name"]
+	return "Free Skill"
+
+
+static func _get_gamble_preview(encounter_data: Dictionary) -> String:
+	"""Get reward preview for gamble encounter."""
+	var data = encounter_data.get("data", {})
+	var bet = data.get("bet_amount", 0)
+	var mult = data.get("win_multiplier", 2)
+	return "Bet %d, Win %d" % [bet, bet * mult]
+
+
+static func _get_elite_challenge_preview(encounter_data: Dictionary) -> String:
+	"""Get reward preview for elite challenge encounter."""
+	var data = encounter_data.get("data", {})
+	var xp = data.get("xp_reward", 0)
+	var gold = data.get("gold_reward", 0)
+	return "+%d XP (all), +%d Gold" % [xp, gold]
+
+
+# =============================================================================
 # UI CREATION FUNCTIONS
 # =============================================================================
 

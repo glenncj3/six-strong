@@ -329,36 +329,8 @@ static func _add_encounter_labels(info_vbox: VBoxContainer, data: Dictionary) ->
 
 
 static func _get_encounter_reward_preview(encounter_data: Dictionary) -> String:
-	"""Get a preview of rewards for this encounter."""
-	var encounter_type = encounter_data.get("type", "")
-	var data = encounter_data.get("data", {})
-
-	match encounter_type:
-		"shop":
-			var item_count = data.get("items", []).size()
-			var skill_count = data.get("skills", []).size()
-			return "%d items, %d skills" % [item_count, skill_count]
-		"xp_reward":
-			return "+%d XP" % data.get("xp_amount", 0)
-		"gold_reward":
-			return "+%d Gold" % data.get("gold_amount", 0)
-		"health_restore":
-			return "Restore 50%% HP"
-		"skill_trainer":
-			var skill_data = GameData.get_skill_by_id(data.get("skill_id", ""))
-			if not skill_data.is_empty():
-				return "Free: %s" % skill_data["name"]
-			return "Free Skill"
-		"gamble":
-			var bet = data.get("bet_amount", 0)
-			var mult = data.get("win_multiplier", 2)
-			return "Bet %d, Win %d" % [bet, bet * mult]
-		"elite_challenge":
-			var xp = data.get("xp_reward", 0)
-			var gold = data.get("gold_reward", 0)
-			return "+%d XP (all), +%d Gold" % [xp, gold]
-		_:
-			return ""
+	"""Get a preview of rewards for this encounter using the registry (OCP-1)."""
+	return EncounterRegistry.get_reward_preview(encounter_data)
 
 
 # Backwards-compatible aliases
