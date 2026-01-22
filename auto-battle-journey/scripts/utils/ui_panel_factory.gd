@@ -73,6 +73,7 @@ static func create_shop_row(
 	var name_label = Label.new()
 	name_label.text = data.get("name", "Unknown %s" % content_type.capitalize())
 	name_label.theme_type_variation = "HeaderLabel"
+	name_label.add_theme_font_size_override("font_size", 20)
 	info_vbox.add_child(name_label)
 
 	var desc_label = Label.new()
@@ -168,7 +169,7 @@ static func add_option_panel_labels(
 	name_label.text = name_text
 	name_label.theme_type_variation = "HeaderLabel"
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
+	name_label.add_theme_font_size_override("font_size", 20)
 
 	# Type
 	var type_label = Label.new()

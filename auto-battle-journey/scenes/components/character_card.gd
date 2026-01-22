@@ -110,7 +110,7 @@ func _apply_normal_size() -> void:
 
 	portrait.custom_minimum_size = Vector2(160, 160)
 
-	name_label.add_theme_font_size_override("font_size", 14)
+	name_label.add_theme_font_size_override("font_size", 20)
 	name_label.visible = true
 
 	stats_container.visible = true
@@ -129,7 +129,7 @@ func _apply_small_size() -> void:
 
 	portrait.custom_minimum_size = Vector2(80, 80)
 
-	name_label.add_theme_font_size_override("font_size", 10)
+	name_label.add_theme_font_size_override("font_size", 20)
 	name_label.visible = true
 
 	# Hide individual stats in small mode
@@ -146,7 +146,7 @@ func _apply_mini_size() -> void:
 
 	portrait.custom_minimum_size = Vector2(60, 60)
 
-	name_label.add_theme_font_size_override("font_size", 9)
+	name_label.add_theme_font_size_override("font_size", 20)
 	name_label.visible = true
 
 	# Hide stats in mini mode
