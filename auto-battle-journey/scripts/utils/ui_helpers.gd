@@ -7,6 +7,27 @@ extends RefCounted
 # CONTAINER MANAGEMENT
 # =============================================================================
 
+static func set_children_mouse_filter_ignore(parent: Control, recursive: bool = true) -> void:
+	"""
+	Set all child Control nodes to MOUSE_FILTER_IGNORE.
+	Use this to allow parent panels to receive hover events.
+
+	In Godot 4.x, all child Control nodes default to MOUSE_FILTER_STOP,
+	which blocks mouse events from reaching the parent PanelContainer.
+	This function sets all children (containers AND leaves) to IGNORE
+	so hover/click events propagate properly.
+
+	Args:
+		parent: The parent Control whose children should be modified
+		recursive: If true, also process children of children (default: true)
+	"""
+	for child in parent.get_children():
+		if child is Control:
+			child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			if recursive:
+				set_children_mouse_filter_ignore(child, true)
+
+
 # =============================================================================
 # VBOX AND SPACER HELPERS (Issue 2)
 # =============================================================================

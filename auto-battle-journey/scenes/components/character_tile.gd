@@ -19,7 +19,7 @@ var _is_pressed: bool = false
 
 func _ready() -> void:
 	# Allow parent to receive hover events by making display children transparent to mouse
-	_set_children_mouse_filter_ignore()
+	UIHelpers.set_children_mouse_filter_ignore(self)
 
 	gui_input.connect(_on_gui_input)
 	mouse_entered.connect(_on_mouse_entered)
@@ -59,16 +59,6 @@ func _apply_state_style() -> void:
 		style = _styles.get("normal")
 	if style:
 		add_theme_stylebox_override("panel", style)
-
-
-func _set_children_mouse_filter_ignore() -> void:
-	# All child Control nodes default to MOUSE_FILTER_STOP in Godot 4.x,
-	# which blocks mouse events from reaching the parent PanelContainer.
-	# Set ALL children (containers AND leaves) to IGNORE so hover/click events propagate.
-	margin_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func setup(character_instance: CharacterInstance, tile_size: float) -> void:
