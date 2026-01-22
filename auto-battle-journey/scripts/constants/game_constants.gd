@@ -92,6 +92,15 @@ const ALL_STATS := [
 	STAT_INCOME
 ]
 
+# Display abbreviations for stats (used in UI)
+const STAT_DISPLAY_NAMES := {
+	STAT_HEALTH: "HP",
+	STAT_ATTACK: "ATK",
+	STAT_DEFENSE: "DEF",
+	STAT_SPEED: "SPD",
+	STAT_INCOME: "INC"
+}
+
 # Default stat values (used when creating new stat blocks)
 static func get_default_stats() -> Dictionary:
 	return {

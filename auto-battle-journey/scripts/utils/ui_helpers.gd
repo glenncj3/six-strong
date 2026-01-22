@@ -238,14 +238,7 @@ static func format_stat(stat_name: String, value: int) -> String:
 	Returns:
 		Formatted string (e.g., "HP 100")
 	"""
-	var short_names = {
-		GameConstants.STAT_HEALTH: "HP",
-		GameConstants.STAT_ATTACK: "ATK",
-		GameConstants.STAT_DEFENSE: "DEF",
-		GameConstants.STAT_SPEED: "SPD",
-		GameConstants.STAT_INCOME: "INC"
-	}
-	var short = short_names.get(stat_name, stat_name.to_upper().left(3))
+	var short = GameConstants.STAT_DISPLAY_NAMES.get(stat_name, stat_name.to_upper().left(3))
 	return "%s %d" % [short, value]
 
 
