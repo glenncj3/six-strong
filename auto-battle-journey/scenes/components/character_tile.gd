@@ -1,7 +1,7 @@
-extends PanelContainer
-# CharacterTile - Simple square tile for character overview display
-# Shows portrait and name in a compact square format
-# Used in TeamDisplay overview mode
+extends ClickablePanelBase
+## CharacterTile - Simple square tile for character overview display
+## Shows portrait and name in a compact square format
+## Used in TeamDisplay overview mode
 
 signal tile_clicked(char_instance: CharacterInstance)
 
@@ -11,54 +11,24 @@ signal tile_clicked(char_instance: CharacterInstance)
 @onready var name_label: Label = $MarginContainer/VBoxContainer/NameLabel
 
 var char_instance: CharacterInstance = null
-var clickable: bool = true
-var _styles: Dictionary = {}
-var _is_hovered: bool = false
-var _is_pressed: bool = false
 
 
-func _ready() -> void:
-	# Allow parent to receive hover events by making display children transparent to mouse
+func _on_ready() -> void:
 	UIHelpers.set_children_mouse_filter_ignore(self)
-
-	gui_input.connect(_on_gui_input)
-	mouse_entered.connect(_on_mouse_entered)
-	mouse_exited.connect(_on_mouse_exited)
 	_init_styles()
 
 
 func _init_styles() -> void:
-	_styles = UIStyles.create_clickable_panel_styles(
+	var styles = UIStyles.create_clickable_panel_styles(
 		GameConstants.COLOR_PANEL_DARK,
 		GameConstants.COLOR_PANEL_DARK.lightened(0.15),
 		GameConstants.COLOR_PANEL_DARK.darkened(0.1)
 	)
-	_apply_state_style()
+	setup_styles(styles)
 
 
-func _on_mouse_entered() -> void:
-	_is_hovered = true
-	_apply_state_style()
-
-
-func _on_mouse_exited() -> void:
-	_is_hovered = false
-	_is_pressed = false
-	_apply_state_style()
-
-
-func _apply_state_style() -> void:
-	if _styles.is_empty() or not clickable:
-		return
-	var style: StyleBoxFlat
-	if _is_pressed and _is_hovered:
-		style = _styles.get("pressed", _styles.get("normal"))
-	elif _is_hovered:
-		style = _styles.get("hover", _styles.get("normal"))
-	else:
-		style = _styles.get("normal")
-	if style:
-		add_theme_stylebox_override("panel", style)
+func _handle_click() -> void:
+	tile_clicked.emit(char_instance)
 
 
 func setup(character_instance: CharacterInstance, tile_size: float) -> void:
@@ -91,27 +61,6 @@ func setup(character_instance: CharacterInstance, tile_size: float) -> void:
 
 	# Set name with level
 	name_label.text = "%s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
-
-
-func set_clickable(enabled: bool) -> void:
-	"""Enable or disable click interaction."""
-	clickable = enabled
-	mouse_filter = MOUSE_FILTER_STOP if enabled else MOUSE_FILTER_IGNORE
-
-
-func _on_gui_input(event: InputEvent) -> void:
-	if not clickable:
-		return
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			if event.pressed:
-				_is_pressed = true
-				_apply_state_style()
-			else:
-				if _is_pressed and _is_hovered:
-					tile_clicked.emit(char_instance)
-				_is_pressed = false
-				_apply_state_style()
 
 
 func highlight(enabled: bool) -> void:
