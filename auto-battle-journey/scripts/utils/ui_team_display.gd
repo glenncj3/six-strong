@@ -75,10 +75,9 @@ static func _update_card_runtime_stats(card: Node, char_instance) -> void:
 
 	# Update health to show current/max
 	stats_container.get_node("HealthLabel").text = "HP %d/%d" % [char_instance.current_health, char_instance.max_health]
-	stats_container.get_node("AttackLabel").text = UIFormattingHelpers.format_stat(GameConstants.STAT_ATTACK, char_instance.stats.get(GameConstants.STAT_ATTACK, 0))
-	stats_container.get_node("DefenseLabel").text = UIFormattingHelpers.format_stat(GameConstants.STAT_DEFENSE, char_instance.stats.get(GameConstants.STAT_DEFENSE, 0))
-	stats_container.get_node("SpeedLabel").text = UIFormattingHelpers.format_stat(GameConstants.STAT_SPEED, char_instance.stats.get(GameConstants.STAT_SPEED, 0))
+	stats_container.get_node("ManaLabel").text = UIFormattingHelpers.format_stat(GameConstants.STAT_MANA, char_instance.stats.get(GameConstants.STAT_MANA, 0))
 	stats_container.get_node("IncomeLabel").text = UIFormattingHelpers.format_stat(GameConstants.STAT_INCOME, char_instance.stats.get(GameConstants.STAT_INCOME, 0))
+	stats_container.get_node("DefendRateLabel").text = "DEF%% %d%%" % char_instance.stats.get(GameConstants.STAT_DEFEND_RATE, 0)
 
 	# Show level in name
 	var name_label = card.get_node("MarginContainer/VBoxContainer/NameLabel")

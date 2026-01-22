@@ -137,14 +137,16 @@ func _format_stat_name(stat_name: String) -> String:
 	match stat_name:
 		GameConstants.STAT_HEALTH:
 			return "Health"
-		GameConstants.STAT_ATTACK:
-			return "Attack"
-		GameConstants.STAT_DEFENSE:
-			return "Defense"
-		GameConstants.STAT_SPEED:
-			return "Speed"
+		GameConstants.STAT_MANA:
+			return "Mana"
 		GameConstants.STAT_INCOME:
 			return "Income"
+		GameConstants.STAT_DEFEND_RATE:
+			return "Defend Rate"
+		GameConstants.STAT_ITEM_SLOTS:
+			return "Item Slots"
+		GameConstants.STAT_STARTING_ITEM_SLOTS:
+			return "Starting Item Slots"
 		_:
 			return stat_name.capitalize().replace("_", " ")
 

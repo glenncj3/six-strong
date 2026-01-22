@@ -135,10 +135,11 @@ static func _get_base_stats(char_master: Dictionary) -> Dictionary:
 	var base = char_master.get("base_stats", {})
 	return {
 		GameConstants.STAT_HEALTH: base.get(GameConstants.STAT_HEALTH, 0),
-		GameConstants.STAT_ATTACK: base.get(GameConstants.STAT_ATTACK, 0),
-		GameConstants.STAT_SPEED: base.get(GameConstants.STAT_SPEED, 0),
-		GameConstants.STAT_DEFENSE: base.get(GameConstants.STAT_DEFENSE, 0),
-		GameConstants.STAT_INCOME: base.get(GameConstants.STAT_INCOME, 0)
+		GameConstants.STAT_MANA: base.get(GameConstants.STAT_MANA, 0),
+		GameConstants.STAT_INCOME: base.get(GameConstants.STAT_INCOME, 0),
+		GameConstants.STAT_DEFEND_RATE: base.get(GameConstants.STAT_DEFEND_RATE, 0),
+		GameConstants.STAT_ITEM_SLOTS: base.get(GameConstants.STAT_ITEM_SLOTS, 9),
+		GameConstants.STAT_STARTING_ITEM_SLOTS: base.get(GameConstants.STAT_STARTING_ITEM_SLOTS, 0)
 	}
 
 
@@ -160,10 +161,10 @@ static func clone_stats(stats: Dictionary) -> Dictionary:
 
 static func stats_to_string(stats: Dictionary) -> String:
 	"""Format stats for display/debugging."""
-	return "HP:%d ATK:%d DEF:%d SPD:%d INC:%d" % [
+	return "HP:%d MP:%d INC:%d DEF%%:%d SLOTS:%d" % [
 		stats.get(GameConstants.STAT_HEALTH, 0),
-		stats.get(GameConstants.STAT_ATTACK, 0),
-		stats.get(GameConstants.STAT_DEFENSE, 0),
-		stats.get(GameConstants.STAT_SPEED, 0),
-		stats.get(GameConstants.STAT_INCOME, 0)
+		stats.get(GameConstants.STAT_MANA, 0),
+		stats.get(GameConstants.STAT_INCOME, 0),
+		stats.get(GameConstants.STAT_DEFEND_RATE, 0),
+		stats.get(GameConstants.STAT_ITEM_SLOTS, 9)
 	]

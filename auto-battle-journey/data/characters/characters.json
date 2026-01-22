@@ -5,11 +5,10 @@
       "name": "Brave Knight",
       "image_path": "res://assets/characters/knight.png",
       "base_stats": {
-        "basic_attack_damage": 10,
-        "speed": 5,
-        "defense": 8,
         "health": 100,
-        "income": 3
+        "mana": 5,
+        "income": 3,
+        "startingItemSlots": 1
       },
       "prestige_rewards": [
         {
@@ -20,7 +19,6 @@
         },
         {
           "prestige": 2,
-          "stat_boost": {"basic_attack_damage": 2},
           "rewards": [
             {"type": "skill", "id": "skill_power_strike", "level_requirement": 3}
           ]
@@ -38,11 +36,10 @@
       "name": "Mystic Sage",
       "image_path": "res://assets/characters/mage.png",
       "base_stats": {
-        "basic_attack_damage": 15,
-        "speed": 4,
-        "defense": 3,
         "health": 70,
-        "income": 4
+        "mana": 5,
+        "income": 4,
+        "startingItemSlots": 1
       },
       "prestige_rewards": [
         {
@@ -53,7 +50,6 @@
         },
         {
           "prestige": 2,
-          "stat_boost": {"basic_attack_damage": 3},
           "rewards": [
             {"type": "skill", "id": "skill_arcane_blast", "level_requirement": 2}
           ]
@@ -65,11 +61,10 @@
       "name": "Shadow Thief",
       "image_path": "res://assets/characters/rogue.png",
       "base_stats": {
-        "basic_attack_damage": 8,
-        "speed": 10,
-        "defense": 4,
         "health": 80,
-        "income": 5
+        "mana": 5,
+        "income": 5,
+        "startingItemSlots": 1
       },
       "prestige_rewards": [
         {
@@ -80,7 +75,6 @@
         },
         {
           "prestige": 2,
-          "stat_boost": {"speed": 2},
           "rewards": [
             {"type": "skill", "id": "skill_dodge", "level_requirement": 2}
           ]
@@ -92,11 +86,10 @@
       "name": "Holy Priest",
       "image_path": "res://assets/characters/cleric.png",
       "base_stats": {
-        "basic_attack_damage": 6,
-        "speed": 4,
-        "defense": 6,
         "health": 90,
-        "income": 3
+        "mana": 5,
+        "income": 3,
+        "startingItemSlots": 1
       },
       "prestige_rewards": [
         {
@@ -119,11 +112,10 @@
       "name": "Forest Scout",
       "image_path": "res://assets/characters/ranger.png",
       "base_stats": {
-        "basic_attack_damage": 12,
-        "speed": 7,
-        "defense": 5,
         "health": 85,
-        "income": 4
+        "mana": 5,
+        "income": 4,
+        "startingItemSlots": 1
       },
       "prestige_rewards": [
         {
@@ -134,7 +126,6 @@
         },
         {
           "prestige": 2,
-          "stat_boost": {"speed": 1, "basic_attack_damage": 1},
           "rewards": [
             {"type": "skill", "id": "skill_quick_shot", "level_requirement": 3}
           ]
@@ -146,11 +137,10 @@
       "name": "Raging Berserker",
       "image_path": "res://assets/characters/berserker.png",
       "base_stats": {
-        "basic_attack_damage": 14,
-        "speed": 6,
-        "defense": 2,
         "health": 110,
-        "income": 2
+        "mana": 5,
+        "income": 2,
+        "startingItemSlots": 1
       },
       "prestige_rewards": [
         {
@@ -161,7 +151,6 @@
         },
         {
           "prestige": 2,
-          "stat_boost": {"basic_attack_damage": 4},
           "rewards": [
             {"type": "skill", "id": "skill_rage", "level_requirement": 2}
           ]
@@ -173,11 +162,10 @@
       "name": "Divine Paladin",
       "image_path": "res://assets/characters/paladin.png",
       "base_stats": {
-        "basic_attack_damage": 9,
-        "speed": 4,
-        "defense": 10,
         "health": 105,
-        "income": 3
+        "mana": 5,
+        "income": 3,
+        "startingItemSlots": 1
       },
       "prestige_rewards": [
         {
@@ -188,7 +176,7 @@
         },
         {
           "prestige": 2,
-          "stat_boost": {"defense": 3},
+          "stat_boost": {"defendRate": 10},
           "rewards": [
             {"type": "skill", "id": "skill_iron_skin", "level_requirement": 4}
           ]
@@ -200,11 +188,10 @@
       "name": "Dark Necromancer",
       "image_path": "res://assets/characters/necromancer.png",
       "base_stats": {
-        "basic_attack_damage": 13,
-        "speed": 3,
-        "defense": 4,
         "health": 75,
-        "income": 5
+        "mana": 5,
+        "income": 5,
+        "startingItemSlots": 1
       },
       "prestige_rewards": [
         {
@@ -215,7 +202,7 @@
         },
         {
           "prestige": 2,
-          "stat_boost": {"basic_attack_damage": 2, "health": 10},
+          "stat_boost": {"health": 10},
           "rewards": [
             {"type": "skill", "id": "skill_life_drain", "level_requirement": 3}
           ]
@@ -227,11 +214,10 @@
       "name": "Zen Monk",
       "image_path": "res://assets/characters/monk.png",
       "base_stats": {
-        "basic_attack_damage": 7,
-        "speed": 9,
-        "defense": 6,
         "health": 85,
-        "income": 3
+        "mana": 5,
+        "income": 3,
+        "startingItemSlots": 1
       },
       "prestige_rewards": [
         {
@@ -242,7 +228,7 @@
         },
         {
           "prestige": 2,
-          "stat_boost": {"speed": 2, "defense": 2},
+          "stat_boost": {"defendRate": 5},
           "rewards": [
             {"type": "skill", "id": "skill_inner_peace", "level_requirement": 2}
           ]
@@ -254,11 +240,10 @@
       "name": "Silent Assassin",
       "image_path": "res://assets/characters/assassin.png",
       "base_stats": {
-        "basic_attack_damage": 16,
-        "speed": 8,
-        "defense": 2,
         "health": 65,
-        "income": 4
+        "mana": 5,
+        "income": 4,
+        "startingItemSlots": 1
       },
       "prestige_rewards": [
         {
@@ -269,7 +254,6 @@
         },
         {
           "prestige": 2,
-          "stat_boost": {"basic_attack_damage": 3, "speed": 1},
           "rewards": [
             {"type": "skill", "id": "skill_backstab", "level_requirement": 4}
           ]

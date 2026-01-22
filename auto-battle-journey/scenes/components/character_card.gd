@@ -12,10 +12,9 @@ signal card_clicked(character_data: Dictionary)
 @onready var name_label: Label = $MarginContainer/VBoxContainer/NameLabel
 @onready var stats_container: VBoxContainer = $MarginContainer/VBoxContainer/StatsContainer
 @onready var health_label: Label = $MarginContainer/VBoxContainer/StatsContainer/HealthLabel
-@onready var attack_label: Label = $MarginContainer/VBoxContainer/StatsContainer/AttackLabel
-@onready var defense_label: Label = $MarginContainer/VBoxContainer/StatsContainer/DefenseLabel
-@onready var speed_label: Label = $MarginContainer/VBoxContainer/StatsContainer/SpeedLabel
+@onready var mana_label: Label = $MarginContainer/VBoxContainer/StatsContainer/ManaLabel
 @onready var income_label: Label = $MarginContainer/VBoxContainer/StatsContainer/IncomeLabel
+@onready var defend_rate_label: Label = $MarginContainer/VBoxContainer/StatsContainer/DefendRateLabel
 
 var character_data: Dictionary = {}
 var current_size: UIScaler.CardSize = UIScaler.CardSize.NORMAL
@@ -66,10 +65,9 @@ func setup(char_data: Dictionary, with_equipped_items: bool = false) -> void:
 
 	# Display stats
 	health_label.text = UIHelpers.format_stat(GameConstants.STAT_HEALTH, stats.get(GameConstants.STAT_HEALTH, 0))
-	attack_label.text = UIHelpers.format_stat(GameConstants.STAT_ATTACK, stats.get(GameConstants.STAT_ATTACK, 0))
-	defense_label.text = UIHelpers.format_stat(GameConstants.STAT_DEFENSE, stats.get(GameConstants.STAT_DEFENSE, 0))
-	speed_label.text = UIHelpers.format_stat(GameConstants.STAT_SPEED, stats.get(GameConstants.STAT_SPEED, 0))
+	mana_label.text = UIHelpers.format_stat(GameConstants.STAT_MANA, stats.get(GameConstants.STAT_MANA, 0))
 	income_label.text = UIHelpers.format_stat(GameConstants.STAT_INCOME, stats.get(GameConstants.STAT_INCOME, 0))
+	defend_rate_label.text = UIHelpers.format_stat(GameConstants.STAT_DEFEND_RATE, stats.get(GameConstants.STAT_DEFEND_RATE, 0))
 
 
 func highlight(enabled: bool) -> void:

@@ -58,7 +58,7 @@ func get_summary() -> Dictionary:
 		"total_health": 0,
 		"max_health": 0,
 		"average_level": 0.0,
-		"total_attack": 0
+		"total_mana": 0
 	}
 
 	if team.is_empty():
@@ -68,7 +68,7 @@ func get_summary() -> Dictionary:
 		summary["total_health"] += char_instance.current_health
 		summary["max_health"] += char_instance.max_health
 		summary["average_level"] += char_instance.level
-		summary["total_attack"] += char_instance.basic_attack_damage
+		summary["total_mana"] += char_instance.mana
 
 	summary["average_level"] /= team.size()
 

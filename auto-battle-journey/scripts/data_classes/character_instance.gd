@@ -76,21 +76,25 @@ var max_health: int:
 	get: return stats.get(GameConstants.STAT_HEALTH, 0)
 	set(value): stats[GameConstants.STAT_HEALTH] = value
 
-var basic_attack_damage: int:
-	get: return stats.get(GameConstants.STAT_ATTACK, 0)
-	set(value): stats[GameConstants.STAT_ATTACK] = value
-
-var speed: int:
-	get: return stats.get(GameConstants.STAT_SPEED, 0)
-	set(value): stats[GameConstants.STAT_SPEED] = value
-
-var defense: int:
-	get: return stats.get(GameConstants.STAT_DEFENSE, 0)
-	set(value): stats[GameConstants.STAT_DEFENSE] = value
+var mana: int:
+	get: return stats.get(GameConstants.STAT_MANA, 0)
+	set(value): stats[GameConstants.STAT_MANA] = value
 
 var income: int:
 	get: return stats.get(GameConstants.STAT_INCOME, 0)
 	set(value): stats[GameConstants.STAT_INCOME] = value
+
+var defend_rate: int:
+	get: return stats.get(GameConstants.STAT_DEFEND_RATE, 0)
+	set(value): stats[GameConstants.STAT_DEFEND_RATE] = value
+
+var item_slots: int:
+	get: return stats.get(GameConstants.STAT_ITEM_SLOTS, 9)
+	set(value): stats[GameConstants.STAT_ITEM_SLOTS] = value
+
+var starting_item_slots: int:
+	get: return stats.get(GameConstants.STAT_STARTING_ITEM_SLOTS, 0)
+	set(value): stats[GameConstants.STAT_STARTING_ITEM_SLOTS] = value
 
 
 # =============================================================================

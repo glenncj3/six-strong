@@ -37,22 +37,17 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "HP 100"
 
-[node name="AttackLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsContainer"]
+[node name="ManaLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "ATK 10"
-
-[node name="DefenseLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = "DEF 8"
-
-[node name="SpeedLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = "SPD 5"
+text = "MP 5"
 
 [node name="IncomeLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "INC 3"
+
+[node name="DefendRateLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "DEF% 0"

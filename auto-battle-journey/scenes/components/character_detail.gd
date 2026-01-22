@@ -101,10 +101,9 @@ func _populate_stats() -> void:
 
 	var stat_entries = [
 		{"name": GameConstants.STAT_HEALTH, "format": "HP %d/%d", "args": [char_instance.current_health, char_instance.max_health]},
-		{"name": GameConstants.STAT_ATTACK, "value": char_instance.stats.get(GameConstants.STAT_ATTACK, 0)},
-		{"name": GameConstants.STAT_DEFENSE, "value": char_instance.stats.get(GameConstants.STAT_DEFENSE, 0)},
-		{"name": GameConstants.STAT_SPEED, "value": char_instance.stats.get(GameConstants.STAT_SPEED, 0)},
+		{"name": GameConstants.STAT_MANA, "value": char_instance.stats.get(GameConstants.STAT_MANA, 0)},
 		{"name": GameConstants.STAT_INCOME, "value": char_instance.stats.get(GameConstants.STAT_INCOME, 0)},
+		{"name": GameConstants.STAT_DEFEND_RATE, "format": "DEF%% %d%%", "args": [char_instance.stats.get(GameConstants.STAT_DEFEND_RATE, 0)]},
 	]
 
 	for entry in stat_entries:

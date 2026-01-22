@@ -9,10 +9,9 @@ extends Panel
 @onready var prestige_progress_bar: ProgressBar = $MarginContainer/VBoxContainer/TopBar/InfoContainer/RankProgressBar
 
 @onready var health_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/HealthValue
-@onready var attack_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/AttackValue
-@onready var defense_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/DefenseValue
-@onready var speed_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/SpeedValue
+@onready var mana_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/ManaValue
 @onready var income_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/IncomeValue
+@onready var defend_rate_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/DefendRateValue
 
 @onready var equipped_items_container: HBoxContainer = $MarginContainer/VBoxContainer/EquipmentSection/EquippedItemsContainer
 @onready var items_grid: GridContainer = $MarginContainer/VBoxContainer/ItemsSection/ItemsGrid
@@ -91,13 +90,12 @@ func _update_stats_display(char_master: Dictionary, char_data: Dictionary) -> vo
 
 	# Display stats with gold highlight color
 	health_value.text = str(stats.get(GameConstants.STAT_HEALTH, 0))
-	attack_value.text = str(stats.get(GameConstants.STAT_ATTACK, 0))
-	defense_value.text = str(stats.get(GameConstants.STAT_DEFENSE, 0))
-	speed_value.text = str(stats.get(GameConstants.STAT_SPEED, 0))
+	mana_value.text = str(stats.get(GameConstants.STAT_MANA, 0))
 	income_value.text = str(stats.get(GameConstants.STAT_INCOME, 0))
+	defend_rate_value.text = "%d%%" % stats.get(GameConstants.STAT_DEFEND_RATE, 0)
 
 	# Apply gold color to stat values
-	for label in [health_value, attack_value, defense_value, speed_value, income_value]:
+	for label in [health_value, mana_value, income_value, defend_rate_value]:
 		label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 
 

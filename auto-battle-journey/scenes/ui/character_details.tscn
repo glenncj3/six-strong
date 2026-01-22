@@ -88,32 +88,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "100"
 
-[node name="AttackLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
+[node name="ManaLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
-text = "ATK:"
+text = "MP:"
 
-[node name="AttackValue" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "10"
-
-[node name="DefenseLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "DEF:"
-
-[node name="DefenseValue" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "8"
-
-[node name="SpeedLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "SPD:"
-
-[node name="SpeedValue" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
+[node name="ManaValue" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "5"
@@ -127,6 +107,16 @@ text = "INC:"
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "3"
+
+[node name="DefendRateLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "DEF%:"
+
+[node name="DefendRateValue" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0"
 
 [node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
