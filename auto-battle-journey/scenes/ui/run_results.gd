@@ -15,6 +15,8 @@ extends Control
 @onready var prestige_ups_list = $ScrollContainer/MainContainer/RankUpsPanelContainer/RankUpsPanel/RankUpsContainer/RankUpsList
 
 @onready var continue_button = $ScrollContainer/MainContainer/ContinueButton
+@onready var header_gems_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/GemsLabel
+@onready var header_reroll_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/RerollTokensLabel
 
 # Store run data before it's cleared
 var run_data: Dictionary = {}
@@ -24,6 +26,13 @@ var prestige_ups: Array = []  # Track which characters increased prestige
 
 func _ready() -> void:
 	continue_button.pressed.connect(_on_continue_pressed)
+
+	# Initialize header bar currencies
+	_update_header_currencies()
+	header_gems_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	header_reroll_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	PlayerAccount.gems_changed.connect(_on_gems_changed)
+	PlayerAccount.reroll_tokens_changed.connect(_on_reroll_tokens_changed)
 
 	# Get run data from SceneManager
 	run_data = SceneManager.get_scene_data("run_results", {})
@@ -39,6 +48,7 @@ func _ready() -> void:
 
 func _play_entrance_animations() -> void:
 	"""Play entrance animations with dramatic reveal."""
+	AnimationManager.fade_in($HeaderBar, GameConstants.ANIM_DURATION_NORMAL, 0.0)
 	AnimationManager.fade_in(result_title, GameConstants.ANIM_DURATION_SLOW, 0.0)
 	AnimationManager.fade_in(rounds_label.get_parent().get_parent().get_parent(), GameConstants.ANIM_DURATION_NORMAL, 0.2)
 	AnimationManager.fade_in(gems_label.get_parent().get_parent().get_parent(), GameConstants.ANIM_DURATION_NORMAL, 0.35)
@@ -267,6 +277,19 @@ func _get_reward_name(reward: Dictionary) -> String:
 			return skill_name
 		_:
 			return reward_id
+
+
+func _update_header_currencies() -> void:
+	header_gems_label.text = UIHelpers.format_currency(PlayerAccount.get_gems(), GameConstants.EMOJI_GEM)
+	header_reroll_label.text = UIHelpers.format_currency(PlayerAccount.get_reroll_tokens(), GameConstants.EMOJI_REROLL)
+
+
+func _on_gems_changed(new_amount: int) -> void:
+	header_gems_label.text = UIHelpers.format_currency(new_amount, GameConstants.EMOJI_GEM)
+
+
+func _on_reroll_tokens_changed(new_amount: int) -> void:
+	header_reroll_label.text = UIHelpers.format_currency(new_amount, GameConstants.EMOJI_REROLL)
 
 
 func _on_continue_pressed() -> void:

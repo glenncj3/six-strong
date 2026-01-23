@@ -10,12 +10,12 @@ const AmbientParticlesScene = preload("res://scenes/effects/ambient_particles.ts
 @onready var background = $Background
 @onready var title_label = $MarginContainer/VBoxContainer/Title
 @onready var subtitle_label = $MarginContainer/VBoxContainer/Subtitle
-@onready var gems_label = $CurrencyDisplay/HBoxContainer/GemsLabel
-@onready var reroll_tokens_label = $CurrencyDisplay/HBoxContainer/RerollTokensLabel
+@onready var gems_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/GemsLabel
+@onready var reroll_tokens_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/RerollTokensLabel
 @onready var play_button = $MarginContainer/VBoxContainer/ButtonContainer/PlayButton
 @onready var collection_button = $MarginContainer/VBoxContainer/ButtonContainer/CollectionButton
 @onready var quit_button = $MarginContainer/VBoxContainer/ButtonContainer/QuitButton
-@onready var currency_display = $CurrencyDisplay
+@onready var header_bar = $HeaderBar
 @onready var button_container = $MarginContainer/VBoxContainer/ButtonContainer
 
 
@@ -86,9 +86,6 @@ func _play_entrance_animations() -> void:
 	# Subtitle - fade in with delay
 	AnimationManager.fade_in(subtitle_label, GameConstants.ANIM_DURATION_NORMAL, 0.1)
 
-	# Currency display - fade in
-	AnimationManager.fade_in(currency_display, GameConstants.ANIM_DURATION_NORMAL, 0.05)
-
 	# Buttons - cascade fade in (safe for container layouts)
 	var buttons = [play_button, collection_button, quit_button]
 	var base_delay = 0.15
@@ -133,7 +130,7 @@ func _on_play_pressed() -> void:
 
 func _on_collection_pressed() -> void:
 	print("MainMenu: Opening collection...")
-	SceneManager.go_to_collection()
+	SceneManager.go_to_collection(false)
 
 
 func _on_quit_pressed() -> void:

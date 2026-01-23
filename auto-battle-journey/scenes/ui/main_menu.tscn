@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bymqj3g8kvhda"]
+[gd_scene load_steps=3 format=3 uid="uid://bymqj3g8kvhda"]
 
 [ext_resource type="Script" uid="uid://bq8bii4lhnafe" path="res://scenes/ui/main_menu.gd" id="1_menu"]
+[ext_resource type="PackedScene" uid="uid://header_bar_comp" path="res://scenes/components/header_bar.tscn" id="2_header_bar"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -89,32 +90,23 @@ text = "QUIT"
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CurrencyDisplay" type="MarginContainer" parent="."]
+[node name="HeaderBar" parent="." instance=ExtResource("2_header_bar")]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -150.0
-offset_top = 16.0
-offset_right = 150.0
-offset_bottom = 60.0
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 56.0
 grow_horizontal = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 8
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CurrencyDisplay"]
+[node name="GemsLabel" type="Label" parent="HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
 layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 40
-
-[node name="GemsLabel" type="Label" parent="CurrencyDisplay/HBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = "HeaderLabel"
+theme_override_font_sizes/font_size = 24
 text = "💎 1000"
+vertical_alignment = 1
 
-[node name="RerollTokensLabel" type="Label" parent="CurrencyDisplay/HBoxContainer"]
+[node name="RerollTokensLabel" type="Label" parent="HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = "HeaderLabel"
+theme_override_font_sizes/font_size = 24
 text = "🎫 0"
+vertical_alignment = 1

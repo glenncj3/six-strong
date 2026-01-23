@@ -17,8 +17,6 @@ extends Panel
 @onready var items_grid: GridContainer = $MarginContainer/VBoxContainer/ItemsSection/ItemsGrid
 @onready var skills_grid: GridContainer = $MarginContainer/VBoxContainer/SkillsSection/SkillsGrid
 
-@onready var back_button: Button = $BackButton
-
 var current_character_data: Dictionary = {}
 
 # Preload components
@@ -28,7 +26,6 @@ const SkillIconScene = preload("res://scenes/components/skill_icon.tscn")
 
 func _ready() -> void:
 	_apply_visual_styling()
-	back_button.pressed.connect(_on_back_pressed)
 
 
 func _apply_visual_styling() -> void:
@@ -40,9 +37,6 @@ func _apply_visual_styling() -> void:
 
 	# Style the progress bar
 	UIStyles.apply_progress_bar_styles(prestige_progress_bar, GameConstants.COLOR_GOLD)
-
-	# Style the back button
-	UIStyles.apply_button_styles(back_button)
 
 	# Apply text colors
 	name_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
@@ -233,8 +227,3 @@ func _refresh_display() -> void:
 	var char_id = current_character_data.get("id", "")
 	var updated_data = PlayerAccount.get_character_data(char_id)
 	display_character(updated_data)
-
-
-func _on_back_pressed() -> void:
-	"""Return to collection screen."""
-	SceneManager.go_to_collection()

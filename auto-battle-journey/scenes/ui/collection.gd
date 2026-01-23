@@ -10,8 +10,9 @@ extends Control
 @onready var details_background = $CharacterDetailsPanel/DetailsBackground
 @onready var details_content: Control = $CharacterDetailsPanel/DetailsMargin/DetailsContainer/DetailsContent
 @onready var details_title = $CharacterDetailsPanel/DetailsMargin/DetailsContainer/DetailsTitle
-@onready var close_details_button: Button = $CharacterDetailsPanel/CloseDetailsButton
-@onready var back_button: Button = $BackButton
+@onready var back_button: Button = $HeaderBar/MarginContainer/HBoxContainer/LeftSection/BackButton
+@onready var gems_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/GemsLabel
+@onready var reroll_tokens_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/RerollTokensLabel
 
 # Preload scenes
 const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
@@ -26,10 +27,14 @@ func _ready() -> void:
 	_apply_visual_styling()
 
 	back_button.pressed.connect(_on_back_pressed)
-	close_details_button.pressed.connect(_on_close_details_pressed)
 
 	# Hide details panel initially
 	character_details_panel.visible = false
+
+	# Initialize currency display
+	_update_currency_display()
+	PlayerAccount.gems_changed.connect(_on_gems_changed)
+	PlayerAccount.reroll_tokens_changed.connect(_on_reroll_tokens_changed)
 
 	_populate_character_list()
 	_play_entrance_animations()
@@ -38,7 +43,6 @@ func _ready() -> void:
 func _play_entrance_animations() -> void:
 	"""Play entrance animations for UI elements."""
 	AnimationManager.fade_in(title_label, GameConstants.ANIM_DURATION_NORMAL, 0.0)
-	AnimationManager.fade_in(back_button, GameConstants.ANIM_DURATION_FAST, 0.05)
 
 	# Cascade fade in character tiles
 	var delay = 0.1
@@ -57,9 +61,12 @@ func _apply_visual_styling() -> void:
 	title_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	details_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 
+	# Currency label colors
+	gems_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	reroll_tokens_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+
 	# Button styling
 	UIStyles.apply_button_styles(back_button)
-	UIStyles.apply_button_styles(close_details_button)
 
 
 func _populate_character_list() -> void:
@@ -129,9 +136,6 @@ func _select_character(char_id: String) -> void:
 	# Show the details overlay
 	character_details_panel.visible = true
 
-	# Hide main back button when showing details
-	back_button.visible = false
-
 	# Highlight selected tile
 	_highlight_selected_tile()
 
@@ -139,7 +143,6 @@ func _select_character(char_id: String) -> void:
 func _on_close_details_pressed() -> void:
 	"""Close the details overlay and return to grid view."""
 	character_details_panel.visible = false
-	back_button.visible = true
 
 
 func _highlight_selected_tile() -> void:
@@ -156,7 +159,24 @@ func refresh_display() -> void:
 		_select_character(selected_character_id)
 
 
+func _update_currency_display() -> void:
+	gems_label.text = UIHelpers.format_currency(PlayerAccount.get_gems(), GameConstants.EMOJI_GEM)
+	reroll_tokens_label.text = UIHelpers.format_currency(PlayerAccount.get_reroll_tokens(), GameConstants.EMOJI_REROLL)
+
+
+func _on_gems_changed(new_amount: int) -> void:
+	gems_label.text = UIHelpers.format_currency(new_amount, GameConstants.EMOJI_GEM)
+
+
+func _on_reroll_tokens_changed(new_amount: int) -> void:
+	reroll_tokens_label.text = UIHelpers.format_currency(new_amount, GameConstants.EMOJI_REROLL)
+
+
 func _on_back_pressed() -> void:
-	"""Return to main menu."""
-	print("Collection: Back button pressed")
-	SceneManager.go_to_main_menu()
+	"""Context-aware back: close details if open, else return to main menu."""
+	if character_details_panel.visible:
+		_on_close_details_pressed()
+	else:
+		print("Collection: Back button pressed")
+		var tween = AnimationManager.fade_out(back_button, GameConstants.ANIM_DURATION_NORMAL)
+		tween.finished.connect(func(): SceneManager.go_to_main_menu(false))
