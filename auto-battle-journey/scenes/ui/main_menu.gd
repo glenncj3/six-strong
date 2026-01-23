@@ -9,7 +9,6 @@ const AmbientParticlesScene = preload("res://scenes/effects/ambient_particles.ts
 
 @onready var background = $Background
 @onready var title_label = $MarginContainer/VBoxContainer/Title
-@onready var subtitle_label = $MarginContainer/VBoxContainer/Subtitle
 @onready var gems_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/GemsLabel
 @onready var reroll_tokens_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/RerollTokensLabel
 @onready var play_button = $MarginContainer/VBoxContainer/ButtonContainer/PlayButton
@@ -59,7 +58,6 @@ func _apply_visual_styling() -> void:
 
 	# Title styling
 	title_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
-	subtitle_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
 
 	# Currency labels
 	gems_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
@@ -82,9 +80,6 @@ func _play_entrance_animations() -> void:
 	"""Play entrance animations for menu elements."""
 	# Title - fade in
 	AnimationManager.fade_in(title_label, GameConstants.ANIM_DURATION_NORMAL, 0.0)
-
-	# Subtitle - fade in with delay
-	AnimationManager.fade_in(subtitle_label, GameConstants.ANIM_DURATION_NORMAL, 0.1)
 
 	# Buttons - cascade fade in (safe for container layouts)
 	var buttons = [play_button, collection_button, quit_button]
