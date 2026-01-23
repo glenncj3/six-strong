@@ -235,11 +235,9 @@ static func create_option_panel(data: Dictionary, panel_type: OptionPanelType, o
 	hbox.add_child(info_vbox)
 
 	# Type-specific labels
-	match panel_type:
-		OptionPanelType.COMBAT:
-			_add_combat_labels(info_vbox, data)
-		OptionPanelType.ENCOUNTER:
-			_add_encounter_labels(info_vbox, data)
+	if panel_type == OptionPanelType.COMBAT:
+		_add_combat_labels(info_vbox, data)
+		_add_combat_rewards_overlay(panel, data)
 
 	return panel
 
@@ -268,59 +266,89 @@ static func _create_option_info_section(data: Dictionary, panel_type: OptionPane
 	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info_vbox.add_theme_constant_override("separation", 4)
 
+	var top_spacer = Control.new()
+	top_spacer.custom_minimum_size.y = 5
+	info_vbox.add_child(top_spacer)
+
 	# Name
 	var name_label = Label.new()
 	info_vbox.add_child(name_label)
 	name_label.text = data.get("name", "Unknown")
 	name_label.theme_type_variation = "HeaderLabel"
-	name_label.add_theme_font_size_override("font_size", 20)
-
-	# Type (encounter types replace underscores with spaces)
-	var type_label = Label.new()
-	info_vbox.add_child(type_label)
-	var type_text = data.get("type", "").to_upper()
-	if panel_type == OptionPanelType.ENCOUNTER:
-		type_text = type_text.replace("_", " ")
-	type_label.text = "[%s]" % type_text
-	type_label.modulate = GameConstants.COLOR_DISABLED
-	type_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+	name_label.add_theme_font_size_override("font_size", 32)
 
 	# Description
 	var desc_label = Label.new()
 	info_vbox.add_child(desc_label)
 	desc_label.text = data.get("description", "")
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+	desc_label.add_theme_font_size_override("font_size", 24)
 	desc_label.max_lines_visible = 2
+	desc_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
+	desc_label.add_theme_constant_override("shadow_offset_x", 1)
+	desc_label.add_theme_constant_override("shadow_offset_y", 2)
 
 	return info_vbox
 
 
 static func _add_combat_labels(info_vbox: VBoxContainer, data: Dictionary) -> void:
-	"""Add combat-specific labels (difficulty/prestige and rewards)."""
-	# Difficulty or prestige based on combat type
+	"""Add combat-specific labels (difficulty as stars)."""
+	var star_count := 1
 	if data.get("type") == "ai":
-		var diff_label = Label.new()
-		info_vbox.add_child(diff_label)
-		diff_label.text = "Difficulty: %s" % data.get("difficulty", "Unknown")
-		diff_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
-		diff_label.modulate = UIFormattingHelpers.get_difficulty_color(data.get("difficulty", ""))
+		var difficulty = data.get("difficulty", "Easy")
+		match difficulty:
+			"Easy":
+				star_count = 1
+			"Medium":
+				star_count = 2
+			"Hard":
+				star_count = 3
 	elif data.get("type") == "ghost":
-		var prestige_label = Label.new()
-		info_vbox.add_child(prestige_label)
-		prestige_label.text = "Player Prestige: %d" % data.get("prestige", 0)
-		prestige_label.modulate = GameConstants.COLOR_GHOST_PRESTIGE
-		prestige_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+		star_count = clampi(data.get("prestige", 1), 1, 5)
 
-	# Rewards
-	var reward_label = Label.new()
-	info_vbox.add_child(reward_label)
-	reward_label.text = "Rewards: +%d Gold  +%d XP" % [
-		data.get("reward_gold", 0),
-		data.get("reward_xp", 0)
-	]
-	reward_label.modulate = GameConstants.COLOR_SUCCESS
-	reward_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
+	var diff_label = Label.new()
+	info_vbox.add_child(diff_label)
+	diff_label.text = "★".repeat(star_count)
+	diff_label.add_theme_font_size_override("font_size", 24)
+	# Gold color with 3D effect via outline and shadow
+	diff_label.modulate = Color.WHITE
+	diff_label.add_theme_color_override("font_color", Color("#FFD700"))
+	diff_label.add_theme_color_override("font_outline_color", Color("#8B6914"))
+	diff_label.add_theme_constant_override("outline_size", 3)
+	diff_label.add_theme_color_override("font_shadow_color", Color("#4A3800"))
+	diff_label.add_theme_constant_override("shadow_offset_x", 1)
+	diff_label.add_theme_constant_override("shadow_offset_y", 2)
+
+
+static func _add_combat_rewards_overlay(panel: PanelContainer, data: Dictionary) -> void:
+	"""Add reward icons with quantities in the bottom-right corner of the panel."""
+	var overlay = Control.new()
+	panel.add_child(overlay)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var rewards_label = Label.new()
+	overlay.add_child(rewards_label)
+	rewards_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var gold = data.get("reward_gold", 0)
+	var xp = data.get("reward_xp", 0)
+	rewards_label.text = "%s%d  %s%d" % [GameConstants.EMOJI_GOLD, gold, GameConstants.EMOJI_STAR, xp]
+	rewards_label.add_theme_font_size_override("font_size", 24)
+	rewards_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
+	rewards_label.add_theme_constant_override("shadow_offset_x", 1)
+	rewards_label.add_theme_constant_override("shadow_offset_y", 2)
+
+	# Anchor to bottom-right
+	rewards_label.anchor_left = 1.0
+	rewards_label.anchor_top = 1.0
+	rewards_label.anchor_right = 1.0
+	rewards_label.anchor_bottom = 1.0
+	rewards_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	rewards_label.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	rewards_label.offset_left = -18
+	rewards_label.offset_right = -10
+	rewards_label.offset_top = -13
+	rewards_label.offset_bottom = -5
 
 
 static func _add_encounter_labels(info_vbox: VBoxContainer, data: Dictionary) -> void:
