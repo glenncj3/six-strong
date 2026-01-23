@@ -30,6 +30,7 @@ var draft_manager: DraftManager = null
 var options_team_display: Node = null
 var your_team_display: Node = null
 var select_buttons: Array = []  # SELECT buttons for each option
+var buttons_container: HBoxContainer = null  # Container for SELECT/UNLOCK buttons below tiles
 
 
 var _concede_dialog_open: bool = false
@@ -121,7 +122,6 @@ func _setup_options_display() -> void:
 	"""Create the options TeamDisplay."""
 	options_team_display = TeamDisplayScene.instantiate()
 	options_display_container.add_child(options_team_display)
-	# We'll set it up when options are generated
 
 
 # =============================================================================
@@ -186,13 +186,26 @@ func _on_options_overview_shown() -> void:
 
 
 func _create_select_buttons() -> void:
-	"""Create SELECT buttons inside each character tile."""
+	"""Create SELECT/UNLOCK buttons below the character tiles."""
 	select_buttons.clear()
 
 	if not options_team_display:
 		return
 
-	# Use TeamDisplay's character_tiles array directly
+	# Create or clear buttons container inside TeamDisplay's MainContainer
+	if not buttons_container or not is_instance_valid(buttons_container):
+		buttons_container = HBoxContainer.new()
+		buttons_container.alignment = BoxContainer.ALIGNMENT_CENTER
+		buttons_container.add_theme_constant_override("separation", 8)
+		# Insert after OverviewContainer in the TeamDisplay's MainContainer
+		var main_cont = options_team_display.main_container
+		var overview_idx = options_team_display.overview_container.get_index()
+		main_cont.add_child(buttons_container)
+		main_cont.move_child(buttons_container, overview_idx + 1)
+	else:
+		for child in buttons_container.get_children():
+			child.queue_free()
+
 	var tiles = options_team_display.character_tiles
 
 	if tiles.is_empty():
@@ -204,27 +217,11 @@ func _create_select_buttons() -> void:
 		var tile = tiles[i]
 		var option = current_options[i]
 
-		if not is_instance_valid(tile):
-			continue
-
-		# Get the VBoxContainer inside the tile
-		var vbox = tile.get_node_or_null("MarginContainer/VBoxContainer")
-		if not vbox:
-			continue
-
-		# Skip if button already exists (vbox normally has 2 children: Portrait and NameLabel)
-		if vbox.get_child_count() > 2:
-			continue
-
-		# Add a spacer to push button to bottom
-		var spacer = Control.new()
-		spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		vbox.add_child(spacer)
-
-		# Create the button
 		var button = Button.new()
-		button.custom_minimum_size = Vector2(0, 36)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		# Match button width to the tile above it
+		var tile_width = tile.custom_minimum_size.x
+		button.custom_minimum_size = Vector2(tile_width, 44)
+		button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
 		# Set button text based on ownership
 		if option["is_owned"]:
@@ -233,9 +230,10 @@ func _create_select_buttons() -> void:
 			button.text = "UNLOCK (%d)" % option["unlock_cost"]
 
 		UIStyles.apply_button_styles(button)
+		button.add_theme_font_size_override("font_size", 28)
 		button.pressed.connect(_on_option_button_pressed.bind(i))
 
-		vbox.add_child(button)
+		buttons_container.add_child(button)
 		select_buttons.append(button)
 
 
