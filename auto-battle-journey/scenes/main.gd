@@ -51,6 +51,7 @@ func _change_scene_with_transition(scene_path: String,
 
 	# Swap scenes
 	_load_scene_internal(scene_path)
+	SceneManager.scene_loaded.emit(scene_path)
 
 	# Small delay for visual clarity
 	await get_tree().create_timer(0.05).timeout

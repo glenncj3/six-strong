@@ -4,6 +4,7 @@ extends Node
 # Delegates actual transitions to the Main scene
 
 signal scene_changed(scene_path: String)
+signal scene_loaded(scene_path: String)
 signal transition_started
 signal transition_completed
 
