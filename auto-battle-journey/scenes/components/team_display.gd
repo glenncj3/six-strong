@@ -94,7 +94,7 @@ func _show_overview() -> void:
 
 	# Calculate tile size (just under 1/3 of available width)
 	# Use a minimum width fallback if size not yet calculated
-	var available_width = max(size.x, 680) - 24  # Account for margins, min ~720 screen
+	var available_width = max(size.x, 688) - 24  # Account for margins, min ~720 screen
 	var tile_size = floor((available_width - 16) / 3.0)  # 16 = spacing between tiles
 	tile_size = max(tile_size, 180)  # Minimum tile size for readability
 
