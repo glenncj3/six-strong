@@ -14,15 +14,16 @@ const SkillIconScene = preload("res://scenes/components/skill_icon.tscn")
 @onready var top_section: HBoxContainer = $MarginContainer/MainContainer/TopSection
 @onready var bottom_section: HBoxContainer = $MarginContainer/MainContainer/BottomSection
 
-# Top left - back button, name, stats
+# Top left - portrait
+@onready var portrait: TextureRect = $MarginContainer/MainContainer/TopSection/Portrait
+
+# Top middle - name, stats
 @onready var info_container: VBoxContainer = $MarginContainer/MainContainer/TopSection/InfoContainer
-@onready var header_container: HBoxContainer = $MarginContainer/MainContainer/TopSection/InfoContainer/HeaderContainer
-@onready var back_button: Button = $MarginContainer/MainContainer/TopSection/InfoContainer/HeaderContainer/BackButton
-@onready var name_label: Label = $MarginContainer/MainContainer/TopSection/InfoContainer/HeaderContainer/NameLabel
+@onready var name_label: Label = $MarginContainer/MainContainer/TopSection/InfoContainer/NameLabel
 @onready var stats_container: VBoxContainer = $MarginContainer/MainContainer/TopSection/InfoContainer/StatsContainer
 
-# Top right - portrait
-@onready var portrait: TextureRect = $MarginContainer/MainContainer/TopSection/Portrait
+# Top right - back button
+@onready var back_button: Button = $MarginContainer/MainContainer/TopSection/BackButton
 
 # Bottom left - items grid
 @onready var items_container: GridContainer = $MarginContainer/MainContainer/BottomSection/ItemsContainer
@@ -48,11 +49,20 @@ func _apply_sizing() -> void:
 	back_button.custom_minimum_size = Vector2(40, 40)
 	back_button.add_theme_font_size_override("font_size", 18)
 
-	# Name label
-	name_label.add_theme_font_size_override("font_size", 20)
+	# Portrait - match the width of the 3-column item grid
+	var slot_width = UIScaler.get_item_slot_size(false).x
+	var grid_spacing = 8
+	var portrait_size = slot_width * 3 + grid_spacing * 2
+	portrait.custom_minimum_size = Vector2(portrait_size, portrait_size)
 
-	# Portrait - make it larger
-	portrait.custom_minimum_size = Vector2(140, 140)
+	# Add top spacer to align name with top of portrait art
+	var spacer = Control.new()
+	spacer.custom_minimum_size = Vector2(0, 8)
+	info_container.add_child(spacer)
+	info_container.move_child(spacer, 0)
+
+	# Name label - larger font
+	name_label.add_theme_font_size_override("font_size", 32)
 
 	# Items grid spacing
 	items_container.add_theme_constant_override("h_separation", 8)
@@ -112,8 +122,10 @@ func _populate_stats() -> void:
 			label.text = entry["format"] % entry["args"]
 		else:
 			label.text = UIHelpers.format_stat(entry["name"], entry["value"])
-		label.add_theme_font_size_override("font_size", 16)
+		label.add_theme_font_size_override("font_size", 24)
 		label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+		label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		stats_container.add_child(label)
 
 
@@ -140,6 +152,9 @@ func _populate_items() -> void:
 
 		slot.setup(item_data)
 		slot.set_compact(false)  # Use full size for detail view
+		slot._label.visible = false  # Icons only, no text
+		var slot_width = slot.custom_minimum_size.x
+		slot.custom_minimum_size = Vector2(slot_width, slot_width)  # Square slots
 		slot.set_clickable(not item_data.is_empty())
 
 		if not item_data.is_empty():
@@ -169,7 +184,7 @@ func _populate_skills() -> void:
 	if char_instance.learned_skills.is_empty():
 		var placeholder = Label.new()
 		placeholder.text = "No skills learned"
-		placeholder.add_theme_font_size_override("font_size", 14)
+		placeholder.add_theme_font_size_override("font_size", 24)
 		placeholder.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
 		placeholder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		placeholder.size_flags_vertical = Control.SIZE_EXPAND_FILL
