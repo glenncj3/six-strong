@@ -209,6 +209,45 @@ static func apply_button_styles(button: Button) -> void:
 	button.add_theme_color_override("font_focus_color", GameConstants.COLOR_TEXT_LIGHT)
 
 
+static func setup_button(button: Button, font_size: int = GameConstants.FONT_SIZE_BUTTON) -> void:
+	"""
+	Apply full button styling and set font size.
+
+	Args:
+		button: The Button node to style
+		font_size: Font size override (defaults to FONT_SIZE_BUTTON)
+	"""
+	apply_button_styles(button)
+	button.add_theme_font_size_override("font_size", font_size)
+
+
+static func setup_success_button(button: Button, font_size: int = GameConstants.FONT_SIZE_BUTTON) -> void:
+	"""Apply muted green button styling."""
+	_apply_colored_button(button, GameConstants.COLOR_BUTTON_SUCCESS, GameConstants.COLOR_BUTTON_SUCCESS_LIGHT, GameConstants.COLOR_BUTTON_SUCCESS_DARK)
+	button.add_theme_font_size_override("font_size", font_size)
+
+
+static func setup_danger_button(button: Button, font_size: int = GameConstants.FONT_SIZE_BUTTON) -> void:
+	"""Apply muted red button styling."""
+	_apply_colored_button(button, GameConstants.COLOR_BUTTON_DANGER, GameConstants.COLOR_BUTTON_DANGER_LIGHT, GameConstants.COLOR_BUTTON_DANGER_DARK)
+	button.add_theme_font_size_override("font_size", font_size)
+
+
+static func _apply_colored_button(button: Button, normal_color: Color, hover_color: Color, pressed_color: Color) -> void:
+	"""Apply button styling with custom colors."""
+	button.add_theme_stylebox_override("normal", create_panel_style(normal_color, GameConstants.COLOR_BORDER_GOLD, BORDER_WIDTH_NORMAL, CORNER_RADIUS_MEDIUM, true))
+	button.add_theme_stylebox_override("hover", create_panel_style(hover_color, GameConstants.COLOR_GOLD, BORDER_WIDTH_NORMAL, CORNER_RADIUS_MEDIUM, true))
+	button.add_theme_stylebox_override("pressed", create_panel_style(pressed_color, GameConstants.COLOR_BORDER_GOLD, BORDER_WIDTH_NORMAL, CORNER_RADIUS_MEDIUM, false))
+	button.add_theme_stylebox_override("disabled", create_button_disabled())
+	button.add_theme_stylebox_override("focus", create_panel_style(normal_color, GameConstants.COLOR_BORDER_GOLD, BORDER_WIDTH_NORMAL, CORNER_RADIUS_MEDIUM, true))
+
+	button.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	button.add_theme_color_override("font_hover_color", GameConstants.COLOR_TEXT_GOLD)
+	button.add_theme_color_override("font_pressed_color", GameConstants.COLOR_TEXT_LIGHT)
+	button.add_theme_color_override("font_disabled_color", GameConstants.COLOR_DISABLED)
+	button.add_theme_color_override("font_focus_color", GameConstants.COLOR_TEXT_LIGHT)
+
+
 # =============================================================================
 # SPECIAL STYLES
 # =============================================================================

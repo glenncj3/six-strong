@@ -178,6 +178,13 @@ const PANEL_MARGIN := 10
 const CONTENT_SEPARATION := 8
 const SHOP_ROW_SEPARATION := 12
 
+# Button sizing
+const BUTTON_HEIGHT_STANDARD := 50
+const BUTTON_WIDTH_STANDARD := 280
+const BUTTON_WIDTH_SMALL := 150
+const FONT_SIZE_BUTTON := 24
+const FONT_SIZE_BUTTON_LARGE := 28
+
 # Font sizes for dynamic UI
 const FONT_SIZE_REWARD := 32
 const FONT_SIZE_GOLD_DISPLAY := 20
@@ -201,6 +208,12 @@ const COLOR_SILVER := Color("#BFC4D1")        # Silver accent
 const COLOR_SAPPHIRE := Color("#2D5A8A")      # Button background
 const COLOR_SAPPHIRE_LIGHT := Color("#3D6A9A") # Button hover
 const COLOR_SAPPHIRE_DARK := Color("#1D4A7A") # Button pressed
+const COLOR_BUTTON_SUCCESS := Color("#2A6A3A")       # Green button background
+const COLOR_BUTTON_SUCCESS_LIGHT := Color("#3A7A4A") # Green button hover
+const COLOR_BUTTON_SUCCESS_DARK := Color("#1A5A2A")  # Green button pressed
+const COLOR_BUTTON_DANGER := Color("#6A2A3A")        # Red button background
+const COLOR_BUTTON_DANGER_LIGHT := Color("#7A3A4A")  # Red button hover
+const COLOR_BUTTON_DANGER_DARK := Color("#5A1A2A")   # Red button pressed
 const COLOR_EMERALD := Color("#2A7A4A")       # Success/health
 const COLOR_RUBY := Color("#8A2A3A")          # Danger/damage
 const COLOR_AMETHYST := Color("#6A3A8A")      # Magic/special

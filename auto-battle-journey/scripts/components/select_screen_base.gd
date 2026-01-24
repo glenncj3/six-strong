@@ -12,6 +12,7 @@ extends Control
 
 const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
 
+@onready var background = $Background
 @onready var options_container = $OptionsWrapper/MainContainer/ScrollContainer/OptionsMargin/OptionsContainer
 @onready var team_display_container = $TeamDisplayContainer
 @onready var back_button = $BackButton
@@ -20,11 +21,19 @@ var _options: Array = []
 
 
 func _ready() -> void:
+	_apply_visual_styling()
 	back_button.pressed.connect(_on_back_pressed)
 	back_button.visible = false  # Only for testing
 
 	_setup_team_display()
 	_generate_and_display_options()
+
+
+func _apply_visual_styling() -> void:
+	"""Apply consistent visual styling."""
+	background.color = GameConstants.COLOR_BG_DARK
+	UIStyles.setup_button(back_button)
+	ButtonEffects.apply_effects(back_button)
 
 
 func _setup_team_display() -> void:

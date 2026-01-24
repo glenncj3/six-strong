@@ -151,8 +151,7 @@ func _create_select_buttons() -> void:
 		else:
 			button.text = "UNLOCK (%d)" % option["unlock_cost"]
 
-		UIStyles.apply_button_styles(button)
-		button.add_theme_font_size_override("font_size", 28)
+		UIStyles.setup_button(button, GameConstants.FONT_SIZE_BUTTON_LARGE)
 		button.pressed.connect(_on_option_button_pressed.bind(i))
 
 		buttons_container.add_child(button)

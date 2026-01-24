@@ -73,7 +73,7 @@ static func _create_shop_ui(encounter_data: Dictionary, context: Dictionary) -> 
 	"""Create shop encounter UI."""
 	var vbox = UIHelpers.create_vbox_container()
 
-	vbox.add_child(UIHelpers.create_label("Purchase items and skills with gold", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("Purchase items and skills with gold", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
 
 	var gold_label = UIHelpers.create_label("Your Gold: %d" % RunManager.get_gold(), GameConstants.FONT_SIZE_GOLD_DISPLAY, GameConstants.COLOR_GOLD, true)
 	vbox.add_child(gold_label)
@@ -143,7 +143,7 @@ static func _create_xp_reward_ui(encounter_data: Dictionary, context: Dictionary
 	"""Create XP reward encounter UI."""
 	var vbox = UIHelpers.create_vbox_container(16)
 
-	vbox.add_child(UIHelpers.create_label("Choose a character to receive XP", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("Choose a character to receive XP", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
 
 	var xp_amount = encounter_data["data"]["xp_amount"]
 	vbox.add_child(UIHelpers.create_label("XP Award: +%d" % xp_amount, GameConstants.FONT_SIZE_REWARD, GameConstants.COLOR_SUCCESS, true))
@@ -157,7 +157,8 @@ static func _create_xp_reward_ui(encounter_data: Dictionary, context: Dictionary
 		var char_instance = team[i]
 		var button = Button.new()
 		button.text = "Give to %s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
-		button.custom_minimum_size = Vector2(300, 50)
+		button.custom_minimum_size = Vector2(GameConstants.BUTTON_WIDTH_STANDARD, GameConstants.BUTTON_HEIGHT_STANDARD)
+		UIStyles.setup_button(button)
 		if on_select.is_valid():
 			button.pressed.connect(on_select.bind(i, xp_amount, button))
 		vbox.add_child(button)
@@ -171,7 +172,7 @@ static func _create_gold_reward_ui(encounter_data: Dictionary, _context: Diction
 
 	var gold_amount = encounter_data["data"]["gold_amount"]
 
-	vbox.add_child(UIHelpers.create_label("You found gold!", GameConstants.FONT_SIZE_HEADING, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("You found gold!", GameConstants.FONT_SIZE_HEADING, GameConstants.COLOR_TEXT_LIGHT, true))
 	vbox.add_child(UIHelpers.create_label("+%d Gold" % gold_amount, 48, GameConstants.COLOR_GOLD, true))
 
 	# Award gold immediately
@@ -185,7 +186,7 @@ static func _create_health_restore_ui(encounter_data: Dictionary, _context: Dict
 	"""Create health restore encounter UI."""
 	var vbox = UIHelpers.create_vbox_container(16)
 
-	vbox.add_child(UIHelpers.create_label("Your team's health is restored!", GameConstants.FONT_SIZE_HEADING, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("Your team's health is restored!", GameConstants.FONT_SIZE_HEADING, GameConstants.COLOR_TEXT_LIGHT, true))
 
 	var heal_percentage = encounter_data["data"]["heal_percentage"]
 	var team = RunManager.get_team()
@@ -221,21 +222,21 @@ static func _create_skill_trainer_ui(encounter_data: Dictionary, context: Dictio
 	var on_complete = context.get("on_encounter_complete", Callable())
 
 	if skill_data.is_empty():
-		vbox.add_child(UIHelpers.create_label("No skill available...", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+		vbox.add_child(UIHelpers.create_label("No skill available...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
 		# Allow completion even with error
 		if context.has("on_encounter_complete"):
 			context["on_encounter_complete"].call()
 		return vbox
 
-	vbox.add_child(UIHelpers.create_label("The trainer offers to teach:", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("The trainer offers to teach:", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
 	vbox.add_child(UIHelpers.create_label(skill_data["name"], GameConstants.FONT_SIZE_REWARD, GameConstants.COLOR_SUCCESS, true))
-	vbox.add_child(UIHelpers.create_label(skill_data["description"], GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label(skill_data["description"], GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
 
 	if skill_data.has("level_requirement"):
 		vbox.add_child(UIHelpers.create_label("(Requires Level %d)" % skill_data["level_requirement"], GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_WARNING, true))
 
 	vbox.add_child(UIHelpers.create_spacer(20))
-	vbox.add_child(UIHelpers.create_label("Choose a character to learn this skill:", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("Choose a character to learn this skill:", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
 
 	var team = RunManager.get_team()
 
@@ -243,7 +244,8 @@ static func _create_skill_trainer_ui(encounter_data: Dictionary, context: Dictio
 		var char_instance = team[i]
 		var button = Button.new()
 		button.text = "Teach %s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
-		button.custom_minimum_size = Vector2(300, 50)
+		button.custom_minimum_size = Vector2(GameConstants.BUTTON_WIDTH_STANDARD, GameConstants.BUTTON_HEIGHT_STANDARD)
+		UIStyles.setup_button(button)
 		button.pressed.connect(_on_skill_trainer_selected.bind(i, skill_id, button, vbox, on_complete))
 		vbox.add_child(button)
 
@@ -279,8 +281,8 @@ static func _create_gamble_ui(encounter_data: Dictionary, context: Dictionary) -
 	var multiplier = encounter_data["data"]["win_multiplier"]
 	var current_gold = RunManager.get_gold()
 
-	vbox.add_child(UIHelpers.create_label("The gambler offers a wager...", GameConstants.FONT_SIZE_HEADING, Color.WHITE, true))
-	vbox.add_child(UIHelpers.create_label("Bet: %d Gold" % bet, GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("The gambler offers a wager...", GameConstants.FONT_SIZE_HEADING, GameConstants.COLOR_TEXT_LIGHT, true))
+	vbox.add_child(UIHelpers.create_label("Bet: %d Gold" % bet, GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
 	vbox.add_child(UIHelpers.create_label("Win: %dx your bet (%d Gold)" % [multiplier, bet * multiplier], GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true))
 	vbox.add_child(UIHelpers.create_label("Lose: You lose your bet", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_DANGER, true))
 	vbox.add_child(UIHelpers.create_label("(50% chance to win)", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_MUTED, true))
@@ -291,7 +293,7 @@ static func _create_gamble_ui(encounter_data: Dictionary, context: Dictionary) -
 
 	vbox.add_child(UIHelpers.create_spacer(20))
 
-	var result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_REWARD, Color.WHITE, true)
+	var result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_REWARD, GameConstants.COLOR_TEXT_LIGHT, true)
 	result_label.name = "ResultLabel"
 	vbox.add_child(result_label)
 
@@ -304,14 +306,16 @@ static func _create_gamble_ui(encounter_data: Dictionary, context: Dictionary) -
 
 	var gamble_button = Button.new()
 	gamble_button.text = "GAMBLE!"
-	gamble_button.custom_minimum_size = Vector2(150, 50)
+	gamble_button.custom_minimum_size = Vector2(GameConstants.BUTTON_WIDTH_SMALL, GameConstants.BUTTON_HEIGHT_STANDARD)
 	gamble_button.disabled = current_gold < bet
+	UIStyles.setup_button(gamble_button)
 	gamble_button.pressed.connect(_on_gamble_pressed.bind(bet, multiplier, vbox, on_complete))
 	buttons_container.add_child(gamble_button)
 
 	var decline_button = Button.new()
 	decline_button.text = "Decline"
-	decline_button.custom_minimum_size = Vector2(150, 50)
+	decline_button.custom_minimum_size = Vector2(GameConstants.BUTTON_WIDTH_SMALL, GameConstants.BUTTON_HEIGHT_STANDARD)
+	UIStyles.setup_button(decline_button)
 	decline_button.pressed.connect(_on_gamble_declined.bind(vbox, on_complete))
 	buttons_container.add_child(decline_button)
 
@@ -379,12 +383,12 @@ static func _create_elite_challenge_ui(encounter_data: Dictionary, context: Dict
 	var xp_reward = encounter_data["data"]["xp_reward"]
 	var gold_reward = encounter_data["data"]["gold_reward"]
 
-	vbox.add_child(UIHelpers.create_label("An elite challenge awaits!", GameConstants.FONT_SIZE_HEADING, Color.WHITE, true))
-	vbox.add_child(UIHelpers.create_label("Complete this trial for great rewards.", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("An elite challenge awaits!", GameConstants.FONT_SIZE_HEADING, GameConstants.COLOR_TEXT_LIGHT, true))
+	vbox.add_child(UIHelpers.create_label("Complete this trial for great rewards.", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
 
 	vbox.add_child(UIHelpers.create_spacer(20))
 
-	vbox.add_child(UIHelpers.create_label("Rewards:", GameConstants.FONT_SIZE_BODY, Color.WHITE, true))
+	vbox.add_child(UIHelpers.create_label("Rewards:", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
 	vbox.add_child(UIHelpers.create_label("+%d XP to ALL characters" % xp_reward, GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true))
 	vbox.add_child(UIHelpers.create_label("+%d Gold" % gold_reward, GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_GOLD, true))
 
@@ -394,7 +398,8 @@ static func _create_elite_challenge_ui(encounter_data: Dictionary, context: Dict
 
 	var challenge_button = Button.new()
 	challenge_button.text = "COMPLETE CHALLENGE"
-	challenge_button.custom_minimum_size = Vector2(300, 60)
+	challenge_button.custom_minimum_size = Vector2(GameConstants.BUTTON_WIDTH_STANDARD, GameConstants.BUTTON_HEIGHT_STANDARD)
+	UIStyles.setup_button(challenge_button)
 	challenge_button.pressed.connect(_on_elite_challenge_completed.bind(xp_reward, gold_reward, challenge_button, on_complete))
 	vbox.add_child(challenge_button)
 

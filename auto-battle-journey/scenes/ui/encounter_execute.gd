@@ -2,10 +2,11 @@ extends Control
 # EncounterExecute - Execute the selected encounter
 # Refactored to use data-driven EncounterHandlers for extensibility
 
+@onready var background = $Background
 @onready var title_label = $EncounterContainer/TitleLabel
 @onready var content_container = $EncounterContainer/ContentContainer
-@onready var complete_button = $CompleteButton
-@onready var skip_button = $SkipButton
+@onready var complete_button = $ButtonContainer/CompleteButton
+@onready var skip_button = $ButtonContainer/SkipButton
 
 var encounter_data: Dictionary = {}
 var encounter_completed: bool = false
@@ -15,6 +16,7 @@ var _gold_label: Label = null
 
 
 func _ready() -> void:
+	_apply_visual_styling()
 	complete_button.pressed.connect(_on_complete_pressed)
 	complete_button.disabled = true  # Enable after encounter interaction
 	skip_button.pressed.connect(_on_skip_pressed)
@@ -26,6 +28,16 @@ func _ready() -> void:
 		_play_entrance_animations()
 	else:
 		push_error("EncounterExecute: No encounter data found!")
+
+
+func _apply_visual_styling() -> void:
+	"""Apply consistent visual styling."""
+	background.color = GameConstants.COLOR_BG_DARK
+
+	UIStyles.setup_danger_button(skip_button, GameConstants.FONT_SIZE_BUTTON)
+	ButtonEffects.apply_effects(skip_button)
+	UIStyles.setup_success_button(complete_button, GameConstants.FONT_SIZE_BUTTON)
+	ButtonEffects.apply_effects(complete_button)
 
 
 func _play_entrance_animations() -> void:
