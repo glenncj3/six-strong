@@ -9,7 +9,6 @@ extends PanelContainer
 var current_char_instance: CharacterInstance = null
 var _tween: Tween = null
 var _is_visible: bool = false
-var _dismissed_char: CharacterInstance = null
 
 const SLIDE_DURATION := 0.25
 
@@ -36,18 +35,18 @@ func _apply_style() -> void:
 func _input(event: InputEvent) -> void:
 	if not _is_visible:
 		return
-	if event is InputEventMouseButton and event.pressed:
+	if event is InputEventMouseButton and not event.pressed:
 		if not get_global_rect().has_point(event.position):
-			_dismissed_char = current_char_instance
-			hide_panel()
-			get_tree().process_frame.connect(func(): _dismissed_char = null, CONNECT_ONE_SHOT)
+			call_deferred("_deferred_dismiss")
+
+
+func _deferred_dismiss() -> void:
+	if _is_visible:
+		hide_panel()
 
 
 func show_character(char_instance: CharacterInstance) -> void:
 	"""Show the panel with character info, sliding up from the bottom."""
-	if char_instance == _dismissed_char:
-		return  # Don't re-show a character dismissed by clicking its own tile
-
 	current_char_instance = char_instance
 	_populate(char_instance)
 
