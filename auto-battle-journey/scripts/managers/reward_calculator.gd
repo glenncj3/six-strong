@@ -33,22 +33,6 @@ static func calculate_reputation_loss(current_round: int) -> int:
 	return current_round + 1  # +1 because displayed as 1-indexed
 
 
-static func calculate_run_end_rewards(victory: bool) -> Dictionary:
-	"""
-	Calculate basic rewards at end of run (legacy method).
-
-	Args:
-		victory: Whether the player won the run
-
-	Returns:
-		Dictionary with "gems" and "character_fame" rewards
-	"""
-	return {
-		"gems": GameConstants.VICTORY_GEM_REWARD if victory else GameConstants.DEFEAT_GEM_REWARD,
-		"character_fame": GameConstants.RUN_CHARACTER_FAME_REWARD
-	}
-
-
 static func calculate_gem_reward(victory: bool, wins: int, reputation: int) -> int:
 	"""
 	Calculate gem reward based on performance.
@@ -65,13 +49,11 @@ static func calculate_gem_reward(victory: bool, wins: int, reputation: int) -> i
 	if victory:
 		base_reward = GameConstants.VICTORY_GEM_REWARD
 
-	# Bonus for wins (5 per win)
-	var win_bonus = wins * 5
+	var win_bonus = wins * GameConstants.GEMS_PER_WIN_BONUS
 
-	# Bonus for remaining reputation (victory only, 2 per reputation)
 	var reputation_bonus = 0
 	if victory:
-		reputation_bonus = reputation * 2
+		reputation_bonus = reputation * GameConstants.GEMS_PER_REPUTATION_BONUS
 
 	return base_reward + win_bonus + reputation_bonus
 
@@ -87,12 +69,11 @@ static func calculate_character_fame_reward(victory: bool, wins: int) -> int:
 	Returns:
 		Fame reward per character
 	"""
-	var base_fame = 25
+	var base_fame = GameConstants.FAME_REWARD_BASE_DEFEAT
 	if victory:
-		base_fame = 75
+		base_fame = GameConstants.FAME_REWARD_BASE_VICTORY
 
-	# Bonus for wins (5 per win)
-	var win_bonus = wins * 5
+	var win_bonus = wins * GameConstants.FAME_PER_WIN_BONUS
 
 	return base_fame + win_bonus
 
@@ -121,25 +102,3 @@ static func apply_combat_victory_rewards(
 	return rewards
 
 
-static func apply_run_end_rewards(
-	team_manager: TeamManager,
-	victory: bool
-) -> void:
-	"""
-	Apply end-of-run rewards to characters and player account.
-
-	Args:
-		team_manager: TeamManager with team to reward
-		victory: Whether the player won
-	"""
-	var rewards = calculate_run_end_rewards(victory)
-
-	# Award character fame (for prestige progression)
-	for char_instance in team_manager.get_team():
-		PlayerAccount.add_character_fame(
-			char_instance.base_character_id,
-			rewards["character_fame"]
-		)
-
-	# Award gems
-	PlayerAccount.add_gems(rewards["gems"])

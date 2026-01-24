@@ -91,21 +91,21 @@ func _set_gold_label(label: Label) -> void:
 
 func _on_buy_item(item_id: String, cost: int, char_selector: OptionButton, button: Button) -> void:
 	"""Handle buying an item upgrade."""
-	var char_index = char_selector.selected - 1  # -1 because first item is "Select Character..."
-	var result = RunManager.attempt_purchase(cost, char_index, func(ci): return ci.equip_item_upgrade(item_id))
-	if result["success"]:
-		button.disabled = true
-		button.text = "PURCHASED"
-		_update_gold_label()
+	_handle_purchase(item_id, cost, char_selector, button, func(ci, id): return ci.equip_item_upgrade(id), "PURCHASED")
 
 
 func _on_buy_skill(skill_id: String, cost: int, char_selector: OptionButton, button: Button) -> void:
 	"""Handle buying a skill."""
+	_handle_purchase(skill_id, cost, char_selector, button, func(ci, id): return ci.learn_skill(id), "LEARNED")
+
+
+func _handle_purchase(content_id: String, cost: int, char_selector: OptionButton, button: Button, action: Callable, success_text: String) -> void:
+	"""Handle a purchase (item or skill) with character selection."""
 	var char_index = char_selector.selected - 1
-	var result = RunManager.attempt_purchase(cost, char_index, func(ci): return ci.learn_skill(skill_id))
+	var result = RunManager.attempt_purchase(cost, char_index, func(ci): return action.call(ci, content_id))
 	if result["success"]:
 		button.disabled = true
-		button.text = "LEARNED"
+		button.text = success_text
 		_update_gold_label()
 
 

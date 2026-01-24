@@ -42,6 +42,13 @@ const VICTORY_GEM_REWARD := 100
 const DEFEAT_GEM_REWARD := 25
 const RUN_CHARACTER_FAME_REWARD := 50  # Fame awarded to each character at run end
 
+# Performance-based reward scaling
+const FAME_REWARD_BASE_VICTORY := 75
+const FAME_REWARD_BASE_DEFEAT := 25
+const FAME_PER_WIN_BONUS := 5
+const GEMS_PER_WIN_BONUS := 5
+const GEMS_PER_REPUTATION_BONUS := 2
+
 # Combat rewards
 const COMBAT_WIN_GOLD := 20
 const COMBAT_WIN_XP := 30  # XP per character per combat win

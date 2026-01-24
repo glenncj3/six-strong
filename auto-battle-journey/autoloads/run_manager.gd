@@ -416,7 +416,6 @@ func capture_team_data() -> Array:
 func generate_combat_options(count: int) -> Array:
 	"""
 	Generate random combat options (AI enemies or Player Ghosts).
-	Returns dictionaries for backwards compatibility.
 
 	Args:
 		count: Number of options to generate (usually 3)
@@ -425,19 +424,6 @@ func generate_combat_options(count: int) -> Array:
 		Array of combat option dictionaries
 	"""
 	return _combat_generator.generate_options_as_dicts(count)
-
-
-func generate_combat_options_typed(count: int) -> Array[CombatOption]:
-	"""
-	Generate random combat options as typed CombatOption objects.
-
-	Args:
-		count: Number of options to generate (usually 3)
-
-	Returns:
-		Array of CombatOption objects
-	"""
-	return _combat_generator.generate_options(count)
 
 
 # =============================================================================
