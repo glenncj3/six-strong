@@ -30,32 +30,32 @@ static func _register_default_handlers() -> void:
 
 	var ui_handlers: Dictionary = {
 		"shop": {
-			"create_ui": EncounterUIFactory._create_shop_ui,
-			"get_reward_preview": EncounterUIFactory._get_shop_preview
+			"create_ui": ShopEncounterUI.create_ui,
+			"get_reward_preview": ShopEncounterUI.get_reward_preview
 		},
 		"xp_reward": {
-			"create_ui": EncounterUIFactory._create_xp_reward_ui,
-			"get_reward_preview": EncounterUIFactory._get_xp_reward_preview
+			"create_ui": XpRewardEncounterUI.create_ui,
+			"get_reward_preview": XpRewardEncounterUI.get_reward_preview
 		},
 		"gold_reward": {
-			"create_ui": EncounterUIFactory._create_gold_reward_ui,
-			"get_reward_preview": EncounterUIFactory._get_gold_reward_preview
+			"create_ui": GoldRewardEncounterUI.create_ui,
+			"get_reward_preview": GoldRewardEncounterUI.get_reward_preview
 		},
 		"health_restore": {
-			"create_ui": EncounterUIFactory._create_health_restore_ui,
-			"get_reward_preview": EncounterUIFactory._get_health_restore_preview
+			"create_ui": HealthRestoreEncounterUI.create_ui,
+			"get_reward_preview": HealthRestoreEncounterUI.get_reward_preview
 		},
 		"skill_trainer": {
-			"create_ui": EncounterUIFactory._create_skill_trainer_ui,
-			"get_reward_preview": EncounterUIFactory._get_skill_trainer_preview
+			"create_ui": SkillTrainerEncounterUI.create_ui,
+			"get_reward_preview": SkillTrainerEncounterUI.get_reward_preview
 		},
 		"gamble": {
-			"create_ui": EncounterUIFactory._create_gamble_ui,
-			"get_reward_preview": EncounterUIFactory._get_gamble_preview
+			"create_ui": GambleEncounterUI.create_ui,
+			"get_reward_preview": GambleEncounterUI.get_reward_preview
 		},
 		"elite_challenge": {
-			"create_ui": EncounterUIFactory._create_elite_challenge_ui,
-			"get_reward_preview": EncounterUIFactory._get_elite_challenge_preview
+			"create_ui": EliteChallengeEncounterUI.create_ui,
+			"get_reward_preview": EliteChallengeEncounterUI.get_reward_preview
 		},
 	}
 

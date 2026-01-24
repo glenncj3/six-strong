@@ -3,7 +3,7 @@ extends RefCounted
 ## Facade for encounter handling system.
 ## Maintains backwards compatibility by delegating to:
 ##   - EncounterRegistry: Handler registration and lookup
-##   - EncounterUIFactory: UI creation functions
+##   - Per-type UI classes (e.g., ShopEncounterUI, GambleEncounterUI)
 ##
 ## This class provides the same public API as before (SRP-2 refactoring).
 

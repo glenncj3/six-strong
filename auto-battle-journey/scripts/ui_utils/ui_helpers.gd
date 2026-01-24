@@ -73,6 +73,19 @@ static func set_button_enabled(button: Button, enabled: bool, disabled_text: Str
 	UIContainerHelpers.set_button_enabled(button, enabled, disabled_text)
 
 
+static func create_button(
+	text: String,
+	callback: Callable = Callable(),
+	width: int = GameConstants.BUTTON_WIDTH_STANDARD,
+	height: int = GameConstants.BUTTON_HEIGHT_STANDARD
+) -> Button:
+	return UIContainerHelpers.create_button(text, callback, width, height)
+
+
+static func disable_all_buttons(container: Control) -> void:
+	UIContainerHelpers.disable_all_buttons(container)
+
+
 # =============================================================================
 # UIFormattingHelpers DELEGATES
 # =============================================================================

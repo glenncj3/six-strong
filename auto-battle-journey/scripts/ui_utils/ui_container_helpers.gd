@@ -239,3 +239,39 @@ static func set_button_enabled(button: Button, enabled: bool, disabled_text: Str
 	button.disabled = not enabled
 	if not enabled and not disabled_text.is_empty():
 		button.text = disabled_text
+
+
+static func create_button(
+	text: String,
+	callback: Callable = Callable(),
+	width: int = GameConstants.BUTTON_WIDTH_STANDARD,
+	height: int = GameConstants.BUTTON_HEIGHT_STANDARD
+) -> Button:
+	"""
+	Create a styled button with optional press callback.
+
+	Args:
+		text: Button label text
+		callback: Optional callable to connect to pressed signal
+		width: Minimum button width (default: BUTTON_WIDTH_STANDARD)
+		height: Minimum button height (default: BUTTON_HEIGHT_STANDARD)
+
+	Returns:
+		Configured Button node
+	"""
+	var button = Button.new()
+	button.text = text
+	button.custom_minimum_size = Vector2(width, height)
+	UIStyles.setup_button(button)
+	if callback.is_valid():
+		button.pressed.connect(callback)
+	return button
+
+
+static func disable_all_buttons(container: Control) -> void:
+	"""Recursively disable all Button children in a container."""
+	for child in container.get_children():
+		if child is Button:
+			child.disabled = true
+		elif child.get_child_count() > 0:
+			disable_all_buttons(child)
