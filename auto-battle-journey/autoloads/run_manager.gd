@@ -382,3 +382,28 @@ func apply_combat_rewards(won: bool, combat_data: Dictionary) -> void:
 		var reputation_loss = RewardCalculator.calculate_reputation_loss(current_round)
 		lose_reputation(reputation_loss)
 		print("RunManager: Defeat! Lost %d reputation" % reputation_loss)
+
+
+func complete_combat(won: bool, combat_data: Dictionary) -> void:
+	"""
+	Complete a combat and handle all post-combat logic.
+	This is the single entry point any combat scene should call when combat ends.
+
+	Args:
+		won: True if player won, false if lost
+		combat_data: The combat option dictionary
+	"""
+	if won:
+		apply_combat_rewards(true, combat_data)
+		add_win()
+	else:
+		apply_combat_rewards(false, combat_data)
+		add_loss()
+
+	save_run_state()
+
+	if is_run_over():
+		SceneManager.go_to("run_results")
+	else:
+		advance_round()
+		SceneManager.go_to("run_view")

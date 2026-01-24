@@ -40,94 +40,19 @@ func _setup_display() -> void:
 
 func _on_win_pressed() -> void:
 	"""Handle victory."""
-	print("CombatStub: Player chose VICTORY")
-
-	# Disable buttons
 	win_button.disabled = true
 	lose_button.disabled = true
-
-	# Show result
 	result_label.text = "VICTORY!"
 	result_label.modulate = Color.GREEN
-
-	# Apply rewards
-	RunManager.apply_combat_rewards(true, combat_data)
-	RunManager.add_win()
-
-	# Save state
-	RunManager.save_run_state()
-
-	# Wait a moment then proceed
 	await get_tree().create_timer(1.5).timeout
-	_complete_combat()
+	RunManager.complete_combat(true, combat_data)
 
 
 func _on_lose_pressed() -> void:
 	"""Handle defeat."""
-	print("CombatStub: Player chose DEFEAT")
-
-	# Disable buttons
 	win_button.disabled = true
 	lose_button.disabled = true
-
-	# Show result
 	result_label.text = "DEFEAT..."
 	result_label.modulate = Color.RED
-
-	# Apply penalties
-	RunManager.apply_combat_rewards(false, combat_data)
-	RunManager.add_loss()
-
-	# Save state
-	RunManager.save_run_state()
-
-	# Wait a moment then proceed
 	await get_tree().create_timer(1.5).timeout
-	_complete_combat()
-
-
-func _complete_combat() -> void:
-	"""Complete combat and check if run is over."""
-	# Check if run is over
-	if RunManager.is_run_over():
-		_end_run()
-	else:
-		# Advance to next round
-		RunManager.advance_round()
-
-		# Return to run view (next round, encounter phase)
-		SceneManager.go_to("run_view")
-
-
-func _end_run() -> void:
-	"""Run is over, navigate to results."""
-	var victory = RunManager.did_player_win()
-
-	print("CombatStub: Run is over! Victory: %s" % victory)
-
-	# Store run data for results screen via SceneManager
-	SceneManager.set_scene_data("run_results", {
-		"round": RunManager.get_round(),
-		"wins": RunManager.get_wins(),
-		"losses": RunManager.get_losses(),
-		"gold": RunManager.get_gold(),
-		"reputation": RunManager.get_reputation(),
-		"starting_gold": RunManager.starting_gold,
-		"victory": victory,
-		"team": _capture_team_data()
-	})
-
-	# Navigate to results screen
-	SceneManager.go_to("run_results")
-
-
-func _capture_team_data() -> Array:
-	"""Capture team data before run ends."""
-	var team_data = []
-	for char_instance in RunManager.get_team():
-		team_data.append({
-			"id": char_instance.base_character_id,
-			"name": char_instance.get_character_name(),
-			"level": char_instance.level
-		})
-	return team_data
+	RunManager.complete_combat(false, combat_data)
