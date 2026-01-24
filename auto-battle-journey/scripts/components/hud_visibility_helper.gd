@@ -6,7 +6,7 @@ extends RefCounted
 const GAMEPLAY_SCENES: Array[String] = [
 	"res://scenes/ui/draft.tscn",
 	"res://scenes/ui/run_view.tscn",
-	"res://scenes/ui/encounter_execute.tscn",
+	"res://scenes/ui/encounter_active.tscn",
 	"res://scenes/ui/combat_stub.tscn",
 ]
 

@@ -15,7 +15,7 @@ func _get_data_key() -> String:
 
 
 func _get_next_scene() -> String:
-	return "encounter_execute"
+	return "encounter_active"
 
 
 func _get_log_prefix() -> String:

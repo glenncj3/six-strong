@@ -16,7 +16,7 @@ const SCENES = {
 	"draft": "res://scenes/ui/draft.tscn",
 	"run_view": "res://scenes/ui/run_view.tscn",
 	"encounter_select": "res://scenes/ui/encounter_select.tscn",
-	"encounter_execute": "res://scenes/ui/encounter_execute.tscn",
+	"encounter_active": "res://scenes/ui/encounter_active.tscn",
 	"combat_select": "res://scenes/ui/combat_select.tscn",
 	"combat_stub": "res://scenes/ui/combat_stub.tscn",
 	"run_results": "res://scenes/ui/run_results.tscn",

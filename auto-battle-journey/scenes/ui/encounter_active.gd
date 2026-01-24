@@ -1,5 +1,5 @@
 extends Control
-# EncounterExecute - Execute the selected encounter
+# EncounterActive - Execute the selected encounter
 # Refactored to use data-driven EncounterHandlers for extensibility
 
 @onready var background = $Background
@@ -27,7 +27,7 @@ func _ready() -> void:
 		_setup_encounter()
 		_play_entrance_animations()
 	else:
-		push_error("EncounterExecute: No encounter data found!")
+		push_error("EncounterActive: No encounter data found!")
 
 
 func _apply_visual_styling() -> void:
@@ -52,7 +52,7 @@ func _setup_encounter() -> void:
 
 	# Check if handler exists
 	if not EncounterHandlers.has_handler(encounter_type):
-		push_error("EncounterExecute: Unknown encounter type: %s" % encounter_type)
+		push_error("EncounterActive: Unknown encounter type: %s" % encounter_type)
 		return
 
 	# Create context with callbacks for handlers

@@ -1,9 +1,9 @@
 [gd_scene load_steps=3 format=3 uid="uid://encounter_execute1"]
 
-[ext_resource type="Script" path="res://scenes/ui/encounter_execute.gd" id="1_script"]
+[ext_resource type="Script" path="res://scenes/ui/encounter_active.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/components/abstract_background.tscn" id="2_bg"]
 
-[node name="EncounterExecute" type="Control"]
+[node name="EncounterActive" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
