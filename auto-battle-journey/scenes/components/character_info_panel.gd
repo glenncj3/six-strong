@@ -17,7 +17,7 @@ var slide_down: bool = false  # If true, panel drops down from top instead of sl
 const SLIDE_DURATION := 0.25
 const MAX_ITEMS := GameConstants.MAX_RUN_ITEMS
 const MAX_SKILLS := GameConstants.MAX_RUN_SKILLS
-const SLOT_ICON_SIZE := 80
+const SLOT_ICON_SIZE := 68
 
 
 func _ready() -> void:

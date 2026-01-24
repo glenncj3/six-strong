@@ -31,6 +31,10 @@ func _ready() -> void:
 
 
 func _setup_info_panel() -> void:
+	# Fix info panel height to match tile height
+	var tile_height = _get_tile_size()
+	info_panel_clip.custom_minimum_size = Vector2(0, tile_height)
+	info_panel_clip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	info_panel = CharacterInfoPanelScene.instantiate()
 	info_panel_clip.add_child(info_panel)
 	info_panel.set_anchors_preset(Control.PRESET_FULL_RECT)

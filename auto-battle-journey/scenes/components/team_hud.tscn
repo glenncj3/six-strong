@@ -6,7 +6,7 @@
 layout_mode = 3
 anchors_preset = -1
 anchor_left = 0.04
-anchor_top = 0.53
+anchor_top = 0.6
 anchor_right = 0.96
 anchor_bottom = 0.97
 grow_horizontal = 2

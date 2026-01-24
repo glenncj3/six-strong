@@ -69,10 +69,11 @@ func _setup_options_display() -> void:
 	vbox.add_child(buttons_container)
 
 	# Info panel that drops down below option tiles
-	# Wrap in margin container to match TeamHUD panel width (4% anchors = ~13px extra per side)
+	# Height matches tile size; width matches TeamHUD panel (4% anchors = ~13px extra per side)
+	var tile_height = _get_tile_size()
 	var info_margin = MarginContainer.new()
 	info_margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	info_margin.custom_minimum_size = Vector2(0, 260)
+	info_margin.custom_minimum_size = Vector2(0, tile_height)
 	info_margin.add_theme_constant_override("margin_left", 13)
 	info_margin.add_theme_constant_override("margin_right", 13)
 	vbox.add_child(info_margin)
@@ -137,9 +138,7 @@ func _update_options_display(instances: Array) -> void:
 	UIHelpers.clear_children(options_tiles_container)
 	character_tiles.clear()
 
-	var available_width = max(options_display_container.size.x, 688) - 24
-	var tile_size = floor((available_width - 16) / float(GameConstants.TEAM_SIZE))
-	tile_size = max(tile_size, 180)
+	var tile_size = _get_tile_size()
 
 	for char_instance in instances:
 		var tile = CharacterTileScene.instantiate()
@@ -254,3 +253,9 @@ func _start_run() -> void:
 	print("Draft: Run started, navigating to run_view...")
 
 	SceneManager.go_to_run_view()
+
+
+func _get_tile_size() -> float:
+	var available_width = max(options_display_container.size.x, 688) - 24
+	var tile_size = floor((available_width - 16) / float(GameConstants.TEAM_SIZE))
+	return max(tile_size, 180)
