@@ -5,8 +5,6 @@ extends Control
 @onready var background = $Background
 @onready var title_label = $MainContainer/Title
 @onready var opponent_label = $MainContainer/OpponentLabel
-@onready var stub_notice = $MainContainer/StubNotice
-@onready var instruction_label = $MainContainer/InstructionLabel
 @onready var win_button = $MainContainer/ButtonContainer/WinButton
 @onready var lose_button = $MainContainer/ButtonContainer/LoseButton
 @onready var result_label = $MainContainer/ResultLabel
@@ -39,12 +37,6 @@ func _apply_visual_styling() -> void:
 
 	opponent_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
 	opponent_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
-
-	stub_notice.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
-	stub_notice.add_theme_color_override("font_color", GameConstants.COLOR_WARNING)
-
-	instruction_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
-	instruction_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
 
 	result_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BUTTON_LARGE)
 	result_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
