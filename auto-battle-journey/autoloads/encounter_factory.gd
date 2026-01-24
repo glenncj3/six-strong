@@ -1,43 +1,53 @@
 extends Node
 # EncounterFactory Singleton
-# Generates random encounter options with difficulty scaling
+# Generates random encounter options from JSON configuration
 
 signal encounter_generated(encounter_type: String)
 
-# Weight system for encounter types
-var encounter_weights: Dictionary = {
-	"shop": 1.0,
-	"xp_reward": 1.0,
-	"gold_reward": 0.8,
-	"health_restore": 0.6,
-	"skill_trainer": 0.7,
-	"gamble": 0.5,
-	"elite_challenge": 0.4
+var _encounter_types: Array = []
+
+# Mapping from string constant names to their values (GDScript const members aren't reflectable)
+var _constant_map: Dictionary = {
+	"XP_REWARD_MIN": GameConstants.XP_REWARD_MIN,
+	"XP_REWARD_MAX": GameConstants.XP_REWARD_MAX,
+	"GOLD_REWARD_MIN": GameConstants.GOLD_REWARD_MIN,
+	"GOLD_REWARD_MAX": GameConstants.GOLD_REWARD_MAX,
+	"HEALTH_RESTORE_PERCENTAGE": GameConstants.HEALTH_RESTORE_PERCENTAGE,
+	"SHOP_MIN_ITEMS": GameConstants.SHOP_MIN_ITEMS,
+	"SHOP_MAX_ITEMS": GameConstants.SHOP_MAX_ITEMS,
+	"SHOP_MIN_SKILLS": GameConstants.SHOP_MIN_SKILLS,
+	"SHOP_MAX_SKILLS": GameConstants.SHOP_MAX_SKILLS,
 }
+
+var _generators: Dictionary = {}
 
 
 func _ready() -> void:
-	pass
+	_generators = {
+		"random_range": _gen_random_range,
+		"constant": _gen_constant,
+		"pick_items": _gen_pick_items,
+		"pick_skills": _gen_pick_skills,
+		"pick_learnable_skill": _gen_pick_learnable_skill,
+	}
+
+	var data = JsonPersistence.load_json("res://data/encounters/encounter_types.json")
+	if data:
+		_encounter_types = data.get("encounter_types", [])
+	else:
+		push_error("EncounterFactory: Failed to load encounter_types.json")
 
 
 func generate_encounter_options(count: int) -> Array:
-	"""
-	Generate random encounter options.
-
-	Args:
-		count: Number of options to generate (usually 3)
-
-	Returns:
-		Array of encounter option dictionaries
-	"""
 	var options = []
-	var used_types = []  # Prevent duplicate types in same set
+	var used_types = []
 
 	for i in range(count):
 		var encounter_type = _select_weighted_encounter_type(used_types)
 		used_types.append(encounter_type)
 
-		var encounter_data = _create_encounter_data(encounter_type)
+		var type_def = _get_type_def(encounter_type)
+		var encounter_data = _create_encounter_data(type_def)
 		options.append(encounter_data)
 
 		encounter_generated.emit(encounter_type)
@@ -46,28 +56,33 @@ func generate_encounter_options(count: int) -> Array:
 	return options
 
 
+func get_type_def(type_name: String) -> Dictionary:
+	return _get_type_def(type_name)
+
+
+func get_all_type_defs() -> Array:
+	return _encounter_types
+
+
 func _select_weighted_encounter_type(excluded_types: Array) -> String:
-	"""Select a random encounter type using weights."""
 	var available_types = []
 	var available_weights = []
 
-	for encounter_type in encounter_weights.keys():
-		if encounter_type not in excluded_types:
-			available_types.append(encounter_type)
-			available_weights.append(encounter_weights[encounter_type])
+	for type_def in _encounter_types:
+		var type_name = type_def["type"]
+		if type_name not in excluded_types:
+			available_types.append(type_name)
+			available_weights.append(type_def.get("weight", 1.0))
 
 	if available_types.is_empty():
-		# Fallback: Allow duplicates if we've exhausted unique options
-		available_types = encounter_weights.keys()
-		available_weights.clear()
-		for t in available_types:
-			available_weights.append(encounter_weights[t])
+		for type_def in _encounter_types:
+			available_types.append(type_def["type"])
+			available_weights.append(type_def.get("weight", 1.0))
 
 	return _weighted_random_select(available_types, available_weights)
 
 
 func _weighted_random_select(items: Array, weights: Array) -> Variant:
-	"""Select a random item using weighted probabilities."""
 	var total_weight = 0.0
 	for w in weights:
 		total_weight += w
@@ -80,208 +95,124 @@ func _weighted_random_select(items: Array, weights: Array) -> Variant:
 		if random_value <= cumulative_weight:
 			return items[i]
 
-	# Fallback
 	return items[0] if items.size() > 0 else null
 
 
-func _create_encounter_data(encounter_type: String) -> Dictionary:
-	"""Create encounter data based on type."""
-	var colors = _get_encounter_colors(encounter_type)
+func _create_encounter_data(type_def: Dictionary) -> Dictionary:
 	var encounter_data = {
-		"type": encounter_type,
-		"name": "",
-		"description": "",
-		"image_path": "",
-		"data": {},  # Type-specific data
-		"bg_color": colors.bg.to_html(),
-		"hover_color": colors.hover.to_html(),
-		"pressed_color": colors.pressed.to_html(),
-		"border_color": colors.border.to_html()
+		"type": type_def["type"],
+		"name": type_def["name"],
+		"description": type_def["description"],
+		"image_path": type_def["image_path"],
+		"bg_color": type_def["colors"]["bg"],
+		"hover_color": type_def["colors"]["hover"],
+		"pressed_color": type_def["colors"]["pressed"],
+		"border_color": type_def["colors"]["border"],
+		"data": {}
 	}
 
-	match encounter_type:
-		"shop":
-			encounter_data["name"] = "Traveling Merchant"
-			encounter_data["description"] = "A merchant offers their wares."
-			encounter_data["image_path"] = "res://assets/encounters/merchant.png"
-			encounter_data["data"] = _generate_shop_inventory()
+	var generation = type_def.get("generation", {})
+	var data_fields = generation.get("data_fields", {})
 
-		"xp_reward":
-			encounter_data["name"] = "Training Dummy"
-			encounter_data["description"] = "Practice your skills and gain experience."
-			encounter_data["image_path"] = "res://assets/encounters/training.png"
-			encounter_data["data"] = {
-				"xp_amount": randi_range(GameConstants.XP_REWARD_MIN, GameConstants.XP_REWARD_MAX)
-			}
+	for field_name in data_fields:
+		var field_def = data_fields[field_name]
+		var generator_name = field_def["generator"]
+		if _generators.has(generator_name):
+			encounter_data["data"][field_name] = _generators[generator_name].call(field_def)
+		else:
+			push_error("EncounterFactory: Unknown generator: %s" % generator_name)
 
-		"gold_reward":
-			encounter_data["name"] = "Treasure Chest"
-			encounter_data["description"] = "You found a chest full of gold!"
-			encounter_data["image_path"] = "res://assets/encounters/chest.png"
-			encounter_data["data"] = {
-				"gold_amount": randi_range(GameConstants.GOLD_REWARD_MIN, GameConstants.GOLD_REWARD_MAX)
-			}
-
-		"health_restore":
-			encounter_data["name"] = "Healing Fountain"
-			encounter_data["description"] = "Restore your team's health."
-			encounter_data["image_path"] = "res://assets/encounters/fountain.png"
-			encounter_data["data"] = {
-				"heal_percentage": GameConstants.HEALTH_RESTORE_PERCENTAGE
-			}
-
-		"skill_trainer":
-			encounter_data["name"] = "Skill Trainer"
-			encounter_data["description"] = "Learn a random skill for free!"
-			encounter_data["image_path"] = "res://assets/encounters/trainer.png"
-			encounter_data["data"] = _generate_skill_trainer_data()
-
-		"gamble":
-			encounter_data["name"] = "Mysterious Gambler"
-			encounter_data["description"] = "Risk gold for a chance at greater rewards."
-			encounter_data["image_path"] = "res://assets/encounters/gambler.png"
-			encounter_data["data"] = {
-				"bet_amount": randi_range(20, 40),
-				"win_multiplier": 3
-			}
-
-		"elite_challenge":
-			encounter_data["name"] = "Elite Challenge"
-			encounter_data["description"] = "A difficult trial with great rewards."
-			encounter_data["image_path"] = "res://assets/encounters/elite.png"
-			encounter_data["data"] = {
-				"xp_reward": randi_range(80, 120),
-				"gold_reward": randi_range(40, 60)
-			}
+	if generation.get("scales_with_round", false):
+		_apply_scaling(encounter_data)
 
 	return encounter_data
 
 
-func _get_encounter_colors(encounter_type: String) -> Dictionary:
-	"""Get panel colors based on encounter type."""
-	match encounter_type:
-		"shop":
-			return {
-				"bg": Color("#5A4A3A"),      # Warm brown (commerce)
-				"hover": Color("#7A6A5A"),
-				"pressed": Color("#3A2A1A"),
-				"border": Color("#B88726")
-			}
-		"xp_reward":
-			return {
-				"bg": Color("#2D5A8A"),      # Sapphire blue (growth)
-				"hover": Color("#4D7AAA"),
-				"pressed": Color("#1D4A7A"),
-				"border": Color("#B88726")
-			}
-		"gold_reward":
-			return {
-				"bg": Color("#8A7A21"),      # Gold (wealth)
-				"hover": Color("#AA9A41"),
-				"pressed": Color("#6A5A01"),
-				"border": Color("#B88726")
-			}
-		"health_restore":
-			return {
-				"bg": Color("#2A7A4A"),      # Emerald green (life)
-				"hover": Color("#4A9A6A"),
-				"pressed": Color("#1A5A3A"),
-				"border": Color("#B88726")
-			}
-		"skill_trainer":
-			return {
-				"bg": Color("#6A3A8A"),      # Amethyst purple (magic)
-				"hover": Color("#8A5AAA"),
-				"pressed": Color("#4A1A6A"),
-				"border": Color("#B88726")
-			}
-		"gamble":
-			return {
-				"bg": Color("#8A2A3A"),      # Ruby red (risk)
-				"hover": Color("#AA4A5A"),
-				"pressed": Color("#6A1A2A"),
-				"border": Color("#B88726")
-			}
-		"elite_challenge":
-			return {
-				"bg": Color("#8A5A2A"),      # Warm orange (challenge)
-				"hover": Color("#AA7A4A"),
-				"pressed": Color("#6A3A1A"),
-				"border": Color("#B88726")
-			}
-		_:
-			return {
-				"bg": Color("#3D2E24"),      # Default warm brown
-				"hover": Color("#5D4E44"),
-				"pressed": Color("#2D1E14"),
-				"border": Color("#B88726")
-			}
+func _apply_scaling(encounter_data: Dictionary) -> void:
+	var round_num = RunManager.current_round
+	var scale_factor = 1.0 + (round_num * GameConstants.ROUND_SCALE_FACTOR)
+
+	for key in encounter_data["data"]:
+		var val = encounter_data["data"][key]
+		if val is int:
+			encounter_data["data"][key] = int(val * scale_factor)
+		elif val is float:
+			encounter_data["data"][key] = val * scale_factor
 
 
-func _generate_shop_inventory() -> Dictionary:
-	"""Generate random shop inventory."""
-	var inventory = {
-		"items": [],
-		"skills": []
-	}
+func _get_type_def(type_name: String) -> Dictionary:
+	for type_def in _encounter_types:
+		if type_def["type"] == type_name:
+			return type_def
+	return {}
 
-	# Add random item upgrades for sale
+
+func _resolve_value(val: Variant) -> Variant:
+	if val is String and _constant_map.has(val):
+		return _constant_map[val]
+	return val
+
+
+# --- Generator functions ---
+
+func _gen_random_range(params: Dictionary) -> int:
+	var min_val = _resolve_value(params.get("min", 0))
+	var max_val = _resolve_value(params.get("max", 0))
+	return randi_range(int(min_val), int(max_val))
+
+
+func _gen_constant(params: Dictionary) -> Variant:
+	return _resolve_value(params.get("value", 0))
+
+
+func _gen_pick_items(params: Dictionary) -> Array:
+	var count = randi_range(
+		int(_resolve_value(params.get("count_min", 1))),
+		int(_resolve_value(params.get("count_max", 3)))
+	)
 	var all_item_upgrades = GameData.get_all_item_upgrades()
 	all_item_upgrades.shuffle()
-	var item_count = randi_range(GameConstants.SHOP_MIN_ITEMS, GameConstants.SHOP_MAX_ITEMS)
-	for i in range(mini(item_count, all_item_upgrades.size())):
-		inventory["items"].append({
+	var items = []
+	for i in range(mini(count, all_item_upgrades.size())):
+		items.append({
 			"id": all_item_upgrades[i]["id"],
 			"cost": randi_range(GameConstants.SHOP_ITEM_MIN_COST, GameConstants.SHOP_ITEM_MAX_COST)
 		})
+	return items
 
-	# Add random skills for sale
+
+func _gen_pick_skills(params: Dictionary) -> Array:
+	var count = randi_range(
+		int(_resolve_value(params.get("count_min", 0))),
+		int(_resolve_value(params.get("count_max", 2)))
+	)
 	var all_skills = GameData.get_all_skills()
 	all_skills.shuffle()
-	var skill_count = randi_range(GameConstants.SHOP_MIN_SKILLS, GameConstants.SHOP_MAX_SKILLS)
-	for i in range(mini(skill_count, all_skills.size())):
-		inventory["skills"].append({
+	var skills = []
+	for i in range(mini(count, all_skills.size())):
+		skills.append({
 			"id": all_skills[i]["id"],
 			"cost": randi_range(GameConstants.SHOP_SKILL_MIN_COST, GameConstants.SHOP_SKILL_MAX_COST)
 		})
-
-	return inventory
-
-
-func apply_scaling(encounter_data: Dictionary, round_num: int) -> void:
-	"""Apply difficulty/reward scaling based on round number."""
-	# Scale rewards based on how far into the run the player is
-	var scale_factor = 1.0 + (round_num * GameConstants.ROUND_SCALE_FACTOR)
-
-	match encounter_data["type"]:
-		"xp_reward":
-			encounter_data["data"]["xp_amount"] = int(encounter_data["data"]["xp_amount"] * scale_factor)
-		"gold_reward":
-			encounter_data["data"]["gold_amount"] = int(encounter_data["data"]["gold_amount"] * scale_factor)
-		"elite_challenge":
-			encounter_data["data"]["xp_reward"] = int(encounter_data["data"]["xp_reward"] * scale_factor)
-			encounter_data["data"]["gold_reward"] = int(encounter_data["data"]["gold_reward"] * scale_factor)
+	return skills
 
 
-func _generate_skill_trainer_data() -> Dictionary:
-	"""Generate a random skill for the trainer to offer that at least one team member can learn."""
+func _gen_pick_learnable_skill(_params: Dictionary) -> String:
 	var all_skills = GameData.get_all_skills()
 	var team = RunManager.get_team()
 
-	# Filter to skills that at least one team member can learn
 	var learnable_skills: Array = []
 	for skill in all_skills:
 		var skill_id = skill["id"]
 		var level_req = skill.get("level_requirement", 1)
 
 		for char_instance in team:
-			# Check if character can learn this skill (not already known + meets level req)
 			if skill_id not in char_instance.learned_skills and char_instance.level >= level_req:
 				learnable_skills.append(skill)
-				break  # At least one character can learn it, move to next skill
+				break
 
 	learnable_skills.shuffle()
 
 	if learnable_skills.size() > 0:
-		return {"skill_id": learnable_skills[0]["id"]}
-	return {"skill_id": ""}
+		return learnable_skills[0]["id"]
+	return ""

@@ -3,14 +3,141 @@
     {
       "type": "shop",
       "name": "Traveling Merchant",
-      "description": "Buy items and upgrades with gold.",
-      "image_path": "res://assets/encounters/merchant.png"
+      "description": "A merchant offers their wares.",
+      "image_path": "res://assets/encounters/merchant.png",
+      "weight": 1.0,
+      "immediate_complete": true,
+      "colors": {
+        "bg": "#5A4A3A",
+        "hover": "#7A6A5A",
+        "pressed": "#3A2A1A",
+        "border": "#B88726"
+      },
+      "generation": {
+        "data_fields": {
+          "items": {"generator": "pick_items", "count_min": "SHOP_MIN_ITEMS", "count_max": "SHOP_MAX_ITEMS"},
+          "skills": {"generator": "pick_skills", "count_min": "SHOP_MIN_SKILLS", "count_max": "SHOP_MAX_SKILLS"}
+        }
+      }
     },
     {
       "type": "xp_reward",
       "name": "Training Dummy",
-      "description": "Practice combat and gain experience.",
-      "image_path": "res://assets/encounters/training.png"
+      "description": "Practice your skills and gain experience.",
+      "image_path": "res://assets/encounters/training.png",
+      "weight": 1.0,
+      "immediate_complete": true,
+      "colors": {
+        "bg": "#2D5A8A",
+        "hover": "#4D7AAA",
+        "pressed": "#1D4A7A",
+        "border": "#B88726"
+      },
+      "generation": {
+        "data_fields": {
+          "xp_amount": {"generator": "random_range", "min": "XP_REWARD_MIN", "max": "XP_REWARD_MAX"}
+        },
+        "scales_with_round": true
+      }
+    },
+    {
+      "type": "gold_reward",
+      "name": "Treasure Chest",
+      "description": "You found a chest full of gold!",
+      "image_path": "res://assets/encounters/chest.png",
+      "weight": 0.8,
+      "immediate_complete": true,
+      "colors": {
+        "bg": "#8A7A21",
+        "hover": "#AA9A41",
+        "pressed": "#6A5A01",
+        "border": "#B88726"
+      },
+      "generation": {
+        "data_fields": {
+          "gold_amount": {"generator": "random_range", "min": "GOLD_REWARD_MIN", "max": "GOLD_REWARD_MAX"}
+        },
+        "scales_with_round": true
+      }
+    },
+    {
+      "type": "health_restore",
+      "name": "Healing Fountain",
+      "description": "Restore your team's health.",
+      "image_path": "res://assets/encounters/fountain.png",
+      "weight": 0.6,
+      "immediate_complete": true,
+      "colors": {
+        "bg": "#2A7A4A",
+        "hover": "#4A9A6A",
+        "pressed": "#1A5A3A",
+        "border": "#B88726"
+      },
+      "generation": {
+        "data_fields": {
+          "heal_percentage": {"generator": "constant", "value": "HEALTH_RESTORE_PERCENTAGE"}
+        }
+      }
+    },
+    {
+      "type": "skill_trainer",
+      "name": "Skill Trainer",
+      "description": "Learn a random skill for free!",
+      "image_path": "res://assets/encounters/trainer.png",
+      "weight": 0.7,
+      "immediate_complete": false,
+      "colors": {
+        "bg": "#6A3A8A",
+        "hover": "#8A5AAA",
+        "pressed": "#4A1A6A",
+        "border": "#B88726"
+      },
+      "generation": {
+        "data_fields": {
+          "skill_id": {"generator": "pick_learnable_skill"}
+        }
+      }
+    },
+    {
+      "type": "gamble",
+      "name": "Mysterious Gambler",
+      "description": "Risk gold for a chance at greater rewards.",
+      "image_path": "res://assets/encounters/gambler.png",
+      "weight": 0.5,
+      "immediate_complete": false,
+      "colors": {
+        "bg": "#8A2A3A",
+        "hover": "#AA4A5A",
+        "pressed": "#6A1A2A",
+        "border": "#B88726"
+      },
+      "generation": {
+        "data_fields": {
+          "bet_amount": {"generator": "random_range", "min": 20, "max": 40},
+          "win_multiplier": {"generator": "constant", "value": 3}
+        }
+      }
+    },
+    {
+      "type": "elite_challenge",
+      "name": "Elite Challenge",
+      "description": "A difficult trial with great rewards.",
+      "image_path": "res://assets/encounters/elite.png",
+      "weight": 0.4,
+      "immediate_complete": false,
+      "colors": {
+        "bg": "#8A5A2A",
+        "hover": "#AA7A4A",
+        "pressed": "#6A3A1A",
+        "border": "#B88726"
+      },
+      "generation": {
+        "data_fields": {
+          "xp_reward": {"generator": "random_range", "min": 80, "max": 120},
+          "gold_reward": {"generator": "random_range", "min": 40, "max": 60}
+        },
+        "scales_with_round": true
+      }
     }
   ]
 }

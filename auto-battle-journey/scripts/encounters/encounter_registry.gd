@@ -28,54 +28,42 @@ static func _ensure_initialized() -> void:
 static func _register_default_handlers() -> void:
 	"""Register all default encounter type handlers."""
 
-	# Shop encounter
-	register("shop", {
-		"create_ui": EncounterUIFactory._create_shop_ui,
-		"immediate_complete": true,
-		"get_reward_preview": EncounterUIFactory._get_shop_preview
-	})
+	var ui_handlers: Dictionary = {
+		"shop": {
+			"create_ui": EncounterUIFactory._create_shop_ui,
+			"get_reward_preview": EncounterUIFactory._get_shop_preview
+		},
+		"xp_reward": {
+			"create_ui": EncounterUIFactory._create_xp_reward_ui,
+			"get_reward_preview": EncounterUIFactory._get_xp_reward_preview
+		},
+		"gold_reward": {
+			"create_ui": EncounterUIFactory._create_gold_reward_ui,
+			"get_reward_preview": EncounterUIFactory._get_gold_reward_preview
+		},
+		"health_restore": {
+			"create_ui": EncounterUIFactory._create_health_restore_ui,
+			"get_reward_preview": EncounterUIFactory._get_health_restore_preview
+		},
+		"skill_trainer": {
+			"create_ui": EncounterUIFactory._create_skill_trainer_ui,
+			"get_reward_preview": EncounterUIFactory._get_skill_trainer_preview
+		},
+		"gamble": {
+			"create_ui": EncounterUIFactory._create_gamble_ui,
+			"get_reward_preview": EncounterUIFactory._get_gamble_preview
+		},
+		"elite_challenge": {
+			"create_ui": EncounterUIFactory._create_elite_challenge_ui,
+			"get_reward_preview": EncounterUIFactory._get_elite_challenge_preview
+		},
+	}
 
-	# XP reward encounter
-	register("xp_reward", {
-		"create_ui": EncounterUIFactory._create_xp_reward_ui,
-		"immediate_complete": true,
-		"get_reward_preview": EncounterUIFactory._get_xp_reward_preview
-	})
-
-	# Gold reward encounter
-	register("gold_reward", {
-		"create_ui": EncounterUIFactory._create_gold_reward_ui,
-		"immediate_complete": true,
-		"get_reward_preview": EncounterUIFactory._get_gold_reward_preview
-	})
-
-	# Health restore encounter
-	register("health_restore", {
-		"create_ui": EncounterUIFactory._create_health_restore_ui,
-		"immediate_complete": true,
-		"get_reward_preview": EncounterUIFactory._get_health_restore_preview
-	})
-
-	# Skill trainer encounter
-	register("skill_trainer", {
-		"create_ui": EncounterUIFactory._create_skill_trainer_ui,
-		"immediate_complete": false,  # Must select a character
-		"get_reward_preview": EncounterUIFactory._get_skill_trainer_preview
-	})
-
-	# Gamble encounter
-	register("gamble", {
-		"create_ui": EncounterUIFactory._create_gamble_ui,
-		"immediate_complete": false,  # Must gamble or decline
-		"get_reward_preview": EncounterUIFactory._get_gamble_preview
-	})
-
-	# Elite challenge encounter
-	register("elite_challenge", {
-		"create_ui": EncounterUIFactory._create_elite_challenge_ui,
-		"immediate_complete": false,  # Must click complete challenge
-		"get_reward_preview": EncounterUIFactory._get_elite_challenge_preview
-	})
+	for type_name in ui_handlers:
+		var type_def = EncounterFactory.get_type_def(type_name)
+		var handler = ui_handlers[type_name].duplicate()
+		handler["immediate_complete"] = type_def.get("immediate_complete", false)
+		register(type_name, handler)
 
 
 static func register(encounter_type: String, handler: Dictionary) -> void:
