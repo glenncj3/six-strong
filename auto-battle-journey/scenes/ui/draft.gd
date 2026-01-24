@@ -323,8 +323,9 @@ func _show_confirm_state() -> void:
 	# Hide gems (only relevant during draft picks)
 	gems_label.visible = false
 
-	# Show confirm button
-	confirm_button.visible = true
+	# Pause for 3 seconds (loading time) then auto-start the run
+	await get_tree().create_timer(2.0).timeout
+	_start_run()
 
 
 # =============================================================================
@@ -365,11 +366,15 @@ func _on_reroll_pressed() -> void:
 
 
 func _on_confirm_pressed() -> void:
-	"""Start the run with drafted characters."""
+	"""Start the run with drafted characters (legacy button handler)."""
 	if not draft_manager.is_draft_complete():
 		push_error("Draft: Must select exactly %d characters" % GameConstants.TEAM_SIZE)
 		return
+	_start_run()
 
+
+func _start_run() -> void:
+	"""Start the run with drafted characters."""
 	print("Draft: Starting run with drafted team...")
 
 	# Extract character IDs

@@ -260,7 +260,7 @@ static func _create_option_image_section(data: Dictionary) -> MarginContainer:
 	return margin
 
 
-static func _create_option_info_section(data: Dictionary, panel_type: OptionPanelType) -> VBoxContainer:
+static func _create_option_info_section(data: Dictionary, _panel_type: OptionPanelType) -> VBoxContainer:
 	"""Create the info section (name, type, description) for an option panel."""
 	var info_vbox = VBoxContainer.new()
 	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
