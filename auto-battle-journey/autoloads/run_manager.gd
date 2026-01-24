@@ -27,6 +27,7 @@ var _combat_generator: CombatGenerator = CombatGenerator.new()
 # Progression (kept in RunManager as it's core run state)
 var current_round: int = 0
 var current_phase: String = PHASE_ENCOUNTER
+var encounters_this_round: int = 0
 var reputation: int = GameConstants.STARTING_REPUTATION
 var wins: int = 0
 var losses: int = 0
@@ -83,6 +84,7 @@ func start_new_run(drafted_character_ids: Array) -> void:
 	# Initialize run state
 	current_round = 0
 	current_phase = PHASE_ENCOUNTER
+	encounters_this_round = 0
 	reputation = GameConstants.STARTING_REPUTATION
 	wins = 0
 	losses = 0
@@ -107,6 +109,7 @@ func save_run_state() -> void:
 		"run_id": run_id,
 		"round": current_round,
 		"phase": current_phase,
+		"encounters_this_round": encounters_this_round,
 		"reputation": reputation,
 		"wins": wins,
 		"losses": losses,
@@ -130,6 +133,7 @@ func load_run_state() -> bool:
 	run_id = save_data.get("run_id", "")
 	current_round = save_data.get("round", 0)
 	current_phase = save_data.get("phase", PHASE_ENCOUNTER)
+	encounters_this_round = save_data.get("encounters_this_round", 0)
 	reputation = save_data.get("reputation", GameConstants.STARTING_REPUTATION)
 	wins = save_data.get("wins", 0)
 	losses = save_data.get("losses", 0)
@@ -169,6 +173,7 @@ func _clear_run_state() -> void:
 	_team_manager.clear()
 	current_round = 0
 	current_phase = PHASE_ENCOUNTER
+	encounters_this_round = 0
 	reputation = GameConstants.STARTING_REPUTATION
 	wins = 0
 	losses = 0
@@ -229,6 +234,7 @@ func advance_round() -> void:
 	"""Move to next round (after encounter + combat)."""
 	current_round += 1
 	current_phase = PHASE_ENCOUNTER
+	encounters_this_round = 0
 	round_changed.emit(current_round)
 	phase_changed.emit(current_phase)
 	save_run_state()
@@ -245,11 +251,15 @@ func set_phase(phase: String) -> void:
 
 
 func complete_encounter() -> void:
-	"""Complete encounter phase and switch to combat."""
-	current_phase = PHASE_COMBAT
+	"""Complete encounter phase. Switches to combat after ENCOUNTERS_PER_ROUND encounters."""
+	encounters_this_round += 1
+	if encounters_this_round >= GameConstants.ENCOUNTERS_PER_ROUND:
+		current_phase = PHASE_COMBAT
+		print("RunManager: Encounters complete (%d/%d), switching to combat phase" % [encounters_this_round, GameConstants.ENCOUNTERS_PER_ROUND])
+	else:
+		print("RunManager: Encounter complete (%d/%d), another encounter available" % [encounters_this_round, GameConstants.ENCOUNTERS_PER_ROUND])
 	phase_changed.emit(current_phase)
 	save_run_state()
-	print("RunManager: Encounter complete, switching to combat phase")
 
 
 func add_gold(amount: int) -> void:
