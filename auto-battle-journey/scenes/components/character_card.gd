@@ -22,16 +22,6 @@ var current_size: UIScaler.CardSize = UIScaler.CardSize.NORMAL
 
 func _on_ready() -> void:
 	UIHelpers.set_children_mouse_filter_ignore(self)
-	_init_styles()
-
-
-func _init_styles() -> void:
-	var styles = UIStyles.create_clickable_panel_styles(
-		GameConstants.COLOR_PANEL_DARK,
-		GameConstants.COLOR_PANEL_DARK.lightened(0.15),
-		GameConstants.COLOR_PANEL_DARK.darkened(0.1)
-	)
-	setup_styles(styles)
 
 
 func _handle_click() -> void:
@@ -70,87 +60,34 @@ func setup(char_data: Dictionary, with_equipped_items: bool = false) -> void:
 	defend_rate_label.text = UIHelpers.format_stat(GameConstants.STAT_DEFEND_RATE, stats.get(GameConstants.STAT_DEFEND_RATE, 0))
 
 
-func highlight(enabled: bool) -> void:
-	"""Visually highlight the card (for selection states)."""
-	if enabled:
-		modulate = Color(1.2, 1.2, 1.2)
-	else:
-		modulate = Color.WHITE
+const SIZE_CONFIG := {
+	UIScaler.CardSize.NORMAL: {"margin": 8, "separation": 6, "portrait": 160, "stats": true, "stat_font": 11},
+	UIScaler.CardSize.SMALL: {"margin": 4, "separation": 2, "portrait": 80, "stats": false, "stat_font": 11},
+	UIScaler.CardSize.MINI: {"margin": 2, "separation": 1, "portrait": 60, "stats": false, "stat_font": 11},
+}
 
 
 func set_card_size(card_size_variant: UIScaler.CardSize) -> void:
-	"""
-	Set the card to a specific size variant.
-
-	Args:
-		card_size_variant: UIScaler.CardSize enum (NORMAL, SMALL, MINI)
-	"""
+	"""Set the card to a specific size variant."""
 	current_size = card_size_variant
-	var new_size = UIScaler.get_character_card_size(card_size_variant)
-	custom_minimum_size = new_size
+	custom_minimum_size = UIScaler.get_character_card_size(card_size_variant)
 
-	match card_size_variant:
-		UIScaler.CardSize.NORMAL:
-			_apply_normal_size()
-		UIScaler.CardSize.SMALL:
-			_apply_small_size()
-		UIScaler.CardSize.MINI:
-			_apply_mini_size()
+	var config = SIZE_CONFIG[card_size_variant]
+	var m = config["margin"]
+	margin_container.add_theme_constant_override("margin_left", m)
+	margin_container.add_theme_constant_override("margin_top", m)
+	margin_container.add_theme_constant_override("margin_right", m)
+	margin_container.add_theme_constant_override("margin_bottom", m)
+	vbox.add_theme_constant_override("separation", config["separation"])
+	portrait.custom_minimum_size = Vector2(config["portrait"], config["portrait"])
+	stats_container.visible = config["stats"]
+
+	if config["stats"]:
+		for label in stats_container.get_children():
+			if label is Label:
+				label.add_theme_font_size_override("font_size", config["stat_font"])
 
 	_apply_state_style()
-
-
-func _apply_normal_size() -> void:
-	"""Apply normal size styling (200x280)."""
-	margin_container.add_theme_constant_override("margin_left", 8)
-	margin_container.add_theme_constant_override("margin_top", 8)
-	margin_container.add_theme_constant_override("margin_right", 8)
-	margin_container.add_theme_constant_override("margin_bottom", 8)
-	vbox.add_theme_constant_override("separation", 6)
-
-	portrait.custom_minimum_size = Vector2(160, 160)
-
-	name_label.add_theme_font_size_override("font_size", 20)
-	name_label.visible = true
-
-	stats_container.visible = true
-	for label in stats_container.get_children():
-		if label is Label:
-			label.add_theme_font_size_override("font_size", 11)
-
-
-func _apply_small_size() -> void:
-	"""Apply small size styling (100x140)."""
-	margin_container.add_theme_constant_override("margin_left", 4)
-	margin_container.add_theme_constant_override("margin_top", 4)
-	margin_container.add_theme_constant_override("margin_right", 4)
-	margin_container.add_theme_constant_override("margin_bottom", 4)
-	vbox.add_theme_constant_override("separation", 2)
-
-	portrait.custom_minimum_size = Vector2(80, 80)
-
-	name_label.add_theme_font_size_override("font_size", 20)
-	name_label.visible = true
-
-	# Hide individual stats in small mode
-	stats_container.visible = false
-
-
-func _apply_mini_size() -> void:
-	"""Apply mini size styling (80x110)."""
-	margin_container.add_theme_constant_override("margin_left", 2)
-	margin_container.add_theme_constant_override("margin_top", 2)
-	margin_container.add_theme_constant_override("margin_right", 2)
-	margin_container.add_theme_constant_override("margin_bottom", 2)
-	vbox.add_theme_constant_override("separation", 1)
-
-	portrait.custom_minimum_size = Vector2(60, 60)
-
-	name_label.add_theme_font_size_override("font_size", 20)
-	name_label.visible = true
-
-	# Hide stats in mini mode
-	stats_container.visible = false
 
 
 func apply_rarity_border(rarity: String = "common") -> void:

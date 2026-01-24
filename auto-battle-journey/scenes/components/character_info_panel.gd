@@ -134,55 +134,43 @@ func _populate(char_instance: CharacterInstance) -> void:
 
 func _populate_items_grid(char_instance: CharacterInstance) -> void:
 	"""Fill the items grid with icons for equipped items and upgrades."""
-	UIHelpers.clear_children(items_grid)
-
-	# Collect all item image paths (starting items + upgrades found in run)
-	var item_icons: Array[String] = []
-
+	var icons: Array[String] = []
 	for item_id in char_instance.equipped_items:
-		if item_icons.size() >= MAX_ITEMS:
+		if icons.size() >= MAX_ITEMS:
 			break
 		var item_data = GameData.get_item_by_id(item_id)
 		if not item_data.is_empty():
-			item_icons.append(item_data.get("image_path", ""))
-
+			icons.append(item_data.get("image_path", ""))
 	for upgrade_id in char_instance.equipped_item_upgrades:
-		if item_icons.size() >= MAX_ITEMS:
+		if icons.size() >= MAX_ITEMS:
 			break
 		var upgrade_data = GameData.get_item_upgrade_by_id(upgrade_id)
 		if not upgrade_data.is_empty():
-			item_icons.append(upgrade_data.get("image_path", ""))
-
-	# Fill all 6 slots (populated or empty)
-	for i in range(MAX_ITEMS):
-		var slot = _create_icon_slot()
-		if i < item_icons.size() and item_icons[i] != "":
-			var icon_rect = slot.get_child(0) as TextureRect
-			UIHelpers.set_texture_safe(icon_rect, item_icons[i])
-		items_grid.add_child(slot)
+			icons.append(upgrade_data.get("image_path", ""))
+	_populate_grid(items_grid, icons, MAX_ITEMS)
 
 
 func _populate_skills_grid(char_instance: CharacterInstance) -> void:
 	"""Fill the skills grid with icons for learned skills."""
-	UIHelpers.clear_children(skills_grid)
-
-	# Collect skill image paths
-	var skill_icons: Array[String] = []
-
+	var icons: Array[String] = []
 	for skill_id in char_instance.learned_skills:
-		if skill_icons.size() >= MAX_SKILLS:
+		if icons.size() >= MAX_SKILLS:
 			break
 		var skill_data = GameData.get_skill_by_id(skill_id)
 		if not skill_data.is_empty():
-			skill_icons.append(skill_data.get("image_path", ""))
+			icons.append(skill_data.get("image_path", ""))
+	_populate_grid(skills_grid, icons, MAX_SKILLS)
 
-	# Fill all 6 slots (populated or empty)
-	for i in range(MAX_SKILLS):
+
+func _populate_grid(grid: GridContainer, icons: Array[String], max_slots: int) -> void:
+	"""Fill a grid with icon slots, populated or empty."""
+	UIHelpers.clear_children(grid)
+	for i in range(max_slots):
 		var slot = _create_icon_slot()
-		if i < skill_icons.size() and skill_icons[i] != "":
+		if i < icons.size() and icons[i] != "":
 			var icon_rect = slot.get_child(0) as TextureRect
-			UIHelpers.set_texture_safe(icon_rect, skill_icons[i])
-		skills_grid.add_child(slot)
+			UIHelpers.set_texture_safe(icon_rect, icons[i])
+		grid.add_child(slot)
 
 
 func _create_icon_slot() -> PanelContainer:

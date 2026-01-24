@@ -66,6 +66,19 @@ static func _get_elite_challenge_preview(encounter_data: Dictionary) -> String:
 
 
 # =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
+static func _disable_all_buttons(container: Control) -> void:
+	"""Recursively disable all Button children in a container."""
+	for child in container.get_children():
+		if child is Button:
+			child.disabled = true
+		elif child.get_child_count() > 0:
+			_disable_all_buttons(child)
+
+
+# =============================================================================
 # UI CREATION FUNCTIONS
 # =============================================================================
 
@@ -266,10 +279,7 @@ static func _on_skill_trainer_selected(char_index: int, skill_id: String, button
 
 	if success:
 		button.text = "Skill Learned!"
-		button.disabled = true
-		for child in container.get_children():
-			if child is Button:
-				child.disabled = true
+		_disable_all_buttons(container)
 		if on_complete.is_valid():
 			on_complete.call()
 	else:
@@ -358,25 +368,14 @@ static func _on_gamble_pressed(bet: int, multiplier: int, container: Control, on
 
 	gold_label.text = "Your Gold: %d" % RunManager.get_gold()
 
-	# Disable gamble buttons
-	for child in container.get_children():
-		if child is HBoxContainer:
-			for button in child.get_children():
-				if button is Button:
-					button.disabled = true
-
+	_disable_all_buttons(container)
 	if on_complete.is_valid():
 		on_complete.call()
 
 
 static func _on_gamble_declined(container: Control, on_complete: Callable) -> void:
 	"""Handle declining to gamble."""
-	# Disable buttons
-	for child in container.get_children():
-		if child is HBoxContainer:
-			for button in child.get_children():
-				if button is Button:
-					button.disabled = true
+	_disable_all_buttons(container)
 
 	var result_label = container.get_node("ResultLabel")
 	result_label.text = "You walk away..."

@@ -4,6 +4,7 @@ extends Control
 @onready var background = $Background
 @onready var result_title = $ScrollContainer/MainContainer/ResultTitle
 
+@onready var stats_section = $ScrollContainer/MainContainer/StatsPanelContainer
 @onready var stats_panel = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel
 @onready var stats_title = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/StatsTitle
 @onready var rounds_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/RoundsLabel
@@ -12,6 +13,7 @@ extends Control
 @onready var gold_earned_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/GoldEarnedLabel
 @onready var reputation_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/ReputationLabel
 
+@onready var rewards_section = $ScrollContainer/MainContainer/RewardsPanelContainer
 @onready var rewards_panel = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel
 @onready var rewards_title = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer/RewardsTitle
 @onready var gems_label = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer/GemsLabel
@@ -91,8 +93,8 @@ func _play_entrance_animations() -> void:
 	"""Play entrance animations with dramatic reveal."""
 	AnimationManager.fade_in($HeaderBar, GameConstants.ANIM_DURATION_NORMAL, 0.0)
 	AnimationManager.fade_in(result_title, GameConstants.ANIM_DURATION_SLOW, 0.0)
-	AnimationManager.fade_in(rounds_label.get_parent().get_parent().get_parent(), GameConstants.ANIM_DURATION_NORMAL, 0.2)
-	AnimationManager.fade_in(gems_label.get_parent().get_parent().get_parent(), GameConstants.ANIM_DURATION_NORMAL, 0.35)
+	AnimationManager.fade_in(stats_section, GameConstants.ANIM_DURATION_NORMAL, 0.2)
+	AnimationManager.fade_in(rewards_section, GameConstants.ANIM_DURATION_NORMAL, 0.35)
 	AnimationManager.fade_in(continue_button, GameConstants.ANIM_DURATION_NORMAL, 0.5)
 
 

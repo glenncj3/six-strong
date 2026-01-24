@@ -9,22 +9,15 @@ const CharacterInfoPanelScene = preload("res://scenes/components/character_info_
 @onready var info_panel_clip: Control = $VBoxContainer/InfoPanelClip
 @onready var title_label: Label = $VBoxContainer/TitleLabel
 
-const GAMEPLAY_SCENES: Array[String] = [
-	"res://scenes/ui/draft.tscn",
-	"res://scenes/ui/run_view.tscn",
-	"res://scenes/ui/encounter_execute.tscn",
-	"res://scenes/ui/combat_stub.tscn",
-]
-
-const FADE_DURATION := 0.3
-
 var _is_draft_mode: bool = false
-var _tween: Tween = null
+var _visibility: HudVisibilityHelper = null
 var info_panel: Node = null
 
 
 func _ready() -> void:
+	add_to_group("team_hud")
 	visible = false
+	_visibility = HudVisibilityHelper.new(self)
 	title_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	_setup_info_panel()
 	SceneManager.scene_loaded.connect(_on_scene_loaded)
@@ -41,54 +34,25 @@ func _setup_info_panel() -> void:
 
 
 # =============================================================================
-# TRANSITION ANIMATIONS
-# =============================================================================
-
-func _kill_tween() -> void:
-	if _tween and _tween.is_valid():
-		_tween.kill()
-	_tween = null
-
-
-func _fade_in() -> void:
-	_kill_tween()
-	modulate.a = 0.0
-	visible = true
-	_tween = create_tween()
-	_tween.set_ease(Tween.EASE_OUT)
-	_tween.set_trans(Tween.TRANS_CUBIC)
-	_tween.tween_property(self, "modulate:a", 1.0, FADE_DURATION)
-
-
-func _fade_out() -> void:
-	_kill_tween()
-	_tween = create_tween()
-	_tween.set_ease(Tween.EASE_IN)
-	_tween.set_trans(Tween.TRANS_CUBIC)
-	_tween.tween_property(self, "modulate:a", 0.0, FADE_DURATION)
-	_tween.tween_callback(func(): visible = false)
-
-
-# =============================================================================
 # SCENE TRANSITIONS
 # =============================================================================
 
 func _on_scene_loaded(scene_path: String) -> void:
-	if scene_path not in GAMEPLAY_SCENES:
+	if not _visibility.is_gameplay_scene(scene_path):
 		if visible:
-			_fade_out()
+			_visibility.fade_out()
 		return
 
 	if scene_path == "res://scenes/ui/draft.tscn":
 		reset_for_draft()
 		if not visible:
-			_fade_in()
+			_visibility.fade_in()
 		else:
 			visible = true
 	elif RunManager.is_run_active:
 		_enter_run_mode()
 		if not visible:
-			_fade_in()
+			_visibility.fade_in()
 		else:
 			visible = true
 	else:

@@ -19,23 +19,18 @@ signal concede_requested
 @onready var dialog_confirm_button = $ConcedeConfirmDialog/DialogPanel/DialogContent/ButtonContainer/ConfirmButton
 @onready var dialog_overlay = $ConcedeConfirmDialog/Overlay
 
-const GAMEPLAY_SCENES: Array[String] = [
-	"res://scenes/ui/draft.tscn",
-	"res://scenes/ui/run_view.tscn",
-	"res://scenes/ui/encounter_execute.tscn",
-	"res://scenes/ui/combat_stub.tscn",
-]
-
-const FADE_DURATION := 0.3
 const CROSSFADE_DURATION := 0.15
 
+var _visibility: HudVisibilityHelper = null
 var _concede_dialog_open: bool = false
 var _is_draft_mode: bool = false
 var _header_tween: Tween = null
 
 
 func _ready() -> void:
+	add_to_group("run_hud")
 	visible = false
+	_visibility = HudVisibilityHelper.new(self)
 
 	_apply_visual_styling()
 
@@ -114,7 +109,7 @@ func _fade_in_header() -> void:
 	_header_tween = create_tween()
 	_header_tween.set_ease(Tween.EASE_OUT)
 	_header_tween.set_trans(Tween.TRANS_CUBIC)
-	_header_tween.tween_property(header_bar, "modulate:a", 1.0, FADE_DURATION)
+	_header_tween.tween_property(header_bar, "modulate:a", 1.0, HudVisibilityHelper.FADE_DURATION)
 
 
 func _fade_out_header() -> void:
@@ -122,7 +117,7 @@ func _fade_out_header() -> void:
 	_header_tween = create_tween()
 	_header_tween.set_ease(Tween.EASE_IN)
 	_header_tween.set_trans(Tween.TRANS_CUBIC)
-	_header_tween.tween_property(header_bar, "modulate:a", 0.0, FADE_DURATION)
+	_header_tween.tween_property(header_bar, "modulate:a", 0.0, HudVisibilityHelper.FADE_DURATION)
 	_header_tween.tween_callback(func(): visible = false)
 
 
@@ -209,7 +204,7 @@ func _on_gems_changed(new_amount: int) -> void:
 # =============================================================================
 
 func _on_scene_loaded(scene_path: String) -> void:
-	if scene_path not in GAMEPLAY_SCENES:
+	if not _visibility.is_gameplay_scene(scene_path):
 		if visible:
 			_fade_out_header()
 		return

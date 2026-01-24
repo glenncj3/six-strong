@@ -11,6 +11,7 @@ extends PanelContainer
 ##   4. Override _on_ready() for additional initialization
 
 const InteractiveScaleClass = preload("res://scripts/effects/interactive_scale.gd")
+const HIGHLIGHT_MODULATE := Color(1.2, 1.2, 1.2)
 
 signal panel_clicked(data: Variant)
 
@@ -28,6 +29,7 @@ var _scaler = null  # InteractiveScale instance
 
 
 func _ready() -> void:
+	_init_default_styles()
 	_scaler = InteractiveScaleClass.new(self, hover_scale, press_scale)
 	if clickable:
 		_setup_mouse_interaction()
@@ -37,6 +39,22 @@ func _ready() -> void:
 func _on_ready() -> void:
 	## Override in subclass for additional initialization
 	pass
+
+
+func _init_default_styles() -> void:
+	## Sets default dark panel styles. Called in _ready() before _on_ready().
+	## Subclasses can override by calling setup_styles() in their _on_ready() or setup().
+	var styles = UIStyles.create_clickable_panel_styles(
+		GameConstants.COLOR_PANEL_DARK,
+		GameConstants.COLOR_PANEL_DARK.lightened(0.15),
+		GameConstants.COLOR_PANEL_DARK.darkened(0.1)
+	)
+	setup_styles(styles)
+
+
+func highlight(enabled: bool) -> void:
+	## Visually highlight the panel (for selection states).
+	modulate = HIGHLIGHT_MODULATE if enabled else Color.WHITE
 
 
 func _setup_mouse_interaction() -> void:
