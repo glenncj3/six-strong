@@ -1,7 +1,6 @@
 extends ClickablePanelBase
 ## CharacterTile - Simple square tile for character overview display
 ## Shows portrait and name in a compact square format
-## Used in TeamDisplay overview mode
 
 signal tile_clicked(char_instance: CharacterInstance)
 signal tile_clicked_data(char_data: Dictionary)

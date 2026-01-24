@@ -1,7 +1,7 @@
 extends Control
 # Collection - Browse and manage character collection
 # Portrait mobile layout with full-screen details overlay
-# Uses CharacterTile in rows of 3, same as TeamDisplay
+# Uses CharacterTile in rows of 3
 
 @onready var background = $Background
 @onready var title_label = $MainContainer/VBoxContainer/Title
@@ -70,7 +70,7 @@ func _apply_visual_styling() -> void:
 
 
 func _populate_character_list() -> void:
-	"""Create character tiles in rows of 3, like TeamDisplay."""
+	"""Create character tiles in rows of 3."""
 	# Clear existing tiles
 	UIHelpers.clear_children(character_list)
 	character_tiles.clear()
@@ -80,7 +80,7 @@ func _populate_character_list() -> void:
 
 	print("Collection: Displaying %d characters" % unlocked_chars.size())
 
-	# Calculate tile size (same logic as TeamDisplay)
+	# Calculate tile size
 	var available_width = max(size.x, 680) - 32  # Account for margins
 	var tile_size = floor((available_width - 16) / 3.0)  # 16 = spacing between tiles
 	tile_size = max(tile_size, 180)  # Minimum tile size

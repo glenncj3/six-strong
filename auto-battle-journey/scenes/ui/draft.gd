@@ -1,9 +1,6 @@
 extends Control
 # Draft - Character selection UI for starting a run
 # Uses DraftManager for business logic, this scene handles UI only
-# Uses two TeamDisplay panels for consistent UI:
-# - Options panel: shows draftable characters
-# - Team panel: shows already drafted characters
 
 @onready var background: ColorRect = $Background
 @onready var header_bar = $HeaderBar
@@ -21,14 +18,15 @@ extends Control
 @onready var concede_confirm_dialog = $ConcedeConfirmDialog
 
 # Preload scenes
-const TeamDisplayScene = preload("res://scenes/components/team_display.tscn")
+const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
 
 # Draft manager handles business logic
 var draft_manager: DraftManager = null
 
 # UI state
-var options_team_display: Node = null
-var your_team_display: Node = null
+var options_tiles_container: HBoxContainer = null
+var your_team_tiles_container: HBoxContainer = null
+var character_tiles: Array = []  # References to option tiles
 var select_buttons: Array = []  # SELECT buttons for each option
 var buttons_container: HBoxContainer = null  # Container for SELECT/UNLOCK buttons below tiles
 
@@ -119,9 +117,20 @@ func _style_concede_button() -> void:
 
 
 func _setup_options_display() -> void:
-	"""Create the options TeamDisplay."""
-	options_team_display = TeamDisplayScene.instantiate()
-	options_display_container.add_child(options_team_display)
+	"""Create the options tiles container."""
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 8)
+	options_display_container.add_child(vbox)
+
+	options_tiles_container = HBoxContainer.new()
+	options_tiles_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	options_tiles_container.add_theme_constant_override("separation", 8)
+	vbox.add_child(options_tiles_container)
+
+	buttons_container = HBoxContainer.new()
+	buttons_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	buttons_container.add_theme_constant_override("separation", 8)
+	vbox.add_child(buttons_container)
 
 
 # =============================================================================
@@ -135,10 +144,6 @@ func _on_options_generated(options: Array, instances: Array) -> void:
 
 func _on_character_drafted(_char_data: Dictionary, _char_instance: CharacterInstance) -> void:
 	"""Handle a character being drafted."""
-	# Return options display to overview mode
-	if options_team_display:
-		options_team_display.refresh()
-
 	_update_team_display()
 	_update_instruction()
 	_update_header_stats()
@@ -168,20 +173,23 @@ func _update_header_stats() -> void:
 # =============================================================================
 
 func _update_options_display(instances: Array) -> void:
-	"""Update the options TeamDisplay with current options."""
-	if options_team_display and instances.size() > 0:
-		# Connect to overview_shown signal to add buttons whenever tiles are created
-		if not options_team_display.overview_shown.is_connected(_on_options_overview_shown):
-			options_team_display.overview_shown.connect(_on_options_overview_shown)
+	"""Update the options display with current character tiles."""
+	if instances.size() == 0:
+		return
 
-		options_team_display.setup(instances, "AVAILABLE CHARACTERS")
-		# Buttons will be added via the overview_shown signal
+	UIHelpers.clear_children(options_tiles_container)
+	character_tiles.clear()
 
+	var available_width = max(options_display_container.size.x, 688) - 24
+	var tile_size = floor((available_width - 16) / 3.0)
+	tile_size = max(tile_size, 180)
 
-func _on_options_overview_shown() -> void:
-	"""Add SELECT buttons when overview is shown (initial or returning from details)."""
-	# Wait a frame for tiles to be fully ready
-	await get_tree().process_frame
+	for char_instance in instances:
+		var tile = CharacterTileScene.instantiate()
+		options_tiles_container.add_child(tile)
+		tile.setup(char_instance, tile_size)
+		character_tiles.append(tile)
+
 	_create_select_buttons()
 
 
@@ -189,41 +197,24 @@ func _create_select_buttons() -> void:
 	"""Create SELECT/UNLOCK buttons below the character tiles."""
 	select_buttons.clear()
 
-	if not options_team_display:
-		return
+	# Clear existing buttons
+	for child in buttons_container.get_children():
+		child.queue_free()
 
-	# Create or clear buttons container inside TeamDisplay's MainContainer
-	if not buttons_container or not is_instance_valid(buttons_container):
-		buttons_container = HBoxContainer.new()
-		buttons_container.alignment = BoxContainer.ALIGNMENT_CENTER
-		buttons_container.add_theme_constant_override("separation", 8)
-		# Insert after OverviewContainer in the TeamDisplay's MainContainer
-		var main_cont = options_team_display.main_container
-		var overview_idx = options_team_display.overview_container.get_index()
-		main_cont.add_child(buttons_container)
-		main_cont.move_child(buttons_container, overview_idx + 1)
-	else:
-		for child in buttons_container.get_children():
-			child.queue_free()
-
-	var tiles = options_team_display.character_tiles
-
-	if tiles.is_empty():
+	if character_tiles.is_empty():
 		return
 
 	var current_options = draft_manager.current_options
 
-	for i in range(min(tiles.size(), current_options.size())):
-		var tile = tiles[i]
+	for i in range(min(character_tiles.size(), current_options.size())):
+		var tile = character_tiles[i]
 		var option = current_options[i]
 
 		var button = Button.new()
-		# Match button width to the tile above it
 		var tile_width = tile.custom_minimum_size.x
 		button.custom_minimum_size = Vector2(tile_width, 44)
 		button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
-		# Set button text based on ownership
 		if option["is_owned"]:
 			button.text = "SELECT"
 		else:
@@ -260,12 +251,34 @@ func _update_team_display() -> void:
 
 	team_display_container.visible = true
 
-	# Create team display if needed
-	if your_team_display == null:
-		your_team_display = TeamDisplayScene.instantiate()
-		team_display_container.add_child(your_team_display)
+	# Create team tiles container if needed
+	if your_team_tiles_container == null:
+		var vbox = VBoxContainer.new()
+		vbox.add_theme_constant_override("separation", 8)
+		team_display_container.add_child(vbox)
 
-	your_team_display.setup(drafted_instances, "YOUR TEAM")
+		var title = Label.new()
+		title.text = "YOUR TEAM"
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		title.add_theme_font_size_override("font_size", 20)
+		title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+		vbox.add_child(title)
+
+		your_team_tiles_container = HBoxContainer.new()
+		your_team_tiles_container.alignment = BoxContainer.ALIGNMENT_CENTER
+		your_team_tiles_container.add_theme_constant_override("separation", 8)
+		vbox.add_child(your_team_tiles_container)
+
+	UIHelpers.clear_children(your_team_tiles_container)
+
+	var available_width = max(team_display_container.size.x, 688) - 24
+	var tile_size = floor((available_width - 16) / 3.0)
+	tile_size = max(tile_size, 180)
+
+	for char_instance in drafted_instances:
+		var tile = CharacterTileScene.instantiate()
+		your_team_tiles_container.add_child(tile)
+		tile.setup(char_instance, tile_size)
 
 
 func _update_instruction() -> void:

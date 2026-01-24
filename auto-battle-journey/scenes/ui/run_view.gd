@@ -2,8 +2,12 @@ extends Control
 # RunView - Main UI during an active run
 # Header bar and concede are handled by the persistent RunHUD
 
+const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
+
 @onready var background = $Background
-@onready var team_display = $TeamDisplay
+@onready var team_container = $TeamContainer
+@onready var title_label = $TeamContainer/VBoxContainer/TitleLabel
+@onready var tiles_container = $TeamContainer/VBoxContainer/TilesContainer
 @onready var options_panel = $OptionsPanel
 
 
@@ -11,6 +15,7 @@ func _ready() -> void:
 	print("RunView: Scene loaded, initializing...")
 
 	background.color = GameConstants.COLOR_BG_DARK
+	title_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 
 	RunManager.phase_changed.connect(_on_phase_changed)
 
@@ -22,7 +27,7 @@ func _ready() -> void:
 
 
 func _play_entrance_animations() -> void:
-	AnimationManager.fade_in(team_display, GameConstants.ANIM_DURATION_NORMAL, 0.0)
+	AnimationManager.fade_in(team_container, GameConstants.ANIM_DURATION_NORMAL, 0.0)
 	AnimationManager.fade_in(options_panel, GameConstants.ANIM_DURATION_NORMAL, 0.1)
 
 
@@ -33,7 +38,16 @@ func _exit_tree() -> void:
 
 func _update_team_display() -> void:
 	var team = RunManager.get_team()
-	team_display.setup(team, "YOUR TEAM")
+	UIHelpers.clear_children(tiles_container)
+
+	var available_width = max(team_container.size.x, 688) - 24
+	var tile_size = floor((available_width - 16) / 3.0)
+	tile_size = max(tile_size, 180)
+
+	for char_instance in team:
+		var tile = CharacterTileScene.instantiate()
+		tiles_container.add_child(tile)
+		tile.setup(char_instance, tile_size)
 
 
 func _setup_phase() -> void:

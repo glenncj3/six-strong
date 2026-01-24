@@ -6,7 +6,6 @@ extends RefCounted
 ## - UIContainerHelpers: Container management, mouse filters, texture loading
 ## - UIFormattingHelpers: Text/number formatting
 ## - UIPanelFactory: Option panels, shop rows
-## - UITeamDisplay: Team display population
 ##
 ## New code should use the specialized classes directly for clarity.
 ## This facade exists for backwards compatibility with existing code.
@@ -132,11 +131,3 @@ static func create_combat_option_panel(combat_data: Dictionary, on_select: Calla
 
 static func create_encounter_option_panel(encounter_data: Dictionary, on_select: Callable) -> ClickableOptionPanel:
 	return UIPanelFactory.create_encounter_option_panel(encounter_data, on_select)
-
-
-# =============================================================================
-# UITeamDisplay DELEGATES
-# =============================================================================
-
-static func populate_team_display(parent_container: Control, team: Array, title_text: String = "YOUR TEAM", on_card_clicked: Callable = Callable()) -> void:
-	UITeamDisplay.populate_team_display(parent_container, team, title_text, on_card_clicked)

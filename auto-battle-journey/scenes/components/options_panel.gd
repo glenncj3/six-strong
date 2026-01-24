@@ -1,6 +1,5 @@
 extends PanelContainer
 # OptionsPanel - Container for encounter/combat options
-# Mirrors TeamDisplay structure for consistent sizing
 
 @onready var options_container: VBoxContainer = $MarginContainer/MainContainer/OptionsContainer
 

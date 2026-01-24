@@ -10,6 +10,8 @@ extends Control
 ## - _get_next_scene() -> String: Scene to navigate to after selection
 ## - _get_log_prefix() -> String: Prefix for log messages
 
+const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
+
 @onready var options_container = $OptionsWrapper/MainContainer/ScrollContainer/OptionsMargin/OptionsContainer
 @onready var team_display_container = $TeamDisplayContainer
 @onready var back_button = $BackButton
@@ -26,10 +28,37 @@ func _ready() -> void:
 
 
 func _setup_team_display() -> void:
-	"""Display the player's team at the top of the screen."""
+	"""Display the player's team using CharacterTile instances."""
 	var team = RunManager.get_team()
-	if team.size() > 0:
-		UIHelpers.populate_team_display(team_display_container, team, "YOUR TEAM")
+	if team.size() == 0:
+		return
+
+	UIHelpers.clear_children(team_display_container)
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 8)
+	team_display_container.add_child(vbox)
+
+	var title = Label.new()
+	title.text = "YOUR TEAM"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 20)
+	title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	vbox.add_child(title)
+
+	var tiles_container = HBoxContainer.new()
+	tiles_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	tiles_container.add_theme_constant_override("separation", 8)
+	vbox.add_child(tiles_container)
+
+	var available_width = max(team_display_container.size.x, 688) - 24
+	var tile_size = floor((available_width - 16) / 3.0)
+	tile_size = max(tile_size, 180)
+
+	for char_instance in team:
+		var tile = CharacterTileScene.instantiate()
+		tiles_container.add_child(tile)
+		tile.setup(char_instance, tile_size)
 
 
 func _generate_and_display_options() -> void:
