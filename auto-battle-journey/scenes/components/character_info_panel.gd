@@ -11,6 +11,7 @@ extends PanelContainer
 var current_char_instance: CharacterInstance = null
 var _tween: Tween = null
 var _is_visible: bool = false
+var _suppress_dismiss: bool = false
 
 const SLIDE_DURATION := 0.25
 const MAX_ITEMS := GameConstants.MAX_RUN_ITEMS
@@ -48,6 +49,9 @@ func _input(event: InputEvent) -> void:
 
 
 func _deferred_dismiss() -> void:
+	if _suppress_dismiss:
+		_suppress_dismiss = false
+		return
 	if _is_visible:
 		hide_panel()
 
@@ -58,6 +62,7 @@ func show_character(char_instance: CharacterInstance) -> void:
 	_populate(char_instance)
 
 	if _is_visible:
+		_suppress_dismiss = true
 		return  # Content updated above, skip animation
 
 	_is_visible = true
