@@ -19,7 +19,7 @@ func _ready() -> void:
 
 	win_button.pressed.connect(_on_win_pressed)
 	lose_button.pressed.connect(_on_lose_pressed)
-	RunManager.combat_completed.connect(_on_combat_completed)
+	RunFlowController.combat_completed.connect(_on_combat_completed)
 
 	result_label.text = ""
 
@@ -74,7 +74,7 @@ func _on_win_pressed() -> void:
 	result_label.text = "VICTORY!"
 	result_label.modulate = GameConstants.COLOR_SUCCESS
 	await get_tree().create_timer(1.5).timeout
-	RunManager.complete_combat(true, combat_data)
+	RunFlowController.complete_combat(true, combat_data)
 
 
 func _on_lose_pressed() -> void:
@@ -84,7 +84,7 @@ func _on_lose_pressed() -> void:
 	result_label.text = "DEFEAT..."
 	result_label.modulate = GameConstants.COLOR_DANGER
 	await get_tree().create_timer(1.5).timeout
-	RunManager.complete_combat(false, combat_data)
+	RunFlowController.complete_combat(false, combat_data)
 
 
 func _on_combat_completed(_won: bool, run_over: bool) -> void:

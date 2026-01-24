@@ -8,7 +8,6 @@ signal round_changed(new_round: int)
 signal reputation_changed(new_reputation: int)
 signal gold_changed(new_gold: int)
 signal phase_changed(new_phase: String)
-signal combat_completed(won: bool, is_run_over: bool)
 
 # Save file path
 const SAVE_PATH = "user://active_run.json"
@@ -446,30 +445,3 @@ func apply_combat_rewards(won: bool, combat_data: Dictionary) -> void:
 		lose_reputation(reputation_loss)
 
 
-func complete_combat(won: bool, combat_data: Dictionary) -> void:
-	"""
-	Complete a combat and handle all post-combat logic.
-	Emits combat_completed signal for the scene to handle navigation.
-
-	Args:
-		won: True if player won, false if lost
-		combat_data: The combat option dictionary
-	"""
-	if won:
-		apply_combat_rewards(true, combat_data)
-		add_win()
-	else:
-		apply_combat_rewards(false, combat_data)
-		add_loss()
-
-	save_run_state()
-
-	var run_over = is_run_over()
-	if run_over:
-		var victory = did_player_win()
-		var reward_data = end_run(victory)
-		SceneManager.set_scene_data("run_results", reward_data)
-	else:
-		advance_round()
-
-	combat_completed.emit(won, run_over)

@@ -24,6 +24,7 @@ EncounterFactory="*res://autoloads/encounter_factory.gd"
 SceneManager="*res://autoloads/scene_manager.gd"
 TransitionManager="*res://autoloads/transition_manager.gd"
 AnimationManager="*res://autoloads/animation_manager.gd"
+RunFlowController="*res://autoloads/run_flow_controller.gd"
 
 [display]
 
