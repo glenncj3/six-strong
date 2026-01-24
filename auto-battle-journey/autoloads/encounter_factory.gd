@@ -31,11 +31,8 @@ func _ready() -> void:
 		"pick_learnable_skill": _gen_pick_learnable_skill,
 	}
 
-	var data = JsonPersistence.load_json("res://data/encounters/encounter_types.json")
-	if data:
-		_encounter_types = data.get("encounter_types", [])
-	else:
-		push_error("EncounterFactory: Failed to load encounter_types.json")
+	# Use GameData's cached encounter types (single source of truth)
+	_encounter_types = GameData.get_encounter_types()
 
 
 func generate_encounter_options(count: int) -> Array:

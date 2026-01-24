@@ -311,35 +311,9 @@ func _set_shader_progress(value: float) -> void:
 
 
 func _setup_dissolve_shader() -> void:
-	"""Create and apply the dissolve shader."""
+	"""Load and apply the dissolve shader."""
 	if not _dissolve_material:
-		var shader = Shader.new()
-		shader.code = """
-shader_type canvas_item;
-
-uniform float progress : hint_range(0.0, 1.0) = 0.0;
-uniform vec4 color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
-uniform float edge_width : hint_range(0.0, 0.2) = 0.05;
-
-float random(vec2 uv) {
-	return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
-}
-
-void fragment() {
-	float noise = random(UV * 20.0);
-	float threshold = progress;
-
-	if (noise < threshold - edge_width) {
-		COLOR = color;
-	} else if (noise < threshold) {
-		// Edge glow
-		float edge = (threshold - noise) / edge_width;
-		COLOR = mix(vec4(0.85, 0.65, 0.13, 1.0), color, edge);
-	} else {
-		COLOR = vec4(0.0, 0.0, 0.0, 0.0);
-	}
-}
-"""
+		var shader = load("res://shaders/dissolve_transition.gdshader") as Shader
 		_dissolve_material = ShaderMaterial.new()
 		_dissolve_material.shader = shader
 		_dissolve_material.set_shader_parameter("color", Color.BLACK)
@@ -379,44 +353,9 @@ func _wipe_in(radial: bool, duration: float) -> void:
 
 
 func _setup_wipe_shader(radial: bool) -> void:
-	"""Create and apply the wipe shader."""
-	var shader = Shader.new()
-
-	if radial:
-		shader.code = """
-shader_type canvas_item;
-
-uniform float progress : hint_range(0.0, 1.0) = 0.0;
-uniform vec4 color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
-uniform float softness : hint_range(0.0, 0.2) = 0.02;
-
-void fragment() {
-	vec2 center = vec2(0.5, 0.5);
-	float dist = distance(UV, center);
-	float max_dist = 0.707; // sqrt(0.5^2 + 0.5^2)
-	float normalized_dist = dist / max_dist;
-
-	float threshold = progress * 1.2; // Overshoot to ensure full coverage
-	float alpha = smoothstep(threshold - softness, threshold, normalized_dist);
-
-	COLOR = vec4(color.rgb, 1.0 - alpha);
-}
-"""
-	else:
-		shader.code = """
-shader_type canvas_item;
-
-uniform float progress : hint_range(0.0, 1.0) = 0.0;
-uniform vec4 color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
-uniform float softness : hint_range(0.0, 0.2) = 0.02;
-
-void fragment() {
-	float threshold = progress * 1.1; // Slight overshoot
-	float alpha = smoothstep(threshold - softness, threshold, 1.0 - UV.x);
-
-	COLOR = vec4(color.rgb, alpha);
-}
-"""
+	"""Load and apply the appropriate wipe shader."""
+	var shader_path = "res://shaders/wipe_radial.gdshader" if radial else "res://shaders/wipe_horizontal.gdshader"
+	var shader = load(shader_path) as Shader
 
 	_wipe_material = ShaderMaterial.new()
 	_wipe_material.shader = shader

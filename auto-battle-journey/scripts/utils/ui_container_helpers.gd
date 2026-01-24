@@ -51,6 +51,14 @@ static func create_vbox_container(separation: int = GameConstants.CONTENT_SEPARA
 	return vbox
 
 
+static func create_hbox_container(separation: int = GameConstants.CONTENT_SEPARATION, alignment: BoxContainer.AlignmentMode = BoxContainer.ALIGNMENT_CENTER) -> HBoxContainer:
+	"""Create a configured HBoxContainer with standard settings."""
+	var hbox = HBoxContainer.new()
+	hbox.alignment = alignment
+	hbox.add_theme_constant_override("separation", separation)
+	return hbox
+
+
 static func create_spacer(height: int = 20) -> Control:
 	"""
 	Create a vertical spacer control.

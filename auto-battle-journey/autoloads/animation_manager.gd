@@ -35,6 +35,11 @@ func _get_duration(duration: float, default: float) -> float:
 	return duration if duration > 0 else default
 
 
+func _ensure_centered_pivot(node: Control) -> void:
+	"""Set pivot to center of the control for scale/rotation animations."""
+	_ensure_centered_pivot(node)
+
+
 # =============================================================================
 # ENTRANCE ANIMATIONS
 # =============================================================================
@@ -93,7 +98,7 @@ func scale_pop(node: Control, duration: float = -1.0, delay: float = 0.0) -> Twe
 	var d = _get_duration(duration, GameConstants.ANIM_DURATION_NORMAL)
 
 	# Set pivot to center
-	node.pivot_offset = node.size / 2
+	_ensure_centered_pivot(node)
 	node.scale = Vector2(0.8, 0.8)
 	node.modulate.a = 0
 
@@ -213,7 +218,7 @@ func scale_out(node: Control, duration: float = -1.0) -> Tween:
 	"""Scale out and fade (reverse of scale_pop)."""
 	var d = _get_duration(duration, GameConstants.ANIM_DURATION_FAST)
 
-	node.pivot_offset = node.size / 2
+	_ensure_centered_pivot(node)
 
 	var tween = _create_tween(node, 0.0, Tween.EASE_IN, GameConstants.ANIM_TRANS_STANDARD)
 	tween.set_parallel(true)
@@ -256,7 +261,7 @@ func hover_scale_up(node: Control, scale: float = -1.0, duration: float = -1.0) 
 	var s = scale if scale > 0 else GameConstants.HOVER_SCALE
 	var d = _get_duration(duration, GameConstants.ANIM_DURATION_FAST)
 
-	node.pivot_offset = node.size / 2
+	_ensure_centered_pivot(node)
 
 	var tween = _create_tween(node)
 	tween.tween_property(node, "scale", Vector2(s, s), d)
@@ -289,7 +294,7 @@ func press_scale(node: Control, scale: float = -1.0, duration: float = -1.0) -> 
 	var s = scale if scale > 0 else GameConstants.PRESS_SCALE
 	var d = _get_duration(duration, GameConstants.ANIM_DURATION_INSTANT)
 
-	node.pivot_offset = node.size / 2
+	_ensure_centered_pivot(node)
 
 	var tween = _create_tween(node, 0.0, Tween.EASE_OUT, Tween.TRANS_QUAD)
 	tween.tween_property(node, "scale", Vector2(s, s), d)
@@ -327,7 +332,7 @@ func card_hover_lift(node: Control, lift: float = -1.0, duration: float = -1.0) 
 	var s = GameConstants.CARD_HOVER_SCALE
 	var d = _get_duration(duration, GameConstants.ANIM_DURATION_FAST)
 
-	node.pivot_offset = node.size / 2
+	_ensure_centered_pivot(node)
 
 	var tween = _create_tween(node)
 	tween.set_parallel(true)
@@ -363,7 +368,7 @@ func card_select_bounce(node: Control, duration: float = -1.0) -> Tween:
 	"""Selection animation with bounce effect."""
 	var d = _get_duration(duration, GameConstants.ANIM_DURATION_NORMAL)
 
-	node.pivot_offset = node.size / 2
+	_ensure_centered_pivot(node)
 
 	var tween = _create_tween(node, 0.0, GameConstants.ANIM_EASE_STANDARD, GameConstants.ANIM_TRANS_BOUNCE)
 	# Quick scale up then settle
@@ -394,7 +399,7 @@ func number_pop(label: Label, new_value: String, color: Color = Color.WHITE,
 	var d = _get_duration(duration, GameConstants.ANIM_DURATION_FAST)
 	var original_color = label.modulate
 
-	label.pivot_offset = label.size / 2
+	_ensure_centered_pivot(label)
 
 	var tween = _create_tween(label, 0.0, GameConstants.ANIM_EASE_STANDARD, GameConstants.ANIM_TRANS_BOUNCE)
 
@@ -529,14 +534,4 @@ func shake(node: CanvasItem, intensity: float = -1.0, duration: float = -1.0) ->
 
 func error_shake(node: Control) -> Tween:
 	"""Quick horizontal shake for invalid actions."""
-	var original_x = node.position.x
-	var intensity = GameConstants.SHAKE_INTENSITY_LIGHT
-
-	var tween = node.create_tween()
-	tween.tween_property(node, "position:x", original_x - intensity, 0.05)
-	tween.tween_property(node, "position:x", original_x + intensity, 0.05)
-	tween.tween_property(node, "position:x", original_x - intensity * 0.5, 0.05)
-	tween.tween_property(node, "position:x", original_x + intensity * 0.5, 0.05)
-	tween.tween_property(node, "position:x", original_x, 0.05)
-
-	return tween
+	return shake(node, GameConstants.SHAKE_INTENSITY_LIGHT, 0.25)

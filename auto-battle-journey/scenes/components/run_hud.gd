@@ -246,7 +246,7 @@ func _on_concede_confirmed() -> void:
 	concede_requested.emit()
 
 	if _is_draft_mode:
-		SceneManager.go_to_main_menu()
+		SceneManager.go_to("main_menu")
 	else:
 		var reward_data = RunManager.end_run(false)
 		SceneManager.set_scene_data("run_results", reward_data)

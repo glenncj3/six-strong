@@ -24,6 +24,10 @@ static func create_vbox_container(separation: int = GameConstants.CONTENT_SEPARA
 	return UIContainerHelpers.create_vbox_container(separation, full_rect)
 
 
+static func create_hbox_container(separation: int = GameConstants.CONTENT_SEPARATION, alignment: BoxContainer.AlignmentMode = BoxContainer.ALIGNMENT_CENTER) -> HBoxContainer:
+	return UIContainerHelpers.create_hbox_container(separation, alignment)
+
+
 static func create_spacer(height: int = 20) -> Control:
 	return UIContainerHelpers.create_spacer(height)
 

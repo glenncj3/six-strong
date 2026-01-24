@@ -71,97 +71,56 @@ func _load_encounter_types() -> void:
 
 
 # =============================================================================
-# PUBLIC API - Character Data
+# GENERIC ACCESSOR
+# =============================================================================
+
+func _get_from(collection: Dictionary, id: String, type_name: String) -> Dictionary:
+	"""Generic accessor with warning on miss."""
+	if collection.has(id):
+		return collection[id]
+	push_warning("GameData: %s not found: %s" % [type_name, id])
+	return {}
+
+
+# =============================================================================
+# PUBLIC API
 # =============================================================================
 
 func get_character_by_id(id: String) -> Dictionary:
-	"""Get character data by ID."""
-	if characters.has(id):
-		return characters[id]
-	push_warning("GameData: Character not found: %s" % id)
-	return {}
-
+	return _get_from(characters, id, "Character")
 
 func get_all_characters() -> Array:
-	"""Get array of all character data."""
 	return characters.values()
 
-
 func has_character(id: String) -> bool:
-	"""Check if character exists."""
 	return characters.has(id)
 
-
-# =============================================================================
-# PUBLIC API - Item Data
-# =============================================================================
-
 func get_item_by_id(id: String) -> Dictionary:
-	"""Get item data by ID."""
-	if items.has(id):
-		return items[id]
-	push_warning("GameData: Item not found: %s" % id)
-	return {}
-
+	return _get_from(items, id, "Item")
 
 func get_all_items() -> Array:
-	"""Get array of all item data."""
 	return items.values()
 
-
 func has_item(id: String) -> bool:
-	"""Check if item exists."""
 	return items.has(id)
 
-
-# =============================================================================
-# PUBLIC API - Item Upgrade Data
-# =============================================================================
-
 func get_item_upgrade_by_id(id: String) -> Dictionary:
-	"""Get item upgrade data by ID."""
-	if item_upgrades.has(id):
-		return item_upgrades[id]
-	push_warning("GameData: Item upgrade not found: %s" % id)
-	return {}
-
+	return _get_from(item_upgrades, id, "Item upgrade")
 
 func get_all_item_upgrades() -> Array:
-	"""Get array of all item upgrade data."""
 	return item_upgrades.values()
 
-
 func has_item_upgrade(id: String) -> bool:
-	"""Check if item upgrade exists."""
 	return item_upgrades.has(id)
 
-
-# =============================================================================
-# PUBLIC API - Skill Data
-# =============================================================================
-
 func get_skill_by_id(id: String) -> Dictionary:
-	"""Get skill data by ID."""
-	if skills.has(id):
-		return skills[id]
-	push_warning("GameData: Skill not found: %s" % id)
-	return {}
-
+	return _get_from(skills, id, "Skill")
 
 func get_all_skills() -> Array:
-	"""Get array of all skill data."""
 	return skills.values()
 
-
 func has_skill(id: String) -> bool:
-	"""Check if skill exists."""
 	return skills.has(id)
 
-
-# =============================================================================
-# PUBLIC API - Encounter Data
-# =============================================================================
-
 func get_encounter_types() -> Array:
-	"""Get array of all encounter type definitions."""
 	return encounter_types

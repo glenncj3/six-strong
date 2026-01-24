@@ -239,7 +239,7 @@ func _start_run() -> void:
 	var char_ids = draft_manager.get_drafted_character_ids()
 	RunManager.start_new_run(char_ids)
 
-	SceneManager.go_to_run_view()
+	SceneManager.go_to("run_view")
 
 
 func _get_tile_size() -> float:

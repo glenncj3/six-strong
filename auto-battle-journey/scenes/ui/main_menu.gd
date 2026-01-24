@@ -4,7 +4,6 @@ extends Control
 # Now includes entrance animations and enhanced button effects
 
 const DebugMenuScene = preload("res://scenes/ui/debug_menu.tscn")
-const ButtonEffectsScript = preload("res://scripts/effects/button_effects.gd")
 const AmbientParticlesScene = preload("res://scenes/effects/ambient_particles.tscn")
 
 @onready var background = $Background
@@ -68,9 +67,9 @@ func _apply_visual_styling() -> void:
 
 func _apply_button_effects() -> void:
 	"""Apply hover/press scale effects to buttons."""
-	ButtonEffectsScript.apply_effects(play_button)
-	ButtonEffectsScript.apply_effects(collection_button)
-	ButtonEffectsScript.apply_effects(quit_button)
+	ButtonEffects.apply_effects(play_button)
+	ButtonEffects.apply_effects(collection_button)
+	ButtonEffects.apply_effects(quit_button)
 
 
 func _play_entrance_animations() -> void:
@@ -115,11 +114,11 @@ func _on_play_pressed() -> void:
 		RunManager.load_run_state()
 		SceneManager.go_to("run_view")
 	else:
-		SceneManager.go_to_draft()
+		SceneManager.go_to("draft")
 
 
 func _on_collection_pressed() -> void:
-	SceneManager.go_to_collection(false)
+	SceneManager.go_to("collection", false)
 
 
 func _on_quit_pressed() -> void:

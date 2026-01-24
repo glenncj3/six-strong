@@ -90,25 +90,6 @@ func go_to(scene_name: String, fade: bool = true) -> void:
 	change_scene(SCENES[scene_name], fade)
 
 
-func go_to_main_menu(fade: bool = true) -> void:
-	"""Convenience method: Go to main menu."""
-	go_to("main_menu", fade)
-
-
-func go_to_collection(fade: bool = true) -> void:
-	"""Convenience method: Go to collection screen."""
-	go_to("collection", fade)
-
-
-func go_to_draft(fade: bool = true) -> void:
-	"""Convenience method: Go to draft screen."""
-	go_to("draft", fade)
-
-
-func go_to_run_view(fade: bool = true) -> void:
-	"""Convenience method: Go to run view screen."""
-	go_to("run_view", fade)
-
 
 # =============================================================================
 # STATE QUERIES

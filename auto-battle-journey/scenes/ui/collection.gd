@@ -173,4 +173,4 @@ func _on_back_pressed() -> void:
 		_on_close_details_pressed()
 	else:
 		var tween = AnimationManager.fade_out(back_button, GameConstants.ANIM_DURATION_NORMAL)
-		tween.finished.connect(func(): SceneManager.go_to_main_menu(false))
+		tween.finished.connect(func(): SceneManager.go_to("main_menu", false))
