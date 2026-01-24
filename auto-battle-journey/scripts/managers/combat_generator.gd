@@ -37,7 +37,7 @@ func _generate_ai_option() -> CombatOption:
 	var xp_reward = base_reward + GameConstants.AI_BONUS_XP
 
 	# Get colors based on difficulty
-	var colors = _get_difficulty_colors(difficulty)
+	var colors = GameConstants.get_combat_colors(difficulty)
 
 	return CombatOption.create_ai(
 		"AI Enemy (%s)" % difficulty,
@@ -63,6 +63,7 @@ func _generate_player_ghost_option() -> CombatOption:
 	var xp_reward = base_reward + GameConstants.GHOST_BONUS_XP
 
 	# Ghost uses amethyst purple
+	var colors = GameConstants.get_ghost_combat_colors()
 	return CombatOption.create_ghost(
 		"Player Ghost (Prestige %d)" % prestige,
 		"Fight another player's team.",
@@ -70,44 +71,11 @@ func _generate_player_ghost_option() -> CombatOption:
 		prestige,
 		base_reward,
 		xp_reward,
-		Color("#6A3A8A"),  # bg - amethyst purple
-		Color("#8A5AAA"),  # hover
-		Color("#4A1A6A"),  # pressed
-		Color("#B88726")   # border - gold
+		colors.bg,
+		colors.hover,
+		colors.pressed,
+		colors.border
 	)
-
-
-func _get_difficulty_colors(difficulty: String) -> Dictionary:
-	"""Get panel colors based on combat difficulty."""
-	match difficulty:
-		"Easy":
-			return {
-				"bg": Color("#2A7A4A"),      # Emerald green
-				"hover": Color("#3A9A5A"),
-				"pressed": Color("#1A6A3A"),
-				"border": Color("#B88726")
-			}
-		"Medium":
-			return {
-				"bg": Color("#8A6A21"),      # Gold-brown
-				"hover": Color("#AA8A41"),
-				"pressed": Color("#6A4A01"),
-				"border": Color("#B88726")
-			}
-		"Hard":
-			return {
-				"bg": Color("#8A2A3A"),      # Ruby red
-				"hover": Color("#AA4A5A"),
-				"pressed": Color("#6A1A2A"),
-				"border": Color("#B88726")
-			}
-		_:
-			return {
-				"bg": Color("#3D2E24"),      # Default warm brown
-				"hover": Color("#5D4E44"),
-				"pressed": Color("#2D1E14"),
-				"border": Color("#B88726")
-			}
 
 
 # =============================================================================

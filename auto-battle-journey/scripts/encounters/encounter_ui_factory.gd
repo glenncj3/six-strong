@@ -166,7 +166,7 @@ static func _create_xp_reward_ui(encounter_data: Dictionary, context: Dictionary
 	return vbox
 
 
-static func _create_gold_reward_ui(encounter_data: Dictionary, _context: Dictionary) -> Control:
+static func _create_gold_reward_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create gold reward encounter UI."""
 	var vbox = UIHelpers.create_vbox_container(16)
 
@@ -175,13 +175,15 @@ static func _create_gold_reward_ui(encounter_data: Dictionary, _context: Diction
 	vbox.add_child(UIHelpers.create_label("You found gold!", GameConstants.FONT_SIZE_HEADING, GameConstants.COLOR_TEXT_LIGHT, true))
 	vbox.add_child(UIHelpers.create_label("+%d Gold" % gold_amount, 48, GameConstants.COLOR_GOLD, true))
 
-	# Award gold immediately
-	RunManager.add_gold(gold_amount)
+	# Award gold via context callback
+	var on_gold_reward = context.get("on_gold_reward", Callable())
+	if on_gold_reward.is_valid():
+		on_gold_reward.call(gold_amount)
 
 	return vbox
 
 
-static func _create_health_restore_ui(encounter_data: Dictionary, _context: Dictionary) -> Control:
+static func _create_health_restore_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create health restore encounter UI."""
 	var vbox = UIHelpers.create_vbox_container(16)
 
@@ -189,10 +191,12 @@ static func _create_health_restore_ui(encounter_data: Dictionary, _context: Dict
 
 	var heal_percentage = encounter_data["data"]["heal_percentage"]
 	var team = RunManager.get_team()
+	var on_health_restore = context.get("on_health_restore", Callable())
 
 	for char_instance in team:
 		var heal_amount = int(char_instance.max_health * heal_percentage)
-		char_instance.heal(heal_amount)
+		if on_health_restore.is_valid():
+			on_health_restore.call(char_instance, heal_amount)
 
 		var char_label = UIHelpers.create_label(
 			"%s: +%d HP (%d/%d)" % [
@@ -217,12 +221,12 @@ static func _create_skill_trainer_ui(encounter_data: Dictionary, context: Dictio
 	var skill_id = encounter_data["data"]["skill_id"]
 	var skill_data = GameData.get_skill_by_id(skill_id)
 	var on_complete = context.get("on_encounter_complete", Callable())
+	var on_skill_learn = context.get("on_skill_learn", Callable())
 
 	if skill_data.is_empty():
 		vbox.add_child(UIHelpers.create_label("No skill available...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
-		# Allow completion even with error
-		if context.has("on_encounter_complete"):
-			context["on_encounter_complete"].call()
+		if on_complete.is_valid():
+			on_complete.call()
 		return vbox
 
 	vbox.add_child(UIHelpers.create_label("The trainer offers to teach:", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
@@ -243,22 +247,26 @@ static func _create_skill_trainer_ui(encounter_data: Dictionary, context: Dictio
 		button.text = "Teach %s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
 		button.custom_minimum_size = Vector2(GameConstants.BUTTON_WIDTH_STANDARD, GameConstants.BUTTON_HEIGHT_STANDARD)
 		UIStyles.setup_button(button)
-		button.pressed.connect(_on_skill_trainer_selected.bind(i, skill_id, button, vbox, on_complete))
+		button.pressed.connect(_on_skill_trainer_selected.bind(i, skill_id, button, vbox, on_complete, on_skill_learn))
 		vbox.add_child(button)
 
 	return vbox
 
 
-static func _on_skill_trainer_selected(char_index: int, skill_id: String, button: Button, container: VBoxContainer, on_complete: Callable) -> void:
+static func _on_skill_trainer_selected(char_index: int, skill_id: String, button: Button, container: VBoxContainer, on_complete: Callable, on_skill_learn: Callable) -> void:
 	"""Handle skill trainer selection."""
 	var team = RunManager.get_team()
 	var char_instance = team[char_index]
 
-	var success = char_instance.learn_skill(skill_id)
+	var success = false
+	if on_skill_learn.is_valid():
+		success = on_skill_learn.call(char_instance, skill_id)
+	else:
+		success = char_instance.learn_skill(skill_id)
+
 	if success:
 		button.text = "Skill Learned!"
 		button.disabled = true
-		# Disable all buttons after successful learn
 		for child in container.get_children():
 			if child is Button:
 				child.disabled = true
@@ -299,13 +307,15 @@ static func _create_gamble_ui(encounter_data: Dictionary, context: Dictionary) -
 	vbox.add_child(buttons_container)
 
 	var on_complete = context.get("on_encounter_complete", Callable())
+	var on_gold_spend = context.get("on_gold_spend", Callable())
+	var on_gold_reward = context.get("on_gold_reward", Callable())
 
 	var gamble_button = Button.new()
 	gamble_button.text = "GAMBLE!"
 	gamble_button.custom_minimum_size = Vector2(GameConstants.BUTTON_WIDTH_SMALL, GameConstants.BUTTON_HEIGHT_STANDARD)
 	gamble_button.disabled = current_gold < bet
 	UIStyles.setup_button(gamble_button)
-	gamble_button.pressed.connect(_on_gamble_pressed.bind(bet, multiplier, vbox, on_complete))
+	gamble_button.pressed.connect(_on_gamble_pressed.bind(bet, multiplier, vbox, on_complete, on_gold_spend, on_gold_reward))
 	buttons_container.add_child(gamble_button)
 
 	var decline_button = Button.new()
@@ -318,9 +328,14 @@ static func _create_gamble_ui(encounter_data: Dictionary, context: Dictionary) -
 	return vbox
 
 
-static func _on_gamble_pressed(bet: int, multiplier: int, container: Control, on_complete: Callable) -> void:
+static func _on_gamble_pressed(bet: int, multiplier: int, container: Control, on_complete: Callable, on_gold_spend: Callable, on_gold_reward: Callable) -> void:
 	"""Handle gamble."""
-	if not RunManager.spend_gold(bet):
+	var spent = false
+	if on_gold_spend.is_valid():
+		spent = on_gold_spend.call(bet)
+	else:
+		spent = RunManager.spend_gold(bet)
+	if not spent:
 		return
 
 	var result_label = container.get_node("ResultLabel")
@@ -331,7 +346,10 @@ static func _on_gamble_pressed(bet: int, multiplier: int, container: Control, on
 
 	if won:
 		var winnings = bet * multiplier
-		RunManager.add_gold(winnings)
+		if on_gold_reward.is_valid():
+			on_gold_reward.call(winnings)
+		else:
+			RunManager.add_gold(winnings)
 		result_label.text = "YOU WON! +%d Gold!" % winnings
 		result_label.modulate = GameConstants.COLOR_SUCCESS
 	else:
@@ -387,26 +405,28 @@ static func _create_elite_challenge_ui(encounter_data: Dictionary, context: Dict
 	vbox.add_child(UIHelpers.create_spacer(20))
 
 	var on_complete = context.get("on_encounter_complete", Callable())
+	var on_xp_reward_all = context.get("on_xp_reward_all", Callable())
+	var on_gold_reward = context.get("on_gold_reward", Callable())
 
 	var challenge_button = Button.new()
 	challenge_button.text = "COMPLETE CHALLENGE"
 	challenge_button.custom_minimum_size = Vector2(GameConstants.BUTTON_WIDTH_STANDARD, GameConstants.BUTTON_HEIGHT_STANDARD)
 	UIStyles.setup_button(challenge_button)
-	challenge_button.pressed.connect(_on_elite_challenge_completed.bind(xp_reward, gold_reward, challenge_button, on_complete))
+	challenge_button.pressed.connect(_on_elite_challenge_completed.bind(xp_reward, gold_reward, challenge_button, on_complete, on_xp_reward_all, on_gold_reward))
 	vbox.add_child(challenge_button)
 
 	return vbox
 
 
-static func _on_elite_challenge_completed(xp_reward: int, gold_reward: int, button: Button, on_complete: Callable) -> void:
+static func _on_elite_challenge_completed(xp_reward: int, gold_reward: int, button: Button, on_complete: Callable, on_xp_reward_all: Callable, on_gold_reward: Callable) -> void:
 	"""Handle elite challenge completion."""
-	# Award XP to all characters
-	var team = RunManager.get_team()
-	for char_instance in team:
-		char_instance.add_experience(xp_reward)
+	# Award XP to all characters via callback
+	if on_xp_reward_all.is_valid():
+		on_xp_reward_all.call(xp_reward)
 
-	# Award gold
-	RunManager.add_gold(gold_reward)
+	# Award gold via callback
+	if on_gold_reward.is_valid():
+		on_gold_reward.call(gold_reward)
 
 	button.text = "Challenge Complete!"
 	button.disabled = true

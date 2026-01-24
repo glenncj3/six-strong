@@ -2,6 +2,8 @@ extends Control
 # RunHUD - Persistent header bar that stays visible during gameplay
 # Lives on a CanvasLayer above the transition layer so it persists through scene changes
 
+signal concede_requested
+
 @onready var header_bar = $HeaderBar
 @onready var content_container = $HeaderBar/MarginContainer
 @onready var round_label = $HeaderBar/MarginContainer/HBoxContainer/LeftSection/RoundLabel
@@ -246,19 +248,13 @@ func _on_concede_confirmed() -> void:
 	_concede_dialog_open = false
 	concede_confirm_dialog.visible = false
 
+	concede_requested.emit()
+
 	if _is_draft_mode:
 		SceneManager.go_to_main_menu()
 	else:
-		SceneManager.set_scene_data("run_results", {
-			"round": RunManager.get_round(),
-			"wins": RunManager.get_wins(),
-			"losses": RunManager.get_losses(),
-			"gold": RunManager.get_gold(),
-			"reputation": RunManager.get_reputation(),
-			"starting_gold": RunManager.starting_gold,
-			"victory": false,
-			"team": _capture_team_data()
-		})
+		var reward_data = RunManager.end_run(false)
+		SceneManager.set_scene_data("run_results", reward_data)
 		SceneManager.go_to("run_results")
 
 
@@ -272,12 +268,3 @@ func _on_concede_dialog_closed() -> void:
 	concede_confirm_dialog.visible = false
 
 
-func _capture_team_data() -> Array:
-	var team_data = []
-	for char_instance in RunManager.get_team():
-		team_data.append({
-			"id": char_instance.base_character_id,
-			"name": char_instance.get_character_name(),
-			"level": char_instance.level
-		})
-	return team_data

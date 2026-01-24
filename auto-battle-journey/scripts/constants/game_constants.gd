@@ -258,6 +258,21 @@ const GHOST_BASE_REWARD_GOLD := 25
 const GHOST_REWARD_PER_PRESTIGE := 5
 const GHOST_BONUS_XP := 15
 
+# Combat panel colors per difficulty
+static func get_combat_colors(difficulty: String) -> Dictionary:
+	match difficulty:
+		"Easy":
+			return {"bg": COLOR_EMERALD, "hover": Color("#3A9A5A"), "pressed": Color("#1A6A3A"), "border": COLOR_BORDER_GOLD}
+		"Medium":
+			return {"bg": Color("#8A6A21"), "hover": Color("#AA8A41"), "pressed": Color("#6A4A01"), "border": COLOR_BORDER_GOLD}
+		"Hard":
+			return {"bg": COLOR_RUBY, "hover": Color("#AA4A5A"), "pressed": Color("#6A1A2A"), "border": COLOR_BORDER_GOLD}
+		_:
+			return {"bg": COLOR_PANEL_WARM, "hover": Color("#5D4E44"), "pressed": Color("#2D1E14"), "border": COLOR_BORDER_GOLD}
+
+static func get_ghost_combat_colors() -> Dictionary:
+	return {"bg": COLOR_AMETHYST, "hover": Color("#8A5AAA"), "pressed": Color("#4A1A6A"), "border": COLOR_BORDER_GOLD}
+
 # =============================================================================
 # ENCOUNTER CONSTANTS
 # =============================================================================

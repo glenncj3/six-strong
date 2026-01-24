@@ -97,7 +97,7 @@ func _play_entrance_animations() -> void:
 
 
 func _capture_run_data() -> void:
-	"""Capture run data from RunManager."""
+	"""Fallback: Capture run data from RunManager if scene_data not provided."""
 	run_data = {
 		"round": RunManager.get_round(),
 		"wins": RunManager.get_wins(),
@@ -105,17 +105,8 @@ func _capture_run_data() -> void:
 		"gold": RunManager.get_gold(),
 		"reputation": RunManager.get_reputation(),
 		"starting_gold": RunManager.starting_gold,
-		"team": []
+		"team": RunManager.capture_team_data()
 	}
-
-	# Capture team info
-	for char_instance in RunManager.get_team():
-		run_data["team"].append({
-			"id": char_instance.base_character_id,
-			"name": char_instance.get_character_name(),
-			"level": char_instance.level
-		})
-
 	was_victory = RunManager.did_player_win()
 
 
@@ -154,51 +145,21 @@ func _display_stats() -> void:
 
 
 func _display_rewards() -> void:
-	"""Display and apply rewards."""
-	var wins = run_data.get("wins", 0)
-	var reputation = run_data.get("reputation", 0)
+	"""Display pre-calculated rewards (applied by RunManager.end_run())."""
+	var gem_reward = run_data.get("gem_reward", 0)
+	var fame_reward = run_data.get("fame_reward", 0)
+	prestige_ups = run_data.get("prestige_ups", [])
 
-	# Calculate gem reward using RewardCalculator (DRY)
-	var gem_reward = RewardCalculator.calculate_gem_reward(was_victory, wins, reputation)
 	gems_label.text = "+%d %s Gems" % [gem_reward, GameConstants.EMOJI_GEM]
 	gems_label.add_theme_color_override("font_color", GameConstants.COLOR_SUCCESS)
 
-	# Apply gem reward
-	PlayerAccount.add_gems(gem_reward)
-
-	# Calculate character fame using RewardCalculator (DRY)
-	var fame_reward = RewardCalculator.calculate_character_fame_reward(was_victory, wins)
-
 	for char_data in run_data.get("team", []):
-		var char_id = char_data["id"]
-		var char_name = char_data["name"]
-
-		# Create fame award label
 		var fame_label = Label.new()
-		fame_label.text = "%s: +%d Fame" % [char_name, fame_reward]
+		fame_label.text = "%s: +%d Fame" % [char_data["name"], fame_reward]
 		fame_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		fame_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
 		fame_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 		character_fame_container.add_child(fame_label)
-
-		# Get current prestige before adding fame
-		var char_account_data = PlayerAccount.get_character_data(char_id)
-		var old_prestige = char_account_data.get("prestige", 1)
-
-		# Apply fame to account character
-		PlayerAccount.add_character_fame(char_id, fame_reward)
-
-		# Check if prestige increased
-		var new_char_data = PlayerAccount.get_character_data(char_id)
-		var new_prestige = new_char_data.get("prestige", 1)
-
-		if new_prestige > old_prestige:
-			prestige_ups.append({
-				"name": char_name,
-				"old_prestige": old_prestige,
-				"new_prestige": new_prestige,
-				"id": char_id
-			})
 
 
 func _display_prestige_ups() -> void:
@@ -334,10 +295,5 @@ func _on_reroll_tokens_changed(new_amount: int) -> void:
 
 
 func _on_continue_pressed() -> void:
-	"""Return to main menu."""
-	# End run and clear state (if not already done)
-	if RunManager.is_run_active:
-		RunManager.end_run(was_victory)
-
-	# Navigate to main menu using SceneManager
+	"""Return to main menu. Run was already ended by RunManager."""
 	SceneManager.go_to_main_menu()

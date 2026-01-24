@@ -8,6 +8,7 @@ signal round_changed(new_round: int)
 signal reputation_changed(new_reputation: int)
 signal gold_changed(new_gold: int)
 signal phase_changed(new_phase: String)
+signal combat_completed(won: bool, is_run_over: bool)
 
 # Save file path
 const SAVE_PATH = "user://active_run.json"
@@ -144,16 +145,67 @@ func load_run_state() -> bool:
 	return true
 
 
-func end_run(victory: bool) -> void:
+func end_run(victory: bool) -> Dictionary:
 	"""
-	End the current run and clear state.
-	Note: Rewards should be applied BEFORE calling this (in run_results).
+	End the current run: calculate and apply rewards, then clear state.
+	Returns a Dictionary with all run results data for display.
 
 	Args:
 		victory: True if player won (10 combats), false if defeated (0 reputation)
+
+	Returns:
+		Dictionary with run stats, reward amounts, and prestige changes
 	"""
-	# Clear run state
+	var reward_data = _apply_end_of_run_rewards(victory)
 	_clear_run_state()
+	return reward_data
+
+
+func _apply_end_of_run_rewards(victory: bool) -> Dictionary:
+	"""Calculate and apply end-of-run rewards. Returns display data."""
+	var wins_count = wins
+	var rep = reputation
+	var team_data = capture_team_data()
+
+	# Calculate rewards
+	var gem_reward = RewardCalculator.calculate_gem_reward(victory, wins_count, rep)
+	var fame_reward = RewardCalculator.calculate_character_fame_reward(victory, wins_count)
+
+	# Apply gem reward
+	PlayerAccount.add_gems(gem_reward)
+
+	# Apply fame and track prestige changes
+	var prestige_ups_list = []
+	for char_data in team_data:
+		var char_id = char_data["id"]
+		var old_data = PlayerAccount.get_character_data(char_id)
+		var old_prestige = old_data.get("prestige", 1)
+
+		PlayerAccount.add_character_fame(char_id, fame_reward)
+
+		var new_data = PlayerAccount.get_character_data(char_id)
+		var new_prestige = new_data.get("prestige", 1)
+		if new_prestige > old_prestige:
+			prestige_ups_list.append({
+				"name": char_data["name"],
+				"old_prestige": old_prestige,
+				"new_prestige": new_prestige,
+				"id": char_id
+			})
+
+	return {
+		"victory": victory,
+		"round": current_round,
+		"wins": wins_count,
+		"losses": losses,
+		"gold": current_gold,
+		"reputation": rep,
+		"starting_gold": starting_gold,
+		"team": team_data,
+		"gem_reward": gem_reward,
+		"fame_reward": fame_reward,
+		"prestige_ups": prestige_ups_list
+	}
 
 
 func _clear_run_state() -> void:
@@ -265,6 +317,34 @@ func spend_gold(amount: int) -> bool:
 	return false
 
 
+func attempt_purchase(cost: int, char_index: int, action: Callable) -> Dictionary:
+	"""
+	Attempt a gold purchase with character selection and action.
+	Handles gold spending, character lookup, action execution, and refund on failure.
+
+	Args:
+		cost: Gold cost of the purchase
+		char_index: Index of the selected character (0-based, -1 means none selected)
+		action: Callable(char_instance: CharacterInstance) -> bool
+
+	Returns:
+		Dictionary with "success" (bool) and "error" (String)
+	"""
+	if char_index < 0:
+		return {"success": false, "error": "no_character_selected"}
+	if not spend_gold(cost):
+		return {"success": false, "error": "insufficient_gold"}
+	var team = get_team()
+	if char_index >= team.size():
+		add_gold(cost)
+		return {"success": false, "error": "invalid_character"}
+	var char_instance = team[char_index]
+	if not action.call(char_instance):
+		add_gold(cost)  # refund
+		return {"success": false, "error": "action_failed"}
+	return {"success": true, "error": ""}
+
+
 func add_win() -> void:
 	"""Record a combat victory (rewards handled by apply_combat_rewards)."""
 	wins += 1
@@ -315,6 +395,18 @@ func get_team_summary() -> Dictionary:
 func get_character_by_index(index: int) -> CharacterInstance:
 	"""Get a team member by index (0-2)."""
 	return _team_manager.get_character_by_index(index)
+
+
+func capture_team_data() -> Array:
+	"""Capture team member data as an Array of Dictionaries (id, name, level)."""
+	var team_data = []
+	for char_instance in _team_manager.get_team():
+		team_data.append({
+			"id": char_instance.base_character_id,
+			"name": char_instance.get_character_name(),
+			"level": char_instance.level
+		})
+	return team_data
 
 
 # =============================================================================
@@ -371,7 +463,7 @@ func apply_combat_rewards(won: bool, combat_data: Dictionary) -> void:
 func complete_combat(won: bool, combat_data: Dictionary) -> void:
 	"""
 	Complete a combat and handle all post-combat logic.
-	This is the single entry point any combat scene should call when combat ends.
+	Emits combat_completed signal for the scene to handle navigation.
 
 	Args:
 		won: True if player won, false if lost
@@ -386,8 +478,12 @@ func complete_combat(won: bool, combat_data: Dictionary) -> void:
 
 	save_run_state()
 
-	if is_run_over():
-		SceneManager.go_to("run_results")
+	var run_over = is_run_over()
+	if run_over:
+		var victory = did_player_win()
+		var reward_data = end_run(victory)
+		SceneManager.set_scene_data("run_results", reward_data)
 	else:
 		advance_round()
-		SceneManager.go_to("run_view")
+
+	combat_completed.emit(won, run_over)

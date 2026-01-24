@@ -61,7 +61,12 @@ func _setup_encounter() -> void:
 		"on_buy_item": _on_buy_item,
 		"on_buy_skill": _on_buy_skill,
 		"on_xp_select": _on_xp_character_selected,
-		"on_encounter_complete": _enable_complete
+		"on_encounter_complete": _enable_complete,
+		"on_gold_reward": _on_gold_reward,
+		"on_health_restore": _on_health_restore,
+		"on_skill_learn": _on_skill_learn,
+		"on_gold_spend": _on_gold_spend,
+		"on_xp_reward_all": _on_xp_reward_all,
 	}
 
 	# Create UI using the handler
@@ -86,48 +91,22 @@ func _set_gold_label(label: Label) -> void:
 
 func _on_buy_item(item_id: String, cost: int, char_selector: OptionButton, button: Button) -> void:
 	"""Handle buying an item upgrade."""
-	var selected_index = char_selector.selected - 1  # -1 because first item is "Select Character..."
-
-	if selected_index < 0:
-		return
-
-	if not RunManager.spend_gold(cost):
-		return
-
-	var team = RunManager.get_team()
-	var char_instance = team[selected_index]
-
-	var success = char_instance.equip_item_upgrade(item_id)
-	if success:
+	var char_index = char_selector.selected - 1  # -1 because first item is "Select Character..."
+	var result = RunManager.attempt_purchase(cost, char_index, func(ci): return ci.equip_item_upgrade(item_id))
+	if result["success"]:
 		button.disabled = true
 		button.text = "PURCHASED"
 		_update_gold_label()
-	else:
-		# Refund if level requirement not met
-		RunManager.add_gold(cost)
 
 
 func _on_buy_skill(skill_id: String, cost: int, char_selector: OptionButton, button: Button) -> void:
 	"""Handle buying a skill."""
-	var selected_index = char_selector.selected - 1
-
-	if selected_index < 0:
-		return
-
-	if not RunManager.spend_gold(cost):
-		return
-
-	var team = RunManager.get_team()
-	var char_instance = team[selected_index]
-
-	var success = char_instance.learn_skill(skill_id)
-	if success:
+	var char_index = char_selector.selected - 1
+	var result = RunManager.attempt_purchase(cost, char_index, func(ci): return ci.learn_skill(skill_id))
+	if result["success"]:
 		button.disabled = true
 		button.text = "LEARNED"
 		_update_gold_label()
-	else:
-		# Refund if already learned or level requirement not met
-		RunManager.add_gold(cost)
 
 
 func _on_xp_character_selected(char_index: int, xp_amount: int, button: Button) -> void:
@@ -139,6 +118,36 @@ func _on_xp_character_selected(char_index: int, xp_amount: int, button: Button) 
 
 	button.text = "XP Given! %s" % ("(LEVEL UP!)" if leveled_up else "")
 	button.disabled = true
+
+
+func _on_gold_reward(amount: int) -> void:
+	"""Handle gold reward from encounters."""
+	RunManager.add_gold(amount)
+	_update_gold_label()
+
+
+func _on_health_restore(char_instance: CharacterInstance, heal_amount: int) -> void:
+	"""Handle health restore for a character."""
+	char_instance.heal(heal_amount)
+
+
+func _on_skill_learn(char_instance: CharacterInstance, skill_id: String) -> bool:
+	"""Handle skill learning. Returns true on success."""
+	return char_instance.learn_skill(skill_id)
+
+
+func _on_gold_spend(amount: int) -> bool:
+	"""Handle gold spending. Returns true on success."""
+	var success = RunManager.spend_gold(amount)
+	if success:
+		_update_gold_label()
+	return success
+
+
+func _on_xp_reward_all(xp_amount: int) -> void:
+	"""Handle XP reward for all team members."""
+	for char_instance in RunManager.get_team():
+		char_instance.add_experience(xp_amount)
 
 
 func _update_gold_label() -> void:
