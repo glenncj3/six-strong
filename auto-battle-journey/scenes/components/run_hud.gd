@@ -11,6 +11,11 @@ extends Control
 @onready var gems_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/GemsLabel
 @onready var concede_button = $HeaderBar/MarginContainer/HBoxContainer/RightSection/ConcedeButton
 @onready var concede_confirm_dialog = $ConcedeConfirmDialog
+@onready var dialog_panel = $ConcedeConfirmDialog/DialogPanel
+@onready var dialog_title = $ConcedeConfirmDialog/DialogPanel/DialogContent/DialogTitle
+@onready var dialog_cancel_button = $ConcedeConfirmDialog/DialogPanel/DialogContent/ButtonContainer/CancelButton
+@onready var dialog_confirm_button = $ConcedeConfirmDialog/DialogPanel/DialogContent/ButtonContainer/ConfirmButton
+@onready var dialog_overlay = $ConcedeConfirmDialog/Overlay
 
 const GAMEPLAY_SCENES: Array[String] = [
 	"res://scenes/ui/draft.tscn",
@@ -33,9 +38,9 @@ func _ready() -> void:
 	_apply_visual_styling()
 
 	concede_button.pressed.connect(_on_concede_button_pressed)
-	concede_confirm_dialog.confirmed.connect(_on_concede_confirmed)
-	concede_confirm_dialog.canceled.connect(_on_concede_dialog_closed)
-	concede_confirm_dialog.close_requested.connect(_on_concede_dialog_closed)
+	dialog_confirm_button.pressed.connect(_on_concede_confirmed)
+	dialog_cancel_button.pressed.connect(_on_concede_dialog_closed)
+	dialog_overlay.gui_input.connect(_on_overlay_input)
 
 	RunManager.round_changed.connect(_on_stats_changed)
 	RunManager.reputation_changed.connect(_on_stats_changed)
@@ -51,6 +56,7 @@ func _apply_visual_styling() -> void:
 	gold_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	gems_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	_style_concede_button()
+	_style_concede_dialog()
 
 
 func _style_concede_button() -> void:
@@ -75,6 +81,18 @@ func _style_concede_button() -> void:
 	concede_button.add_theme_color_override("font_hover_color", Color.WHITE)
 	concede_button.add_theme_color_override("font_pressed_color", GameConstants.COLOR_TEXT_LIGHT)
 	concede_button.add_theme_font_size_override("font_size", 16)
+
+
+func _style_concede_dialog() -> void:
+	UIStyles.apply_panel_style(dialog_panel, UIStyles.create_dark_panel())
+
+	dialog_title.add_theme_font_size_override("font_size", 32)
+	dialog_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
+
+	UIStyles.setup_button(dialog_cancel_button)
+	ButtonEffects.apply_effects(dialog_cancel_button)
+	UIStyles.setup_danger_button(dialog_confirm_button)
+	ButtonEffects.apply_effects(dialog_confirm_button)
 
 
 # =============================================================================
@@ -119,8 +137,6 @@ func _crossfade_to_run_mode() -> void:
 	_header_tween.tween_callback(func():
 		_is_draft_mode = false
 		gems_label.visible = false
-		concede_confirm_dialog.title = "Concede Run?"
-		concede_confirm_dialog.dialog_text = "Are you sure you want to concede this run?\n\nYou will receive defeat rewards based on your current progress."
 		_update_stats()
 	)
 
@@ -142,16 +158,12 @@ func _enter_draft_mode() -> void:
 	gold_label.text = "%s 0" % GameConstants.EMOJI_GOLD
 	gems_label.text = "%s %d" % [GameConstants.EMOJI_GEM, PlayerAccount.get_gems()]
 	gems_label.visible = true
-	concede_confirm_dialog.title = "Abandon Draft?"
-	concede_confirm_dialog.dialog_text = "Are you sure you want to abandon this draft and return to the main menu?"
 
 
 func _enter_run_mode() -> void:
 	_is_draft_mode = false
 	content_container.modulate.a = 1.0
 	gems_label.visible = false
-	concede_confirm_dialog.title = "Concede Run?"
-	concede_confirm_dialog.dialog_text = "Are you sure you want to concede this run?\n\nYou will receive defeat rewards based on your current progress."
 	_update_stats()
 
 
@@ -225,13 +237,14 @@ func _on_scene_loaded(scene_path: String) -> void:
 
 func _on_concede_button_pressed() -> void:
 	_concede_dialog_open = true
-	concede_confirm_dialog.popup_centered()
+	concede_confirm_dialog.visible = true
 
 
 func _on_concede_confirmed() -> void:
 	if not _concede_dialog_open:
 		return
 	_concede_dialog_open = false
+	concede_confirm_dialog.visible = false
 
 	if _is_draft_mode:
 		SceneManager.go_to_main_menu()
@@ -249,8 +262,14 @@ func _on_concede_confirmed() -> void:
 		SceneManager.go_to("run_results")
 
 
+func _on_overlay_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		_on_concede_dialog_closed()
+
+
 func _on_concede_dialog_closed() -> void:
 	_concede_dialog_open = false
+	concede_confirm_dialog.visible = false
 
 
 func _capture_team_data() -> Array:

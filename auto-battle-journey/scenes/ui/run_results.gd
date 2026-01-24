@@ -1,17 +1,25 @@
 extends Control
 # RunResults - Display run completion results and rewards
 
+@onready var background = $Background
 @onready var result_title = $ScrollContainer/MainContainer/ResultTitle
+
+@onready var stats_panel = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel
+@onready var stats_title = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/StatsTitle
 @onready var rounds_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/RoundsLabel
 @onready var wins_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/WinsLabel
 @onready var losses_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/LossesLabel
 @onready var gold_earned_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/GoldEarnedLabel
 @onready var reputation_label = $ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer/ReputationLabel
 
+@onready var rewards_panel = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel
+@onready var rewards_title = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer/RewardsTitle
 @onready var gems_label = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer/GemsLabel
 @onready var character_fame_container = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer/CharacterXPContainer
 
 @onready var prestige_ups_panel = $ScrollContainer/MainContainer/RankUpsPanelContainer
+@onready var rank_ups_panel = $ScrollContainer/MainContainer/RankUpsPanelContainer/RankUpsPanel
+@onready var rank_ups_title = $ScrollContainer/MainContainer/RankUpsPanelContainer/RankUpsPanel/RankUpsContainer/RankUpsTitle
 @onready var prestige_ups_list = $ScrollContainer/MainContainer/RankUpsPanelContainer/RankUpsPanel/RankUpsContainer/RankUpsList
 
 @onready var continue_button = $ScrollContainer/MainContainer/ContinueButton
@@ -25,6 +33,7 @@ var prestige_ups: Array = []  # Track which characters increased prestige
 
 
 func _ready() -> void:
+	_apply_visual_styling()
 	continue_button.pressed.connect(_on_continue_pressed)
 
 	# Initialize header bar currencies
@@ -44,6 +53,40 @@ func _ready() -> void:
 
 	_display_results()
 	_play_entrance_animations()
+
+
+func _apply_visual_styling() -> void:
+	"""Apply consistent visual styling."""
+	background.color = GameConstants.COLOR_BG_DARK
+
+	# Result title
+	result_title.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_TITLE)
+	result_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+
+	# Panel styles
+	UIStyles.apply_panel_style(stats_panel, UIStyles.create_dark_panel())
+	UIStyles.apply_panel_style(rewards_panel, UIStyles.create_dark_panel())
+	UIStyles.apply_panel_style(rank_ups_panel, UIStyles.create_dark_panel())
+
+	# Panel titles
+	stats_title.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
+	stats_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
+	rewards_title.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
+	rewards_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
+	rank_ups_title.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
+	rank_ups_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
+
+	# Stat labels
+	for label in [rounds_label, wins_label, losses_label, gold_earned_label, reputation_label]:
+		label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
+		label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+
+	# Gems reward label
+	gems_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
+
+	# Continue button
+	UIStyles.setup_button(continue_button, GameConstants.FONT_SIZE_BUTTON)
+	ButtonEffects.apply_effects(continue_button)
 
 
 func _play_entrance_animations() -> void:
@@ -90,10 +133,10 @@ func _display_title() -> void:
 	"""Display victory or defeat title."""
 	if was_victory:
 		result_title.text = "VICTORY!"
-		result_title.modulate = Color(0.2, 1.0, 0.2)
+		result_title.add_theme_color_override("font_color", GameConstants.COLOR_SUCCESS)
 	else:
 		result_title.text = "DEFEAT"
-		result_title.modulate = Color(1.0, 0.2, 0.2)
+		result_title.add_theme_color_override("font_color", GameConstants.COLOR_DANGER)
 
 
 func _display_stats() -> void:
@@ -120,7 +163,7 @@ func _display_rewards() -> void:
 	# Calculate gem reward using RewardCalculator (DRY)
 	var gem_reward = RewardCalculator.calculate_gem_reward(was_victory, wins, reputation)
 	gems_label.text = "+%d %s Gems" % [gem_reward, GameConstants.EMOJI_GEM]
-	gems_label.modulate = GameConstants.COLOR_SUCCESS
+	gems_label.add_theme_color_override("font_color", GameConstants.COLOR_SUCCESS)
 
 	# Apply gem reward
 	PlayerAccount.add_gems(gem_reward)
@@ -136,6 +179,8 @@ func _display_rewards() -> void:
 		var fame_label = Label.new()
 		fame_label.text = "%s: +%d Fame" % [char_name, fame_reward]
 		fame_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		fame_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
+		fame_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 		character_fame_container.add_child(fame_label)
 
 		# Get current prestige before adding fame
@@ -173,8 +218,8 @@ func _display_prestige_ups() -> void:
 		# Create clickable header button
 		var header_button = Button.new()
 		header_button.text = "%s PRESTIGE UP!  [+]" % prestige_up["name"]
-		header_button.add_theme_font_size_override("font_size", 18)
-		header_button.add_theme_color_override("font_color", GameConstants.COLOR_GOLD)
+		header_button.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
+		header_button.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 		header_button.flat = true
 		header_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		prestige_up_container.add_child(header_button)
@@ -183,6 +228,7 @@ func _display_prestige_ups() -> void:
 		var prestige_label = Label.new()
 		prestige_label.text = "Prestige %d -> Prestige %d" % [prestige_up["old_prestige"], prestige_up["new_prestige"]]
 		prestige_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		prestige_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 		prestige_up_container.add_child(prestige_label)
 
 		# Collapsible details container (hidden by default)
@@ -227,7 +273,7 @@ func _display_prestige_rewards(container: VBoxContainer, char_id: String, new_pr
 				var unlocks_label = Label.new()
 				unlocks_label.text = "Unlocked:"
 				unlocks_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				unlocks_label.modulate = GameConstants.COLOR_MUTED
+				unlocks_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
 				container.add_child(unlocks_label)
 
 				for reward in prestige_reward["rewards"]:
@@ -235,7 +281,7 @@ func _display_prestige_rewards(container: VBoxContainer, char_id: String, new_pr
 					var reward_name = _get_reward_name(reward)
 					reward_label.text = "  %s" % reward_name
 					reward_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-					reward_label.modulate = GameConstants.COLOR_SUCCESS
+					reward_label.add_theme_color_override("font_color", GameConstants.COLOR_SUCCESS)
 					container.add_child(reward_label)
 
 			# Display stat boosts
@@ -243,7 +289,7 @@ func _display_prestige_rewards(container: VBoxContainer, char_id: String, new_pr
 				var boost_label = Label.new()
 				boost_label.text = "Stat Boost:"
 				boost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				boost_label.modulate = GameConstants.COLOR_MUTED
+				boost_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
 				container.add_child(boost_label)
 
 				for stat_name in prestige_reward["stat_boost"]:
@@ -251,7 +297,7 @@ func _display_prestige_rewards(container: VBoxContainer, char_id: String, new_pr
 					var stat_label = Label.new()
 					stat_label.text = "  %s +%d" % [stat_name.replace("_", " ").capitalize(), boost_value]
 					stat_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-					stat_label.modulate = Color(0.3, 0.7, 1.0)
+					stat_label.add_theme_color_override("font_color", GameConstants.COLOR_SAPPHIRE_LIGHT)
 					container.add_child(stat_label)
 
 			break

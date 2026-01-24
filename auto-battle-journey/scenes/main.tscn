@@ -83,14 +83,59 @@ grow_horizontal = 0
 grow_vertical = 2
 text = "✕"
 
-[node name="ConcedeConfirmDialog" type="ConfirmationDialog" parent="HUDLayer/RunHUD"]
-title = "Concede Run?"
-position = Vector2i(0, 0)
-size = Vector2i(300, 120)
-dialog_text = "Are you sure you want to concede this run?
+[node name="ConcedeConfirmDialog" type="Control" parent="HUDLayer/RunHUD"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-You will receive defeat rewards based on your current progress."
-dialog_autowrap = true
+[node name="Overlay" type="ColorRect" parent="HUDLayer/RunHUD/ConcedeConfirmDialog"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="DialogPanel" type="PanelContainer" parent="HUDLayer/RunHUD/ConcedeConfirmDialog"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 0.35
+anchor_right = 0.9
+anchor_bottom = 0.35
+offset_bottom = 140.0
+grow_horizontal = 2
+
+[node name="DialogContent" type="VBoxContainer" parent="HUDLayer/RunHUD/ConcedeConfirmDialog/DialogPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="DialogTitle" type="Label" parent="HUDLayer/RunHUD/ConcedeConfirmDialog/DialogPanel/DialogContent"]
+layout_mode = 2
+theme_type_variation = "HeaderLabel"
+text = "Concede?"
+horizontal_alignment = 1
+
+[node name="ButtonContainer" type="HBoxContainer" parent="HUDLayer/RunHUD/ConcedeConfirmDialog/DialogPanel/DialogContent"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="CancelButton" type="Button" parent="HUDLayer/RunHUD/ConcedeConfirmDialog/DialogPanel/DialogContent/ButtonContainer"]
+custom_minimum_size = Vector2(150, 50)
+layout_mode = 2
+text = "CANCEL"
+
+[node name="ConfirmButton" type="Button" parent="HUDLayer/RunHUD/ConcedeConfirmDialog/DialogPanel/DialogContent/ButtonContainer"]
+custom_minimum_size = Vector2(150, 50)
+layout_mode = 2
+text = "CONCEDE"
 
 [node name="TeamHUD" parent="HUDLayer" instance=ExtResource("4_team_hud")]
 layout_mode = 1
