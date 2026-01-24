@@ -194,9 +194,9 @@ const FONT_SIZE_GOLD_DISPLAY := 20
 # =============================================================================
 
 # --- Background Colors ---
-const COLOR_BG_DARK := Color("#1E1C2E")       # Dark purple-black (main background)
-const COLOR_BG_MEDIUM := Color("#292438")     # Medium purple (secondary areas)
-const COLOR_BG_LIGHT := Color("#383148")      # Light purple (tertiary/hover)
+const COLOR_BG_DARK := Color("#4A3D34")       # Dark warm brown (main background)
+const COLOR_BG_MEDIUM := Color("#6B5A4D")     # Medium taupe (secondary areas)
+const COLOR_BG_LIGHT := Color("#8A7565")      # Light taupe (tertiary/hover)
 
 # --- Panel Colors ---
 const COLOR_PANEL_DARK := Color("#2E2420")    # Mahogany (panel backgrounds)

@@ -54,7 +54,6 @@ func _play_entrance_animations() -> void:
 func _apply_visual_styling() -> void:
 	"""Apply fantasy aesthetic styling."""
 	# Backgrounds
-	background.color = GameConstants.COLOR_BG_DARK
 	details_background.color = GameConstants.COLOR_BG_DARK
 
 	# Title styling

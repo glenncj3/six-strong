@@ -32,8 +32,6 @@ func _ready() -> void:
 
 func _apply_visual_styling() -> void:
 	"""Apply consistent visual styling."""
-	background.color = GameConstants.COLOR_BG_DARK
-
 	UIStyles.setup_danger_button(skip_button, GameConstants.FONT_SIZE_BUTTON)
 	ButtonEffects.apply_effects(skip_button)
 	UIStyles.setup_success_button(complete_button, GameConstants.FONT_SIZE_BUTTON)

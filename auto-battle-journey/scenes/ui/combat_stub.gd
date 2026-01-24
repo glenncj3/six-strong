@@ -33,8 +33,6 @@ func _ready() -> void:
 
 func _apply_visual_styling() -> void:
 	"""Apply consistent visual styling."""
-	background.color = GameConstants.COLOR_BG_DARK
-
 	title_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
 	title_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 

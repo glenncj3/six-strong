@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://shaders/abstract_background.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bg"]
+shader = ExtResource("1_shader")
+shader_parameter/color_base = Color(0.52, 0.43, 0.38, 1)
+shader_parameter/color_dark = Color(0.28, 0.23, 0.20, 1)
+shader_parameter/color_light = Color(0.68, 0.58, 0.50, 1)
+shader_parameter/color_warm = Color(0.60, 0.44, 0.32, 1)
+shader_parameter/color_cool = Color(0.42, 0.40, 0.40, 1)
+shader_parameter/scale = 4.5
+shader_parameter/detail = 5.0
+shader_parameter/contrast = 0.6
+shader_parameter/animation_speed = 0.015
+shader_parameter/vignette_strength = 0.35
+
+[node name="Background" type="ColorRect"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("ShaderMaterial_bg")
+color = Color(0.52, 0.43, 0.38, 1)

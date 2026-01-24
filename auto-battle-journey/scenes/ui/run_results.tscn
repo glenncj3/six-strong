@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/run_results.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://header_bar_comp" path="res://scenes/components/header_bar.tscn" id="2_header_bar"]
+[ext_resource type="PackedScene" path="res://scenes/components/abstract_background.tscn" id="3_bg"]
 
 [node name="RunResults" type="Control"]
 layout_mode = 3
@@ -12,14 +13,8 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" parent="." instance=ExtResource("3_bg")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
 
 [node name="HeaderBar" parent="." instance=ExtResource("2_header_bar")]
 layout_mode = 1
@@ -92,9 +87,6 @@ theme_type_variation = "HeaderLabel"
 text = "RUN STATISTICS"
 horizontal_alignment = 1
 
-[node name="Separator" type="HSeparator" parent="ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer"]
-layout_mode = 2
-
 [node name="RoundsLabel" type="Label" parent="ScrollContainer/MainContainer/StatsPanelContainer/StatsPanel/StatsContainer"]
 layout_mode = 2
 text = "Rounds Completed: 0"
@@ -137,9 +129,6 @@ layout_mode = 2
 theme_type_variation = "HeaderLabel"
 text = "REWARDS"
 horizontal_alignment = 1
-
-[node name="Separator" type="HSeparator" parent="ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer"]
-layout_mode = 2
 
 [node name="GemsLabel" type="Label" parent="ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer"]
 layout_mode = 2

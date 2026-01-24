@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://c5draft8scene1"]
+[gd_scene load_steps=3 format=3 uid="uid://c5draft8scene1"]
 
 [ext_resource type="Script" path="res://scenes/ui/draft.gd" id="1_draft"]
+[ext_resource type="PackedScene" path="res://scenes/components/abstract_background.tscn" id="2_bg"]
 
 [node name="Draft" type="Control"]
 layout_mode = 3
@@ -11,15 +12,8 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_draft")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" parent="." instance=ExtResource("2_bg")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.118, 0.11, 0.18, 1)
 
 [node name="MainContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -45,9 +39,6 @@ theme_override_font_sizes/font_size = 32
 text = "SELECT CHARACTER 1 OF 3"
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="HSeparator" type="HSeparator" parent="MainContainer/VBoxContainer"]
-layout_mode = 2
 
 [node name="ContentScroll" type="ScrollContainer" parent="MainContainer/VBoxContainer"]
 layout_mode = 2

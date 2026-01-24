@@ -50,7 +50,6 @@ func _setup_draft_manager() -> void:
 
 
 func _apply_visual_styling() -> void:
-	background.color = GameConstants.COLOR_BG_DARK
 	UIStyles.apply_button_styles(confirm_button)
 
 
@@ -70,11 +69,18 @@ func _setup_options_display() -> void:
 	vbox.add_child(buttons_container)
 
 	# Info panel that drops down below option tiles
+	# Wrap in margin container to match TeamHUD panel width (4% anchors = ~13px extra per side)
+	var info_margin = MarginContainer.new()
+	info_margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	info_margin.custom_minimum_size = Vector2(0, 260)
+	info_margin.add_theme_constant_override("margin_left", 13)
+	info_margin.add_theme_constant_override("margin_right", 13)
+	vbox.add_child(info_margin)
+
 	var info_panel_clip = Control.new()
 	info_panel_clip.clip_contents = true
 	info_panel_clip.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	info_panel_clip.custom_minimum_size = Vector2(0, 260)
-	vbox.add_child(info_panel_clip)
+	info_margin.add_child(info_panel_clip)
 
 	options_info_panel = CharacterInfoPanelScene.instantiate()
 	options_info_panel.slide_down = true

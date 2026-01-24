@@ -53,9 +53,6 @@ func _ready() -> void:
 
 func _apply_visual_styling() -> void:
 	"""Apply fantasy aesthetic styling to the menu."""
-	# Background
-	background.color = GameConstants.COLOR_BG_DARK
-
 	# Title styling
 	title_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 

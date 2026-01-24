@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://combat_stub1"]
+[gd_scene load_steps=3 format=3 uid="uid://combat_stub1"]
 
 [ext_resource type="Script" path="res://scenes/ui/combat_stub.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/components/abstract_background.tscn" id="2_bg"]
 
 [node name="CombatStub" type="Control"]
 layout_mode = 3
@@ -11,14 +12,8 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" parent="." instance=ExtResource("2_bg")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
 
 [node name="MainContainer" type="VBoxContainer" parent="."]
 layout_mode = 1

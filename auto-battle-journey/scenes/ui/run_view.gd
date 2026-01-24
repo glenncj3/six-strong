@@ -10,8 +10,6 @@ extends Control
 func _ready() -> void:
 	print("RunView: Scene loaded, initializing...")
 
-	background.color = GameConstants.COLOR_BG_DARK
-
 	RunManager.phase_changed.connect(_on_phase_changed)
 
 	_setup_phase()

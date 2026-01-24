@@ -31,7 +31,6 @@ func _ready() -> void:
 
 func _apply_visual_styling() -> void:
 	"""Apply consistent visual styling."""
-	background.color = GameConstants.COLOR_BG_DARK
 	UIStyles.setup_button(back_button)
 	ButtonEffects.apply_effects(back_button)
 

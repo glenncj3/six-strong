@@ -57,8 +57,6 @@ func _ready() -> void:
 
 func _apply_visual_styling() -> void:
 	"""Apply consistent visual styling."""
-	background.color = GameConstants.COLOR_BG_DARK
-
 	# Result title
 	result_title.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_TITLE)
 	result_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
@@ -242,9 +240,6 @@ func _display_prestige_ups() -> void:
 		# Populate details with unlocked content
 		_display_prestige_rewards(details_container, prestige_up["id"], prestige_up["new_prestige"])
 
-		# Add separator
-		var separator = HSeparator.new()
-		prestige_ups_list.add_child(separator)
 
 
 func _toggle_prestige_details(header_button: Button, details_container: VBoxContainer, char_name: String) -> void:
