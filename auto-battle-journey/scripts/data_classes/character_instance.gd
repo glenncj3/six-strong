@@ -122,6 +122,10 @@ func add_experience(xp: int) -> bool:
 
 func learn_skill(skill_id: String) -> bool:
 	"""Learn a new skill during the run."""
+	if learned_skills.size() >= GameConstants.MAX_RUN_SKILLS:
+		push_warning("CharacterInstance: Max skills reached (%d)" % GameConstants.MAX_RUN_SKILLS)
+		return false
+
 	if skill_id in learned_skills:
 		push_warning("CharacterInstance: Skill already learned: %s" % skill_id)
 		return false
@@ -159,6 +163,11 @@ func equip_item_upgrade(item_upgrade_id: String) -> bool:
 	"""
 	Equip an item upgrade found during the run.
 	"""
+	var total_items = equipped_items.size() + equipped_item_upgrades.size()
+	if total_items >= GameConstants.MAX_RUN_ITEMS:
+		push_warning("CharacterInstance: Max items reached (%d)" % GameConstants.MAX_RUN_ITEMS)
+		return false
+
 	if item_upgrade_id in equipped_item_upgrades:
 		push_warning("CharacterInstance: Item upgrade already equipped: %s" % item_upgrade_id)
 		return false

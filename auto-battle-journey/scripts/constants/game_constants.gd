@@ -72,6 +72,10 @@ const COMBAT_WIN_XP := 30  # XP per character per combat win
 const WINS_FOR_VICTORY := 10
 const TEAM_SIZE := 3
 
+# Per-character run limits
+const MAX_RUN_ITEMS := 6
+const MAX_RUN_SKILLS := 6
+
 # =============================================================================
 # STAT NAMES
 # =============================================================================

@@ -1,16 +1,21 @@
 extends PanelContainer
-# CharacterInfoPanel - Sliding panel showing character details
+# CharacterInfoPanel - Sliding panel showing character name, items, and skills
 # Slides up from the bottom when a character tile is clicked
 
-@onready var portrait: TextureRect = $MarginContainer/HBoxContainer/Portrait
-@onready var name_label: Label = $MarginContainer/HBoxContainer/InfoContainer/NameLabel
-@onready var stats_container: GridContainer = $MarginContainer/HBoxContainer/InfoContainer/StatsContainer
+@onready var name_label: Label = $MarginContainer/VBoxContainer/NameLabel
+@onready var items_label: Label = $MarginContainer/VBoxContainer/GridsContainer/ItemsSection/ItemsLabel
+@onready var skills_label: Label = $MarginContainer/VBoxContainer/GridsContainer/SkillsSection/SkillsLabel
+@onready var items_grid: GridContainer = $MarginContainer/VBoxContainer/GridsContainer/ItemsSection/ItemsGrid
+@onready var skills_grid: GridContainer = $MarginContainer/VBoxContainer/GridsContainer/SkillsSection/SkillsGrid
 
 var current_char_instance: CharacterInstance = null
 var _tween: Tween = null
 var _is_visible: bool = false
 
 const SLIDE_DURATION := 0.25
+const MAX_ITEMS := GameConstants.MAX_RUN_ITEMS
+const MAX_SKILLS := GameConstants.MAX_RUN_SKILLS
+const SLOT_ICON_SIZE := 80
 
 
 func _ready() -> void:
@@ -30,6 +35,8 @@ func _apply_style() -> void:
 	)
 	add_theme_stylebox_override("panel", style)
 	name_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
+	items_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
+	skills_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 
 
 func _input(event: InputEvent) -> void:
@@ -107,31 +114,88 @@ func _populate(char_instance: CharacterInstance) -> void:
 	if char_master.is_empty():
 		return
 
-	# Portrait
-	UIHelpers.set_texture_safe(portrait, char_master.get("image_path", ""))
+	# Name (centered, header style)
+	name_label.text = char_instance.get_character_name()
 
-	# Name with level
-	name_label.text = "%s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
+	# Items grid
+	_populate_items_grid(char_instance)
 
-	# Stats
-	UIHelpers.clear_children(stats_container)
+	# Skills grid
+	_populate_skills_grid(char_instance)
 
-	var stats = [
-		["HP", "%d/%d" % [char_instance.current_health, char_instance.max_health]],
-		["MP", "%d" % char_instance.stats.get(GameConstants.STAT_MANA, 0)],
-		["INC", "%d" % char_instance.stats.get(GameConstants.STAT_INCOME, 0)],
-		["DEF", "%d%%" % char_instance.stats.get(GameConstants.STAT_DEFEND_RATE, 0)],
-	]
 
-	for stat in stats:
-		var label_name = Label.new()
-		label_name.text = stat[0]
-		label_name.add_theme_font_size_override("font_size", 22)
-		label_name.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
-		stats_container.add_child(label_name)
+func _populate_items_grid(char_instance: CharacterInstance) -> void:
+	"""Fill the items grid with icons for equipped items and upgrades."""
+	UIHelpers.clear_children(items_grid)
 
-		var label_value = Label.new()
-		label_value.text = stat[1]
-		label_value.add_theme_font_size_override("font_size", 22)
-		label_value.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
-		stats_container.add_child(label_value)
+	# Collect all item image paths (starting items + upgrades found in run)
+	var item_icons: Array[String] = []
+
+	for item_id in char_instance.equipped_items:
+		if item_icons.size() >= MAX_ITEMS:
+			break
+		var item_data = GameData.get_item_by_id(item_id)
+		if not item_data.is_empty():
+			item_icons.append(item_data.get("image_path", ""))
+
+	for upgrade_id in char_instance.equipped_item_upgrades:
+		if item_icons.size() >= MAX_ITEMS:
+			break
+		var upgrade_data = GameData.get_item_upgrade_by_id(upgrade_id)
+		if not upgrade_data.is_empty():
+			item_icons.append(upgrade_data.get("image_path", ""))
+
+	# Fill all 6 slots (populated or empty)
+	for i in range(MAX_ITEMS):
+		var slot = _create_icon_slot()
+		if i < item_icons.size() and item_icons[i] != "":
+			var icon_rect = slot.get_child(0) as TextureRect
+			UIHelpers.set_texture_safe(icon_rect, item_icons[i])
+		items_grid.add_child(slot)
+
+
+func _populate_skills_grid(char_instance: CharacterInstance) -> void:
+	"""Fill the skills grid with icons for learned skills."""
+	UIHelpers.clear_children(skills_grid)
+
+	# Collect skill image paths
+	var skill_icons: Array[String] = []
+
+	for skill_id in char_instance.learned_skills:
+		if skill_icons.size() >= MAX_SKILLS:
+			break
+		var skill_data = GameData.get_skill_by_id(skill_id)
+		if not skill_data.is_empty():
+			skill_icons.append(skill_data.get("image_path", ""))
+
+	# Fill all 6 slots (populated or empty)
+	for i in range(MAX_SKILLS):
+		var slot = _create_icon_slot()
+		if i < skill_icons.size() and skill_icons[i] != "":
+			var icon_rect = slot.get_child(0) as TextureRect
+			UIHelpers.set_texture_safe(icon_rect, skill_icons[i])
+		skills_grid.add_child(slot)
+
+
+func _create_icon_slot() -> PanelContainer:
+	"""Create a single icon slot with background and a TextureRect child."""
+	var panel = PanelContainer.new()
+	panel.custom_minimum_size = Vector2(SLOT_ICON_SIZE, SLOT_ICON_SIZE)
+
+	# Slot background style
+	var bg = StyleBoxFlat.new()
+	bg.bg_color = Color(0.15, 0.12, 0.1, 0.6)
+	bg.border_color = GameConstants.COLOR_BORDER_SILVER
+	bg.set_border_width_all(1)
+	bg.set_corner_radius_all(4)
+	panel.add_theme_stylebox_override("panel", bg)
+
+	# Icon TextureRect inside the panel
+	var icon = TextureRect.new()
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	icon.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.add_child(icon)
+
+	return panel

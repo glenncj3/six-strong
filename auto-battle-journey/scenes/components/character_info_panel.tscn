@@ -18,30 +18,58 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
-[node name="Portrait" type="TextureRect" parent="MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(120, 120)
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-size_flags_vertical = 4
-expand_mode = 1
-stretch_mode = 5
+theme_type_variation = "HeaderLabel"
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+text = "Character Name"
 
-[node name="InfoContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="GridsContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="ItemsSection" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridsContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="NameLabel" type="Label" parent="MarginContainer/HBoxContainer/InfoContainer"]
+[node name="ItemsLabel" type="Label" parent="MarginContainer/VBoxContainer/GridsContainer/ItemsSection"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
-text = "Character Name"
+theme_type_variation = "HeaderLabel"
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+text = "Items"
 
-[node name="StatsContainer" type="GridContainer" parent="MarginContainer/HBoxContainer/InfoContainer"]
+[node name="ItemsGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/GridsContainer/ItemsSection"]
 layout_mode = 2
+size_flags_horizontal = 4
 size_flags_vertical = 3
-columns = 2
-theme_override_constants/h_separation = 16
-theme_override_constants/v_separation = 4
+columns = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+
+[node name="SkillsSection" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="SkillsLabel" type="Label" parent="MarginContainer/VBoxContainer/GridsContainer/SkillsSection"]
+layout_mode = 2
+theme_type_variation = "HeaderLabel"
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+text = "Skills"
+
+[node name="SkillsGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/GridsContainer/SkillsSection"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+columns = 3
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
