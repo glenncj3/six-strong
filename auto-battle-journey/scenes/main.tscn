@@ -10,7 +10,7 @@ script = ExtResource("1_main")
 [node name="SceneContainer" type="Node" parent="."]
 
 [node name="HUDLayer" type="CanvasLayer" parent="."]
-layer = 50
+layer = 150
 
 [node name="RunHUD" type="Control" parent="HUDLayer"]
 anchors_preset = 15
@@ -58,6 +58,14 @@ layout_mode = 2
 theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 24
 text = "💰 0"
+vertical_alignment = 1
+
+[node name="GemsLabel" type="Label" parent="HUDLayer/RunHUD/HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
+visible = false
+layout_mode = 2
+theme_type_variation = "HeaderLabel"
+theme_override_font_sizes/font_size = 24
+text = "💎 0"
 vertical_alignment = 1
 
 [node name="ConcedeButton" type="Button" parent="HUDLayer/RunHUD/HeaderBar/MarginContainer/HBoxContainer/RightSection"]

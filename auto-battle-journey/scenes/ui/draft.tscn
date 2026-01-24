@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://c5draft8scene1"]
+[gd_scene load_steps=2 format=3 uid="uid://c5draft8scene1"]
 
 [ext_resource type="Script" path="res://scenes/ui/draft.gd" id="1_draft"]
-[ext_resource type="PackedScene" uid="uid://header_bar_comp" path="res://scenes/components/header_bar.tscn" id="2_header_bar"]
 
 [node name="Draft" type="Control"]
 layout_mode = 3
@@ -21,66 +20,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.118, 0.11, 0.18, 1)
-
-[node name="HeaderBar" parent="." instance=ExtResource("2_header_bar")]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 56.0
-grow_horizontal = 2
-
-[node name="TitleLabel" type="Label" parent="HeaderBar/MarginContainer/HBoxContainer/LeftSection"]
-layout_mode = 1
-anchors_preset = 9
-anchor_bottom = 1.0
-offset_right = 200.0
-grow_vertical = 2
-theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 24
-text = "RECRUIT!"
-vertical_alignment = 1
-
-[node name="WinsLabel" type="Label" parent="HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
-layout_mode = 2
-theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 24
-text = "⭐ 0/10"
-vertical_alignment = 1
-
-[node name="ReputationLabel" type="Label" parent="HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
-layout_mode = 2
-theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 24
-text = "❤️ 20"
-vertical_alignment = 1
-
-[node name="GoldLabel" type="Label" parent="HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
-layout_mode = 2
-theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 24
-text = "💰 0"
-vertical_alignment = 1
-
-[node name="GemsLabel" type="Label" parent="HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
-layout_mode = 2
-theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 24
-text = "💎 0"
-vertical_alignment = 1
-
-[node name="ConcedeButton" type="Button" parent="HeaderBar/MarginContainer/HBoxContainer/RightSection"]
-layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -30.0
-offset_top = -15.0
-offset_bottom = 15.0
-grow_horizontal = 0
-grow_vertical = 2
-text = "✕"
 
 [node name="MainContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -181,9 +120,3 @@ text = "YOUR TEAM"
 horizontal_alignment = 1
 vertical_alignment = 2
 
-[node name="ConcedeConfirmDialog" type="ConfirmationDialog" parent="."]
-title = "Abandon Draft?"
-position = Vector2i(0, 0)
-size = Vector2i(300, 120)
-dialog_text = "Are you sure you want to abandon this draft and return to the main menu?"
-dialog_autowrap = true

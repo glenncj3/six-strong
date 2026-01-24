@@ -1,22 +1,30 @@
 extends Control
-# RunHUD - Persistent header bar that stays visible during active runs
-# Lives on a CanvasLayer below the transition layer so it fades naturally with scenes
+# RunHUD - Persistent header bar that stays visible during gameplay
+# Lives on a CanvasLayer above the transition layer so it persists through scene changes
 
 @onready var header_bar = $HeaderBar
+@onready var content_container = $HeaderBar/MarginContainer
 @onready var round_label = $HeaderBar/MarginContainer/HBoxContainer/LeftSection/RoundLabel
 @onready var wins_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/WinsLabel
 @onready var reputation_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/ReputationLabel
 @onready var gold_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/GoldLabel
+@onready var gems_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/GemsLabel
 @onready var concede_button = $HeaderBar/MarginContainer/HBoxContainer/RightSection/ConcedeButton
 @onready var concede_confirm_dialog = $ConcedeConfirmDialog
 
-const RUN_SCENES: Array[String] = [
+const GAMEPLAY_SCENES: Array[String] = [
+	"res://scenes/ui/draft.tscn",
 	"res://scenes/ui/run_view.tscn",
 	"res://scenes/ui/encounter_execute.tscn",
 	"res://scenes/ui/combat_stub.tscn",
 ]
 
+const FADE_DURATION := 0.3
+const CROSSFADE_DURATION := 0.15
+
 var _concede_dialog_open: bool = false
+var _is_draft_mode: bool = false
+var _header_tween: Tween = null
 
 
 func _ready() -> void:
@@ -32,6 +40,7 @@ func _ready() -> void:
 	RunManager.round_changed.connect(_on_stats_changed)
 	RunManager.reputation_changed.connect(_on_stats_changed)
 	RunManager.gold_changed.connect(_on_stats_changed)
+	PlayerAccount.gems_changed.connect(_on_gems_changed)
 	SceneManager.scene_loaded.connect(_on_scene_loaded)
 
 
@@ -40,6 +49,7 @@ func _apply_visual_styling() -> void:
 	wins_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	reputation_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	gold_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	gems_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	_style_concede_button()
 
 
@@ -67,6 +77,84 @@ func _style_concede_button() -> void:
 	concede_button.add_theme_font_size_override("font_size", 16)
 
 
+# =============================================================================
+# TRANSITION ANIMATIONS
+# =============================================================================
+
+func _kill_tween() -> void:
+	if _header_tween and _header_tween.is_valid():
+		_header_tween.kill()
+	_header_tween = null
+
+
+func _fade_in_header() -> void:
+	_kill_tween()
+	header_bar.modulate.a = 0.0
+	visible = true
+	_header_tween = create_tween()
+	_header_tween.set_ease(Tween.EASE_OUT)
+	_header_tween.set_trans(Tween.TRANS_CUBIC)
+	_header_tween.tween_property(header_bar, "modulate:a", 1.0, FADE_DURATION)
+
+
+func _fade_out_header() -> void:
+	_kill_tween()
+	_header_tween = create_tween()
+	_header_tween.set_ease(Tween.EASE_IN)
+	_header_tween.set_trans(Tween.TRANS_CUBIC)
+	_header_tween.tween_property(header_bar, "modulate:a", 0.0, FADE_DURATION)
+	_header_tween.tween_callback(func(): visible = false)
+
+
+func _crossfade_to_run_mode() -> void:
+	_kill_tween()
+	_header_tween = create_tween()
+	_header_tween.set_ease(Tween.EASE_IN_OUT)
+	_header_tween.set_trans(Tween.TRANS_CUBIC)
+
+	# Fade out content (bar panel stays)
+	_header_tween.tween_property(content_container, "modulate:a", 0.0, CROSSFADE_DURATION)
+
+	# Update content at midpoint
+	_header_tween.tween_callback(func():
+		_is_draft_mode = false
+		gems_label.visible = false
+		concede_confirm_dialog.title = "Concede Run?"
+		concede_confirm_dialog.dialog_text = "Are you sure you want to concede this run?\n\nYou will receive defeat rewards based on your current progress."
+		_update_stats()
+	)
+
+	# Fade in new content
+	_header_tween.tween_property(content_container, "modulate:a", 1.0, CROSSFADE_DURATION)
+
+
+# =============================================================================
+# MODE MANAGEMENT
+# =============================================================================
+
+func _enter_draft_mode() -> void:
+	_is_draft_mode = true
+	content_container.modulate.a = 1.0
+	round_label.text = "RECRUIT!"
+	wins_label.text = "%s 0/%d" % [GameConstants.EMOJI_STAR, GameConstants.WINS_FOR_VICTORY]
+	reputation_label.text = "%s %d" % [GameConstants.EMOJI_HEART, GameConstants.STARTING_REPUTATION]
+	reputation_label.modulate = Color.WHITE
+	gold_label.text = "%s 0" % GameConstants.EMOJI_GOLD
+	gems_label.text = "%s %d" % [GameConstants.EMOJI_GEM, PlayerAccount.get_gems()]
+	gems_label.visible = true
+	concede_confirm_dialog.title = "Abandon Draft?"
+	concede_confirm_dialog.dialog_text = "Are you sure you want to abandon this draft and return to the main menu?"
+
+
+func _enter_run_mode() -> void:
+	_is_draft_mode = false
+	content_container.modulate.a = 1.0
+	gems_label.visible = false
+	concede_confirm_dialog.title = "Concede Run?"
+	concede_confirm_dialog.dialog_text = "Are you sure you want to concede this run?\n\nYou will receive defeat rewards based on your current progress."
+	_update_stats()
+
+
 func _update_stats() -> void:
 	var round_num = RunManager.get_round()
 	var rep = RunManager.get_reputation()
@@ -86,19 +174,54 @@ func _update_stats() -> void:
 		reputation_label.modulate = Color.WHITE
 
 
+## Update gold display during draft (called by draft scene as characters are selected)
+func update_draft_gold(amount: int) -> void:
+	if _is_draft_mode:
+		gold_label.text = "%s %d" % [GameConstants.EMOJI_GOLD, amount]
+
+
 func _on_stats_changed(_value = null) -> void:
-	if visible:
+	if visible and not _is_draft_mode:
 		_update_stats()
 
+
+func _on_gems_changed(new_amount: int) -> void:
+	if visible and _is_draft_mode:
+		gems_label.text = "%s %d" % [GameConstants.EMOJI_GEM, new_amount]
+
+
+# =============================================================================
+# SCENE TRANSITIONS
+# =============================================================================
 
 func _on_scene_loaded(scene_path: String) -> void:
-	# Fires while screen is still black (between fade-out and fade-in)
-	if scene_path in RUN_SCENES and RunManager.is_run_active:
-		_update_stats()
-		visible = true
+	if scene_path not in GAMEPLAY_SCENES:
+		if visible:
+			_fade_out_header()
+		return
+
+	if scene_path == "res://scenes/ui/draft.tscn":
+		_enter_draft_mode()
+		if not visible:
+			_fade_in_header()
+		else:
+			visible = true
+	elif RunManager.is_run_active:
+		if visible and _is_draft_mode:
+			_crossfade_to_run_mode()
+		else:
+			_enter_run_mode()
+			if not visible:
+				_fade_in_header()
+			else:
+				visible = true
 	else:
 		visible = false
 
+
+# =============================================================================
+# CONCEDE HANDLING
+# =============================================================================
 
 func _on_concede_button_pressed() -> void:
 	_concede_dialog_open = true
@@ -110,17 +233,20 @@ func _on_concede_confirmed() -> void:
 		return
 	_concede_dialog_open = false
 
-	SceneManager.set_scene_data("run_results", {
-		"round": RunManager.get_round(),
-		"wins": RunManager.get_wins(),
-		"losses": RunManager.get_losses(),
-		"gold": RunManager.get_gold(),
-		"reputation": RunManager.get_reputation(),
-		"starting_gold": RunManager.starting_gold,
-		"victory": false,
-		"team": _capture_team_data()
-	})
-	SceneManager.go_to("run_results")
+	if _is_draft_mode:
+		SceneManager.go_to_main_menu()
+	else:
+		SceneManager.set_scene_data("run_results", {
+			"round": RunManager.get_round(),
+			"wins": RunManager.get_wins(),
+			"losses": RunManager.get_losses(),
+			"gold": RunManager.get_gold(),
+			"reputation": RunManager.get_reputation(),
+			"starting_gold": RunManager.starting_gold,
+			"victory": false,
+			"team": _capture_team_data()
+		})
+		SceneManager.go_to("run_results")
 
 
 func _on_concede_dialog_closed() -> void:
