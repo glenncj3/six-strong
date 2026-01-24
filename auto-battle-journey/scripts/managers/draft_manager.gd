@@ -55,8 +55,8 @@ func generate_options() -> void:
 	# Track which character IDs we've added to options
 	var option_ids: Array[String] = []
 
-	# Generate 2 owned options
-	for i in range(2):
+	# Generate owned options
+	for i in range(GameConstants.DRAFT_OWNED_OPTIONS):
 		if available_owned.size() > 0:
 			var char_data = available_owned.pop_front()
 			current_options.append({

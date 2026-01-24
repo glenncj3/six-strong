@@ -71,6 +71,8 @@ const COMBAT_WIN_XP := 30  # XP per character per combat win
 # Win/loss conditions
 const WINS_FOR_VICTORY := 10
 const TEAM_SIZE := 3
+const DRAFT_OPTIONS_PER_PICK := 3
+const DRAFT_OWNED_OPTIONS := 2  # Remaining filled by random
 const ENCOUNTERS_PER_ROUND := 1  # How many encounters occur before each combat
 
 # Per-character run limits

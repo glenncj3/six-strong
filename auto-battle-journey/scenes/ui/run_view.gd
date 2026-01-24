@@ -53,7 +53,7 @@ func _update_team_display() -> void:
 	UIHelpers.clear_children(tiles_container)
 
 	var available_width = max(team_container.size.x, 688) - 24
-	var tile_size = floor((available_width - 16) / 3.0)
+	var tile_size = floor((available_width - 16) / float(GameConstants.TEAM_SIZE))
 	tile_size = max(tile_size, 180)
 
 	for char_instance in team:

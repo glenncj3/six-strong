@@ -129,7 +129,7 @@ func _setup_info_panel() -> void:
 
 func _get_tile_size() -> float:
 	var available_width = max(team_section.size.x, 688) - 24
-	var tile_size = floor((available_width - 16) / 3.0)
+	var tile_size = floor((available_width - 16) / float(GameConstants.TEAM_SIZE))
 	return max(tile_size, 180)
 
 
@@ -210,7 +210,7 @@ func _update_options_display(instances: Array) -> void:
 	character_tiles.clear()
 
 	var available_width = max(options_display_container.size.x, 688) - 24
-	var tile_size = floor((available_width - 16) / 3.0)
+	var tile_size = floor((available_width - 16) / float(GameConstants.TEAM_SIZE))
 	tile_size = max(tile_size, 180)
 
 	for char_instance in instances:
