@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://dxvcx7qkajyqr"]
+[gd_scene load_steps=5 format=3 uid="uid://dxvcx7qkajyqr"]
 
 [ext_resource type="Script" path="res://scenes/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scenes/components/run_hud.gd" id="2_run_hud"]
 [ext_resource type="PackedScene" uid="uid://header_bar_comp" path="res://scenes/components/header_bar.tscn" id="3_header_bar"]
+[ext_resource type="PackedScene" uid="uid://team_hud_comp1" path="res://scenes/components/team_hud.tscn" id="4_team_hud"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -90,6 +91,9 @@ dialog_text = "Are you sure you want to concede this run?
 
 You will receive defeat rewards based on your current progress."
 dialog_autowrap = true
+
+[node name="TeamHUD" parent="HUDLayer" instance=ExtResource("4_team_hud")]
+layout_mode = 1
 
 [node name="TransitionLayer" type="CanvasLayer" parent="."]
 layer = 100

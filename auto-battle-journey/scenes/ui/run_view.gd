@@ -1,73 +1,32 @@
 extends Control
 # RunView - Main UI during an active run
 # Header bar and concede are handled by the persistent RunHUD
-
-const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
-const CharacterInfoPanelScene = preload("res://scenes/components/character_info_panel.tscn")
+# Team tiles are handled by the persistent TeamHUD
 
 @onready var background = $Background
-@onready var team_container = $TeamContainer
-@onready var title_label = $TeamContainer/VBoxContainer/TitleLabel
-@onready var tiles_container = $TeamContainer/VBoxContainer/TilesContainer
-@onready var info_panel_clip = $TeamContainer/VBoxContainer/InfoPanelClip
 @onready var options_panel = $OptionsPanel
-
-var info_panel: Node = null
 
 
 func _ready() -> void:
 	print("RunView: Scene loaded, initializing...")
 
 	background.color = GameConstants.COLOR_BG_DARK
-	title_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
-
-	_setup_info_panel()
 
 	RunManager.phase_changed.connect(_on_phase_changed)
 
-	_update_team_display()
 	_setup_phase()
 	_play_entrance_animations()
 
 	print("RunView: Initialization complete")
 
 
-func _setup_info_panel() -> void:
-	info_panel = CharacterInfoPanelScene.instantiate()
-	info_panel_clip.add_child(info_panel)
-	info_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-
-
 func _play_entrance_animations() -> void:
-	AnimationManager.fade_in(team_container, GameConstants.ANIM_DURATION_NORMAL, 0.0)
 	AnimationManager.fade_in(options_panel, GameConstants.ANIM_DURATION_NORMAL, 0.1)
 
 
 func _exit_tree() -> void:
 	if RunManager.phase_changed.is_connected(_on_phase_changed):
 		RunManager.phase_changed.disconnect(_on_phase_changed)
-
-
-func _update_team_display() -> void:
-	var team = RunManager.get_team()
-	UIHelpers.clear_children(tiles_container)
-
-	var available_width = max(team_container.size.x, 688) - 24
-	var tile_size = floor((available_width - 16) / float(GameConstants.TEAM_SIZE))
-	tile_size = max(tile_size, 180)
-
-	for char_instance in team:
-		var tile = CharacterTileScene.instantiate()
-		tiles_container.add_child(tile)
-		tile.setup(char_instance, tile_size)
-		tile.tile_clicked.connect(_on_tile_clicked)
-
-
-func _on_tile_clicked(char_instance: CharacterInstance) -> void:
-	if info_panel.is_showing() and info_panel.current_char_instance == char_instance:
-		info_panel.hide_panel()
-	else:
-		info_panel.show_character(char_instance)
 
 
 func _setup_phase() -> void:
