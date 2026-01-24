@@ -12,6 +12,7 @@ var current_char_instance: CharacterInstance = null
 var _tween: Tween = null
 var _is_visible: bool = false
 var _suppress_dismiss: bool = false
+var slide_down: bool = false  # If true, panel drops down from top instead of sliding up from bottom
 
 const SLIDE_DURATION := 0.25
 const MAX_ITEMS := GameConstants.MAX_RUN_ITEMS
@@ -74,8 +75,9 @@ func show_character(char_instance: CharacterInstance) -> void:
 		_tween.kill()
 
 	var slide_distance = get_parent().size.y
-	offset_top = slide_distance
-	offset_bottom = slide_distance
+	var direction = -1.0 if slide_down else 1.0
+	offset_top = slide_distance * direction
+	offset_bottom = slide_distance * direction
 	modulate.a = 0
 
 	_tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
@@ -96,11 +98,12 @@ func hide_panel() -> void:
 		_tween.kill()
 
 	var slide_distance = get_parent().size.y
+	var direction = -1.0 if slide_down else 1.0
 
 	_tween = create_tween().set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
 	_tween.set_parallel(true)
-	_tween.tween_property(self, "offset_top", slide_distance, SLIDE_DURATION * 0.8)
-	_tween.tween_property(self, "offset_bottom", slide_distance, SLIDE_DURATION * 0.8)
+	_tween.tween_property(self, "offset_top", slide_distance * direction, SLIDE_DURATION * 0.8)
+	_tween.tween_property(self, "offset_bottom", slide_distance * direction, SLIDE_DURATION * 0.8)
 	_tween.tween_property(self, "modulate:a", 0.0, SLIDE_DURATION * 0.8)
 	_tween.chain().tween_callback(func():
 		visible = false

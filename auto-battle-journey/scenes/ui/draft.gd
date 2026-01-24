@@ -12,6 +12,7 @@ extends Control
 
 # Preload scenes
 const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
+const CharacterInfoPanelScene = preload("res://scenes/components/character_info_panel.tscn")
 
 # Draft manager handles business logic
 var draft_manager: DraftManager = null
@@ -21,6 +22,7 @@ var options_tiles_container: HBoxContainer = null
 var character_tiles: Array = []  # References to option tiles
 var select_buttons: Array = []  # SELECT buttons for each option
 var buttons_container: HBoxContainer = null  # Container for SELECT/UNLOCK buttons below tiles
+var options_info_panel: Node = null  # Local info panel for option tiles (drops down)
 
 
 func _ready() -> void:
@@ -67,6 +69,18 @@ func _setup_options_display() -> void:
 	buttons_container.add_theme_constant_override("separation", 8)
 	vbox.add_child(buttons_container)
 
+	# Info panel that drops down below option tiles
+	var info_panel_clip = Control.new()
+	info_panel_clip.clip_contents = true
+	info_panel_clip.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	info_panel_clip.custom_minimum_size = Vector2(0, 260)
+	vbox.add_child(info_panel_clip)
+
+	options_info_panel = CharacterInfoPanelScene.instantiate()
+	options_info_panel.slide_down = true
+	info_panel_clip.add_child(options_info_panel)
+	options_info_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+
 
 # =============================================================================
 # DRAFT MANAGER SIGNAL HANDLERS
@@ -110,6 +124,10 @@ func _update_options_display(instances: Array) -> void:
 	if instances.size() == 0:
 		return
 
+	# Hide info panel from previous options
+	if options_info_panel and options_info_panel.is_showing():
+		options_info_panel.hide_panel()
+
 	UIHelpers.clear_children(options_tiles_container)
 	character_tiles.clear()
 
@@ -121,6 +139,7 @@ func _update_options_display(instances: Array) -> void:
 		var tile = CharacterTileScene.instantiate()
 		options_tiles_container.add_child(tile)
 		tile.setup(char_instance, tile_size)
+		tile.tile_clicked.connect(_on_option_tile_clicked)
 		character_tiles.append(tile)
 
 	_create_select_buttons()
@@ -156,6 +175,15 @@ func _create_select_buttons() -> void:
 
 		buttons_container.add_child(button)
 		select_buttons.append(button)
+
+
+func _on_option_tile_clicked(char_instance: CharacterInstance) -> void:
+	if not options_info_panel:
+		return
+	if options_info_panel.is_showing() and options_info_panel.current_char_instance == char_instance:
+		options_info_panel.hide_panel()
+	else:
+		options_info_panel.show_character(char_instance)
 
 
 func _on_option_button_pressed(option_index: int) -> void:
