@@ -59,9 +59,7 @@ func _setup_team_display() -> void:
 	tiles_container.add_theme_constant_override("separation", 8)
 	vbox.add_child(tiles_container)
 
-	var available_width = max(team_display_container.size.x, 688) - 24
-	var tile_size = floor((available_width - 16) / 3.0)
-	tile_size = max(tile_size, 180)
+	var tile_size = UIScaler.calculate_tile_size(team_display_container.size.x, 3)
 
 	for char_instance in team:
 		var tile = CharacterTileScene.instantiate()

@@ -219,3 +219,10 @@ static func get_items_grid_columns() -> int:
 static func get_skills_grid_columns() -> int:
 	"""Get recommended columns for skills grid (5 columns for 720px width)."""
 	return 5
+
+
+static func calculate_tile_size(container_width: float, columns: int, margin: float = 24.0, spacing: float = 16.0, min_size: float = 180.0, fallback_width: float = 688.0) -> float:
+	"""Calculate tile size to fill a container evenly across columns."""
+	var available_width = max(container_width, fallback_width) - margin
+	var tile_size = floor((available_width - spacing) / float(columns))
+	return max(tile_size, min_size)

@@ -45,17 +45,8 @@ static func create_panel_style(
 	var style = StyleBoxFlat.new()
 	style.bg_color = bg_color
 
-	# Corner radius
-	style.corner_radius_top_left = corner_radius
-	style.corner_radius_top_right = corner_radius
-	style.corner_radius_bottom_left = corner_radius
-	style.corner_radius_bottom_right = corner_radius
-
-	# Border
-	style.border_width_left = border_width
-	style.border_width_right = border_width
-	style.border_width_top = border_width
-	style.border_width_bottom = border_width
+	style.set_corner_radius_all(corner_radius)
+	style.set_border_width_all(border_width)
 	style.border_color = border_color
 
 	# Shadow
@@ -258,12 +249,7 @@ static func create_progress_bar_fill(color: Color = GameConstants.COLOR_GOLD) ->
 	"""Create progress bar fill style."""
 	var style = StyleBoxFlat.new()
 	style.bg_color = color
-
-	style.corner_radius_top_left = CORNER_RADIUS_SMALL
-	style.corner_radius_top_right = CORNER_RADIUS_SMALL
-	style.corner_radius_bottom_left = CORNER_RADIUS_SMALL
-	style.corner_radius_bottom_right = CORNER_RADIUS_SMALL
-
+	style.set_corner_radius_all(CORNER_RADIUS_SMALL)
 	return style
 
 
@@ -319,6 +305,27 @@ static func apply_panel_style(panel: PanelContainer, style: StyleBoxFlat = null)
 	if style == null:
 		style = create_dark_panel()
 	panel.add_theme_stylebox_override("panel", style)
+
+
+static func style_label(label: Label, font_size: int, color: Color = GameConstants.COLOR_TEXT_LIGHT) -> void:
+	"""Apply font size and color to a label in one call."""
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_color", color)
+
+
+static func apply_text_shadow(label: Label, shadow_color: Color = Color(0, 0, 0, 0.7), offset: Vector2 = Vector2(1, 2)) -> void:
+	"""Apply text shadow to a label."""
+	label.add_theme_color_override("font_shadow_color", shadow_color)
+	label.add_theme_constant_override("shadow_offset_x", int(offset.x))
+	label.add_theme_constant_override("shadow_offset_y", int(offset.y))
+
+
+static func set_margin_all(container: MarginContainer, margin: int) -> void:
+	"""Set all four margins on a MarginContainer to the same value."""
+	container.add_theme_constant_override("margin_left", margin)
+	container.add_theme_constant_override("margin_right", margin)
+	container.add_theme_constant_override("margin_top", margin)
+	container.add_theme_constant_override("margin_bottom", margin)
 
 
 static func apply_text_color(control: Control, color: Color = GameConstants.COLOR_TEXT_LIGHT) -> void:

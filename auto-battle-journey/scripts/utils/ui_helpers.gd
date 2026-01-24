@@ -11,9 +11,6 @@ extends RefCounted
 ## This facade exists for backwards compatibility with existing code.
 
 
-## Type of option panel to create (re-exported from UIPanelFactory)
-enum OptionPanelType { COMBAT, ENCOUNTER }
-
 
 # =============================================================================
 # UIContainerHelpers DELEGATES
@@ -105,12 +102,6 @@ static func create_shop_row(
 ) -> Control:
 	return UIPanelFactory.create_shop_row(data, cost, team, buy_callback, content_type)
 
-
-
-static func create_option_panel(data: Dictionary, panel_type: OptionPanelType, on_select: Callable) -> ClickableOptionPanel:
-	# Map UIHelpers.OptionPanelType to UIPanelFactory.OptionPanelType
-	var factory_type = UIPanelFactory.OptionPanelType.COMBAT if panel_type == OptionPanelType.COMBAT else UIPanelFactory.OptionPanelType.ENCOUNTER
-	return UIPanelFactory.create_option_panel(data, factory_type, on_select)
 
 
 static func create_combat_option_panel(combat_data: Dictionary, on_select: Callable) -> ClickableOptionPanel:

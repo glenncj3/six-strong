@@ -78,9 +78,7 @@ func _populate_character_list() -> void:
 	var unlocked_chars = PlayerAccount.get_unlocked_characters()
 
 	# Calculate tile size
-	var available_width = max(size.x, 680) - 32  # Account for margins
-	var tile_size = floor((available_width - 16) / 3.0)  # 16 = spacing between tiles
-	tile_size = max(tile_size, 180)  # Minimum tile size
+	var tile_size = UIScaler.calculate_tile_size(size.x, 3, 32.0, 16.0, 180.0, 680.0)
 
 	# Create rows of 3 tiles
 	var current_row: HBoxContainer = null

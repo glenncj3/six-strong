@@ -165,35 +165,26 @@ func _gen_constant(params: Dictionary) -> Variant:
 
 
 func _gen_pick_items(params: Dictionary) -> Array:
-	var count = randi_range(
-		int(_resolve_value(params.get("count_min", 1))),
-		int(_resolve_value(params.get("count_max", 3)))
-	)
-	var all_item_upgrades = GameData.get_all_item_upgrades()
-	all_item_upgrades.shuffle()
-	var items = []
-	for i in range(mini(count, all_item_upgrades.size())):
-		items.append({
-			"id": all_item_upgrades[i]["id"],
-			"cost": randi_range(GameConstants.SHOP_ITEM_MIN_COST, GameConstants.SHOP_ITEM_MAX_COST)
-		})
-	return items
+	return _gen_pick_from_pool(params, GameData.get_all_item_upgrades(), 1, 3, GameConstants.SHOP_ITEM_MIN_COST, GameConstants.SHOP_ITEM_MAX_COST)
 
 
 func _gen_pick_skills(params: Dictionary) -> Array:
+	return _gen_pick_from_pool(params, GameData.get_all_skills(), 0, 2, GameConstants.SHOP_SKILL_MIN_COST, GameConstants.SHOP_SKILL_MAX_COST)
+
+
+func _gen_pick_from_pool(params: Dictionary, pool: Array, default_min: int, default_max: int, min_cost: int, max_cost: int) -> Array:
 	var count = randi_range(
-		int(_resolve_value(params.get("count_min", 0))),
-		int(_resolve_value(params.get("count_max", 2)))
+		int(_resolve_value(params.get("count_min", default_min))),
+		int(_resolve_value(params.get("count_max", default_max)))
 	)
-	var all_skills = GameData.get_all_skills()
-	all_skills.shuffle()
-	var skills = []
-	for i in range(mini(count, all_skills.size())):
-		skills.append({
-			"id": all_skills[i]["id"],
-			"cost": randi_range(GameConstants.SHOP_SKILL_MIN_COST, GameConstants.SHOP_SKILL_MAX_COST)
+	pool.shuffle()
+	var result = []
+	for i in range(mini(count, pool.size())):
+		result.append({
+			"id": pool[i]["id"],
+			"cost": randi_range(min_cost, max_cost)
 		})
-	return skills
+	return result
 
 
 func _gen_pick_learnable_skill(_params: Dictionary) -> String:

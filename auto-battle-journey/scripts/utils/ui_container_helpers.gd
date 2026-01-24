@@ -88,7 +88,7 @@ static func create_label(
 	label.text = text
 	label.add_theme_font_size_override("font_size", font_size)
 	if color != Color.WHITE:
-		label.modulate = color
+		label.add_theme_color_override("font_color", color)
 	if centered:
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	return label
@@ -158,7 +158,7 @@ static func create_empty_placeholder(text: String, color: Color = Color(0.7, 0.7
 	"""
 	var label = Label.new()
 	label.text = text
-	label.modulate = color
+	label.add_theme_color_override("font_color", color)
 	return label
 
 

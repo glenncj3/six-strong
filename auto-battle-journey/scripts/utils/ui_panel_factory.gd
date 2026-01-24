@@ -73,13 +73,12 @@ static func create_shop_row(
 	var name_label = Label.new()
 	name_label.text = data.get("name", "Unknown %s" % content_type.capitalize())
 	name_label.theme_type_variation = "HeaderLabel"
-	name_label.add_theme_font_size_override("font_size", 20)
+	UIStyles.style_label(name_label, GameConstants.FONT_SIZE_GOLD_DISPLAY)
 	info_vbox.add_child(name_label)
 
 	var desc_label = Label.new()
 	desc_label.text = data.get("description", "")
-	desc_label.modulate = GameConstants.COLOR_DISABLED
-	desc_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_TINY)
+	UIStyles.style_label(desc_label, GameConstants.FONT_SIZE_TINY, GameConstants.COLOR_DISABLED)
 	info_vbox.add_child(desc_label)
 
 	# Level requirement
@@ -87,8 +86,7 @@ static func create_shop_row(
 	if level_req > 1:
 		var req_label = Label.new()
 		req_label.text = "Requires Level %d" % level_req
-		req_label.modulate = GameConstants.COLOR_ERROR
-		req_label.add_theme_font_size_override("font_size", 11)
+		UIStyles.style_label(req_label, GameConstants.FONT_SIZE_TINY, GameConstants.COLOR_ERROR)
 		info_vbox.add_child(req_label)
 
 	# Character selector
@@ -163,10 +161,7 @@ static func create_option_panel(data: Dictionary, panel_type: OptionPanelType, o
 static func _create_option_image_section(data: Dictionary) -> MarginContainer:
 	"""Create the image section for an option panel."""
 	var margin = MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", GameConstants.PANEL_MARGIN)
-	margin.add_theme_constant_override("margin_right", GameConstants.PANEL_MARGIN)
-	margin.add_theme_constant_override("margin_top", GameConstants.PANEL_MARGIN)
-	margin.add_theme_constant_override("margin_bottom", GameConstants.PANEL_MARGIN)
+	UIStyles.set_margin_all(margin, GameConstants.PANEL_MARGIN)
 
 	var image = TextureRect.new()
 	margin.add_child(image)
@@ -193,18 +188,16 @@ static func _create_option_info_section(data: Dictionary, _panel_type: OptionPan
 	info_vbox.add_child(name_label)
 	name_label.text = data.get("name", "Unknown")
 	name_label.theme_type_variation = "HeaderLabel"
-	name_label.add_theme_font_size_override("font_size", 32)
+	UIStyles.style_label(name_label, GameConstants.FONT_SIZE_REWARD)
 
 	# Description
 	var desc_label = Label.new()
 	info_vbox.add_child(desc_label)
 	desc_label.text = data.get("description", "")
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc_label.add_theme_font_size_override("font_size", 24)
 	desc_label.max_lines_visible = 2
-	desc_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
-	desc_label.add_theme_constant_override("shadow_offset_x", 1)
-	desc_label.add_theme_constant_override("shadow_offset_y", 2)
+	UIStyles.style_label(desc_label, GameConstants.FONT_SIZE_HEADING)
+	UIStyles.apply_text_shadow(desc_label)
 
 	return info_vbox
 
@@ -227,15 +220,11 @@ static func _add_combat_labels(info_vbox: VBoxContainer, data: Dictionary) -> vo
 	var diff_label = Label.new()
 	info_vbox.add_child(diff_label)
 	diff_label.text = "★".repeat(star_count)
-	diff_label.add_theme_font_size_override("font_size", 24)
-	# Gold color with 3D effect via outline and shadow
-	diff_label.modulate = Color.WHITE
-	diff_label.add_theme_color_override("font_color", Color("#FFD700"))
+	UIStyles.style_label(diff_label, GameConstants.FONT_SIZE_HEADING, Color("#FFD700"))
+	# Gold 3D effect via outline and shadow
 	diff_label.add_theme_color_override("font_outline_color", Color("#8B6914"))
 	diff_label.add_theme_constant_override("outline_size", 3)
-	diff_label.add_theme_color_override("font_shadow_color", Color("#4A3800"))
-	diff_label.add_theme_constant_override("shadow_offset_x", 1)
-	diff_label.add_theme_constant_override("shadow_offset_y", 2)
+	UIStyles.apply_text_shadow(diff_label, Color("#4A3800"))
 
 
 static func _add_combat_rewards_overlay(panel: PanelContainer, data: Dictionary) -> void:
@@ -251,10 +240,8 @@ static func _add_combat_rewards_overlay(panel: PanelContainer, data: Dictionary)
 	var gold = data.get("reward_gold", 0)
 	var xp = data.get("reward_xp", 0)
 	rewards_label.text = "%s%d  %s%d" % [GameConstants.EMOJI_GOLD, gold, GameConstants.EMOJI_STAR, xp]
-	rewards_label.add_theme_font_size_override("font_size", 24)
-	rewards_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
-	rewards_label.add_theme_constant_override("shadow_offset_x", 1)
-	rewards_label.add_theme_constant_override("shadow_offset_y", 2)
+	UIStyles.style_label(rewards_label, GameConstants.FONT_SIZE_HEADING)
+	UIStyles.apply_text_shadow(rewards_label)
 
 	# Anchor to bottom-right
 	rewards_label.anchor_left = 1.0

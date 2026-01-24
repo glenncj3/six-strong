@@ -243,6 +243,4 @@ func _start_run() -> void:
 
 
 func _get_tile_size() -> float:
-	var available_width = max(options_display_container.size.x, 688) - 24
-	var tile_size = floor((available_width - 16) / float(GameConstants.TEAM_SIZE))
-	return max(tile_size, 180)
+	return UIScaler.calculate_tile_size(options_display_container.size.x, GameConstants.TEAM_SIZE)

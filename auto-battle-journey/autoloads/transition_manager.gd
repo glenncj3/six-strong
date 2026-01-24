@@ -288,7 +288,7 @@ func _dissolve_out(duration: float) -> void:
 	var tween = create_tween()
 	tween.set_ease(GameConstants.ANIM_EASE_STANDARD)
 	tween.set_trans(Tween.TRANS_LINEAR)
-	tween.tween_method(_set_dissolve_progress, 0.0, 1.0, duration)
+	tween.tween_method(_set_shader_progress, 0.0, 1.0, duration)
 	await tween.finished
 
 
@@ -297,15 +297,15 @@ func _dissolve_in(duration: float) -> void:
 	var tween = create_tween()
 	tween.set_ease(GameConstants.ANIM_EASE_STANDARD)
 	tween.set_trans(Tween.TRANS_LINEAR)
-	tween.tween_method(_set_dissolve_progress, 1.0, 0.0, duration)
+	tween.tween_method(_set_shader_progress, 1.0, 0.0, duration)
 	await tween.finished
 
 	_color_rect.material = null
 	_color_rect.modulate.a = 0
 
 
-func _set_dissolve_progress(value: float) -> void:
-	"""Helper to set dissolve shader progress."""
+func _set_shader_progress(value: float) -> void:
+	"""Helper to set shader progress (used by dissolve and wipe)."""
 	if _color_rect.material:
 		_color_rect.material.set_shader_parameter("progress", value)
 
@@ -360,7 +360,7 @@ func _wipe_out(radial: bool, duration: float) -> void:
 	var tween = create_tween()
 	tween.set_ease(GameConstants.ANIM_EASE_STANDARD)
 	tween.set_trans(Tween.TRANS_LINEAR)
-	tween.tween_method(_set_wipe_progress, 0.0, 1.0, duration)
+	tween.tween_method(_set_shader_progress, 0.0, 1.0, duration)
 	await tween.finished
 
 
@@ -369,17 +369,13 @@ func _wipe_in(radial: bool, duration: float) -> void:
 	var tween = create_tween()
 	tween.set_ease(GameConstants.ANIM_EASE_STANDARD)
 	tween.set_trans(Tween.TRANS_LINEAR)
-	tween.tween_method(_set_wipe_progress, 1.0, 0.0, duration)
+	tween.tween_method(_set_shader_progress, 1.0, 0.0, duration)
 	await tween.finished
 
 	_color_rect.material = null
 	_color_rect.modulate.a = 0
 
 
-func _set_wipe_progress(value: float) -> void:
-	"""Helper to set wipe shader progress."""
-	if _color_rect.material:
-		_color_rect.material.set_shader_parameter("progress", value)
 
 
 func _setup_wipe_shader(radial: bool) -> void:
