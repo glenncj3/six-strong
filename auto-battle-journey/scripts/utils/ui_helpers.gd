@@ -106,18 +106,6 @@ static func create_shop_row(
 	return UIPanelFactory.create_shop_row(data, cost, team, buy_callback, content_type)
 
 
-static func create_option_panel_base(image_path: String, image_size: Vector2) -> Dictionary:
-	return UIPanelFactory.create_option_panel_base(image_path, image_size)
-
-
-static func add_option_panel_labels(
-	content: VBoxContainer,
-	name_text: String,
-	type_text: String,
-	description: String
-) -> void:
-	UIPanelFactory.add_option_panel_labels(content, name_text, type_text, description)
-
 
 static func create_option_panel(data: Dictionary, panel_type: OptionPanelType, on_select: Callable) -> ClickableOptionPanel:
 	# Map UIHelpers.OptionPanelType to UIPanelFactory.OptionPanelType

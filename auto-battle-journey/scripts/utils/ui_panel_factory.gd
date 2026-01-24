@@ -105,88 +105,6 @@ static func create_shop_row(
 	return row
 
 
-# =============================================================================
-# OPTION PANEL BASE
-# =============================================================================
-
-static func create_option_panel_base(image_path: String, image_size: Vector2) -> Dictionary:
-	"""
-	Create the base structure for an option panel (encounter/combat selection).
-
-	Args:
-		image_path: Path to the panel image
-		image_size: Size of the image
-
-	Returns:
-		Dictionary with "panel", "content" (VBoxContainer), and "image" (TextureRect)
-	"""
-	var panel = PanelContainer.new()
-
-	var margin = MarginContainer.new()
-	panel.add_child(margin)
-	margin.add_theme_constant_override("margin_left", GameConstants.PANEL_MARGIN)
-	margin.add_theme_constant_override("margin_right", GameConstants.PANEL_MARGIN)
-	margin.add_theme_constant_override("margin_top", GameConstants.PANEL_MARGIN)
-	margin.add_theme_constant_override("margin_bottom", GameConstants.PANEL_MARGIN)
-
-	var content = VBoxContainer.new()
-	margin.add_child(content)
-	content.add_theme_constant_override("separation", GameConstants.CONTENT_SEPARATION)
-
-	# Image
-	var image = TextureRect.new()
-	content.add_child(image)
-	image.custom_minimum_size = image_size
-	image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	UIContainerHelpers.set_texture_safe(image, image_path)
-
-	return {
-		"panel": panel,
-		"content": content,
-		"image": image
-	}
-
-
-static func add_option_panel_labels(
-	content: VBoxContainer,
-	name_text: String,
-	type_text: String,
-	description: String
-) -> void:
-	"""
-	Add standard labels to an option panel.
-
-	Args:
-		content: The VBoxContainer to add labels to
-		name_text: Name to display
-		type_text: Type tag (e.g., "SHOP", "AI")
-		description: Description text
-	"""
-	# Name
-	var name_label = Label.new()
-	content.add_child(name_label)
-	name_label.text = name_text
-	name_label.theme_type_variation = "HeaderLabel"
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 20)
-
-	# Type
-	var type_label = Label.new()
-	content.add_child(type_label)
-	type_label.text = "[%s]" % type_text
-	type_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	type_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_TINY)
-	type_label.modulate = GameConstants.COLOR_DISABLED
-
-	# Description
-	var desc_label = Label.new()
-	content.add_child(desc_label)
-	desc_label.text = description
-	desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc_label.custom_minimum_size.y = 40
-
 
 # =============================================================================
 # OPTION PANEL CREATION (Unified)
@@ -350,19 +268,6 @@ static func _add_combat_rewards_overlay(panel: PanelContainer, data: Dictionary)
 	rewards_label.offset_top = -13
 	rewards_label.offset_bottom = -5
 
-
-static func _add_encounter_labels(info_vbox: VBoxContainer, data: Dictionary) -> void:
-	"""Add encounter-specific labels (reward preview)."""
-	var reward_label = Label.new()
-	info_vbox.add_child(reward_label)
-	reward_label.text = _get_encounter_reward_preview(data)
-	reward_label.modulate = GameConstants.COLOR_SUCCESS
-	reward_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_SMALL)
-
-
-static func _get_encounter_reward_preview(encounter_data: Dictionary) -> String:
-	"""Get a preview of rewards for this encounter using the registry (OCP-1)."""
-	return EncounterRegistry.get_reward_preview(encounter_data)
 
 
 # Backwards-compatible aliases

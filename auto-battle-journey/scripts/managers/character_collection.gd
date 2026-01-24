@@ -191,7 +191,6 @@ func add_character_fame(char_id: String, fame: int) -> void:
 	while char_data["fame"] >= GameConstants.FAME_PER_PRESTIGE:
 		char_data["fame"] -= GameConstants.FAME_PER_PRESTIGE
 		char_data["prestige"] += 1
-		print("CharacterCollection: %s prestige increased to %d!" % [char_id, char_data["prestige"]])
 		_apply_prestige_rewards(char_id, char_data["prestige"])
 		character_prestige_up.emit(char_id, char_data["prestige"])
 
@@ -211,8 +210,6 @@ func _apply_prestige_rewards(char_id: String, new_prestige: int) -> void:
 
 	for prestige_reward in char_master["prestige_rewards"]:
 		if prestige_reward.get("prestige") == new_prestige:
-			print("CharacterCollection: Applying prestige %d rewards for %s" % [new_prestige, char_id])
-
 			if prestige_reward.has("rewards"):
 				for reward in prestige_reward["rewards"]:
 					_apply_reward(char_data, reward)
@@ -228,15 +225,12 @@ func _apply_reward(char_data: Dictionary, reward: Dictionary) -> void:
 		"item":
 			if reward_id not in char_data["unlocked_items"]:
 				char_data["unlocked_items"].append(reward_id)
-				print("  - Unlocked item: %s" % reward_id)
 		"item_upgrade":
 			if reward_id not in char_data["unlocked_item_upgrades"]:
 				char_data["unlocked_item_upgrades"].append(reward_id)
-				print("  - Unlocked item upgrade: %s" % reward_id)
 		"skill":
 			if reward_id not in char_data["unlocked_skills"]:
 				char_data["unlocked_skills"].append(reward_id)
-				print("  - Unlocked skill: %s" % reward_id)
 		_:
 			push_warning("CharacterCollection: Unknown reward type: %s" % reward_type)
 

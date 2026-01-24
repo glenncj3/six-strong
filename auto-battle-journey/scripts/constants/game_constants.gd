@@ -10,24 +10,6 @@ extends RefCounted
 const DESIGN_WIDTH := 720
 const DESIGN_HEIGHT := 1280
 
-# UI margins for mobile (smaller for portrait mode)
-const SCREEN_MARGIN := 16
-const SCREEN_MARGIN_SMALL := 8
-
-# Component sizes optimized for portrait mobile
-const CHARACTER_CARD_WIDTH := 200
-const CHARACTER_CARD_HEIGHT := 280
-const CHARACTER_CARD_SMALL_WIDTH := 100
-const CHARACTER_CARD_SMALL_HEIGHT := 140
-
-const ITEM_SLOT_WIDTH := 72
-const ITEM_SLOT_HEIGHT := 90
-const ITEM_ICON_SIZE := 56
-
-const SKILL_ICON_WIDTH := 56
-const SKILL_ICON_HEIGHT := 70
-const SKILL_ICON_IMAGE_SIZE := 40
-
 # Font sizes for mobile
 const FONT_SIZE_TITLE := 48
 const FONT_SIZE_HEADING := 24
@@ -170,7 +152,6 @@ const CLASS_TYPE_DISPLAY_NAMES := {
 
 # Icon sizes used in shop rows, encounter panels, etc.
 const SHOP_ICON_SIZE := 48
-const ENCOUNTER_IMAGE_SIZE := 180
 const COMBAT_IMAGE_SIZE := 100
 
 # Standard margins and spacing
@@ -234,24 +215,23 @@ const COLOR_RARITY_RARE := Color("#4A6AAA")      # Blue
 const COLOR_RARITY_EPIC := Color("#8A4A9A")      # Purple
 const COLOR_RARITY_LEGENDARY := Color("#D9A621") # Gold
 
-# --- Legacy Color Constants (for compatibility) ---
-const COLOR_SUCCESS := Color("#2A7A4A")
-const COLOR_ERROR := Color("#8A2A3A")
-const COLOR_DANGER := Color("#8A2A3A")
-const COLOR_WARNING := Color("#D9A621")
+# --- Semantic Color Aliases ---
+const COLOR_SUCCESS := COLOR_EMERALD
+const COLOR_ERROR := COLOR_RUBY
+const COLOR_DANGER := COLOR_RUBY
+const COLOR_WARNING := COLOR_GOLD
 const COLOR_DISABLED := Color("#6A6A6A")
-const COLOR_MUTED := Color("#B8A88A")
-const COLOR_GHOST_PRESTIGE := Color("#6A3A8A")
-const COLOR_HIGHLIGHT := Color("#FFD54F")
+const COLOR_MUTED := COLOR_TEXT_MUTED
+const COLOR_HIGHLIGHT := COLOR_TEXT_GOLD
 
 # Reputation color thresholds
 const REPUTATION_CRITICAL_THRESHOLD := 5
 const REPUTATION_WARNING_THRESHOLD := 10
 
-# Combat difficulty colors
-const COLOR_DIFFICULTY_EASY := Color("#2A7A4A")    # Emerald green
-const COLOR_DIFFICULTY_MEDIUM := Color("#D9A621") # Gold
-const COLOR_DIFFICULTY_HARD := Color("#8A2A3A")   # Ruby red
+# Combat difficulty colors (aliases)
+const COLOR_DIFFICULTY_EASY := COLOR_EMERALD
+const COLOR_DIFFICULTY_MEDIUM := COLOR_GOLD
+const COLOR_DIFFICULTY_HARD := COLOR_RUBY
 
 # =============================================================================
 # EMOJI CONSTANTS
@@ -452,7 +432,6 @@ const PRESS_SCALE := 0.95
 # Card interaction effects
 const CARD_HOVER_LIFT := 4.0
 const CARD_HOVER_SCALE := 1.05
-const CARD_TILT_DEGREES := 3.0
 
 # =============================================================================
 # GLOW COLORS (for rarity-based effects)
@@ -460,17 +439,6 @@ const CARD_TILT_DEGREES := 3.0
 
 const GLOW_COLOR_LEGENDARY := Color("#FFD700")
 const GLOW_COLOR_EPIC := Color("#9932CC")
-const GLOW_COLOR_RARE := Color("#4169E1")
-const GLOW_COLOR_UNCOMMON := Color("#32CD32")
-const GLOW_COLOR_COMMON := Color("#808080")
-
-# =============================================================================
-# PARTICLE EFFECT CONSTANTS
-# =============================================================================
-
-const PARTICLE_RATE_SUBTLE := 5
-const PARTICLE_RATE_NORMAL := 15
-const PARTICLE_RATE_INTENSE := 30
 
 # =============================================================================
 # SCREEN SHAKE CONSTANTS

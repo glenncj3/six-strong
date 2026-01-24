@@ -89,11 +89,9 @@ func _on_buy_item(item_id: String, cost: int, char_selector: OptionButton, butto
 	var selected_index = char_selector.selected - 1  # -1 because first item is "Select Character..."
 
 	if selected_index < 0:
-		print("EncounterExecute: Must select a character first")
 		return
 
 	if not RunManager.spend_gold(cost):
-		print("EncounterExecute: Not enough gold")
 		return
 
 	var team = RunManager.get_team()
@@ -101,14 +99,12 @@ func _on_buy_item(item_id: String, cost: int, char_selector: OptionButton, butto
 
 	var success = char_instance.equip_item_upgrade(item_id)
 	if success:
-		print("EncounterExecute: Purchased and equipped item upgrade: %s" % item_id)
 		button.disabled = true
 		button.text = "PURCHASED"
 		_update_gold_label()
 	else:
 		# Refund if level requirement not met
 		RunManager.add_gold(cost)
-		print("EncounterExecute: Cannot equip - level requirement not met")
 
 
 func _on_buy_skill(skill_id: String, cost: int, char_selector: OptionButton, button: Button) -> void:
@@ -116,11 +112,9 @@ func _on_buy_skill(skill_id: String, cost: int, char_selector: OptionButton, but
 	var selected_index = char_selector.selected - 1
 
 	if selected_index < 0:
-		print("EncounterExecute: Must select a character first")
 		return
 
 	if not RunManager.spend_gold(cost):
-		print("EncounterExecute: Not enough gold")
 		return
 
 	var team = RunManager.get_team()
@@ -128,14 +122,12 @@ func _on_buy_skill(skill_id: String, cost: int, char_selector: OptionButton, but
 
 	var success = char_instance.learn_skill(skill_id)
 	if success:
-		print("EncounterExecute: Purchased and learned skill: %s" % skill_id)
 		button.disabled = true
 		button.text = "LEARNED"
 		_update_gold_label()
 	else:
 		# Refund if already learned or level requirement not met
 		RunManager.add_gold(cost)
-		print("EncounterExecute: Cannot learn skill")
 
 
 func _on_xp_character_selected(char_index: int, xp_amount: int, button: Button) -> void:
@@ -147,8 +139,6 @@ func _on_xp_character_selected(char_index: int, xp_amount: int, button: Button) 
 
 	button.text = "XP Given! %s" % ("(LEVEL UP!)" if leveled_up else "")
 	button.disabled = true
-
-	print("EncounterExecute: Gave %d XP to %s" % [xp_amount, char_instance.get_character_name()])
 
 
 func _update_gold_label() -> void:
@@ -169,7 +159,6 @@ func _enable_complete() -> void:
 
 func _on_skip_pressed() -> void:
 	"""Skip the encounter without taking rewards and return to run view."""
-	print("EncounterExecute: Skipping encounter...")
 
 	# Complete encounter (advances game state) but player gets no rewards
 	RunManager.complete_encounter()
@@ -181,10 +170,7 @@ func _on_skip_pressed() -> void:
 func _on_complete_pressed() -> void:
 	"""Complete the encounter and return to run view."""
 	if not encounter_completed:
-		print("EncounterExecute: Encounter not ready to complete")
 		return
-
-	print("EncounterExecute: Completing encounter...")
 
 	# Switch to combat phase
 	RunManager.complete_encounter()

@@ -77,8 +77,6 @@ func _populate_character_list() -> void:
 	# Get unlocked characters
 	var unlocked_chars = PlayerAccount.get_unlocked_characters()
 
-	print("Collection: Displaying %d characters" % unlocked_chars.size())
-
 	# Calculate tile size
 	var available_width = max(size.x, 680) - 32  # Account for margins
 	var tile_size = floor((available_width - 16) / 3.0)  # 16 = spacing between tiles
@@ -176,6 +174,5 @@ func _on_back_pressed() -> void:
 	if character_details_panel.visible:
 		_on_close_details_pressed()
 	else:
-		print("Collection: Back button pressed")
 		var tween = AnimationManager.fade_out(back_button, GameConstants.ANIM_DURATION_NORMAL)
 		tween.finished.connect(func(): SceneManager.go_to_main_menu(false))

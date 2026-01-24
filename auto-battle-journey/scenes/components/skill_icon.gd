@@ -55,11 +55,11 @@ func _get_normal_size() -> Vector2:
 
 
 func _get_compact_icon_size() -> float:
-	return UIScaler.get_skill_image_size(true)
+	return UIScaler.get_skill_image_size()
 
 
 func _get_normal_icon_size() -> float:
-	return UIScaler.get_skill_image_size(false)
+	return UIScaler.get_skill_image_size()
 
 
 func _get_normal_separation() -> int:

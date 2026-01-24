@@ -177,7 +177,6 @@ static func _create_gold_reward_ui(encounter_data: Dictionary, _context: Diction
 
 	# Award gold immediately
 	RunManager.add_gold(gold_amount)
-	print("EncounterUIFactory: Awarded %d gold" % gold_amount)
 
 	return vbox
 
@@ -207,8 +206,6 @@ static func _create_health_restore_ui(encounter_data: Dictionary, _context: Dict
 			true
 		)
 		vbox.add_child(char_label)
-
-	print("EncounterUIFactory: Healed all characters by %d%%" % int(heal_percentage * 100))
 
 	return vbox
 
@@ -267,7 +264,6 @@ static func _on_skill_trainer_selected(char_index: int, skill_id: String, button
 				child.disabled = true
 		if on_complete.is_valid():
 			on_complete.call()
-		print("EncounterUIFactory: %s learned %s from trainer" % [char_instance.get_character_name(), skill_id])
 	else:
 		button.text = "Cannot Learn (Level/Already Known)"
 		button.disabled = true
@@ -325,7 +321,6 @@ static func _create_gamble_ui(encounter_data: Dictionary, context: Dictionary) -
 static func _on_gamble_pressed(bet: int, multiplier: int, container: Control, on_complete: Callable) -> void:
 	"""Handle gamble."""
 	if not RunManager.spend_gold(bet):
-		print("EncounterUIFactory: Not enough gold to gamble")
 		return
 
 	var result_label = container.get_node("ResultLabel")
@@ -339,11 +334,9 @@ static func _on_gamble_pressed(bet: int, multiplier: int, container: Control, on
 		RunManager.add_gold(winnings)
 		result_label.text = "YOU WON! +%d Gold!" % winnings
 		result_label.modulate = GameConstants.COLOR_SUCCESS
-		print("EncounterUIFactory: Gamble won! +%d gold" % winnings)
 	else:
 		result_label.text = "You lost... -%d Gold" % bet
 		result_label.modulate = GameConstants.COLOR_DANGER
-		print("EncounterUIFactory: Gamble lost! -%d gold" % bet)
 
 	gold_label.text = "Your Gold: %d" % RunManager.get_gold()
 
@@ -373,7 +366,6 @@ static func _on_gamble_declined(container: Control, on_complete: Callable) -> vo
 
 	if on_complete.is_valid():
 		on_complete.call()
-	print("EncounterUIFactory: Declined to gamble")
 
 
 static func _create_elite_challenge_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
@@ -421,5 +413,3 @@ static func _on_elite_challenge_completed(xp_reward: int, gold_reward: int, butt
 
 	if on_complete.is_valid():
 		on_complete.call()
-
-	print("EncounterUIFactory: Elite challenge completed! +%d XP to all, +%d gold" % [xp_reward, gold_reward])

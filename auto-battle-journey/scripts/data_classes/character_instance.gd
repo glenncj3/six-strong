@@ -60,8 +60,6 @@ func _init(char_data: Dictionary, game_data: Node = null) -> void:
 	# Set health to max
 	current_health = stats.get(GameConstants.STAT_HEALTH, 0)
 
-	print("CharacterInstance created: %s (%s)" % [base_character_id, StatCalculator.stats_to_string(stats)])
-
 
 func _get_game_data() -> Node:
 	"""Get game data source (supports dependency injection)."""
@@ -110,7 +108,6 @@ func add_experience(xp: int) -> bool:
 	if experience >= GameConstants.XP_PER_LEVEL:
 		experience -= GameConstants.XP_PER_LEVEL
 		level += 1
-		print("CharacterInstance: %s leveled up to %d!" % [base_character_id, level])
 		return true
 
 	return false
@@ -151,7 +148,6 @@ func learn_skill(skill_id: String) -> bool:
 
 		StatCalculator.apply_modifier(stats, stat_name, value, effect_type == "stat_multiply")
 
-	print("CharacterInstance: %s learned skill: %s" % [base_character_id, skill_id])
 	return true
 
 
@@ -189,7 +185,6 @@ func equip_item_upgrade(item_upgrade_id: String) -> bool:
 	for stat_name in modifiers:
 		StatCalculator.apply_modifier(stats, stat_name, modifiers[stat_name], false)
 
-	print("CharacterInstance: %s equipped item upgrade: %s" % [base_character_id, item_upgrade_id])
 	return true
 
 
@@ -200,8 +195,6 @@ func equip_item_upgrade(item_upgrade_id: String) -> bool:
 func take_damage(amount: int) -> void:
 	"""Take damage, clamped to 0."""
 	current_health = max(0, current_health - amount)
-	if current_health == 0:
-		print("CharacterInstance: %s has fallen!" % base_character_id)
 
 
 func heal(amount: int) -> void:

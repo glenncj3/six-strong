@@ -82,8 +82,6 @@ func _generate_and_display_options() -> void:
 
 func _on_option_selected(option_data: Dictionary) -> void:
 	"""Handle option selection."""
-	print("%s: Selected %s" % [_get_log_prefix(), option_data.get("name", "Unknown")])
-
 	SceneManager.set_scene_data(_get_data_key(), option_data)
 	SceneManager.go_to(_get_next_scene())
 

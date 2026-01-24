@@ -118,8 +118,6 @@ static func apply_combat_victory_rewards(
 	gold_callback.call(rewards["gold"])
 	team_manager.distribute_experience(rewards["xp"])
 
-	print("RewardCalculator: Victory! Awarded %d gold, %d XP per character" % [rewards["gold"], rewards["xp"]])
-
 	return rewards
 
 
@@ -145,5 +143,3 @@ static func apply_run_end_rewards(
 
 	# Award gems
 	PlayerAccount.add_gems(rewards["gems"])
-
-	print("RewardCalculator: Run ended - Awarded %d gems, %d fame per character" % [rewards["gems"], rewards["character_fame"]])

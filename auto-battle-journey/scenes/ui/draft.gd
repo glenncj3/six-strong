@@ -210,12 +210,9 @@ func _update_instruction() -> void:
 		]
 	else:
 		instruction_label.text = "TEAM COMPLETE - READY TO START"
-	print("Draft: Instruction updated to: %s" % instruction_label.text)
 
 
 func _show_confirm_state() -> void:
-	print("Draft: Showing confirm state (team complete)")
-
 	options_section.visible = false
 
 	await get_tree().create_timer(2.0).timeout
@@ -228,10 +225,7 @@ func _show_confirm_state() -> void:
 
 func _on_reroll_pressed() -> void:
 	if PlayerAccount.spend_reroll_token():
-		print("Draft: Rerolling options...")
 		draft_manager.generate_options()
-	else:
-		print("Draft: No reroll tokens available")
 
 
 func _on_confirm_pressed() -> void:
@@ -242,15 +236,8 @@ func _on_confirm_pressed() -> void:
 
 
 func _start_run() -> void:
-	print("Draft: Starting run with drafted team...")
-
 	var char_ids = draft_manager.get_drafted_character_ids()
-
-	print("Draft: Character IDs: %s" % str(char_ids))
-
 	RunManager.start_new_run(char_ids)
-
-	print("Draft: Run started, navigating to run_view...")
 
 	SceneManager.go_to_run_view()
 

@@ -110,8 +110,6 @@ func generate_options() -> void:
 		var char_instance = CharacterInstance.new(option["char_data"])
 		option_instances.append(char_instance)
 
-	print("DraftManager: Generated %d unique options" % current_options.size())
-
 	options_generated.emit(current_options, option_instances)
 
 
@@ -131,11 +129,9 @@ func select_character(char_data: Dictionary) -> bool:
 	var char_id = char_data.get("id", "")
 
 	if is_character_drafted(char_id):
-		print("DraftManager: Character already selected")
 		return false
 
 	if drafted_characters.size() >= GameConstants.TEAM_SIZE:
-		print("DraftManager: Already have %d characters" % GameConstants.TEAM_SIZE)
 		return false
 
 	drafted_characters.append(char_data)
@@ -145,8 +141,6 @@ func select_character(char_data: Dictionary) -> bool:
 	drafted_instances.append(char_instance)
 
 	selection_count += 1
-
-	print("DraftManager: Selected %s (%d/%d)" % [char_id, selection_count, GameConstants.TEAM_SIZE])
 
 	character_drafted.emit(char_data, char_instance)
 
@@ -162,7 +156,6 @@ func unlock_and_select(char_data: Dictionary, cost: int) -> bool:
 	Returns true if unlock and selection were successful.
 	"""
 	if drafted_characters.size() >= GameConstants.TEAM_SIZE:
-		print("DraftManager: Already have %d characters" % GameConstants.TEAM_SIZE)
 		return false
 
 	var char_id = char_data.get("id", "")
@@ -170,7 +163,6 @@ func unlock_and_select(char_data: Dictionary, cost: int) -> bool:
 	# Attempt to unlock
 	var success = PlayerAccount.unlock_character(char_id, cost)
 	if not success:
-		print("DraftManager: Failed to unlock character (not enough gems)")
 		return false
 
 	# Now select the newly unlocked character

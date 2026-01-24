@@ -120,24 +120,6 @@ static func create_subtle_panel() -> StyleBoxFlat:
 	)
 
 
-static func create_transparent_panel(border_color: Color = GameConstants.COLOR_BORDER_GOLD) -> StyleBoxFlat:
-	"""Create a transparent panel with only a border (for overlays)."""
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0, 0, 0, 0)
-
-	style.corner_radius_top_left = CORNER_RADIUS_MEDIUM
-	style.corner_radius_top_right = CORNER_RADIUS_MEDIUM
-	style.corner_radius_bottom_left = CORNER_RADIUS_MEDIUM
-	style.corner_radius_bottom_right = CORNER_RADIUS_MEDIUM
-
-	style.border_width_left = BORDER_WIDTH_THIN
-	style.border_width_right = BORDER_WIDTH_THIN
-	style.border_width_top = BORDER_WIDTH_THIN
-	style.border_width_bottom = BORDER_WIDTH_THIN
-	style.border_color = border_color
-
-	return style
-
 
 # =============================================================================
 # BUTTON STYLES

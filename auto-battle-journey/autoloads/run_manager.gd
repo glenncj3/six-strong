@@ -59,8 +59,6 @@ func start_new_run(drafted_character_ids: Array) -> void:
 		push_error("RunManager: Must draft exactly %d characters" % GameConstants.TEAM_SIZE)
 		return
 
-	print("RunManager: Starting new run with characters: %s" % str(drafted_character_ids))
-
 	# Generate run ID
 	run_id = "run_%d" % Time.get_unix_time_from_system()
 
@@ -92,8 +90,6 @@ func start_new_run(drafted_character_ids: Array) -> void:
 	encounter_history.clear()
 	is_run_active = true
 
-	print("RunManager: Run started with %d characters, starting gold: %d" % [_team_manager.get_size(), starting_gold])
-
 	# Save initial state
 	save_run_state()
 
@@ -119,8 +115,7 @@ func save_run_state() -> void:
 		"encounter_history": encounter_history
 	}
 
-	if JsonPersistence.save_json(SAVE_PATH, save_data):
-		print("RunManager: Run state saved (Round %d, Reputation %d)" % [current_round, reputation])
+	JsonPersistence.save_json(SAVE_PATH, save_data)
 
 
 func load_run_state() -> bool:
@@ -146,7 +141,6 @@ func load_run_state() -> bool:
 
 	is_run_active = true
 
-	print("RunManager: Run state loaded (Round %d, %d characters)" % [current_round, _team_manager.get_size()])
 	return true
 
 
@@ -158,12 +152,8 @@ func end_run(victory: bool) -> void:
 	Args:
 		victory: True if player won (10 combats), false if defeated (0 reputation)
 	"""
-	print("RunManager: Ending run - %s" % ("VICTORY" if victory else "DEFEAT"))
-
 	# Clear run state
 	_clear_run_state()
-
-	print("RunManager: Run ended, state cleared")
 
 
 func _clear_run_state() -> void:
@@ -183,7 +173,6 @@ func _clear_run_state() -> void:
 
 	# Delete save file
 	JsonPersistence.delete_file(SAVE_PATH)
-	print("RunManager: Run save file deleted")
 
 
 # =============================================================================
@@ -255,9 +244,6 @@ func complete_encounter() -> void:
 	encounters_this_round += 1
 	if encounters_this_round >= GameConstants.ENCOUNTERS_PER_ROUND:
 		current_phase = PHASE_COMBAT
-		print("RunManager: Encounters complete (%d/%d), switching to combat phase" % [encounters_this_round, GameConstants.ENCOUNTERS_PER_ROUND])
-	else:
-		print("RunManager: Encounter complete (%d/%d), another encounter available" % [encounters_this_round, GameConstants.ENCOUNTERS_PER_ROUND])
 	phase_changed.emit(current_phase)
 	save_run_state()
 
@@ -295,7 +281,6 @@ func lose_reputation(amount: int) -> void:
 	"""Lose reputation (from combat loss)."""
 	reputation = max(0, reputation - amount)
 	reputation_changed.emit(reputation)
-	print("RunManager: Lost %d reputation (now %d)" % [amount, reputation])
 	save_run_state()
 
 
@@ -381,7 +366,6 @@ func apply_combat_rewards(won: bool, combat_data: Dictionary) -> void:
 		# Lose reputation equal to round number
 		var reputation_loss = RewardCalculator.calculate_reputation_loss(current_round)
 		lose_reputation(reputation_loss)
-		print("RunManager: Defeat! Lost %d reputation" % reputation_loss)
 
 
 func complete_combat(won: bool, combat_data: Dictionary) -> void:

@@ -37,28 +37,21 @@ func save_account() -> void:
 		"unlocked_character_ids": _collection.get_unlocked_character_ids()
 	}
 
-	if JsonPersistence.save_json(SAVE_PATH, save_data):
-		print("PlayerAccount: Account saved")
+	JsonPersistence.save_json(SAVE_PATH, save_data)
 
 
 func load_account() -> void:
 	"""Load player account from local JSON file."""
 	if not JsonPersistence.file_exists(SAVE_PATH):
-		print("PlayerAccount: No save file found, creating default account")
 		_create_default_account()
 		return
 
 	var data = JsonPersistence.load_json(SAVE_PATH)
 	if data == null:
-		print("PlayerAccount: Failed to load save, creating default account")
 		_create_default_account()
 		return
 
 	_load_from_data(data)
-	print("PlayerAccount: Account loaded successfully")
-	print("  - Gems: %d" % _currency.get_gems())
-	print("  - Reroll Tokens: %d" % _currency.get_reroll_tokens())
-	print("  - Unlocked Characters: %d" % _collection.get_character_count())
 
 
 func _load_from_data(data: Dictionary) -> void:
@@ -80,7 +73,6 @@ func _load_from_data(data: Dictionary) -> void:
 
 func _create_default_account() -> void:
 	"""Create a new player account with starting characters unlocked."""
-	print("PlayerAccount: Creating default account...")
 
 	_player_id = "player_%d" % Time.get_unix_time_from_system()
 
@@ -97,7 +89,6 @@ func _create_default_account() -> void:
 		_collection.unlock_character(char_id)
 
 	save_account()
-	print("PlayerAccount: Default account created with %d characters" % starting_chars.size())
 
 
 func _setup_manager_connections() -> void:

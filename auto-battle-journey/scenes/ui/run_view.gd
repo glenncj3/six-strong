@@ -8,14 +8,10 @@ extends Control
 
 
 func _ready() -> void:
-	print("RunView: Scene loaded, initializing...")
-
 	RunManager.phase_changed.connect(_on_phase_changed)
 
 	_setup_phase()
 	_play_entrance_animations()
-
-	print("RunView: Initialization complete")
 
 
 func _play_entrance_animations() -> void:
@@ -49,7 +45,6 @@ func _generate_encounter_options() -> void:
 
 
 func _on_encounter_selected(encounter_data: Dictionary) -> void:
-	print("RunView: Selected encounter %s" % encounter_data["name"])
 	SceneManager.set_scene_data("selected_encounter", encounter_data)
 	SceneManager.go_to("encounter_execute")
 
@@ -66,7 +61,6 @@ func _generate_combat_options() -> void:
 
 
 func _on_combat_selected(combat_data: Dictionary) -> void:
-	print("RunView: Selected combat %s" % combat_data["name"])
 	SceneManager.set_scene_data("selected_combat", combat_data)
 	SceneManager.go_to("combat_stub")
 

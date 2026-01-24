@@ -209,7 +209,6 @@ func _equip_item(item_id: String) -> void:
 	var char_id = current_character_data.get("id", "")
 	var success = PlayerAccount.equip_item(char_id, item_id)
 	if success:
-		print("CharacterDetails: Equipped %s" % item_id)
 		_refresh_display()
 
 
@@ -218,7 +217,6 @@ func _unequip_item(item_id: String) -> void:
 	var char_id = current_character_data.get("id", "")
 	var success = PlayerAccount.unequip_item(char_id, item_id)
 	if success:
-		print("CharacterDetails: Unequipped %s" % item_id)
 		_refresh_display()
 
 

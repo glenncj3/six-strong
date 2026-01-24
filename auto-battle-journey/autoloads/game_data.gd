@@ -25,20 +25,11 @@ func _ready() -> void:
 
 func load_all_data() -> void:
 	"""Load all master data from JSON files."""
-	print("GameData: Loading all master data...")
-
 	_load_characters()
 	_load_items()
 	_load_item_upgrades()
 	_load_skills()
 	_load_encounter_types()
-
-	print("GameData: All data loaded successfully")
-	print("  - Characters: %d" % characters.size())
-	print("  - Items: %d" % items.size())
-	print("  - Item Upgrades: %d" % item_upgrades.size())
-	print("  - Skills: %d" % skills.size())
-	print("  - Encounter Types: %d" % encounter_types.size())
 
 
 func _load_data_collection(path: String, container_key: String, target_dict: Dictionary) -> void:

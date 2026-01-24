@@ -52,7 +52,6 @@ func generate_encounter_options(count: int) -> Array:
 
 		encounter_generated.emit(encounter_type)
 
-	print("EncounterFactory: Generated %d encounter options" % options.size())
 	return options
 
 

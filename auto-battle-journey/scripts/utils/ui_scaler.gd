@@ -4,11 +4,11 @@ extends RefCounted
 # Converts percentages to pixels based on design resolution (720x1280)
 
 # =============================================================================
-# DESIGN CONSTANTS
+# DESIGN CONSTANTS (sourced from GameConstants)
 # =============================================================================
 
-const DESIGN_WIDTH := 720.0
-const DESIGN_HEIGHT := 1280.0
+const DESIGN_WIDTH: float = GameConstants.DESIGN_WIDTH
+const DESIGN_HEIGHT: float = GameConstants.DESIGN_HEIGHT
 
 # =============================================================================
 # CARD SIZE VARIANTS
@@ -113,11 +113,9 @@ static func get_skill_icon_size(compact: bool = false) -> Vector2:
 	return Vector2(vw(7.8), vh(5.5))
 
 
-static func get_skill_image_size(compact: bool = false) -> float:
-	"""Get skill icon image size in pixels."""
-	if compact:
-		return vw(5.5)  # ~40px
-	return vw(5.5)  # ~40px
+static func get_skill_image_size() -> float:
+	"""Get skill icon image size in pixels (~40px)."""
+	return vw(5.5)
 
 
 # =============================================================================

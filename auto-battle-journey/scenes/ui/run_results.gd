@@ -335,8 +335,6 @@ func _on_reroll_tokens_changed(new_amount: int) -> void:
 
 func _on_continue_pressed() -> void:
 	"""Return to main menu."""
-	print("RunResults: Continuing to main menu")
-
 	# End run and clear state (if not already done)
 	if RunManager.is_run_active:
 		RunManager.end_run(was_victory)

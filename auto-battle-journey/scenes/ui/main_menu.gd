@@ -112,16 +112,13 @@ func _on_reroll_tokens_changed(new_amount: int) -> void:
 func _on_play_pressed() -> void:
 	# Check if there's an active run to resume
 	if RunManager.has_active_run():
-		print("MainMenu: Resuming active run...")
 		RunManager.load_run_state()
 		SceneManager.go_to("run_view")
 	else:
-		print("MainMenu: Starting new run (draft)...")
 		SceneManager.go_to_draft()
 
 
 func _on_collection_pressed() -> void:
-	print("MainMenu: Opening collection...")
 	SceneManager.go_to_collection(false)
 
 
@@ -136,7 +133,6 @@ func _input(event: InputEvent) -> void:
 			KEY_T:
 				PlayerAccount.add_reroll_token()
 				_update_currency_display()
-				print("MainMenu: Added reroll token (Debug)")
 			KEY_D:
 				_open_debug_menu()
 
@@ -145,4 +141,3 @@ func _open_debug_menu() -> void:
 	"""Open the debug menu overlay."""
 	var debug_menu = DebugMenuScene.instantiate()
 	add_child(debug_menu)
-	print("MainMenu: Opened debug menu")
