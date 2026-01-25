@@ -41,8 +41,9 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 
 	for i in range(heal_options.size()):
 		var option = heal_options[i]
-		# Build tile data with display info
+		# Build tile data with display info (use index as unique ID)
 		var tile_data = {
+			"id": "heal_option_%d" % i,
 			"heal_amount": option.get("heal_amount", 10),
 			"cost": option.get("cost", 10),
 			"name": "+%d HP" % option.get("heal_amount", 10),
@@ -73,7 +74,7 @@ static func _on_option_selected(tile_data: Dictionary) -> void:
 	"""Handle heal option tile selection."""
 	_selected_option = tile_data
 
-	EncounterUIHelpers.highlight_selected_tile(_tiles, tile_data, "heal_amount", false)
+	EncounterUIHelpers.highlight_selected_tile(_tiles, tile_data, "id", false)
 
 	# Show character selector
 	_show_character_selector()
