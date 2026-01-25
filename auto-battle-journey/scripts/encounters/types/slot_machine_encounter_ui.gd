@@ -64,7 +64,6 @@ class SlotMachineController extends VBoxContainer:
 	var extra_spin_button: Button
 	var result_label: Label
 	var total_winnings: int = 0
-	var winnings_label: Label
 
 	# Resource cost config
 	var extra_spin_cost: int = 0
@@ -77,8 +76,8 @@ class SlotMachineController extends VBoxContainer:
 		context = p_context
 
 		set_anchors_preset(Control.PRESET_FULL_RECT)
-		add_theme_constant_override("separation", 16)
-		alignment = BoxContainer.ALIGNMENT_CENTER
+		add_theme_constant_override("separation", 10)
+		alignment = BoxContainer.ALIGNMENT_BEGIN
 
 		var data = encounter_data.get("data", {})
 		spins_remaining = data.get("free_spins", 2)
@@ -95,6 +94,16 @@ class SlotMachineController extends VBoxContainer:
 		var triple = data.get("triple_reward", 50)
 		var pair = data.get("pair_reward", 15)
 
+		# Result label (shown in empty space at top, below encounter title)
+		result_label = UIHelpers.create_label(
+			"",
+			GameConstants.FONT_SIZE_REWARD,
+			GameConstants.COLOR_SUCCESS,
+			true
+		)
+		result_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		add_child(result_label)
+
 		# Payout info
 		var payout_text = "💎x3: %d | 3 match: %d | 2 match: %d" % [jackpot, triple, pair]
 		var payout_label = UIHelpers.create_label(
@@ -105,8 +114,6 @@ class SlotMachineController extends VBoxContainer:
 		)
 		payout_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		add_child(payout_label)
-
-		add_child(UIHelpers.create_spacer(8))
 
 		# Reel container
 		var reel_center = CenterContainer.new()
@@ -143,46 +150,24 @@ class SlotMachineController extends VBoxContainer:
 		reel_center.add_child(reel_box)
 		add_child(reel_center)
 
-		add_child(UIHelpers.create_spacer(8))
-
-		# Result label
-		result_label = UIHelpers.create_label(
-			"",
-			GameConstants.FONT_SIZE_REWARD,
-			GameConstants.COLOR_SUCCESS,
-			true
-		)
-		result_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		add_child(result_label)
-
-		# Winnings tracker
-		winnings_label = UIHelpers.create_label(
-			"",
-			GameConstants.FONT_SIZE_BODY,
-			GameConstants.COLOR_GOLD,
-			true
-		)
-		winnings_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		add_child(winnings_label)
-
-		add_child(UIHelpers.create_spacer(8))
+		add_child(UIHelpers.create_spacer(20))
 
 		# Buttons
 		var button_box = HBoxContainer.new()
 		button_box.alignment = BoxContainer.ALIGNMENT_CENTER
 		button_box.add_theme_constant_override("separation", 16)
 
-		spin_button = UIHelpers.create_button("Spins: %d" % spins_remaining, _on_spin_pressed, 150, 60)
+		spin_button = UIHelpers.create_button("Spins: %d" % spins_remaining, _on_spin_pressed, 160, 50)
 		UIStyles.setup_success_button(spin_button)
-		spin_button.add_theme_font_size_override("font_size", 24)
+		spin_button.add_theme_font_size_override("font_size", 20)
 		button_box.add_child(spin_button)
 
 		var resource_icon = "💰" if extra_spin_resource == "gold" else "❤️"
 		extra_spin_button = UIHelpers.create_button(
 			"+1 Spin (%s%d)" % [resource_icon, extra_spin_cost],
 			_on_extra_spin_pressed,
-			180,
-			60
+			160,
+			50
 		)
 		UIStyles.setup_button(extra_spin_button)
 		button_box.add_child(extra_spin_button)
@@ -437,7 +422,7 @@ class SlotMachineController extends VBoxContainer:
 				RunManager.add_gold(reward)
 
 			result_label.add_theme_color_override("font_color", GameConstants.COLOR_SUCCESS)
-			_update_winnings_display()
+			message += " (Total: +%d)" % total_winnings
 
 		result_label.text = message
 		_update_button_states()
@@ -487,15 +472,6 @@ class SlotMachineController extends VBoxContainer:
 		spin_button.pivot_offset = spin_button.size / 2
 		tween.tween_property(spin_button, "scale", Vector2(1.1, 1.1), 0.1)
 		tween.tween_property(spin_button, "scale", Vector2(1.0, 1.0), 0.1)
-
-
-	func _update_winnings_display() -> void:
-		if total_winnings > 0:
-			winnings_label.text = "Total Winnings: +%d Gold" % total_winnings
-
-			var tween = create_tween()
-			tween.tween_property(winnings_label, "scale", Vector2(1.15, 1.15), 0.1)
-			tween.tween_property(winnings_label, "scale", Vector2(1.0, 1.0), 0.1)
 
 
 	func _update_button_states() -> void:

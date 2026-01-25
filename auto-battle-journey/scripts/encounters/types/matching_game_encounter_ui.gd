@@ -47,7 +47,7 @@ class MatchingGameController extends VBoxContainer:
 		context = p_context
 
 		set_anchors_preset(Control.PRESET_FULL_RECT)
-		add_theme_constant_override("separation", 12)
+		add_theme_constant_override("separation", 4)
 		alignment = BoxContainer.ALIGNMENT_CENTER
 
 		var data = encounter_data.get("data", {})
@@ -75,13 +75,15 @@ class MatchingGameController extends VBoxContainer:
 		rewards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		add_child(rewards)
 
-		# Result label (shown when match is found)
-		result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_REWARD, GameConstants.COLOR_SUCCESS, true)
-		result_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		add_child(result_label)
+		add_child(UIHelpers.create_spacer(10))
 
 		# Create grid
 		_create_tile_grid()
+
+		# Result label (shown when match is found) - placed after grid
+		result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true)
+		result_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		add_child(result_label)
 
 
 	func _create_tile_grid() -> void:
