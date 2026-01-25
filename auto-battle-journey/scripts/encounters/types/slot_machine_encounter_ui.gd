@@ -175,7 +175,7 @@ class SlotMachineController extends VBoxContainer:
 		add_child(button_box)
 
 
-	func _create_reel(index: int) -> PanelContainer:
+	func _create_reel(_index: int) -> PanelContainer:
 		var panel = PanelContainer.new()
 		panel.custom_minimum_size = Vector2(REEL_WIDTH, REEL_HEIGHT)
 
@@ -304,11 +304,9 @@ class SlotMachineController extends VBoxContainer:
 		current_symbols[reel_index] = final_symbol
 
 		# Create spinning animation
-		var elapsed := 0.0
 		var spin_interval := 1.0 / SYMBOLS_PER_SECOND
-		var next_change := 0.0
 
-		# Use a timer-based approach for symbol cycling
+		# Use a tween-based approach for symbol cycling
 		var tween = create_tween()
 		tween.set_loops(int(stop_time / spin_interval))
 

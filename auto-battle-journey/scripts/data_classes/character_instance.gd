@@ -131,12 +131,6 @@ func learn_skill(skill_id: String) -> bool:
 	if skill_data.is_empty():
 		return false
 
-	# Check level requirement
-	var level_req = skill_data.get("level_requirement", 1)
-	if level < level_req:
-		push_warning("CharacterInstance: Level too low for skill %s (requires %d)" % [skill_id, level_req])
-		return false
-
 	learned_skills.append(skill_id)
 
 	# Apply skill effects using StatCalculator
@@ -170,12 +164,6 @@ func equip_item_upgrade(item_upgrade_id: String) -> bool:
 
 	var upgrade_data = _get_game_data().get_item_upgrade_by_id(item_upgrade_id)
 	if upgrade_data.is_empty():
-		return false
-
-	# Check level requirement
-	var level_req = upgrade_data.get("level_requirement", 1)
-	if level < level_req:
-		push_warning("CharacterInstance: Level too low for upgrade (requires %d)" % level_req)
 		return false
 
 	equipped_item_upgrades.append(item_upgrade_id)

@@ -186,17 +186,34 @@ func _gen_pick_from_pool(params: Dictionary, pool: Array, default_min: int, defa
 	return result
 
 
+func _get_team_max_level() -> int:
+	"""Get the highest level among team members."""
+	var team = RunManager.get_team()
+	var max_level = 1
+	for char_instance in team:
+		max_level = maxi(max_level, char_instance.level)
+	return max_level
+
+
+func _filter_pool_by_level(pool: Array, max_level: int) -> Array:
+	"""Filter a pool of items/skills by level_requirement."""
+	var filtered: Array = []
+	for entry in pool:
+		var level_req = entry.get("level_requirement", 1)
+		if max_level >= level_req:
+			filtered.append(entry)
+	return filtered
+
+
 func _gen_pick_learnable_skill(_params: Dictionary) -> String:
-	var all_skills = GameData.get_all_skills()
+	var all_skills = _filter_pool_by_level(GameData.get_all_skills(), _get_team_max_level())
 	var team = RunManager.get_team()
 
 	var learnable_skills: Array = []
 	for skill in all_skills:
 		var skill_id = skill["id"]
-		var level_req = skill.get("level_requirement", 1)
-
 		for char_instance in team:
-			if skill_id not in char_instance.learned_skills and char_instance.level >= level_req:
+			if skill_id not in char_instance.learned_skills:
 				learnable_skills.append(skill)
 				break
 
@@ -210,16 +227,14 @@ func _gen_pick_learnable_skill(_params: Dictionary) -> String:
 func _gen_pick_learnable_skills(params: Dictionary) -> Array:
 	"""Pick multiple learnable skills for the team."""
 	var count = int(params.get("count", 3))
-	var all_skills = GameData.get_all_skills()
+	var all_skills = _filter_pool_by_level(GameData.get_all_skills(), _get_team_max_level())
 	var team = RunManager.get_team()
 
 	var learnable_skills: Array = []
 	for skill in all_skills:
 		var skill_id = skill["id"]
-		var level_req = skill.get("level_requirement", 1)
-
 		for char_instance in team:
-			if skill_id not in char_instance.learned_skills and char_instance.level >= level_req:
+			if skill_id not in char_instance.learned_skills:
 				learnable_skills.append(skill["id"])
 				break
 
@@ -231,20 +246,19 @@ func _gen_pick_shop_offerings(params: Dictionary) -> Array:
 	"""Pick a mix of items and skills for the shop (max 3 total)."""
 	var count = int(params.get("count", 3))
 	var offerings: Array = []
+	var team_max_level = _get_team_max_level()
 
-	# Get available items (item upgrades)
-	var all_items = GameData.get_all_item_upgrades()
-	all_items.shuffle()
+	var available_items = _filter_pool_by_level(GameData.get_all_item_upgrades(), team_max_level)
+	available_items.shuffle()
 
-	# Get available skills
-	var all_skills = GameData.get_all_skills()
-	all_skills.shuffle()
+	var available_skills = _filter_pool_by_level(GameData.get_all_skills(), team_max_level)
+	available_skills.shuffle()
 
 	# Mix items and skills randomly
 	var pool: Array = []
-	for item in all_items:
+	for item in available_items:
 		pool.append({"type": "item", "data": item})
-	for skill in all_skills:
+	for skill in available_skills:
 		pool.append({"type": "skill", "data": skill})
 
 	pool.shuffle()

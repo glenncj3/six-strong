@@ -338,7 +338,7 @@ func _wipe_out(radial: bool, duration: float) -> void:
 	await tween.finished
 
 
-func _wipe_in(radial: bool, duration: float) -> void:
+func _wipe_in(_radial: bool, duration: float) -> void:
 	"""Reverse wipe effect."""
 	var tween = create_tween()
 	tween.set_ease(GameConstants.ANIM_EASE_STANDARD)
