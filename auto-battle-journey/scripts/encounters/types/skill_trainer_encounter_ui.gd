@@ -70,7 +70,7 @@ static func _on_skill_selected(skill_data: Dictionary) -> void:
 	"""Handle skill tile selection."""
 	_selected_skill_data = skill_data
 
-	EncounterUIHelpers.highlight_selected_tile(_tiles, skill_data, "id", false)
+	EncounterUIHelpers.highlight_selected_tile(_tiles, skill_data, "id", true)
 
 	# Show character selector
 	_show_character_selector()

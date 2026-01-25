@@ -74,7 +74,7 @@ static func _on_option_selected(tile_data: Dictionary) -> void:
 	"""Handle heal option tile selection."""
 	_selected_option = tile_data
 
-	EncounterUIHelpers.highlight_selected_tile(_tiles, tile_data, "id", false)
+	EncounterUIHelpers.highlight_selected_tile(_tiles, tile_data, "id", true)
 
 	# Show character selector
 	_show_character_selector()
