@@ -21,26 +21,6 @@
       }
     },
     {
-      "type": "xp_reward",
-      "name": "Training Dummy",
-      "description": "Practice your skills and gain experience.",
-      "image_path": "res://assets/encounters/training.png",
-      "weight": 1.0,
-      "immediate_complete": true,
-      "colors": {
-        "bg": "#2D5A8A",
-        "hover": "#4D7AAA",
-        "pressed": "#1D4A7A",
-        "border": "#B88726"
-      },
-      "generation": {
-        "data_fields": {
-          "xp_amount": {"generator": "random_range", "min": "XP_REWARD_MIN", "max": "XP_REWARD_MAX"}
-        },
-        "scales_with_round": true
-      }
-    },
-    {
       "type": "gold_reward",
       "name": "Treasure Chest",
       "description": "You found a chest full of gold!",
@@ -116,27 +96,6 @@
           "bet_amount": {"generator": "random_range", "min": 20, "max": 40},
           "win_multiplier": {"generator": "constant", "value": 3}
         }
-      }
-    },
-    {
-      "type": "elite_challenge",
-      "name": "Elite Challenge",
-      "description": "A difficult trial with great rewards.",
-      "image_path": "res://assets/encounters/elite.png",
-      "weight": 0.4,
-      "immediate_complete": false,
-      "colors": {
-        "bg": "#8A5A2A",
-        "hover": "#AA7A4A",
-        "pressed": "#6A3A1A",
-        "border": "#B88726"
-      },
-      "generation": {
-        "data_fields": {
-          "xp_reward": {"generator": "random_range", "min": 80, "max": 120},
-          "gold_reward": {"generator": "random_range", "min": 40, "max": 60}
-        },
-        "scales_with_round": true
       }
     },
     {

@@ -33,10 +33,6 @@ static func _register_default_handlers() -> void:
 			"create_ui": ShopEncounterUI.create_ui,
 			"get_reward_preview": ShopEncounterUI.get_reward_preview
 		},
-		"xp_reward": {
-			"create_ui": XpRewardEncounterUI.create_ui,
-			"get_reward_preview": XpRewardEncounterUI.get_reward_preview
-		},
 		"gold_reward": {
 			"create_ui": GoldRewardEncounterUI.create_ui,
 			"get_reward_preview": GoldRewardEncounterUI.get_reward_preview
@@ -52,10 +48,6 @@ static func _register_default_handlers() -> void:
 		"gamble": {
 			"create_ui": GambleEncounterUI.create_ui,
 			"get_reward_preview": GambleEncounterUI.get_reward_preview
-		},
-		"elite_challenge": {
-			"create_ui": EliteChallengeEncounterUI.create_ui,
-			"get_reward_preview": EliteChallengeEncounterUI.get_reward_preview
 		},
 		"matching_game": {
 			"create_ui": MatchingGameEncounterUI.create_ui,
