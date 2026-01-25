@@ -29,6 +29,7 @@ func _ready() -> void:
 		"pick_items": _gen_pick_items,
 		"pick_skills": _gen_pick_skills,
 		"pick_learnable_skill": _gen_pick_learnable_skill,
+		"pick_learnable_skills": _gen_pick_learnable_skills,
 	}
 
 	# Use GameData's cached encounter types (single source of truth)
@@ -203,3 +204,23 @@ func _gen_pick_learnable_skill(_params: Dictionary) -> String:
 	if learnable_skills.size() > 0:
 		return learnable_skills[0]["id"]
 	return ""
+
+
+func _gen_pick_learnable_skills(params: Dictionary) -> Array:
+	"""Pick multiple learnable skills for the team."""
+	var count = int(params.get("count", 3))
+	var all_skills = GameData.get_all_skills()
+	var team = RunManager.get_team()
+
+	var learnable_skills: Array = []
+	for skill in all_skills:
+		var skill_id = skill["id"]
+		var level_req = skill.get("level_requirement", 1)
+
+		for char_instance in team:
+			if skill_id not in char_instance.learned_skills and char_instance.level >= level_req:
+				learnable_skills.append(skill["id"])
+				break
+
+	learnable_skills.shuffle()
+	return learnable_skills.slice(0, count)

@@ -1,71 +1,143 @@
 class_name SkillTrainerEncounterUI
 extends RefCounted
 ## UI creation and reward preview for skill trainer encounters.
+## Shows 3 skill options, player picks one, then picks a character to learn it.
+
+const SkillTileScene = preload("res://scenes/components/skill_tile.tscn")
+
+# Store references for callback access
+static var _selected_skill_data: Dictionary = {}
+static var _on_complete: Callable = Callable()
+static var _on_skill_learn: Callable = Callable()
+static var _on_gold_spend: Callable = Callable()
+static var _tiles: Array = []
+static var _char_selector_container: Control = null
+static var _confirm_btn: Button = null
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create skill trainer encounter UI."""
-	var vbox = UIHelpers.create_vbox_container(12)
+	var vbox = UIHelpers.create_vbox_container(8)
 
-	var skill_id = encounter_data["data"]["skill_id"]
-	var skill_data = GameData.get_skill_by_id(skill_id)
-	var on_complete = context.get("on_encounter_complete", Callable())
-	var on_skill_learn = context.get("on_skill_learn", Callable())
+	var skill_ids: Array = encounter_data["data"].get("skill_ids", [])
+	_on_complete = context.get("on_encounter_complete", Callable())
+	_on_skill_learn = context.get("on_skill_learn", Callable())
+	_on_gold_spend = context.get("on_gold_spend", Callable())
+	_selected_skill_data = {}
+	_tiles.clear()
 
-	if skill_data.is_empty():
-		vbox.add_child(UIHelpers.create_label("No skill available...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
-		if on_complete.is_valid():
-			on_complete.call()
+	if skill_ids.is_empty():
+		vbox.add_child(UIHelpers.create_label("No skills available...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
+		if _on_complete.is_valid():
+			_on_complete.call()
 		return vbox
 
-	vbox.add_child(UIHelpers.create_label("The trainer offers to teach:", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
-	vbox.add_child(UIHelpers.create_label(skill_data["name"], GameConstants.FONT_SIZE_REWARD, GameConstants.COLOR_SUCCESS, true))
-	vbox.add_child(UIHelpers.create_label(skill_data["description"], GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
+	# Create horizontal container for skill tiles
+	var hbox = UIHelpers.create_hbox_container(8, BoxContainer.ALIGNMENT_CENTER)
+	vbox.add_child(hbox)
 
-	if skill_data.has("level_requirement"):
-		vbox.add_child(UIHelpers.create_label("(Requires Level %d)" % skill_data["level_requirement"], GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_WARNING, true))
+	var tile_size = UIScaler.calculate_tile_size(GameConstants.DESIGN_WIDTH, GameConstants.TEAM_SIZE, 48.0, 8.0, 180.0)
 
-	vbox.add_child(UIHelpers.create_spacer(20))
-	vbox.add_child(UIHelpers.create_label("Choose a character to learn this skill:", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
+	for i in range(skill_ids.size()):
+		var skill_id = skill_ids[i]
+		var skill_data = GameData.get_skill_by_id(skill_id)
+		if skill_data.is_empty():
+			continue
 
-	var team = RunManager.get_team()
+		var tile = SkillTileScene.instantiate()
+		hbox.add_child(tile)
+		# Defer setup until tile enters the scene tree
+		tile.ready.connect(_setup_tile.bind(tile, skill_data, tile_size))
+		_tiles.append(tile)
 
-	for i in range(team.size()):
-		var char_instance = team[i]
-		var button = UIContainerHelpers.create_button(
-			"Teach %s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
-		)
-		button.pressed.connect(_on_skill_trainer_selected.bind(i, skill_id, button, vbox, on_complete, on_skill_learn))
-		vbox.add_child(button)
+	# Character selector (hidden until skill is selected)
+	_char_selector_container = UIHelpers.create_vbox_container(8)
+	_char_selector_container.visible = false
+	vbox.add_child(_char_selector_container)
 
 	return vbox
 
 
-static func get_reward_preview(encounter_data: Dictionary) -> String:
-	"""Get reward preview for skill trainer encounter."""
-	var data = encounter_data.get("data", {})
-	var skill_data = GameData.get_skill_by_id(data.get("skill_id", ""))
-	if not skill_data.is_empty():
-		return "Free: %s" % skill_data["name"]
-	return "Free Skill"
+static func _setup_tile(tile: Control, skill_data: Dictionary, tile_size: float) -> void:
+	"""Setup tile after it enters the scene tree."""
+	tile.setup(skill_data, tile_size)
+	tile.tile_clicked.connect(_on_skill_selected)
 
 
-static func _on_skill_trainer_selected(char_index: int, skill_id: String, button: Button, container: VBoxContainer, on_complete: Callable, on_skill_learn: Callable) -> void:
-	"""Handle skill trainer selection."""
+static func _on_skill_selected(skill_data: Dictionary) -> void:
+	"""Handle skill tile selection."""
+	_selected_skill_data = skill_data
+
+	# Dim all tiles and highlight selected
+	for tile in _tiles:
+		if tile.skill_data.get("id") == skill_data.get("id"):
+			tile.modulate = Color(0.6, 1.0, 0.6)
+		else:
+			tile.modulate = Color(0.5, 0.5, 0.5)
+			tile.set_clickable(false)
+
+	# Show character selector
+	_show_character_selector()
+
+
+static func _show_character_selector() -> void:
+	"""Show dropdown to select which character learns the skill."""
+	UIHelpers.clear_children(_char_selector_container)
+	_char_selector_container.visible = true
+
+	var cost = _selected_skill_data.get("cost", 0)
+	var can_afford = RunManager.get_gold() >= cost
+
+	var team = RunManager.get_team()
+	var selector = UIPanelFactory.create_team_selector(team)
+	_char_selector_container.add_child(selector)
+
+	_confirm_btn = UIContainerHelpers.create_button("Learn (%dg)" % cost)
+	if can_afford:
+		UIStyles.setup_success_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
+	else:
+		UIStyles.setup_danger_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
+		_confirm_btn.disabled = true
+		_confirm_btn.text = "Not enough gold (%dg)" % cost
+	_confirm_btn.pressed.connect(_on_confirm_learn.bind(selector))
+	_char_selector_container.add_child(_confirm_btn)
+
+
+static func _on_confirm_learn(selector: OptionButton) -> void:
+	"""Confirm skill learning for selected character."""
+	var char_index = selector.selected - 1  # First option is "Select..."
+	if char_index < 0:
+		return
+
+	var cost = _selected_skill_data.get("cost", 0)
+
+	# Try to spend gold
+	var gold_spent = false
+	if _on_gold_spend.is_valid():
+		gold_spent = _on_gold_spend.call(cost)
+	else:
+		gold_spent = RunManager.spend_gold(cost)
+
+	if not gold_spent:
+		return
+
 	var team = RunManager.get_team()
 	var char_instance = team[char_index]
+	var skill_id = _selected_skill_data.get("id", "")
 
 	var success = false
-	if on_skill_learn.is_valid():
-		success = on_skill_learn.call(char_instance, skill_id)
+	if _on_skill_learn.is_valid():
+		success = _on_skill_learn.call(char_instance, skill_id)
 	else:
 		success = char_instance.learn_skill(skill_id)
 
 	if success:
-		button.text = "Skill Learned!"
-		UIContainerHelpers.disable_all_buttons(container)
-		if on_complete.is_valid():
-			on_complete.call()
-	else:
-		button.text = "Cannot Learn (Level/Already Known)"
-		button.disabled = true
+		# Hide selector and show success
+		_char_selector_container.visible = false
+		if _on_complete.is_valid():
+			_on_complete.call()
+
+
+static func get_reward_preview(_encounter_data: Dictionary) -> String:
+	"""Get reward preview for skill trainer encounter."""
+	return "Buy Skill"

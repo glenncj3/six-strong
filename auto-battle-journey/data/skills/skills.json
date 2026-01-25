@@ -6,6 +6,7 @@
       "description": "A powerful attack technique.",
       "image_path": "res://assets/skills/power_strike.png",
       "effects": [],
+      "cost": 10,
       "level_requirement": 3
     },
     {
@@ -14,7 +15,8 @@
       "description": "Improves evasion ability.",
       "image_path": "res://assets/skills/dodge.png",
       "effects": [],
-      "level_requirement": 2
+      "cost": 10,
+      "level_requirement": 1
     },
     {
       "id": "skill_iron_skin",
@@ -22,6 +24,7 @@
       "description": "Increases defend rate by 10%.",
       "image_path": "res://assets/skills/iron_skin.png",
       "effects": [{"type": "stat_add", "stat": "defendRate", "value": 10}],
+      "cost": 10,
       "level_requirement": 4
     },
     {
@@ -30,6 +33,7 @@
       "description": "Increases max health by 20.",
       "image_path": "res://assets/skills/vitality.png",
       "effects": [{"type": "stat_add", "stat": "health", "value": 20}],
+      "cost": 10,
       "level_requirement": 1
     },
     {
@@ -38,6 +42,7 @@
       "description": "A powerful magical attack.",
       "image_path": "res://assets/skills/arcane_blast.png",
       "effects": [],
+      "cost": 10,
       "level_requirement": 2
     },
     {
@@ -46,6 +51,7 @@
       "description": "A rapid ranged attack.",
       "image_path": "res://assets/skills/quick_shot.png",
       "effects": [],
+      "cost": 10,
       "level_requirement": 3
     },
     {
@@ -56,6 +62,7 @@
       "effects": [
         {"type": "stat_add", "stat": "defendRate", "value": -5}
       ],
+      "cost": 10,
       "level_requirement": 2
     },
     {
@@ -66,6 +73,7 @@
       "effects": [
         {"type": "stat_add", "stat": "health", "value": 15}
       ],
+      "cost": 10,
       "level_requirement": 3
     },
     {
@@ -77,6 +85,7 @@
         {"type": "stat_add", "stat": "defendRate", "value": 5},
         {"type": "stat_add", "stat": "health", "value": 5}
       ],
+      "cost": 10,
       "level_requirement": 2
     },
     {
@@ -85,6 +94,7 @@
       "description": "A devastating sneak attack.",
       "image_path": "res://assets/skills/backstab.png",
       "effects": [],
+      "cost": 10,
       "level_requirement": 4
     },
     {
@@ -95,7 +105,8 @@
       "effects": [
         {"type": "stat_add", "stat": "health", "value": 10}
       ],
-      "level_requirement": 2
+      "cost": 10,
+      "level_requirement": 1
     },
     {
       "id": "skill_swiftness",
@@ -103,6 +114,7 @@
       "description": "Greatly improves agility.",
       "image_path": "res://assets/skills/swiftness.png",
       "effects": [],
+      "cost": 10,
       "level_requirement": 3
     }
   ]

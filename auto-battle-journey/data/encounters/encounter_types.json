@@ -62,7 +62,7 @@
     {
       "type": "skill_trainer",
       "name": "Skill Trainer",
-      "description": "Learn a random skill for free!",
+      "description": "Purchase a skill for your team.",
       "image_path": "res://assets/encounters/trainer.png",
       "weight": 0.7,
       "immediate_complete": false,
@@ -74,7 +74,7 @@
       },
       "generation": {
         "data_fields": {
-          "skill_id": {"generator": "pick_learnable_skill"}
+          "skill_ids": {"generator": "pick_learnable_skills", "count": 3}
         }
       }
     },
