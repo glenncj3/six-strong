@@ -161,6 +161,8 @@ class MatchingGameController extends VBoxContainer:
 		tile.is_revealed = true
 
 		var button: Button = tile.button
+		button.disabled = true  # Disable immediately to prevent double-clicks
+
 		var color: Color
 		var symbol: String
 
@@ -178,18 +180,33 @@ class MatchingGameController extends VBoxContainer:
 				color = COLOR_FACE_DOWN
 				symbol = "?"
 
-		button.text = symbol
+		# Flip animation
+		var tween = create_tween()
+		tween.set_ease(Tween.EASE_IN_OUT)
+		tween.set_trans(Tween.TRANS_SINE)
 
-		var style = StyleBoxFlat.new()
-		style.bg_color = color
-		style.set_corner_radius_all(8)
-		style.set_border_width_all(2)
-		style.border_color = GameConstants.COLOR_BORDER_GOLD
-		button.add_theme_stylebox_override("normal", style)
-		button.add_theme_stylebox_override("hover", style.duplicate())
-		button.add_theme_stylebox_override("pressed", style.duplicate())
-		button.add_theme_stylebox_override("disabled", style.duplicate())
-		button.disabled = true
+		# Store original pivot
+		button.pivot_offset = button.size / 2
+
+		# First half: scale X to 0 (flip away)
+		tween.tween_property(button, "scale:x", 0.0, 0.15)
+
+		# At midpoint, change appearance
+		tween.tween_callback(func():
+			button.text = symbol
+			var style = StyleBoxFlat.new()
+			style.bg_color = color
+			style.set_corner_radius_all(8)
+			style.set_border_width_all(2)
+			style.border_color = GameConstants.COLOR_BORDER_GOLD
+			button.add_theme_stylebox_override("normal", style)
+			button.add_theme_stylebox_override("hover", style.duplicate())
+			button.add_theme_stylebox_override("pressed", style.duplicate())
+			button.add_theme_stylebox_override("disabled", style.duplicate())
+		)
+
+		# Second half: scale X back to 1 (flip to reveal)
+		tween.tween_property(button, "scale:x", 1.0, 0.15)
 
 
 	func _complete_game(matched_type: String) -> void:
