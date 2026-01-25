@@ -55,12 +55,14 @@ class SlotMachineController extends VBoxContainer:
 	var context: Dictionary
 	var reel_labels: Array = []  # The Label nodes showing symbols
 	var current_symbols: Array = []  # Current symbol on each reel
+	var locked_reels: Array = []  # Whether each reel is locked
+	var lock_buttons: Array = []  # Lock button for each reel
 	var spinning: bool = false
+	var reels_still_spinning: int = 0
 	var spins_remaining: int = 0
 	var spin_button: Button
 	var extra_spin_button: Button
 	var result_label: Label
-	var spins_label: Label
 	var total_winnings: int = 0
 	var winnings_label: Label
 
@@ -93,16 +95,6 @@ class SlotMachineController extends VBoxContainer:
 		var triple = data.get("triple_reward", 50)
 		var pair = data.get("pair_reward", 15)
 
-		# Spins remaining
-		spins_label = UIHelpers.create_label(
-			"Spins: %d" % spins_remaining,
-			GameConstants.FONT_SIZE_BODY,
-			GameConstants.COLOR_GOLD,
-			true
-		)
-		spins_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		add_child(spins_label)
-
 		# Payout info
 		var payout_text = "💎x3: %d | 3 match: %d | 2 match: %d" % [jackpot, triple, pair]
 		var payout_label = UIHelpers.create_label(
@@ -124,10 +116,29 @@ class SlotMachineController extends VBoxContainer:
 		reel_box.add_theme_constant_override("separation", REEL_SPACING)
 
 		for i in range(REEL_COUNT):
+			var reel_column = VBoxContainer.new()
+			reel_column.add_theme_constant_override("separation", 8)
+
 			var reel = _create_reel(i)
 			reel_labels.append(reel)
 			current_symbols.append(SYMBOLS[randi() % SYMBOLS.size()])
-			reel_box.add_child(reel)
+			locked_reels.append(false)
+			reel_column.add_child(reel)
+
+			# Lock button below each reel
+			var lock_btn = Button.new()
+			lock_btn.custom_minimum_size = Vector2(50, 50)
+			lock_btn.text = "🔓"
+			lock_btn.add_theme_font_size_override("font_size", 24)
+			lock_btn.tooltip_text = "Lock this reel"
+			lock_btn.pressed.connect(_on_lock_pressed.bind(i))
+			lock_buttons.append(lock_btn)
+
+			var lock_center = CenterContainer.new()
+			lock_center.add_child(lock_btn)
+			reel_column.add_child(lock_center)
+
+			reel_box.add_child(reel_column)
 
 		reel_center.add_child(reel_box)
 		add_child(reel_center)
@@ -161,7 +172,7 @@ class SlotMachineController extends VBoxContainer:
 		button_box.alignment = BoxContainer.ALIGNMENT_CENTER
 		button_box.add_theme_constant_override("separation", 16)
 
-		spin_button = UIHelpers.create_button("SPIN!", _on_spin_pressed, 150, 60)
+		spin_button = UIHelpers.create_button("Spins: %d" % spins_remaining, _on_spin_pressed, 150, 60)
 		UIStyles.setup_success_button(spin_button)
 		spin_button.add_theme_font_size_override("font_size", 24)
 		button_box.add_child(spin_button)
@@ -209,6 +220,30 @@ class SlotMachineController extends VBoxContainer:
 		return panel
 
 
+	func _on_lock_pressed(reel_index: int) -> void:
+		if spinning:
+			return
+
+		locked_reels[reel_index] = not locked_reels[reel_index]
+		var btn: Button = lock_buttons[reel_index]
+		var panel: PanelContainer = reel_labels[reel_index]
+
+		if locked_reels[reel_index]:
+			btn.text = "🔒"
+			btn.tooltip_text = "Unlock this reel"
+			# Dim the locked reel slightly
+			var style: StyleBoxFlat = panel.get_theme_stylebox("panel").duplicate()
+			style.border_color = GameConstants.COLOR_TEXT_MUTED
+			panel.add_theme_stylebox_override("panel", style)
+		else:
+			btn.text = "🔓"
+			btn.tooltip_text = "Lock this reel"
+			# Restore normal border
+			var style: StyleBoxFlat = panel.get_theme_stylebox("panel").duplicate()
+			style.border_color = GameConstants.COLOR_BORDER_GOLD
+			panel.add_theme_stylebox_override("panel", style)
+
+
 	func _on_spin_pressed() -> void:
 		if spinning or spins_remaining <= 0:
 			return
@@ -254,16 +289,32 @@ class SlotMachineController extends VBoxContainer:
 		result_label.text = ""
 		_update_button_states()
 
-		# Animate each reel
+		# Track how many reels are actually spinning
+		reels_still_spinning = 0
+
+		# Animate each unlocked reel
 		for i in range(REEL_COUNT):
-			_animate_reel(i)
+			if not locked_reels[i]:
+				reels_still_spinning += 1
+
+		var spin_order := 0
+		for i in range(REEL_COUNT):
+			if not locked_reels[i]:
+				_animate_reel(i, spin_order)
+				spin_order += 1
+
+		# If all reels are locked, just evaluate immediately
+		if reels_still_spinning == 0:
+			var eval_tween = create_tween()
+			eval_tween.tween_interval(0.1)
+			eval_tween.tween_callback(_evaluate_spin)
 
 
-	func _animate_reel(reel_index: int) -> void:
+	func _animate_reel(reel_index: int, spin_order: int = 0) -> void:
 		var panel: PanelContainer = reel_labels[reel_index]
 		var label: Label = panel.get_meta("symbol_label")
 
-		var stop_time = SPIN_DURATION + (reel_index * REEL_STOP_DELAY)
+		var stop_time = SPIN_DURATION + (spin_order * REEL_STOP_DELAY)
 		var final_symbol = SYMBOLS[randi() % SYMBOLS.size()]
 		current_symbols[reel_index] = final_symbol
 
@@ -323,7 +374,8 @@ class SlotMachineController extends VBoxContainer:
 		flash_tween.tween_property(style, "border_color", GameConstants.COLOR_BORDER_GOLD, 0.2)
 
 		# Check if all reels have stopped
-		if reel_index == REEL_COUNT - 1:
+		reels_still_spinning -= 1
+		if reels_still_spinning <= 0:
 			# Small delay then evaluate
 			var eval_tween = create_tween()
 			eval_tween.tween_interval(0.3)
@@ -428,12 +480,13 @@ class SlotMachineController extends VBoxContainer:
 
 
 	func _update_spins_display() -> void:
-		spins_label.text = "Spins: %d" % spins_remaining
+		spin_button.text = "Spins: %d" % spins_remaining
 
 		# Animate the change
 		var tween = create_tween()
-		tween.tween_property(spins_label, "scale", Vector2(1.2, 1.2), 0.1)
-		tween.tween_property(spins_label, "scale", Vector2(1.0, 1.0), 0.1)
+		spin_button.pivot_offset = spin_button.size / 2
+		tween.tween_property(spin_button, "scale", Vector2(1.1, 1.1), 0.1)
+		tween.tween_property(spin_button, "scale", Vector2(1.0, 1.0), 0.1)
 
 
 	func _update_winnings_display() -> void:
@@ -449,11 +502,17 @@ class SlotMachineController extends VBoxContainer:
 		spin_button.disabled = spinning or spins_remaining <= 0
 		extra_spin_button.disabled = spinning or extra_spin_purchased
 
+		# Disable lock buttons while spinning
+		for btn in lock_buttons:
+			btn.disabled = spinning
+
 		if extra_spin_purchased:
 			extra_spin_button.text = "Purchased"
 
 		if spins_remaining <= 0 and not spinning:
 			spin_button.text = "Done"
+		elif not spinning:
+			spin_button.text = "Spins: %d" % spins_remaining
 
 
 	func _check_completion() -> void:
