@@ -16,6 +16,7 @@ static var _char_selector_container: Control = null
 static var _confirm_btn: Button = null
 static var _max_purchases: int = 1
 static var _purchases_made: int = 0
+static var _eligible_char_indices: Array = []  # Maps selector index to team index
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
@@ -78,13 +79,12 @@ static func _on_offering_selected(tile_data: Dictionary) -> void:
 	"""Handle offering tile selection."""
 	_selected_offering = tile_data
 
-	# Dim all tiles and highlight selected
+	# Dim all tiles and highlight selected (keep all clickable so user can change selection)
 	for tile in _tiles:
 		if tile.tile_data.get("id") == tile_data.get("id"):
 			tile.modulate = Color(0.6, 1.0, 0.6)
 		else:
 			tile.modulate = Color(0.5, 0.5, 0.5)
-			tile.set_clickable(false)
 
 	# Show character selector
 	_show_character_selector()
@@ -98,14 +98,42 @@ static func _show_character_selector() -> void:
 	var cost = _selected_offering.get("cost", 0)
 	var can_afford = RunManager.get_gold() >= cost
 	var offering_type = _selected_offering.get("offering_type", "item")
+	var offering_id = _selected_offering.get("id", "")
 
 	var team = RunManager.get_team()
-	var selector = UIPanelFactory.create_team_selector(team)
+
+	# Filter to only characters who can receive this offering
+	_eligible_char_indices.clear()
+	var eligible_chars: Array = []
+	for i in range(team.size()):
+		var char_instance = team[i]
+		var is_eligible = false
+
+		if offering_type == "skill":
+			var already_learned = offering_id in char_instance.learned_skills
+			var max_skills_reached = char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS
+			is_eligible = not already_learned and not max_skills_reached
+		else:
+			# Item upgrade
+			var already_equipped = offering_id in char_instance.equipped_item_upgrades
+			var total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
+			var max_items_reached = total_items >= GameConstants.MAX_RUN_ITEMS
+			is_eligible = not already_equipped and not max_items_reached
+
+		if is_eligible:
+			_eligible_char_indices.append(i)
+			eligible_chars.append(char_instance)
+
+	var selector = UIPanelFactory.create_team_selector(eligible_chars)
 	_char_selector_container.add_child(selector)
 
 	var action_text = "Equip" if offering_type == "item" else "Learn"
 	_confirm_btn = UIContainerHelpers.create_button("%s (%dg)" % [action_text, cost])
-	if can_afford:
+	if eligible_chars.is_empty():
+		UIStyles.setup_danger_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
+		_confirm_btn.disabled = true
+		_confirm_btn.text = "No eligible characters"
+	elif can_afford:
 		UIStyles.setup_success_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
 	else:
 		UIStyles.setup_danger_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
@@ -117,8 +145,8 @@ static func _show_character_selector() -> void:
 
 static func _on_confirm_purchase(selector: OptionButton) -> void:
 	"""Confirm purchase for selected character."""
-	var char_index = selector.selected - 1  # First option is "Select..."
-	if char_index < 0:
+	var selector_index = selector.selected - 1  # First option is "Select..."
+	if selector_index < 0 or selector_index >= _eligible_char_indices.size():
 		return
 
 	var cost = _selected_offering.get("cost", 0)
@@ -128,13 +156,15 @@ static func _on_confirm_purchase(selector: OptionButton) -> void:
 	# The buy callbacks handle gold spending internally and disable the button on success
 	var button_was_enabled = not _confirm_btn.disabled
 
+	var team = RunManager.get_team()
+	var char_index = _eligible_char_indices[selector_index]
+
 	if offering_type == "skill":
 		if _on_buy_skill.is_valid():
 			_on_buy_skill.call(offering_id, cost, selector, _confirm_btn)
 		else:
 			# Fallback: handle locally
 			if RunManager.spend_gold(cost):
-				var team = RunManager.get_team()
 				team[char_index].learn_skill(offering_id)
 				_confirm_btn.disabled = true
 				_confirm_btn.text = "LEARNED"
@@ -144,7 +174,6 @@ static func _on_confirm_purchase(selector: OptionButton) -> void:
 		else:
 			# Fallback: handle locally
 			if RunManager.spend_gold(cost):
-				var team = RunManager.get_team()
 				team[char_index].equip_item_upgrade(offering_id)
 				_confirm_btn.disabled = true
 				_confirm_btn.text = "PURCHASED"

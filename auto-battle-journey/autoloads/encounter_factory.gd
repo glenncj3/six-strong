@@ -233,8 +233,11 @@ func _gen_pick_learnable_skills(params: Dictionary) -> Array:
 	var learnable_skills: Array = []
 	for skill in all_skills:
 		var skill_id = skill["id"]
+		# Check if at least one character can learn this skill
 		for char_instance in team:
-			if skill_id not in char_instance.learned_skills:
+			var already_learned = skill_id in char_instance.learned_skills
+			var max_skills_reached = char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS
+			if not already_learned and not max_skills_reached:
 				learnable_skills.append(skill["id"])
 				break
 
@@ -247,19 +250,34 @@ func _gen_pick_shop_offerings(params: Dictionary) -> Array:
 	var count = int(params.get("count", 3))
 	var offerings: Array = []
 	var team_max_level = _get_team_max_level()
+	var team = RunManager.get_team()
 
 	var available_items = _filter_pool_by_level(GameData.get_all_item_upgrades(), team_max_level)
-	available_items.shuffle()
-
 	var available_skills = _filter_pool_by_level(GameData.get_all_skills(), team_max_level)
-	available_skills.shuffle()
 
-	# Mix items and skills randomly
+	# Mix items and skills randomly, filtering to only include acquirable ones
 	var pool: Array = []
+
 	for item in available_items:
-		pool.append({"type": "item", "data": item})
+		var item_id = item["id"]
+		# Check if at least one character can equip this item
+		for char_instance in team:
+			var already_equipped = item_id in char_instance.equipped_item_upgrades
+			var total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
+			var max_items_reached = total_items >= GameConstants.MAX_RUN_ITEMS
+			if not already_equipped and not max_items_reached:
+				pool.append({"type": "item", "data": item})
+				break
+
 	for skill in available_skills:
-		pool.append({"type": "skill", "data": skill})
+		var skill_id = skill["id"]
+		# Check if at least one character can learn this skill
+		for char_instance in team:
+			var already_learned = skill_id in char_instance.learned_skills
+			var max_skills_reached = char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS
+			if not already_learned and not max_skills_reached:
+				pool.append({"type": "skill", "data": skill})
+				break
 
 	pool.shuffle()
 

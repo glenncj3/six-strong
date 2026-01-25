@@ -4,6 +4,7 @@ extends Node
 # Delegates actual transitions to the Main scene
 
 signal scene_changed(scene_path: String)
+@warning_ignore("unused_signal")  # Emitted by Main scene after loading
 signal scene_loaded(scene_path: String)
 signal transition_started
 signal transition_completed

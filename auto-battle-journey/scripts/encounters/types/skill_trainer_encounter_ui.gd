@@ -13,6 +13,7 @@ static var _on_gold_spend: Callable = Callable()
 static var _tiles: Array = []
 static var _char_selector_container: Control = null
 static var _confirm_btn: Button = null
+static var _eligible_char_indices: Array = []  # Maps selector index to team index
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
@@ -87,14 +88,31 @@ static func _show_character_selector() -> void:
 	_char_selector_container.visible = true
 
 	var cost = _selected_skill_data.get("cost", 0)
+	var skill_id = _selected_skill_data.get("id", "")
 	var can_afford = RunManager.get_gold() >= cost
 
 	var team = RunManager.get_team()
-	var selector = UIPanelFactory.create_team_selector(team)
+
+	# Filter to only characters who can learn this skill
+	_eligible_char_indices.clear()
+	var eligible_chars: Array = []
+	for i in range(team.size()):
+		var char_instance = team[i]
+		var already_learned = skill_id in char_instance.learned_skills
+		var max_skills_reached = char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS
+		if not already_learned and not max_skills_reached:
+			_eligible_char_indices.append(i)
+			eligible_chars.append(char_instance)
+
+	var selector = UIPanelFactory.create_team_selector(eligible_chars)
 	_char_selector_container.add_child(selector)
 
 	_confirm_btn = UIContainerHelpers.create_button("Learn (%dg)" % cost)
-	if can_afford:
+	if eligible_chars.is_empty():
+		UIStyles.setup_danger_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
+		_confirm_btn.disabled = true
+		_confirm_btn.text = "No eligible characters"
+	elif can_afford:
 		UIStyles.setup_success_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
 	else:
 		UIStyles.setup_danger_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
@@ -106,8 +124,8 @@ static func _show_character_selector() -> void:
 
 static func _on_confirm_learn(selector: OptionButton) -> void:
 	"""Confirm skill learning for selected character."""
-	var char_index = selector.selected - 1  # First option is "Select..."
-	if char_index < 0:
+	var selector_index = selector.selected - 1  # First option is "Select..."
+	if selector_index < 0 or selector_index >= _eligible_char_indices.size():
 		return
 
 	var cost = _selected_skill_data.get("cost", 0)
@@ -123,6 +141,7 @@ static func _on_confirm_learn(selector: OptionButton) -> void:
 		return
 
 	var team = RunManager.get_team()
+	var char_index = _eligible_char_indices[selector_index]
 	var char_instance = team[char_index]
 	var skill_id = _selected_skill_data.get("id", "")
 
