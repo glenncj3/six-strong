@@ -70,13 +70,7 @@ static func _on_skill_selected(skill_data: Dictionary) -> void:
 	"""Handle skill tile selection."""
 	_selected_skill_data = skill_data
 
-	# Dim all tiles and highlight selected
-	for tile in _tiles:
-		if tile.tile_data.get("id") == skill_data.get("id"):
-			tile.modulate = GameConstants.COLOR_TILE_SELECTED
-		else:
-			tile.modulate = GameConstants.COLOR_TILE_DIMMED
-			tile.set_clickable(false)
+	EncounterUIHelpers.highlight_selected_tile(_tiles, skill_data, "id", false)
 
 	# Show character selector
 	_show_character_selector()
@@ -94,30 +88,15 @@ static func _show_character_selector() -> void:
 	var team = RunManager.get_team()
 
 	# Filter to only characters who can learn this skill
-	_eligible_char_indices.clear()
-	var eligible_chars: Array = []
-	for i in range(team.size()):
-		var char_instance = team[i]
-		var already_learned = skill_id in char_instance.learned_skills
-		var max_skills_reached = char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS
-		if not already_learned and not max_skills_reached:
-			_eligible_char_indices.append(i)
-			eligible_chars.append(char_instance)
+	var eligible = EncounterUIHelpers.filter_skill_eligible_characters(team, skill_id)
+	_eligible_char_indices = eligible.indices
+	var eligible_chars: Array = eligible.characters
 
 	var selector = UIPanelFactory.create_team_selector(eligible_chars)
 	_char_selector_container.add_child(selector)
 
 	_confirm_btn = UIContainerHelpers.create_button("Learn (%dg)" % cost)
-	if eligible_chars.is_empty():
-		UIStyles.setup_danger_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
-		_confirm_btn.disabled = true
-		_confirm_btn.text = "No eligible characters"
-	elif can_afford:
-		UIStyles.setup_success_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
-	else:
-		UIStyles.setup_danger_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
-		_confirm_btn.disabled = true
-		_confirm_btn.text = "Not enough gold (%dg)" % cost
+	EncounterUIHelpers.setup_confirm_button(_confirm_btn, "Learn", cost, can_afford, not eligible_chars.is_empty())
 	_confirm_btn.pressed.connect(_on_confirm_learn.bind(selector))
 	_char_selector_container.add_child(_confirm_btn)
 
@@ -130,14 +109,7 @@ static func _on_confirm_learn(selector: OptionButton) -> void:
 
 	var cost = _selected_skill_data.get("cost", 0)
 
-	# Try to spend gold
-	var gold_spent = false
-	if _on_gold_spend.is_valid():
-		gold_spent = _on_gold_spend.call(cost)
-	else:
-		gold_spent = RunManager.spend_gold(cost)
-
-	if not gold_spent:
+	if not EncounterUIHelpers.try_spend_gold(cost, _on_gold_spend):
 		return
 
 	var team = RunManager.get_team()

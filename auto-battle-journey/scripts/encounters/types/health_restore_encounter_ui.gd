@@ -72,13 +72,7 @@ static func _on_option_selected(tile_data: Dictionary) -> void:
 	"""Handle heal option tile selection."""
 	_selected_option = tile_data
 
-	# Dim all tiles and highlight selected
-	for tile in _tiles:
-		if tile.tile_data.get("heal_amount") == tile_data.get("heal_amount"):
-			tile.modulate = GameConstants.COLOR_TILE_SELECTED
-		else:
-			tile.modulate = GameConstants.COLOR_TILE_DIMMED
-			tile.set_clickable(false)
+	EncounterUIHelpers.highlight_selected_tile(_tiles, tile_data, "heal_amount", false)
 
 	# Show character selector
 	_show_character_selector()
@@ -97,12 +91,7 @@ static func _show_character_selector() -> void:
 	_char_selector_container.add_child(selector)
 
 	_confirm_btn = UIContainerHelpers.create_button("Heal (%dg)" % cost)
-	if can_afford:
-		UIStyles.setup_success_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
-	else:
-		UIStyles.setup_danger_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
-		_confirm_btn.disabled = true
-		_confirm_btn.text = "Not enough gold (%dg)" % cost
+	EncounterUIHelpers.setup_confirm_button(_confirm_btn, "Heal", cost, can_afford, true)
 	_confirm_btn.pressed.connect(_on_confirm_heal.bind(selector))
 	_char_selector_container.add_child(_confirm_btn)
 
@@ -116,14 +105,7 @@ static func _on_confirm_heal(selector: OptionButton) -> void:
 	var cost = _selected_option.get("cost", 0)
 	var heal_amount = _selected_option.get("heal_amount", 0)
 
-	# Try to spend gold
-	var gold_spent = false
-	if _on_gold_spend.is_valid():
-		gold_spent = _on_gold_spend.call(cost)
-	else:
-		gold_spent = RunManager.spend_gold(cost)
-
-	if not gold_spent:
+	if not EncounterUIHelpers.try_spend_gold(cost, _on_gold_spend):
 		return
 
 	var team = RunManager.get_team()

@@ -80,11 +80,7 @@ static func _on_offering_selected(tile_data: Dictionary) -> void:
 	_selected_offering = tile_data
 
 	# Dim all tiles and highlight selected (keep all clickable so user can change selection)
-	for tile in _tiles:
-		if tile.tile_data.get("id") == tile_data.get("id"):
-			tile.modulate = GameConstants.COLOR_TILE_SELECTED
-		else:
-			tile.modulate = GameConstants.COLOR_TILE_DIMMED
+	EncounterUIHelpers.highlight_selected_tile(_tiles, tile_data, "id", true)
 
 	# Show character selector
 	_show_character_selector()
@@ -103,42 +99,20 @@ static func _show_character_selector() -> void:
 	var team = RunManager.get_team()
 
 	# Filter to only characters who can receive this offering
-	_eligible_char_indices.clear()
-	var eligible_chars: Array = []
-	for i in range(team.size()):
-		var char_instance = team[i]
-		var is_eligible = false
-
-		if offering_type == "skill":
-			var already_learned = offering_id in char_instance.learned_skills
-			var max_skills_reached = char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS
-			is_eligible = not already_learned and not max_skills_reached
-		else:
-			# Item upgrade
-			var already_equipped = offering_id in char_instance.equipped_item_upgrades
-			var total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
-			var max_items_reached = total_items >= GameConstants.MAX_RUN_ITEMS
-			is_eligible = not already_equipped and not max_items_reached
-
-		if is_eligible:
-			_eligible_char_indices.append(i)
-			eligible_chars.append(char_instance)
+	var eligible: Dictionary
+	if offering_type == "skill":
+		eligible = EncounterUIHelpers.filter_skill_eligible_characters(team, offering_id)
+	else:
+		eligible = EncounterUIHelpers.filter_item_eligible_characters(team, offering_id)
+	_eligible_char_indices = eligible.indices
+	var eligible_chars: Array = eligible.characters
 
 	var selector = UIPanelFactory.create_team_selector(eligible_chars)
 	_char_selector_container.add_child(selector)
 
 	var action_text = "Equip" if offering_type == "item" else "Learn"
 	_confirm_btn = UIContainerHelpers.create_button("%s (%dg)" % [action_text, cost])
-	if eligible_chars.is_empty():
-		UIStyles.setup_danger_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
-		_confirm_btn.disabled = true
-		_confirm_btn.text = "No eligible characters"
-	elif can_afford:
-		UIStyles.setup_success_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
-	else:
-		UIStyles.setup_danger_button(_confirm_btn, GameConstants.FONT_SIZE_BUTTON)
-		_confirm_btn.disabled = true
-		_confirm_btn.text = "Not enough gold (%dg)" % cost
+	EncounterUIHelpers.setup_confirm_button(_confirm_btn, action_text, cost, can_afford, not eligible_chars.is_empty())
 	_confirm_btn.pressed.connect(_on_confirm_purchase.bind(selector))
 	_char_selector_container.add_child(_confirm_btn)
 
