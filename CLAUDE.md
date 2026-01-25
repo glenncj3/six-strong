@@ -30,26 +30,26 @@ A roguelike auto-battler inspired by The Bazaar, featuring character collection,
 "C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe"
 ```
 
-The Godot project is in the nested directory:
+The Godot project is at the repository root:
 ```
-C:\Users\glenn\Dev\auto-battle-journey\auto-battle-journey
+C:\Users\glenn\Dev\auto-battle-journey
 ```
 
 ### Common Commands
 
 - **Validate project loads (headless)**:
   ```
-  "C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe" --headless --path "C:\Users\glenn\Dev\auto-battle-journey\auto-battle-journey" --quit
+  "C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe" --headless --path "C:\Users\glenn\Dev\auto-battle-journey" --quit
   ```
 
 - **Open Godot Editor**:
   ```
-  "C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe" --editor --path "C:\Users\glenn\Dev\auto-battle-journey\auto-battle-journey"
+  "C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe" --editor --path "C:\Users\glenn\Dev\auto-battle-journey"
   ```
 
 - **Run the game**:
   ```
-  "C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe" --path "C:\Users\glenn\Dev\auto-battle-journey\auto-battle-journey" res://main.tscn
+  "C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe" --path "C:\Users\glenn\Dev\auto-battle-journey" res://main.tscn
   ```
 
 ## Code Conventions
