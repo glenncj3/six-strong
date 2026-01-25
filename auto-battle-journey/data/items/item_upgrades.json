@@ -7,7 +7,8 @@
       "image_path": "res://assets/items/flaming_sword.png",
       "replaces_slot": "weapon",
       "stat_modifiers": {},
-      "level_requirement": 4
+      "level_requirement": 4,
+      "cost": 20
     },
     {
       "id": "itemup_iron_sword",
@@ -16,7 +17,8 @@
       "image_path": "res://assets/items/iron_sword.png",
       "replaces_slot": "weapon",
       "stat_modifiers": {},
-      "level_requirement": 2
+      "level_requirement": 2,
+      "cost": 20
     },
     {
       "id": "itemup_arcane_staff",
@@ -25,7 +27,8 @@
       "image_path": "res://assets/items/arcane_staff.png",
       "replaces_slot": "weapon",
       "stat_modifiers": {"defendRate": 5},
-      "level_requirement": 3
+      "level_requirement": 3,
+      "cost": 20
     },
     {
       "id": "itemup_shadow_cloak",
@@ -34,7 +37,8 @@
       "image_path": "res://assets/items/shadow_cloak.png",
       "replaces_slot": "armor",
       "stat_modifiers": {"defendRate": 10},
-      "level_requirement": 3
+      "level_requirement": 3,
+      "cost": 20
     },
     {
       "id": "itemup_plate_armor",
@@ -43,7 +47,8 @@
       "image_path": "res://assets/items/plate_armor.png",
       "replaces_slot": "armor",
       "stat_modifiers": {"defendRate": 25, "health": 25},
-      "level_requirement": 4
+      "level_requirement": 4,
+      "cost": 20
     },
     {
       "id": "itemup_vampiric_blade",
@@ -52,7 +57,8 @@
       "image_path": "res://assets/items/vampiric_blade.png",
       "replaces_slot": "weapon",
       "stat_modifiers": {"health": 15},
-      "level_requirement": 5
+      "level_requirement": 5,
+      "cost": 20
     }
   ]
 }

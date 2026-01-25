@@ -3,7 +3,7 @@ extends RefCounted
 ## UI creation and reward preview for skill trainer encounters.
 ## Shows 3 skill options, player picks one, then picks a character to learn it.
 
-const SkillTileScene = preload("res://scenes/components/skill_tile.tscn")
+const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")
 
 # Store references for callback access
 static var _selected_skill_data: Dictionary = {}
@@ -44,7 +44,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 		if skill_data.is_empty():
 			continue
 
-		var tile = SkillTileScene.instantiate()
+		var tile = PurchasableTileScene.instantiate()
 		hbox.add_child(tile)
 		# Defer setup until tile enters the scene tree
 		tile.ready.connect(_setup_tile.bind(tile, skill_data, tile_size))
@@ -61,6 +61,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 static func _setup_tile(tile: Control, skill_data: Dictionary, tile_size: float) -> void:
 	"""Setup tile after it enters the scene tree."""
 	tile.setup(skill_data, tile_size)
+	tile.set_tile_color(GameConstants.COLOR_AMETHYST)
 	tile.tile_clicked.connect(_on_skill_selected)
 
 
@@ -70,7 +71,7 @@ static func _on_skill_selected(skill_data: Dictionary) -> void:
 
 	# Dim all tiles and highlight selected
 	for tile in _tiles:
-		if tile.skill_data.get("id") == skill_data.get("id"):
+		if tile.tile_data.get("id") == skill_data.get("id"):
 			tile.modulate = Color(0.6, 1.0, 0.6)
 		else:
 			tile.modulate = Color(0.5, 0.5, 0.5)

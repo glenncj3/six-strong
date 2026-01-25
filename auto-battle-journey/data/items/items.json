@@ -6,7 +6,8 @@
       "description": "A weathered blade. Better than nothing.",
       "image_path": "res://assets/items/rusty_sword.png",
       "stat_modifiers": {},
-      "slot": "weapon"
+      "slot": "weapon",
+      "cost": 20
     },
     {
       "id": "item_rusty_dagger",
@@ -14,7 +15,8 @@
       "description": "A small, quick blade.",
       "image_path": "res://assets/items/rusty_dagger.png",
       "stat_modifiers": {},
-      "slot": "weapon"
+      "slot": "weapon",
+      "cost": 20
     },
     {
       "id": "item_wooden_staff",
@@ -22,7 +24,8 @@
       "description": "A simple magical focus.",
       "image_path": "res://assets/items/wooden_staff.png",
       "stat_modifiers": {"defendRate": 5},
-      "slot": "weapon"
+      "slot": "weapon",
+      "cost": 20
     },
     {
       "id": "item_prayer_book",
@@ -30,7 +33,8 @@
       "description": "Divine protection through faith.",
       "image_path": "res://assets/items/prayer_book.png",
       "stat_modifiers": {"defendRate": 10, "health": 10},
-      "slot": "weapon"
+      "slot": "weapon",
+      "cost": 20
     },
     {
       "id": "item_short_bow",
@@ -38,7 +42,8 @@
       "description": "Quick and deadly at range.",
       "image_path": "res://assets/items/short_bow.png",
       "stat_modifiers": {},
-      "slot": "weapon"
+      "slot": "weapon",
+      "cost": 20
     },
     {
       "id": "item_leather_armor",
@@ -46,7 +51,8 @@
       "description": "Basic protection.",
       "image_path": "res://assets/items/leather_armor.png",
       "stat_modifiers": {"defendRate": 5, "health": 5},
-      "slot": "armor"
+      "slot": "armor",
+      "cost": 20
     },
     {
       "id": "item_battle_axe",
@@ -54,7 +60,8 @@
       "description": "Heavy and brutal.",
       "image_path": "res://assets/items/battle_axe.png",
       "stat_modifiers": {},
-      "slot": "weapon"
+      "slot": "weapon",
+      "cost": 20
     },
     {
       "id": "item_holy_mace",
@@ -62,7 +69,8 @@
       "description": "Blessed by the divine.",
       "image_path": "res://assets/items/holy_mace.png",
       "stat_modifiers": {"defendRate": 5},
-      "slot": "weapon"
+      "slot": "weapon",
+      "cost": 20
     },
     {
       "id": "item_skull_staff",
@@ -70,7 +78,8 @@
       "description": "Channels dark energy.",
       "image_path": "res://assets/items/skull_staff.png",
       "stat_modifiers": {"health": 5},
-      "slot": "weapon"
+      "slot": "weapon",
+      "cost": 20
     },
     {
       "id": "item_fighting_gloves",
@@ -78,7 +87,8 @@
       "description": "For those who fight with their fists.",
       "image_path": "res://assets/items/fighting_gloves.png",
       "stat_modifiers": {"defendRate": 5},
-      "slot": "weapon"
+      "slot": "weapon",
+      "cost": 20
     },
     {
       "id": "item_poison_blade",
@@ -86,7 +96,8 @@
       "description": "Coated in deadly toxin.",
       "image_path": "res://assets/items/poison_blade.png",
       "stat_modifiers": {},
-      "slot": "weapon"
+      "slot": "weapon",
+      "cost": 20
     },
     {
       "id": "item_chainmail",
@@ -94,7 +105,8 @@
       "description": "Solid metal protection.",
       "image_path": "res://assets/items/chainmail.png",
       "stat_modifiers": {"defendRate": 15, "health": 10},
-      "slot": "armor"
+      "slot": "armor",
+      "cost": 20
     },
     {
       "id": "item_lucky_charm",
@@ -102,7 +114,8 @@
       "description": "A mysterious trinket.",
       "image_path": "res://assets/items/lucky_charm.png",
       "stat_modifiers": {"income": 2},
-      "slot": "accessory"
+      "slot": "accessory",
+      "cost": 20
     }
   ]
 }

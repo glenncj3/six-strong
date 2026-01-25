@@ -1,6 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://skill_tile_scene"]
+[gd_scene load_steps=5 format=3 uid="uid://purchasable_tile_scene"]
 
-[ext_resource type="Script" path="res://scenes/components/skill_tile.gd" id="1_script"]
+[ext_resource type="Script" path="res://scenes/components/purchasable_tile.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://gold_cost_icon" path="res://scenes/components/gold_cost_icon.tscn" id="2_gold_cost"]
 
 [sub_resource type="Shader" id="Shader_haze"]
@@ -21,7 +21,7 @@ void fragment() {
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_haze"]
 shader = SubResource("Shader_haze")
 
-[node name="SkillTile" type="PanelContainer"]
+[node name="PurchasableTile" type="PanelContainer"]
 clip_contents = true
 custom_minimum_size = Vector2(180, 180)
 size_flags_horizontal = 4
@@ -66,7 +66,7 @@ material = SubResource("ShaderMaterial_haze")
 layout_mode = 2
 theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 20
-text = "Skill"
+text = "Item"
 horizontal_alignment = 1
 vertical_alignment = 1
 text_overrun_behavior = 3

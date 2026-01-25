@@ -3,10 +3,10 @@
     {
       "type": "shop",
       "name": "Traveling Merchant",
-      "description": "A merchant offers their wares.",
+      "description": "Purchase an item or skill.",
       "image_path": "res://assets/encounters/merchant.png",
       "weight": 1.0,
-      "immediate_complete": true,
+      "immediate_complete": false,
       "colors": {
         "bg": "#5A4A3A",
         "hover": "#7A6A5A",
@@ -15,8 +15,8 @@
       },
       "generation": {
         "data_fields": {
-          "items": {"generator": "pick_items", "count_min": "SHOP_MIN_ITEMS", "count_max": "SHOP_MAX_ITEMS"},
-          "skills": {"generator": "pick_skills", "count_min": "SHOP_MIN_SKILLS", "count_max": "SHOP_MAX_SKILLS"}
+          "offerings": {"generator": "pick_shop_offerings", "count": 3},
+          "max_purchases": {"generator": "constant", "value": 1}
         }
       }
     },
@@ -43,10 +43,10 @@
     {
       "type": "health_restore",
       "name": "Healing Fountain",
-      "description": "Restore your team's health.",
+      "description": "Purchase healing for your team.",
       "image_path": "res://assets/encounters/fountain.png",
       "weight": 0.6,
-      "immediate_complete": true,
+      "immediate_complete": false,
       "colors": {
         "bg": "#2A7A4A",
         "hover": "#4A9A6A",
@@ -55,7 +55,11 @@
       },
       "generation": {
         "data_fields": {
-          "heal_percentage": {"generator": "constant", "value": "HEALTH_RESTORE_PERCENTAGE"}
+          "heal_options": {"generator": "constant", "value": [
+            {"heal_amount": 10, "cost": 10},
+            {"heal_amount": 20, "cost": 20},
+            {"heal_amount": 50, "cost": 50}
+          ]}
         }
       }
     },

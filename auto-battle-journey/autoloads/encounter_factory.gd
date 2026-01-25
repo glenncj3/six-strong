@@ -30,6 +30,7 @@ func _ready() -> void:
 		"pick_skills": _gen_pick_skills,
 		"pick_learnable_skill": _gen_pick_learnable_skill,
 		"pick_learnable_skills": _gen_pick_learnable_skills,
+		"pick_shop_offerings": _gen_pick_shop_offerings,
 	}
 
 	# Use GameData's cached encounter types (single source of truth)
@@ -224,3 +225,42 @@ func _gen_pick_learnable_skills(params: Dictionary) -> Array:
 
 	learnable_skills.shuffle()
 	return learnable_skills.slice(0, count)
+
+
+func _gen_pick_shop_offerings(params: Dictionary) -> Array:
+	"""Pick a mix of items and skills for the shop (max 3 total)."""
+	var count = int(params.get("count", 3))
+	var offerings: Array = []
+
+	# Get available items (item upgrades)
+	var all_items = GameData.get_all_item_upgrades()
+	all_items.shuffle()
+
+	# Get available skills
+	var all_skills = GameData.get_all_skills()
+	all_skills.shuffle()
+
+	# Mix items and skills randomly
+	var pool: Array = []
+	for item in all_items:
+		pool.append({"type": "item", "data": item})
+	for skill in all_skills:
+		pool.append({"type": "skill", "data": skill})
+
+	pool.shuffle()
+
+	# Pick up to count offerings
+	for i in range(mini(count, pool.size())):
+		var entry = pool[i]
+		var data = entry["data"]
+		offerings.append({
+			"offering_type": entry["type"],
+			"id": data.get("id", ""),
+			"name": data.get("name", "Unknown"),
+			"description": data.get("description", ""),
+			"image_path": data.get("image_path", ""),
+			"cost": data.get("cost", 20),
+			"level_requirement": data.get("level_requirement", 1)
+		})
+
+	return offerings
