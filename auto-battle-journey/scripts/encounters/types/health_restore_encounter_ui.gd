@@ -13,6 +13,7 @@ static var _on_gold_spend: Callable = Callable()
 static var _tiles: Array = []
 static var _char_selector_container: Control = null
 static var _confirm_btn: Button = null
+static var _eligible_char_indices: Array = []  # Maps selector index to team index
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
@@ -87,19 +88,25 @@ static func _show_character_selector() -> void:
 	var can_afford = RunManager.get_gold() >= cost
 
 	var team = RunManager.get_team()
-	var selector = UIPanelFactory.create_team_selector(team)
+
+	# Filter to only characters who need healing
+	var eligible = EncounterUIHelpers.filter_heal_eligible_characters(team)
+	_eligible_char_indices = eligible.indices
+	var eligible_chars: Array = eligible.characters
+
+	var selector = UIPanelFactory.create_team_selector(eligible_chars)
 	_char_selector_container.add_child(selector)
 
 	_confirm_btn = UIContainerHelpers.create_button("Heal (%dg)" % cost)
-	EncounterUIHelpers.setup_confirm_button(_confirm_btn, "Heal", cost, can_afford, true)
+	EncounterUIHelpers.setup_confirm_button(_confirm_btn, "Heal", cost, can_afford, not eligible_chars.is_empty())
 	_confirm_btn.pressed.connect(_on_confirm_heal.bind(selector))
 	_char_selector_container.add_child(_confirm_btn)
 
 
 static func _on_confirm_heal(selector: OptionButton) -> void:
 	"""Confirm healing for selected character."""
-	var char_index = selector.selected - 1  # First option is "Select..."
-	if char_index < 0:
+	var selector_index = selector.selected - 1  # First option is "Select..."
+	if selector_index < 0 or selector_index >= _eligible_char_indices.size():
 		return
 
 	var cost = _selected_option.get("cost", 0)
@@ -109,6 +116,7 @@ static func _on_confirm_heal(selector: OptionButton) -> void:
 		return
 
 	var team = RunManager.get_team()
+	var char_index = _eligible_char_indices[selector_index]
 	var char_instance = team[char_index]
 
 	# Apply healing
