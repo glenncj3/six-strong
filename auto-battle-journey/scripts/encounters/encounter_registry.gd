@@ -57,6 +57,10 @@ static func _register_default_handlers() -> void:
 			"create_ui": EliteChallengeEncounterUI.create_ui,
 			"get_reward_preview": EliteChallengeEncounterUI.get_reward_preview
 		},
+		"matching_game": {
+			"create_ui": MatchingGameEncounterUI.create_ui,
+			"get_reward_preview": MatchingGameEncounterUI.get_reward_preview
+		},
 	}
 
 	for type_name in ui_handlers:

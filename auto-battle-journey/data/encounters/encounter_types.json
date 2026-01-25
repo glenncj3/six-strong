@@ -138,6 +138,28 @@
         },
         "scales_with_round": true
       }
+    },
+    {
+      "type": "matching_game",
+      "name": "Memory Merchant",
+      "description": "Test your memory to uncover hidden treasures!",
+      "image_path": "res://assets/encounters/chest.png",
+      "weight": 0.6,
+      "immediate_complete": false,
+      "colors": {
+        "bg": "#4A5A6A",
+        "hover": "#6A7A8A",
+        "pressed": "#2A3A4A",
+        "border": "#B88726"
+      },
+      "generation": {
+        "data_fields": {
+          "big_gold": {"generator": "random_range", "min": 40, "max": 60},
+          "medium_gold": {"generator": "random_range", "min": 20, "max": 35},
+          "small_gold": {"generator": "random_range", "min": 8, "max": 15}
+        },
+        "scales_with_round": true
+      }
     }
   ]
 }

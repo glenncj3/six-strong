@@ -261,5 +261,3 @@ func _on_overlay_input(event: InputEvent) -> void:
 func _on_concede_dialog_closed() -> void:
 	_concede_dialog_open = false
 	concede_confirm_dialog.visible = false
-
-
