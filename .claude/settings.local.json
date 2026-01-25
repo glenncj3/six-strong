@@ -38,7 +38,8 @@
       "Bash(git -C \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\" diff)",
       "Bash(git -C \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\" log --oneline -5)",
       "Bash(git -C \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\" add auto-battle-journey/CLAUDE.md)",
-      "Bash(git -C \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\" commit -m \"$\\(cat <<''EOF''\nDocument full Godot executable path and headless commands in CLAUDE.md\n\nGodot is not in PATH on this system, so commands need the full path.\nAdded working headless validation command for project testing.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git -C \"C:\\\\Users\\\\glenn\\\\Dev\\\\auto-battle-journey\" commit -m \"$\\(cat <<''EOF''\nDocument full Godot executable path and headless commands in CLAUDE.md\n\nGodot is not in PATH on this system, so commands need the full path.\nAdded working headless validation command for project testing.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "mcp__godot-mcp__get_project_info"
     ]
   }
 }

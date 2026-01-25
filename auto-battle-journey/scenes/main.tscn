@@ -1,9 +1,9 @@
 [gd_scene load_steps=5 format=3 uid="uid://dxvcx7qkajyqr"]
 
-[ext_resource type="Script" path="res://scenes/main.gd" id="1_main"]
-[ext_resource type="Script" path="res://scenes/components/run_hud.gd" id="2_run_hud"]
-[ext_resource type="PackedScene" uid="uid://header_bar_comp" path="res://scenes/components/header_bar.tscn" id="3_header_bar"]
-[ext_resource type="PackedScene" uid="uid://team_hud_comp1" path="res://scenes/components/team_hud.tscn" id="4_team_hud"]
+[ext_resource type="Script" uid="uid://b5capumnxsoxn" path="res://scenes/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://b05m78gdri7jc" path="res://scenes/components/run_hud.gd" id="2_run_hud"]
+[ext_resource type="PackedScene" path="res://scenes/components/header_bar.tscn" id="3_header_bar"]
+[ext_resource type="PackedScene" path="res://scenes/components/team_hud.tscn" id="4_team_hud"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -14,6 +14,7 @@ script = ExtResource("1_main")
 layer = 150
 
 [node name="RunHUD" type="Control" parent="HUDLayer"]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -28,60 +29,6 @@ anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 56.0
 grow_horizontal = 2
-
-[node name="RoundLabel" type="Label" parent="HUDLayer/RunHUD/HeaderBar/MarginContainer/HBoxContainer/LeftSection"]
-layout_mode = 1
-anchors_preset = 9
-anchor_bottom = 1.0
-offset_right = 200.0
-grow_vertical = 2
-theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 24
-text = "ROUND 1"
-vertical_alignment = 1
-
-[node name="WinsLabel" type="Label" parent="HUDLayer/RunHUD/HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
-layout_mode = 2
-theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 24
-text = "⭐ 0/10"
-vertical_alignment = 1
-
-[node name="ReputationLabel" type="Label" parent="HUDLayer/RunHUD/HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
-layout_mode = 2
-theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 24
-text = "❤️ 20"
-vertical_alignment = 1
-
-[node name="GoldLabel" type="Label" parent="HUDLayer/RunHUD/HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
-layout_mode = 2
-theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 24
-text = "💰 0"
-vertical_alignment = 1
-
-[node name="GemsLabel" type="Label" parent="HUDLayer/RunHUD/HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
-visible = false
-layout_mode = 2
-theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 24
-text = "💎 0"
-vertical_alignment = 1
-
-[node name="ConcedeButton" type="Button" parent="HUDLayer/RunHUD/HeaderBar/MarginContainer/HBoxContainer/RightSection"]
-layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -30.0
-offset_top = -15.0
-offset_bottom = 15.0
-grow_horizontal = 0
-grow_vertical = 2
-text = "✕"
 
 [node name="ConcedeConfirmDialog" type="Control" parent="HUDLayer/RunHUD"]
 visible = false
@@ -118,14 +65,14 @@ alignment = 1
 
 [node name="DialogTitle" type="Label" parent="HUDLayer/RunHUD/ConcedeConfirmDialog/DialogPanel/DialogContent"]
 layout_mode = 2
-theme_type_variation = "HeaderLabel"
+theme_type_variation = &"HeaderLabel"
 text = "Concede?"
 horizontal_alignment = 1
 
 [node name="ButtonContainer" type="HBoxContainer" parent="HUDLayer/RunHUD/ConcedeConfirmDialog/DialogPanel/DialogContent"]
 layout_mode = 2
-alignment = 1
 theme_override_constants/separation = 20
+alignment = 1
 
 [node name="CancelButton" type="Button" parent="HUDLayer/RunHUD/ConcedeConfirmDialog/DialogPanel/DialogContent/ButtonContainer"]
 custom_minimum_size = Vector2(150, 50)
@@ -138,7 +85,6 @@ layout_mode = 2
 text = "CONCEDE"
 
 [node name="TeamHUD" parent="HUDLayer" instance=ExtResource("4_team_hud")]
-layout_mode = 1
 
 [node name="TransitionLayer" type="CanvasLayer" parent="."]
 layer = 100
