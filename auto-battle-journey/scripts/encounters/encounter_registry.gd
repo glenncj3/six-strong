@@ -61,6 +61,10 @@ static func _register_default_handlers() -> void:
 			"create_ui": MatchingGameEncounterUI.create_ui,
 			"get_reward_preview": MatchingGameEncounterUI.get_reward_preview
 		},
+		"slot_machine": {
+			"create_ui": SlotMachineEncounterUI.create_ui,
+			"get_reward_preview": SlotMachineEncounterUI.get_reward_preview
+		},
 	}
 
 	for type_name in ui_handlers:

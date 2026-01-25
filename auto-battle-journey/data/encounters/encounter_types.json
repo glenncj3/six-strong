@@ -160,6 +160,31 @@
         },
         "scales_with_round": true
       }
+    },
+    {
+      "type": "slot_machine",
+      "name": "Lucky Spinner",
+      "description": "Spin the reels for a chance at riches!",
+      "image_path": "res://assets/encounters/chest.png",
+      "weight": 0.5,
+      "immediate_complete": false,
+      "colors": {
+        "bg": "#6A4A8A",
+        "hover": "#8A6AAA",
+        "pressed": "#4A2A6A",
+        "border": "#FFD700"
+      },
+      "generation": {
+        "data_fields": {
+          "free_spins": {"generator": "constant", "value": 2},
+          "extra_spin_cost": {"generator": "constant", "value": 15},
+          "extra_spin_resource": {"generator": "constant", "value": "gold"},
+          "jackpot_reward": {"generator": "random_range", "min": 80, "max": 120},
+          "triple_reward": {"generator": "random_range", "min": 35, "max": 55},
+          "pair_reward": {"generator": "random_range", "min": 10, "max": 20}
+        },
+        "scales_with_round": true
+      }
     }
   ]
 }
