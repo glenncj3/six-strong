@@ -4,7 +4,7 @@ extends Control
 # Team tiles are handled by the persistent TeamHUD
 
 @onready var background = $Background
-@onready var options_panel = $OptionsPanel
+@onready var options_container: VBoxContainer = $OptionsContainer
 
 
 func _ready() -> void:
@@ -15,7 +15,7 @@ func _ready() -> void:
 
 
 func _play_entrance_animations() -> void:
-	AnimationManager.fade_in(options_panel, GameConstants.ANIM_DURATION_NORMAL, 0.1)
+	AnimationManager.fade_in(options_container, GameConstants.ANIM_DURATION_NORMAL, 0.1)
 
 
 func _exit_tree() -> void:
@@ -24,7 +24,6 @@ func _exit_tree() -> void:
 
 
 func _setup_phase() -> void:
-	var options_container = options_panel.get_options_container()
 	UIHelpers.clear_children(options_container)
 
 	if RunManager.is_encounter_phase():
@@ -34,7 +33,6 @@ func _setup_phase() -> void:
 
 
 func _generate_encounter_options() -> void:
-	var options_container = options_panel.get_options_container()
 	UIHelpers.clear_children(options_container)
 
 	var encounter_options = EncounterFactory.generate_encounter_options(3)
@@ -50,7 +48,6 @@ func _on_encounter_selected(encounter_data: Dictionary) -> void:
 
 
 func _generate_combat_options() -> void:
-	var options_container = options_panel.get_options_container()
 	UIHelpers.clear_children(options_container)
 
 	var combat_options = RunManager.generate_combat_options(3)
