@@ -73,9 +73,9 @@ static func _on_skill_selected(skill_data: Dictionary) -> void:
 	# Dim all tiles and highlight selected
 	for tile in _tiles:
 		if tile.tile_data.get("id") == skill_data.get("id"):
-			tile.modulate = Color(0.6, 1.0, 0.6)
+			tile.modulate = GameConstants.COLOR_TILE_SELECTED
 		else:
-			tile.modulate = Color(0.5, 0.5, 0.5)
+			tile.modulate = GameConstants.COLOR_TILE_DIMMED
 			tile.set_clickable(false)
 
 	# Show character selector

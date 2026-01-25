@@ -82,9 +82,9 @@ static func _on_offering_selected(tile_data: Dictionary) -> void:
 	# Dim all tiles and highlight selected (keep all clickable so user can change selection)
 	for tile in _tiles:
 		if tile.tile_data.get("id") == tile_data.get("id"):
-			tile.modulate = Color(0.6, 1.0, 0.6)
+			tile.modulate = GameConstants.COLOR_TILE_SELECTED
 		else:
-			tile.modulate = Color(0.5, 0.5, 0.5)
+			tile.modulate = GameConstants.COLOR_TILE_DIMMED
 
 	# Show character selector
 	_show_character_selector()

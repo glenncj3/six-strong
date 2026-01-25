@@ -231,6 +231,10 @@ const COLOR_DISABLED := Color("#6A6A6A")
 const COLOR_MUTED := COLOR_TEXT_MUTED
 const COLOR_HIGHLIGHT := COLOR_TEXT_GOLD
 
+# --- Tile Selection Colors ---
+const COLOR_TILE_SELECTED := Color(0.6, 1.0, 0.6)   # Green tint for selected tiles
+const COLOR_TILE_DIMMED := Color(0.5, 0.5, 0.5)     # Gray tint for unselected tiles
+
 # Reputation color thresholds
 const REPUTATION_CRITICAL_THRESHOLD := 5
 const REPUTATION_WARNING_THRESHOLD := 10
