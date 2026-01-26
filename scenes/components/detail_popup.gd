@@ -1,7 +1,8 @@
-extends PanelContainer
-# DetailPopup - Reusable popup for showing item/skill/upgrade details
-# Follows SOLID principles - single responsibility for detail display
-# Can be used anywhere a detail overlay is needed
+extends ModalPopup
+## DetailPopup - Reusable popup for showing item/skill/upgrade details
+## Follows SOLID principles - single responsibility for detail display
+## Can be used anywhere a detail overlay is needed
+## Extends ModalPopup for standardized overlay and cleanup handling.
 
 signal closed
 
@@ -17,12 +18,10 @@ signal closed
 
 
 func _ready() -> void:
+	super._ready()  # Call base class (sets visible = false)
 	close_button.pressed.connect(_on_close_pressed)
 	UIStyles.apply_panel_style(self, UIStyles.create_warm_panel())
 	UIStyles.apply_button_styles(close_button)
-
-	# Start hidden
-	visible = false
 
 
 func show_item(item_id: String) -> void:
@@ -152,15 +151,13 @@ func _format_stat_name(stat_name: String) -> String:
 
 
 func _show_popup() -> void:
-	"""Show the popup centered."""
-	visible = true
-	# Ensure we're on top
-	move_to_front()
+	"""Show the popup as a modal overlay."""
+	show_modal()
 
 
 func hide_popup() -> void:
-	"""Hide the popup."""
-	visible = false
+	"""Hide the popup and emit closed signal."""
+	hide_modal()
 	closed.emit()
 
 
