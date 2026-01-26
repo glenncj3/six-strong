@@ -39,7 +39,6 @@ class MatchingGameController extends VBoxContainer:
 	var tiles: Array = []  # Array of {type, is_revealed, button}
 	var revealed_counts: Dictionary = {TILE_BIG: 0, TILE_MEDIUM: 0, TILE_SMALL: 0}
 	var game_over: bool = false
-	var result_label: Label
 
 
 	func initialize(p_encounter_data: Dictionary, p_context: Dictionary) -> void:
@@ -80,10 +79,6 @@ class MatchingGameController extends VBoxContainer:
 		# Create grid
 		_create_tile_grid()
 
-		# Result label (shown when match is found) - placed after grid
-		result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true)
-		result_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		add_child(result_label)
 
 
 	func _create_tile_grid() -> void:
@@ -217,18 +212,14 @@ class MatchingGameController extends VBoxContainer:
 		# Calculate reward
 		var data = encounter_data.get("data", {})
 		var gold_reward: int = 0
-		var type_name: String = ""
 
 		match matched_type:
 			TILE_BIG:
 				gold_reward = data.get("big_gold", 50)
-				type_name = "BIG"
 			TILE_MEDIUM:
 				gold_reward = data.get("medium_gold", 25)
-				type_name = "MEDIUM"
 			TILE_SMALL:
 				gold_reward = data.get("small_gold", 10)
-				type_name = "SMALL"
 
 		# Award gold
 		var on_gold_reward = context.get("on_gold_reward", Callable())
@@ -236,9 +227,6 @@ class MatchingGameController extends VBoxContainer:
 			on_gold_reward.call(gold_reward)
 		else:
 			RunManager.add_gold(gold_reward)
-
-		# Update UI
-		result_label.text = "%s Match! +%d Gold!" % [type_name, gold_reward]
 
 		# Disable all remaining buttons
 		for tile in tiles:

@@ -162,9 +162,8 @@ class SlotMachineController extends VBoxContainer:
 		spin_button.add_theme_font_size_override("font_size", 20)
 		button_box.add_child(spin_button)
 
-		var resource_icon = "💰" if extra_spin_resource == "gold" else "❤️"
 		extra_spin_button = UIHelpers.create_button(
-			"+1 Spin (%s%d)" % [resource_icon, extra_spin_cost],
+			"Bonus Spin: %dg" % extra_spin_cost,
 			_on_extra_spin_pressed,
 			160,
 			50
@@ -261,9 +260,8 @@ class SlotMachineController extends VBoxContainer:
 
 		if can_afford:
 			extra_spin_purchased = true
-			spins_remaining += 1
-			_update_spins_display()
 			_update_button_states()
+			_start_spin()
 		else:
 			result_label.add_theme_color_override("font_color", GameConstants.COLOR_DANGER)
 			result_label.text = "Not enough %s!" % extra_spin_resource
