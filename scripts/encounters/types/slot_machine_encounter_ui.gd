@@ -52,7 +52,6 @@ class SlotMachineController extends VBoxContainer:
 	const SYMBOLS_PER_SECOND := 8.0
 
 	var encounter_data: Dictionary
-	var context: Dictionary
 	var reel_labels: Array = []  # The Label nodes showing symbols
 	var current_symbols: Array = []  # Current symbol on each reel
 	var locked_reels: Array = []  # Whether each reel is locked
@@ -70,10 +69,18 @@ class SlotMachineController extends VBoxContainer:
 	var extra_spin_resource: String = "gold"  # "gold" or "health"
 	var extra_spin_purchased: bool = false
 
+	# Store callbacks directly instead of whole context dict to avoid stale references
+	var _on_complete: Callable = Callable()
+	var _on_gold_reward: Callable = Callable()
+	var _on_gold_spend: Callable = Callable()
+
 
 	func initialize(p_encounter_data: Dictionary, p_context: Dictionary) -> void:
 		encounter_data = p_encounter_data
-		context = p_context
+		# Extract and store callbacks directly at initialization time
+		_on_complete = p_context.get("on_encounter_complete", Callable())
+		_on_gold_reward = p_context.get("on_gold_reward", Callable())
+		_on_gold_spend = p_context.get("on_gold_spend", Callable())
 
 		set_anchors_preset(Control.PRESET_FULL_RECT)
 		add_theme_constant_override("separation", 10)
@@ -244,9 +251,8 @@ class SlotMachineController extends VBoxContainer:
 		# Check if player can afford it
 		var can_afford = false
 		if extra_spin_resource == "gold":
-			var on_gold_spend = context.get("on_gold_spend", Callable())
-			if on_gold_spend.is_valid():
-				can_afford = on_gold_spend.call(extra_spin_cost)
+			if _on_gold_spend.is_valid():
+				can_afford = _on_gold_spend.call(extra_spin_cost)
 			else:
 				can_afford = RunManager.spend_gold(extra_spin_cost)
 		else:
@@ -406,12 +412,11 @@ class SlotMachineController extends VBoxContainer:
 		else:
 			message = "No match..."
 
-		# Award gold
+		# Award gold using stored callback
 		if reward > 0:
 			total_winnings += reward
-			var on_gold_reward = context.get("on_gold_reward", Callable())
-			if on_gold_reward.is_valid():
-				on_gold_reward.call(reward)
+			if _on_gold_reward.is_valid():
+				_on_gold_reward.call(reward)
 			else:
 				RunManager.add_gold(reward)
 
@@ -485,7 +490,6 @@ class SlotMachineController extends VBoxContainer:
 
 
 	func _check_completion() -> void:
-		# Signal that the encounter can be completed
-		var on_complete = context.get("on_encounter_complete", Callable())
-		if on_complete.is_valid():
-			on_complete.call()
+		# Signal that the encounter can be completed using stored callback
+		if _on_complete.is_valid():
+			_on_complete.call()

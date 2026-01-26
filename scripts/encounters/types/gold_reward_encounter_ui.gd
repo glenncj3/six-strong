@@ -16,6 +16,13 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var on_gold_reward = context.get("on_gold_reward", Callable())
 	if on_gold_reward.is_valid():
 		on_gold_reward.call(gold_amount)
+	else:
+		RunManager.add_gold(gold_amount)
+
+	# Signal completion so Finish button is enabled
+	var on_complete = context.get("on_encounter_complete", Callable())
+	if on_complete.is_valid():
+		on_complete.call()
 
 	return vbox
 

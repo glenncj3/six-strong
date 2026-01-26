@@ -35,15 +35,20 @@ class MatchingGameController extends VBoxContainer:
 	const COLOR_FACE_DOWN := Color("#4A3D34")
 
 	var encounter_data: Dictionary
-	var context: Dictionary
 	var tiles: Array = []  # Array of {type, is_revealed, button}
 	var revealed_counts: Dictionary = {TILE_BIG: 0, TILE_MEDIUM: 0, TILE_SMALL: 0}
 	var game_over: bool = false
 
+	# Store callbacks directly instead of whole context dict to avoid stale references
+	var _on_complete: Callable = Callable()
+	var _on_gold_reward: Callable = Callable()
+
 
 	func initialize(p_encounter_data: Dictionary, p_context: Dictionary) -> void:
 		encounter_data = p_encounter_data
-		context = p_context
+		# Extract and store callbacks directly at initialization time
+		_on_complete = p_context.get("on_encounter_complete", Callable())
+		_on_gold_reward = p_context.get("on_gold_reward", Callable())
 
 		set_anchors_preset(Control.PRESET_FULL_RECT)
 		add_theme_constant_override("separation", 4)
@@ -221,10 +226,9 @@ class MatchingGameController extends VBoxContainer:
 			TILE_SMALL:
 				gold_reward = data.get("small_gold", 10)
 
-		# Award gold
-		var on_gold_reward = context.get("on_gold_reward", Callable())
-		if on_gold_reward.is_valid():
-			on_gold_reward.call(gold_reward)
+		# Award gold using stored callback
+		if _on_gold_reward.is_valid():
+			_on_gold_reward.call(gold_reward)
 		else:
 			RunManager.add_gold(gold_reward)
 
@@ -232,7 +236,6 @@ class MatchingGameController extends VBoxContainer:
 		for tile in tiles:
 			tile.button.disabled = true
 
-		# Signal completion
-		var on_complete = context.get("on_encounter_complete", Callable())
-		if on_complete.is_valid():
-			on_complete.call()
+		# Signal completion using stored callback
+		if _on_complete.is_valid():
+			_on_complete.call()

@@ -27,8 +27,11 @@ static func get_reward_preview(encounter_data: Dictionary) -> String:
 class WheelEncounterContainer extends VBoxContainer:
 	var controller: WheelController
 	var wheel_visual: WheelVisual
-	var context: Dictionary
 	var encounter_data: Dictionary
+
+	# Store callbacks directly instead of whole context dict to avoid stale references
+	var _on_complete: Callable = Callable()
+	var _context: Dictionary = {}  # Keep context for passing to controller/reward applicator
 
 	# UI elements
 	var spin_button: Button
@@ -39,7 +42,9 @@ class WheelEncounterContainer extends VBoxContainer:
 
 	func initialize(p_encounter_data: Dictionary, p_context: Dictionary) -> void:
 		encounter_data = p_encounter_data
-		context = p_context
+		_context = p_context
+		# Extract and store callback directly at initialization time
+		_on_complete = p_context.get("on_encounter_complete", Callable())
 
 		set_anchors_preset(Control.PRESET_FULL_RECT)
 		add_theme_constant_override("separation", 10)
@@ -47,7 +52,7 @@ class WheelEncounterContainer extends VBoxContainer:
 
 		# Create controller
 		controller = WheelController.new()
-		controller.setup(encounter_data, context)
+		controller.setup(encounter_data, _context)
 
 		# Connect controller signals
 		controller.state_changed.connect(_on_state_changed)
@@ -176,7 +181,7 @@ class WheelEncounterContainer extends VBoxContainer:
 		if not success:
 			# Apply fallback if needed
 			var fallback = RewardApplicator.get_fallback_reward(controller.current_reward)
-			RewardApplicator.apply_reward(fallback, context)
+			RewardApplicator.apply_reward(fallback, _context)
 
 
 	func _on_spin_pressed() -> void:
@@ -248,10 +253,9 @@ class WheelEncounterContainer extends VBoxContainer:
 		"""Called when reward is successfully applied."""
 		_update_gold_display()
 
-		# Complete the encounter
-		var on_complete = context.get("on_encounter_complete", Callable())
-		if on_complete.is_valid():
-			on_complete.call()
+		# Complete the encounter using stored callback
+		if _on_complete.is_valid():
+			_on_complete.call()
 
 
 	func _on_extra_spin_purchased() -> void:
