@@ -10,33 +10,21 @@ extends RefCounted
 
 const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")
 
-# Store references for callback access
-static var _selected_option: Dictionary = {}
-static var _revealed_item_id: String = ""
-static var _on_complete: Callable = Callable()
-static var _on_gold_reward: Callable = Callable()
-static var _tiles: Array = []
-static var _main_container: Control = null
-static var _gold_bonus: int = 2
-
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create treasure chest encounter UI."""
 	var vbox = UIHelpers.create_vbox_container(8)
-	_main_container = vbox
 
 	var mystery_options: Array = encounter_data["data"].get("mystery_options", [])
-	_gold_bonus = encounter_data["data"].get("gold_bonus", 2)
-	_on_complete = context.get("on_encounter_complete", Callable())
-	_on_gold_reward = context.get("on_gold_reward", Callable())
-	_selected_option = {}
-	_revealed_item_id = ""
-	_tiles.clear()
+	var gold_bonus: int = encounter_data["data"].get("gold_bonus", 2)
+	var on_complete: Callable = context.get("on_encounter_complete", Callable())
+	var on_gold_reward: Callable = context.get("on_gold_reward", Callable())
+	var tiles: Array = []
 
 	if mystery_options.is_empty():
 		vbox.add_child(UIHelpers.create_label("The chest is empty...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
-		if _on_complete.is_valid():
-			_on_complete.call()
+		if on_complete.is_valid():
+			on_complete.call()
 		return vbox
 
 	# Instructions label
@@ -56,45 +44,45 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 			"id": option["element"],
 			"element": option["element"],
 			"name": "Random %s Item" % option["display_name"],
-			"description": "+%d Gold" % _gold_bonus,
+			"description": "+%d Gold" % gold_bonus,
 			"image_path": _get_element_image(option["element"]),
 			"cost": 0  # Free, but gives gold!
 		}
 
 		var tile = PurchasableTileScene.instantiate()
 		hbox.add_child(tile)
-		tile.ready.connect(_setup_tile.bind(tile, tile_data, tile_size, option["element"]))
-		_tiles.append(tile)
+		# Bind all state to the tile setup and click handler to avoid static variable issues
+		tile.ready.connect(_setup_tile.bind(tile, tile_data, tile_size, option["element"], tiles, vbox, gold_bonus, on_complete, on_gold_reward))
+		tiles.append(tile)
 
 	return vbox
 
 
-static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float, element: String) -> void:
+static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float, element: String, tiles: Array, container: Control, gold_bonus: int, on_complete: Callable, on_gold_reward: Callable) -> void:
 	"""Setup tile after it enters the scene tree."""
 	tile.setup(tile_data, tile_size)
 	# Color tile based on element
 	tile.set_tile_color(_get_element_color(element))
-	tile.tile_clicked.connect(_on_option_selected)
+	# Bind all required state to the click handler
+	tile.tile_clicked.connect(_on_option_selected.bind(tiles, container, gold_bonus, on_complete, on_gold_reward))
 
 
-static func _on_option_selected(tile_data: Dictionary) -> void:
+static func _on_option_selected(tile_data: Dictionary, tiles: Array, container: Control, gold_bonus: int, on_complete: Callable, on_gold_reward: Callable) -> void:
 	"""Handle mystery option tile selection - reveal and acquire the item immediately."""
-	_selected_option = tile_data
-
 	# Dim all tiles and highlight selected (disable further selection)
-	EncounterUIHelpers.highlight_selected_tile(_tiles, tile_data, "id", false)
+	EncounterUIHelpers.highlight_selected_tile(tiles, tile_data, "id", false)
 
 	# Pick a random item of this element that's not already owned
 	var element = tile_data.get("element", "")
-	_revealed_item_id = _pick_random_item_of_element(element)
+	var revealed_item_id = _pick_random_item_of_element(element)
 
-	if _revealed_item_id.is_empty():
+	if revealed_item_id.is_empty():
 		# No valid item found - give gold instead
-		_show_no_item_fallback()
+		_show_no_item_fallback(container, gold_bonus, on_complete, on_gold_reward)
 		return
 
 	# Add item to player inventory and show result
-	_acquire_item_and_complete()
+	_acquire_item_and_complete(revealed_item_id, container, gold_bonus, on_complete, on_gold_reward)
 
 
 static func _pick_random_item_of_element(element: String) -> String:
@@ -128,13 +116,13 @@ static func _pick_random_item_of_element(element: String) -> String:
 	return valid_items[0]
 
 
-static func _show_no_item_fallback() -> void:
+static func _show_no_item_fallback(container: Control, gold_bonus: int, on_complete: Callable, on_gold_reward: Callable) -> void:
 	"""Show message when no item is available, give gold instead."""
 	# Give extra gold as compensation
-	var fallback_gold = _gold_bonus * 3
+	var fallback_gold = gold_bonus * 3
 
-	if _on_gold_reward.is_valid():
-		_on_gold_reward.call(fallback_gold)
+	if on_gold_reward.is_valid():
+		on_gold_reward.call(fallback_gold)
 	else:
 		RunManager.add_gold(fallback_gold)
 
@@ -145,38 +133,38 @@ static func _show_no_item_fallback() -> void:
 		GameConstants.COLOR_GOLD,
 		true
 	)
-	_main_container.add_child(msg)
+	container.add_child(msg)
 
-	if _on_complete.is_valid():
-		_on_complete.call()
+	if on_complete.is_valid():
+		on_complete.call()
 
 
-static func _acquire_item_and_complete() -> void:
+static func _acquire_item_and_complete(item_id: String, container: Control, gold_bonus: int, on_complete: Callable, on_gold_reward: Callable) -> void:
 	"""Add item to player inventory and complete the encounter."""
 	# Add item to inventory
-	RunManager.add_item_to_inventory(_revealed_item_id)
+	RunManager.add_item_to_inventory(item_id)
 
 	# Award gold bonus
-	if _on_gold_reward.is_valid():
-		_on_gold_reward.call(_gold_bonus)
+	if on_gold_reward.is_valid():
+		on_gold_reward.call(gold_bonus)
 	else:
-		RunManager.add_gold(_gold_bonus)
+		RunManager.add_gold(gold_bonus)
 
 	# Show what was acquired
-	var item_data = GameData.get_item_upgrade_by_id(_revealed_item_id)
+	var item_data = GameData.get_item_upgrade_by_id(item_id)
 	var item_name = item_data.get("name", "Item")
 
 	var result_label = UIHelpers.create_label(
-		"Acquired: %s (+%dg)" % [item_name, _gold_bonus],
+		"Acquired: %s (+%dg)" % [item_name, gold_bonus],
 		GameConstants.FONT_SIZE_BODY,
 		GameConstants.COLOR_SUCCESS,
 		true
 	)
-	_main_container.add_child(result_label)
+	container.add_child(result_label)
 
 	# Complete encounter
-	if _on_complete.is_valid():
-		_on_complete.call()
+	if on_complete.is_valid():
+		on_complete.call()
 
 
 static func _get_element_color(element: String) -> Color:

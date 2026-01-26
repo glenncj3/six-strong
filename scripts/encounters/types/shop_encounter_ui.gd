@@ -13,35 +13,21 @@ extends RefCounted
 
 const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")
 
-# Store references for callback access
-static var _selected_offering: Dictionary = {}
-static var _on_complete: Callable = Callable()
-static var _on_gold_spend: Callable = Callable()
-static var _tiles: Array = []
-static var _main_container: Control = null
-static var _max_purchases: int = 1
-static var _purchases_made: int = 0
-static var _result_label: Label = null
-
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create shop encounter UI."""
 	var vbox = UIHelpers.create_vbox_container(8)
-	_main_container = vbox
 
 	var offerings: Array = encounter_data["data"].get("offerings", [])
-	_max_purchases = encounter_data["data"].get("max_purchases", 1)
-	_purchases_made = 0
-	_on_complete = context.get("on_encounter_complete", Callable())
-	_on_gold_spend = context.get("on_gold_spend", Callable())
-	_selected_offering = {}
-	_tiles.clear()
-	_result_label = null
+	var max_purchases: int = encounter_data["data"].get("max_purchases", 1)
+	var on_complete: Callable = context.get("on_encounter_complete", Callable())
+	var on_gold_spend: Callable = context.get("on_gold_spend", Callable())
+	var tiles: Array = []
 
 	if offerings.is_empty():
 		vbox.add_child(UIHelpers.create_label("Nothing for sale...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
-		if _on_complete.is_valid():
-			_on_complete.call()
+		if on_complete.is_valid():
+			on_complete.call()
 		return vbox
 
 	# Create horizontal container for offering tiles
@@ -59,15 +45,32 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 
 		var tile = PurchasableTileScene.instantiate()
 		hbox.add_child(tile)
-		# Defer setup until tile enters the scene tree
-		tile.ready.connect(_setup_tile.bind(tile, tile_data, tile_size))
-		_tiles.append(tile)
+		tiles.append(tile)
 
 	# Add spacer and result label area
 	vbox.add_child(UIHelpers.create_spacer(8))
-	_result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true)
-	_result_label.visible = false
-	vbox.add_child(_result_label)
+	var result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true)
+	result_label.visible = false
+	vbox.add_child(result_label)
+
+	# Create state dictionary to pass through bindings
+	var state = {
+		"tiles": tiles,
+		"result_label": result_label,
+		"max_purchases": max_purchases,
+		"purchases_made": 0,
+		"on_complete": on_complete,
+		"on_gold_spend": on_gold_spend
+	}
+
+	# Setup tiles with bound state
+	for i in range(offerings.size()):
+		var offering = offerings[i]
+		var tile_data = offering.duplicate()
+		if tile_data.get("offering_type") == "skill":
+			_enrich_skill_tile_data(tile_data)
+		var tile = tiles[i]
+		tile.ready.connect(_setup_tile.bind(tile, tile_data, tile_size, state))
 
 	return vbox
 
@@ -98,7 +101,7 @@ static func _enrich_skill_tile_data(tile_data: Dictionary) -> void:
 	tile_data["trigger"] = skill_data.get("trigger", "")
 
 
-static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float) -> void:
+static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float, state: Dictionary) -> void:
 	"""Setup tile after it enters the scene tree."""
 	tile.setup(tile_data, tile_size)
 	# Color based on type: items are brown/gold, skills are purple
@@ -106,151 +109,70 @@ static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float) 
 		tile.set_tile_color(GameConstants.COLOR_AMETHYST)
 	else:
 		tile.set_tile_color(Color("#5A4A3A"))
-	tile.tile_clicked.connect(_on_offering_selected)
+	tile.tile_clicked.connect(_on_offering_selected.bind(state))
 
 
-static func _on_offering_selected(tile_data: Dictionary) -> void:
+static func _on_offering_selected(tile_data: Dictionary, state: Dictionary) -> void:
 	"""Handle offering tile selection - purchase immediately."""
-	_selected_offering = tile_data
+	var tiles: Array = state.tiles
+	var result_label: Label = state.result_label
+	var on_complete: Callable = state.on_complete
+	var on_gold_spend: Callable = state.on_gold_spend
+	var max_purchases: int = state.max_purchases
 
 	var offering_id = tile_data.get("id", "")
 	var offering_type = tile_data.get("offering_type", "item")
 	var cost = tile_data.get("cost", 0)
 
 	# Check if player can afford
-	if not _can_afford(cost):
-		_show_result("Not enough gold!", GameConstants.COLOR_ERROR)
+	if not SkillEncounterHelpers.can_afford(cost):
+		SkillEncounterHelpers.show_result(result_label, "Not enough gold!", GameConstants.COLOR_ERROR)
 		return
 
 	# Check if item already owned
 	if offering_type == "item":
 		if RunManager.has_item_in_inventory(offering_id):
-			_show_result("Already owned!", GameConstants.COLOR_ERROR)
+			SkillEncounterHelpers.show_result(result_label, "Already owned!", GameConstants.COLOR_ERROR)
 			return
 
 	# Spend gold
-	if not EncounterUIHelpers.try_spend_gold(cost, _on_gold_spend):
-		_show_result("Purchase failed!", GameConstants.COLOR_ERROR)
+	if not EncounterUIHelpers.try_spend_gold(cost, on_gold_spend):
+		SkillEncounterHelpers.show_result(result_label, "Purchase failed!", GameConstants.COLOR_ERROR)
 		return
 
 	# Apply the reward - no character selection needed
 	var success = false
 	if offering_type == "skill":
-		# Phase 3: Execute skill effect immediately
-		success = _execute_skill(offering_id, tile_data)
+		# Execute skill effect immediately
+		var result = SkillEncounterHelpers.execute_skill(tile_data)
+		success = result.success
+		var color = GameConstants.COLOR_SUCCESS if success else GameConstants.COLOR_ERROR
+		SkillEncounterHelpers.show_result(result_label, result.message, color)
+		if not success:
+			# Refund gold
+			RunManager.add_gold(cost)
 	else:
 		# Add item to player inventory
 		var item = RunManager.add_item_to_inventory(offering_id)
 		success = item != null
 		if success:
 			var item_data = GameData.get_item_upgrade_by_id(offering_id)
-			_show_result("Acquired %s!" % item_data.get("name", "Item"), GameConstants.COLOR_SUCCESS)
+			SkillEncounterHelpers.show_result(result_label, "Acquired %s!" % item_data.get("name", "Item"), GameConstants.COLOR_SUCCESS)
 		else:
 			# Refund gold if item couldn't be added
 			RunManager.add_gold(cost)
-			_show_result("Failed to acquire item!", GameConstants.COLOR_ERROR)
+			SkillEncounterHelpers.show_result(result_label, "Failed to acquire item!", GameConstants.COLOR_ERROR)
 
 	if success:
-		_purchases_made += 1
+		state.purchases_made += 1
 
 		# Dim the selected tile (it's been purchased)
-		for tile in _tiles:
-			if tile.tile_data.get("id") == offering_id:
-				tile.modulate = GameConstants.COLOR_TILE_DIMMED
-				tile.set_clickable(false)
-				break
+		SkillEncounterHelpers.dim_tile_by_id(tiles, offering_id)
 
 		# Check if we've reached max purchases
-		if _purchases_made >= _max_purchases:
-			if _on_complete.is_valid():
-				_on_complete.call()
-
-
-static func _execute_skill(skill_id: String, _tile_data: Dictionary) -> bool:
-	"""
-	Execute a skill's effect immediately.
-
-	Args:
-		skill_id: The skill ID
-		tile_data: The tile data (may contain enriched skill info)
-
-	Returns:
-		True if skill was executed successfully
-	"""
-	var skill_data = GameData.get_skill_by_id(skill_id)
-	if skill_data.is_empty():
-		_show_result("Unknown skill!", GameConstants.COLOR_ERROR)
-		return false
-
-	var effect_type = skill_data.get("effect_type", "instant")
-	var skill_name = skill_data.get("name", "Skill")
-
-	# Check if this is a lingering effect
-	if effect_type == "lingering":
-		# Add to lingering effects instead of executing immediately
-		var lingering_success = RunManager.add_lingering_effect(skill_data)
-		if lingering_success:
-			var trigger = skill_data.get("trigger", "")
-			var trigger_desc = _get_trigger_description(trigger)
-			_show_result("%s will activate %s!" % [skill_name, trigger_desc], GameConstants.COLOR_SUCCESS)
-			return true
-		else:
-			_show_result("Failed to prepare %s!" % skill_name, GameConstants.COLOR_ERROR)
-			return false
-
-	# Execute instant effect
-	var context = SkillContext.from_run_manager(RunManager)
-	var registry = _get_skill_registry()
-
-	var exec_success = registry.execute(skill_data, context)
-	if exec_success:
-		var effect = skill_data.get("effect", {})
-		var effect_desc = SkillEffects.get_effect_description(effect)
-		_show_result("%s!" % effect_desc, GameConstants.COLOR_SUCCESS)
-		return true
-	else:
-		_show_result("Failed to use %s!" % skill_name, GameConstants.COLOR_ERROR)
-		return false
-
-
-static func _get_skill_registry() -> SkillEffectRegistry:
-	"""Get or create the skill effect registry."""
-	# Try to get from RunManager if it has one
-	if RunManager.has_method("get_skill_registry"):
-		return RunManager.get_skill_registry()
-
-	# Create a temporary one with all effects registered
-	var registry = SkillEffectRegistry.new()
-	SkillEffects.register_all(registry)
-	return registry
-
-
-static func _get_trigger_description(trigger: String) -> String:
-	"""Get a human-readable description of a trigger."""
-	match trigger:
-		"next_character_acquired":
-			return "when you get a new character"
-		"next_combat":
-			return "before your next combat"
-		"next_encounter":
-			return "at your next encounter"
-		"next_round":
-			return "at the start of next round"
-		_:
-			return "later"
-
-
-static func _can_afford(cost: int) -> bool:
-	"""Check if player can afford the cost."""
-	return RunManager.get_gold() >= cost
-
-
-static func _show_result(message: String, color: Color) -> void:
-	"""Show result message."""
-	if _result_label:
-		_result_label.text = message
-		_result_label.add_theme_color_override("font_color", color)
-		_result_label.visible = true
+		if state.purchases_made >= max_purchases:
+			if on_complete.is_valid():
+				on_complete.call()
 
 
 static func get_reward_preview(encounter_data: Dictionary) -> String:
