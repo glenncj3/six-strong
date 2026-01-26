@@ -203,13 +203,8 @@ static func _on_reward_claimed(reward_id: String, char_index: int) -> void:
 	var team = RunManager.get_team()
 	var char_instance = team[char_index]
 
-	# Award the item
-	if _on_buy_item.is_valid():
-		# Use buy callback with cost 0 (pass null for selector/button since popup handles UI)
-		_on_buy_item.call(reward_id, 0, null, null)
-	else:
-		# Fallback: equip directly
-		char_instance.equip_item_upgrade(reward_id)
+	# Award the item - equip directly since popup already selected the character
+	char_instance.equip_item_upgrade(reward_id)
 
 	# Award gold bonus
 	if _on_gold_reward.is_valid():

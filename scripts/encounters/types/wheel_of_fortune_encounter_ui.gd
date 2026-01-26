@@ -303,7 +303,7 @@ class WheelEncounterContainer extends VBoxContainer:
 		return valid_skills[0]
 
 
-	func _on_popup_claimed(reward_id: String, char_index: int) -> void:
+	func _on_popup_claimed(_reward_id: String, char_index: int) -> void:
 		"""Handle claim from popup."""
 		var team = RunManager.get_team()
 		var target_char = team[char_index]

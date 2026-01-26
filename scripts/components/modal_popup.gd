@@ -109,8 +109,8 @@ func _center_popup() -> void:
 	anchor_right = 0.5
 	anchor_bottom = 0.5
 	# Use current size for offsets
-	var half_width = size.x / 2 if size.x > 0 else 150
-	var half_height = size.y / 2 if size.y > 0 else 150
+	var half_width: float = size.x / 2 if size.x > 0 else 150.0
+	var half_height: float = size.y / 2 if size.y > 0 else 150.0
 	offset_left = -half_width
 	offset_top = -half_height
 	offset_right = half_width
