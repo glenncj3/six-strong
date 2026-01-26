@@ -2,9 +2,17 @@ extends Node
 # RunManager Singleton
 # Manages active run state - now delegates to focused managers
 # Refactored to follow Single Responsibility Principle
+#
+# Phase 3 Additions:
+# - Lingering effects tracking and triggers
+# - Skill effect registry
 
 const SaveDataValidatorScript = preload("res://scripts/utils/save_data_validator.gd")
 const PlayerInventoryScript = preload("res://scripts/managers/player_inventory.gd")
+const LingeringEffectsScript = preload("res://scripts/managers/lingering_effects.gd")
+const SkillEffectRegistryScript = preload("res://scripts/skills/skill_effect_registry.gd")
+const SkillContextScript = preload("res://scripts/skills/skill_context.gd")
+const SkillEffectsScript = preload("res://scripts/skills/skill_effects.gd")
 
 signal run_started
 signal round_changed(new_round: int)
@@ -15,6 +23,9 @@ signal phase_changed(new_phase: String)
 signal draft_character_added(char_instance: CharacterInstance)
 signal draft_gold_updated(amount: int)
 signal item_acquired(item: ItemInstance)
+# Phase 3: Lingering effect signals
+signal lingering_effect_added(effect: Dictionary)
+signal lingering_effect_triggered(effect: Dictionary, trigger: String)
 
 # Save file path
 const SAVE_PATH = "user://active_run.json"
@@ -31,6 +42,8 @@ var run_id: String = ""
 var _team_manager: TeamManager = TeamManager.new()
 var _combat_generator: CombatGenerator = CombatGenerator.new()
 var _player_inventory = PlayerInventoryScript.new()
+var _lingering_effects = LingeringEffectsScript.new()
+var _skill_registry = SkillEffectRegistryScript.new()
 
 # Progression (kept in RunManager as it's core run state)
 var current_round: int = 0
@@ -47,8 +60,18 @@ var encounter_history: Array = []
 
 
 func _ready() -> void:
-	# Check for existing run on startup
-	pass  # Will be called by main scene
+	# Initialize skill effect registry with built-in effects
+	_init_skill_registry()
+
+	# Connect lingering effect signals
+	_lingering_effects.effect_added.connect(_on_lingering_effect_added)
+	_lingering_effects.effect_triggered.connect(_on_lingering_effect_triggered)
+
+
+func _init_skill_registry() -> void:
+	"""Initialize the skill effect registry with all built-in effects."""
+	_skill_registry.clear()
+	SkillEffectsScript.register_all(_skill_registry)
 
 
 func has_active_run() -> bool:
@@ -98,6 +121,10 @@ func start_new_run(drafted_character_ids: Array) -> void:
 	encounter_history.clear()
 	is_run_active = true
 
+	# Clear lingering effects from any previous run
+	_lingering_effects.clear()
+	_player_inventory.clear()
+
 	# Save initial state
 	save_run_state()
 
@@ -121,6 +148,7 @@ func save_run_state() -> void:
 		"current_gold": current_gold,
 		"team": _team_manager.to_array(),
 		"inventory": _player_inventory.to_array(),
+		"lingering_effects": _lingering_effects.to_array(),
 		"encounter_history": encounter_history
 	}
 
@@ -163,6 +191,10 @@ func load_run_state() -> bool:
 	# Restore inventory (Phase 2)
 	var inventory_data = save_data.get("inventory", [])
 	_player_inventory.load_from_array(inventory_data)
+
+	# Restore lingering effects (Phase 3)
+	var lingering_data = save_data.get("lingering_effects", [])
+	_lingering_effects.load_from_array(lingering_data)
 
 	is_run_active = true
 
@@ -253,6 +285,7 @@ func _clear_run_state() -> void:
 	run_id = ""
 	_team_manager.clear()
 	_player_inventory.clear()
+	_lingering_effects.clear()
 	current_round = 0
 	current_phase = PHASE_ENCOUNTER
 	encounters_this_round = 0
@@ -350,6 +383,100 @@ func get_inventory_stat_modifier(stat_name: String) -> int:
 
 
 # =============================================================================
+# LINGERING EFFECTS (Phase 3)
+# =============================================================================
+
+func get_skill_registry():
+	"""Get the skill effect registry."""
+	return _skill_registry
+
+
+func get_lingering_effects():
+	"""Get the lingering effects manager."""
+	return _lingering_effects
+
+
+func add_lingering_effect(skill_data: Dictionary) -> bool:
+	"""
+	Add a lingering effect from skill data.
+
+	Args:
+		skill_data: The full skill data dictionary containing effect and trigger
+
+	Returns:
+		True if effect was added successfully
+	"""
+	var effect_id = _lingering_effects.add_effect(skill_data, current_round)
+	if effect_id > 0:
+		save_run_state()
+		return true
+	return false
+
+
+func trigger_lingering_effects(trigger_type: String) -> Array[Dictionary]:
+	"""
+	Trigger all lingering effects matching the trigger type.
+
+	Args:
+		trigger_type: The trigger to match (e.g., "next_combat")
+
+	Returns:
+		Array of triggered effect entries
+	"""
+	var context = _create_skill_context()
+	var triggered = _lingering_effects.trigger(trigger_type, context, _skill_registry)
+	if triggered.size() > 0:
+		save_run_state()
+	return triggered
+
+
+func trigger_character_acquired_effects(character: CharacterInstance) -> Array[Dictionary]:
+	"""
+	Trigger lingering effects for a newly acquired character.
+
+	Args:
+		character: The newly acquired character
+
+	Returns:
+		Array of triggered effect entries
+	"""
+	var context = _create_skill_context()
+	var triggered = _lingering_effects.trigger_for_character(
+		"next_character_acquired",
+		character,
+		context
+	)
+	if triggered.size() > 0:
+		save_run_state()
+	return triggered
+
+
+func has_pending_effects(trigger_type: String) -> bool:
+	"""Check if there are any lingering effects waiting for a trigger."""
+	return _lingering_effects.has_effects_for_trigger(trigger_type)
+
+
+func get_pending_effects(trigger_type: String) -> Array[Dictionary]:
+	"""Get all pending effects for a trigger type."""
+	return _lingering_effects.get_effects_by_trigger(trigger_type)
+
+
+func _create_skill_context():
+	"""Create a SkillContext for effect execution."""
+	return SkillContextScript.from_run_manager(self)
+
+
+func _on_lingering_effect_added(effect: Dictionary) -> void:
+	"""Handle lingering effect added event."""
+	lingering_effect_added.emit(effect)
+
+
+func _on_lingering_effect_triggered(effect: Dictionary, trigger: String) -> void:
+	"""Handle lingering effect triggered event."""
+	lingering_effect_triggered.emit(effect, trigger)
+
+
+# =============================================================================
 # RUN PROGRESSION
 # =============================================================================
 
@@ -358,6 +485,10 @@ func advance_round() -> void:
 	current_round += 1
 	current_phase = PHASE_ENCOUNTER
 	encounters_this_round = 0
+
+	# Trigger any "next_round" lingering effects
+	trigger_lingering_effects("next_round")
+
 	round_changed.emit(current_round)
 	phase_changed.emit(current_phase)
 	save_run_state()
@@ -376,6 +507,12 @@ func set_phase(phase: String) -> void:
 func complete_encounter() -> void:
 	"""Complete encounter phase. Switches to combat after ENCOUNTERS_PER_ROUND encounters."""
 	encounters_this_round += 1
+
+	# Trigger any "next_encounter" lingering effects for next encounter
+	# (but not when switching to combat)
+	if encounters_this_round < GameConstants.ENCOUNTERS_PER_ROUND:
+		trigger_lingering_effects("next_encounter")
+
 	if encounters_this_round >= GameConstants.ENCOUNTERS_PER_ROUND:
 		current_phase = PHASE_COMBAT
 	phase_changed.emit(current_phase)
@@ -534,11 +671,12 @@ func apply_combat_rewards(won: bool, combat_data: Dictionary) -> void:
 		won: True if player won, false if lost
 		combat_data: The combat option data
 	"""
+	# Trigger "next_combat" lingering effects before combat resolves
+	trigger_lingering_effects("next_combat")
+
 	if won:
 		RewardCalculator.apply_combat_victory_rewards(_team_manager, add_gold, combat_data)
 	else:
 		# Lose reputation equal to round number
 		var reputation_loss = RewardCalculator.calculate_reputation_loss(current_round)
 		lose_reputation(reputation_loss)
-
-

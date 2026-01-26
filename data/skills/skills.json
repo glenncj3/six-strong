@@ -1,120 +1,166 @@
 {
   "skills": [
     {
-      "id": "skill_power_strike",
-      "name": "Power Strike",
-      "description": "A powerful attack technique.",
-      "image_path": "res://assets/skills/power_strike.png",
-      "effects": [],
-      "cost": 10,
-      "level_requirement": 3
+      "id": "skill_healing_surge",
+      "name": "Healing Surge",
+      "description": "Instantly heal all team members for 30 health.",
+      "image_path": "res://assets/skills/healing_surge.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "heal_team",
+        "value": 30
+      },
+      "cost": 15,
+      "level_requirement": 1
     },
     {
-      "id": "skill_dodge",
-      "name": "Dodge",
-      "description": "Improves evasion ability.",
-      "image_path": "res://assets/skills/dodge.png",
-      "effects": [],
+      "id": "skill_gold_rush",
+      "name": "Gold Rush",
+      "description": "Instantly gain 25 gold.",
+      "image_path": "res://assets/skills/gold_rush.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "grant_gold",
+        "value": 25
+      },
       "cost": 10,
       "level_requirement": 1
     },
     {
-      "id": "skill_iron_skin",
-      "name": "Iron Skin",
-      "description": "Increases defend rate by 10%.",
-      "image_path": "res://assets/skills/iron_skin.png",
-      "effects": [{"type": "stat_add", "stat": "defendRate", "value": 10}],
-      "cost": 10,
+      "id": "skill_training_session",
+      "name": "Training Session",
+      "description": "Grant 15 XP to all team members.",
+      "image_path": "res://assets/skills/training_session.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "grant_xp",
+        "value": 15
+      },
+      "cost": 12,
+      "level_requirement": 2
+    },
+    {
+      "id": "skill_fortune_blessing",
+      "name": "Fortune's Blessing",
+      "description": "The next character you acquire gains +20 max health.",
+      "image_path": "res://assets/skills/fortune_blessing.png",
+      "effect_type": "lingering",
+      "effect": {
+        "type": "next_character_stat_boost",
+        "stat": "health",
+        "value": 20
+      },
+      "trigger": "next_character_acquired",
+      "cost": 18,
+      "level_requirement": 3
+    },
+    {
+      "id": "skill_minor_heal",
+      "name": "Minor Heal",
+      "description": "Heal all team members for 15 health.",
+      "image_path": "res://assets/skills/minor_heal.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "heal_team",
+        "value": 15
+      },
+      "cost": 8,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_jackpot",
+      "name": "Jackpot",
+      "description": "Instantly gain 50 gold.",
+      "image_path": "res://assets/skills/jackpot.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "grant_gold",
+        "value": 50
+      },
+      "cost": 25,
       "level_requirement": 4
     },
     {
-      "id": "skill_vitality",
-      "name": "Vitality",
-      "description": "Increases max health by 20.",
-      "image_path": "res://assets/skills/vitality.png",
-      "effects": [{"type": "stat_add", "stat": "health", "value": 20}],
-      "cost": 10,
+      "id": "skill_battle_hardening",
+      "name": "Battle Hardening",
+      "description": "The next character you acquire gains +10 defendRate.",
+      "image_path": "res://assets/skills/battle_hardening.png",
+      "effect_type": "lingering",
+      "effect": {
+        "type": "next_character_stat_boost",
+        "stat": "defendRate",
+        "value": 10
+      },
+      "trigger": "next_character_acquired",
+      "cost": 15,
+      "level_requirement": 2
+    },
+    {
+      "id": "skill_group_training",
+      "name": "Group Training",
+      "description": "Grant 25 XP to all team members.",
+      "image_path": "res://assets/skills/group_training.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "grant_xp",
+        "value": 25
+      },
+      "cost": 20,
+      "level_requirement": 3
+    },
+    {
+      "id": "skill_emergency_funds",
+      "name": "Emergency Funds",
+      "description": "Instantly gain 15 gold.",
+      "image_path": "res://assets/skills/emergency_funds.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "grant_gold",
+        "value": 15
+      },
+      "cost": 5,
       "level_requirement": 1
     },
     {
-      "id": "skill_arcane_blast",
-      "name": "Arcane Blast",
-      "description": "A powerful magical attack.",
-      "image_path": "res://assets/skills/arcane_blast.png",
-      "effects": [],
-      "cost": 10,
-      "level_requirement": 2
-    },
-    {
-      "id": "skill_quick_shot",
-      "name": "Quick Shot",
-      "description": "A rapid ranged attack.",
-      "image_path": "res://assets/skills/quick_shot.png",
-      "effects": [],
-      "cost": 10,
-      "level_requirement": 3
-    },
-    {
-      "id": "skill_rage",
-      "name": "Rage",
-      "description": "Powerful but reduces defend rate by 5%.",
-      "image_path": "res://assets/skills/rage.png",
-      "effects": [
-        {"type": "stat_add", "stat": "defendRate", "value": -5}
-      ],
-      "cost": 10,
-      "level_requirement": 2
-    },
-    {
-      "id": "skill_life_drain",
-      "name": "Life Drain",
-      "description": "Drains life, increasing health by 15.",
-      "image_path": "res://assets/skills/life_drain.png",
-      "effects": [
-        {"type": "stat_add", "stat": "health", "value": 15}
-      ],
-      "cost": 10,
-      "level_requirement": 3
-    },
-    {
-      "id": "skill_inner_peace",
-      "name": "Inner Peace",
-      "description": "Balanced improvement: +5% defend rate and +5 health.",
-      "image_path": "res://assets/skills/inner_peace.png",
-      "effects": [
-        {"type": "stat_add", "stat": "defendRate", "value": 5},
-        {"type": "stat_add", "stat": "health", "value": 5}
-      ],
-      "cost": 10,
-      "level_requirement": 2
-    },
-    {
-      "id": "skill_backstab",
-      "name": "Backstab",
-      "description": "A devastating sneak attack.",
-      "image_path": "res://assets/skills/backstab.png",
-      "effects": [],
-      "cost": 10,
+      "id": "skill_team_restoration",
+      "name": "Team Restoration",
+      "description": "Heal all team members for 50 health.",
+      "image_path": "res://assets/skills/team_restoration.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "heal_team",
+        "value": 50
+      },
+      "cost": 22,
       "level_requirement": 4
     },
     {
-      "id": "skill_battle_cry",
-      "name": "Battle Cry",
-      "description": "Increases health by 10.",
-      "image_path": "res://assets/skills/battle_cry.png",
-      "effects": [
-        {"type": "stat_add", "stat": "health", "value": 10}
-      ],
-      "cost": 10,
-      "level_requirement": 1
+      "id": "skill_future_mana",
+      "name": "Future Mana",
+      "description": "The next character you acquire gains +15 mana.",
+      "image_path": "res://assets/skills/future_mana.png",
+      "effect_type": "lingering",
+      "effect": {
+        "type": "next_character_stat_boost",
+        "stat": "mana",
+        "value": 15
+      },
+      "trigger": "next_character_acquired",
+      "cost": 14,
+      "level_requirement": 2
     },
     {
-      "id": "skill_swiftness",
-      "name": "Swiftness",
-      "description": "Greatly improves agility.",
-      "image_path": "res://assets/skills/swiftness.png",
-      "effects": [],
-      "cost": 10,
+      "id": "skill_combat_prep",
+      "name": "Combat Preparation",
+      "description": "Before your next combat, heal all team members for 20.",
+      "image_path": "res://assets/skills/combat_prep.png",
+      "effect_type": "lingering",
+      "effect": {
+        "type": "heal_team",
+        "value": 20
+      },
+      "trigger": "next_combat",
+      "cost": 16,
       "level_requirement": 3
     }
   ]

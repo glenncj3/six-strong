@@ -5,8 +5,11 @@ extends RefCounted
 ##
 ## Phase 2 Refactor:
 ## - Items go directly to player inventory (no character selection)
-## - Skills are instant effects (no character selection needed)
-## - Simplified purchase flow without popup character picker
+##
+## Phase 3 Refactor:
+## - Skills are one-shot effects that execute immediately
+## - No character assignment for skills
+## - Show effect preview before purchase
 
 const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")
 
@@ -49,8 +52,10 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 
 	for i in range(offerings.size()):
 		var offering = offerings[i]
-		# Build tile data
+		# Build tile data - enrich with effect preview for skills
 		var tile_data = offering.duplicate()
+		if tile_data.get("offering_type") == "skill":
+			_enrich_skill_tile_data(tile_data)
 
 		var tile = PurchasableTileScene.instantiate()
 		hbox.add_child(tile)
@@ -67,6 +72,32 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	return vbox
 
 
+static func _enrich_skill_tile_data(tile_data: Dictionary) -> void:
+	"""Add effect preview information to skill tile data."""
+	var skill_id = tile_data.get("id", "")
+	if skill_id.is_empty():
+		return
+
+	var skill_data = GameData.get_skill_by_id(skill_id)
+	if skill_data.is_empty():
+		return
+
+	# Add effect preview to description
+	var effect = skill_data.get("effect", {})
+	if not effect.is_empty():
+		var effect_desc = SkillEffects.get_effect_description(effect)
+		tile_data["effect_preview"] = effect_desc
+		# Append effect preview to description if not already there
+		var desc = tile_data.get("description", skill_data.get("description", ""))
+		if not desc.contains(effect_desc):
+			tile_data["description"] = desc
+
+	# Copy effect type for display purposes
+	tile_data["effect_type"] = skill_data.get("effect_type", "instant")
+	tile_data["effect"] = skill_data.get("effect", {})
+	tile_data["trigger"] = skill_data.get("trigger", "")
+
+
 static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float) -> void:
 	"""Setup tile after it enters the scene tree."""
 	tile.setup(tile_data, tile_size)
@@ -79,7 +110,7 @@ static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float) 
 
 
 static func _on_offering_selected(tile_data: Dictionary) -> void:
-	"""Handle offering tile selection - purchase immediately (Phase 2)."""
+	"""Handle offering tile selection - purchase immediately."""
 	_selected_offering = tile_data
 
 	var offering_id = tile_data.get("id", "")
@@ -105,10 +136,8 @@ static func _on_offering_selected(tile_data: Dictionary) -> void:
 	# Apply the reward - no character selection needed
 	var success = false
 	if offering_type == "skill":
-		# Phase 3 TODO: Skills are instant effects
-		# For now, just acknowledge the purchase
-		success = true
-		_show_result("Used skill!", GameConstants.COLOR_SUCCESS)
+		# Phase 3: Execute skill effect immediately
+		success = _execute_skill(offering_id, tile_data)
 	else:
 		# Add item to player inventory
 		var item = RunManager.add_item_to_inventory(offering_id)
@@ -135,6 +164,80 @@ static func _on_offering_selected(tile_data: Dictionary) -> void:
 		if _purchases_made >= _max_purchases:
 			if _on_complete.is_valid():
 				_on_complete.call()
+
+
+static func _execute_skill(skill_id: String, tile_data: Dictionary) -> bool:
+	"""
+	Execute a skill's effect immediately.
+
+	Args:
+		skill_id: The skill ID
+		tile_data: The tile data (may contain enriched skill info)
+
+	Returns:
+		True if skill was executed successfully
+	"""
+	var skill_data = GameData.get_skill_by_id(skill_id)
+	if skill_data.is_empty():
+		_show_result("Unknown skill!", GameConstants.COLOR_ERROR)
+		return false
+
+	var effect_type = skill_data.get("effect_type", "instant")
+	var skill_name = skill_data.get("name", "Skill")
+
+	# Check if this is a lingering effect
+	if effect_type == "lingering":
+		# Add to lingering effects instead of executing immediately
+		var success = RunManager.add_lingering_effect(skill_data)
+		if success:
+			var trigger = skill_data.get("trigger", "")
+			var trigger_desc = _get_trigger_description(trigger)
+			_show_result("%s will activate %s!" % [skill_name, trigger_desc], GameConstants.COLOR_SUCCESS)
+			return true
+		else:
+			_show_result("Failed to prepare %s!" % skill_name, GameConstants.COLOR_ERROR)
+			return false
+
+	# Execute instant effect
+	var context = SkillContext.from_run_manager(RunManager)
+	var registry = _get_skill_registry()
+
+	var success = registry.execute(skill_data, context)
+	if success:
+		var effect = skill_data.get("effect", {})
+		var effect_desc = SkillEffects.get_effect_description(effect)
+		_show_result("%s!" % effect_desc, GameConstants.COLOR_SUCCESS)
+		return true
+	else:
+		_show_result("Failed to use %s!" % skill_name, GameConstants.COLOR_ERROR)
+		return false
+
+
+static func _get_skill_registry() -> SkillEffectRegistry:
+	"""Get or create the skill effect registry."""
+	# Try to get from RunManager if it has one
+	if RunManager.has_method("get_skill_registry"):
+		return RunManager.get_skill_registry()
+
+	# Create a temporary one with all effects registered
+	var registry = SkillEffectRegistry.new()
+	SkillEffects.register_all(registry)
+	return registry
+
+
+static func _get_trigger_description(trigger: String) -> String:
+	"""Get a human-readable description of a trigger."""
+	match trigger:
+		"next_character_acquired":
+			return "when you get a new character"
+		"next_combat":
+			return "before your next combat"
+		"next_encounter":
+			return "at your next encounter"
+		"next_round":
+			return "at the start of next round"
+		_:
+			return "later"
 
 
 static func _can_afford(cost: int) -> bool:
