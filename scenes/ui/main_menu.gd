@@ -126,7 +126,7 @@ func _on_play_pressed() -> void:
 
 
 func _on_collection_pressed() -> void:
-	SceneManager.go_to("collection", false)
+	SceneManager.go_to("legacy_collection", false)
 
 
 func _on_quit_pressed() -> void:

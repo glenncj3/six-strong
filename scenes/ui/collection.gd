@@ -1,4 +1,7 @@
 extends Control
+# DEPRECATED: This screen has been replaced by LegacyCollection (Phase 8)
+# Kept for reference during transition period. Use legacy_collection.tscn instead.
+#
 # Collection - Browse and manage character collection
 # Portrait mobile layout with full-screen details overlay
 # Uses CharacterTile in rows of 3

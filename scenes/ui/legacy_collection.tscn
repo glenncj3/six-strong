@@ -1,0 +1,133 @@
+[gd_scene load_steps=4 format=3 uid="uid://c8legacycollect1"]
+
+[ext_resource type="Script" path="res://scenes/ui/legacy_collection.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://header_bar_comp" path="res://scenes/components/header_bar.tscn" id="2_header_bar"]
+[ext_resource type="PackedScene" path="res://scenes/components/abstract_background.tscn" id="3_bg"]
+
+[node name="LegacyCollection" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" parent="." instance=ExtResource("3_bg")]
+layout_mode = 1
+
+[node name="HeaderBar" parent="." instance=ExtResource("2_header_bar")]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 56.0
+grow_horizontal = 2
+
+[node name="BackButton" type="Button" parent="HeaderBar/MarginContainer/HBoxContainer/LeftSection"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 80.0
+grow_vertical = 2
+theme_override_font_sizes/font_size = 16
+text = "< BACK"
+
+[node name="GemsLabel" type="Label" parent="HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
+layout_mode = 2
+theme_type_variation = "HeaderLabel"
+theme_override_font_sizes/font_size = 24
+text = "0"
+vertical_alignment = 1
+
+[node name="RerollTokensLabel" type="Label" parent="HeaderBar/MarginContainer/HBoxContainer/CenterSection"]
+layout_mode = 2
+theme_type_variation = "HeaderLabel"
+theme_override_font_sizes/font_size = 24
+text = "0"
+vertical_alignment = 1
+
+[node name="MainContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 61.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="MainContainer/VBoxContainer"]
+layout_mode = 2
+theme_type_variation = "HeaderLabel"
+theme_override_font_sizes/font_size = 24
+text = "LEGACY COLLECTION"
+horizontal_alignment = 1
+
+[node name="LegacyListScroll" type="ScrollContainer" parent="MainContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="LegacyList" type="VBoxContainer" parent="MainContainer/VBoxContainer/LegacyListScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="LegacyDetailsPanel" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 61.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DetailsBackground" type="ColorRect" parent="LegacyDetailsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.12, 0.16, 1)
+
+[node name="DetailsMargin" type="MarginContainer" parent="LegacyDetailsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="DetailsContainer" type="VBoxContainer" parent="LegacyDetailsPanel/DetailsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DetailsTitle" type="Label" parent="LegacyDetailsPanel/DetailsMargin/DetailsContainer"]
+layout_mode = 2
+theme_type_variation = "HeaderLabel"
+theme_override_font_sizes/font_size = 20
+text = "LEGACY DETAILS"
+horizontal_alignment = 1
+
+[node name="DetailsScroll" type="ScrollContainer" parent="LegacyDetailsPanel/DetailsMargin/DetailsContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="DetailsContent" type="VBoxContainer" parent="LegacyDetailsPanel/DetailsMargin/DetailsContainer/DetailsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8

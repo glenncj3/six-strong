@@ -12,7 +12,8 @@ signal transition_completed
 # Scene path constants for type safety
 const SCENES = {
 	"main_menu": "res://scenes/ui/main_menu.tscn",
-	"collection": "res://scenes/ui/collection.tscn",
+	"collection": "res://scenes/ui/collection.tscn",  # DEPRECATED: Use legacy_collection
+	"legacy_collection": "res://scenes/ui/legacy_collection.tscn",  # Phase 8: Replaces collection
 	"character_details": "res://scenes/ui/character_details.tscn",
 	"draft": "res://scenes/ui/draft.tscn",
 	"run_view": "res://scenes/ui/run_view.tscn",
