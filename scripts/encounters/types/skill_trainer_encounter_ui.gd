@@ -99,7 +99,6 @@ static func _on_skill_selected(skill_data: Dictionary) -> void:
 	_selected_skill_data = skill_data
 
 	var skill_id = skill_data.get("id", "")
-	var skill_name = skill_data.get("name", "Skill")
 	var cost = skill_data.get("cost", 0)
 
 	# Check if player can afford
@@ -147,8 +146,8 @@ static func _execute_skill(skill_data: Dictionary) -> bool:
 	# Check if this is a lingering effect
 	if effect_type == "lingering":
 		# Add to lingering effects instead of executing immediately
-		var success = RunManager.add_lingering_effect(skill_data)
-		if success:
+		var lingering_success = RunManager.add_lingering_effect(skill_data)
+		if lingering_success:
 			var trigger = skill_data.get("trigger", "")
 			var trigger_desc = _get_trigger_description(trigger)
 			_show_result("%s will activate %s!" % [skill_name, trigger_desc], GameConstants.COLOR_SUCCESS)
@@ -161,8 +160,8 @@ static func _execute_skill(skill_data: Dictionary) -> bool:
 	var context = SkillContext.from_run_manager(RunManager)
 	var registry = _get_skill_registry()
 
-	var success = registry.execute(skill_data, context)
-	if success:
+	var exec_success = registry.execute(skill_data, context)
+	if exec_success:
 		var effect = skill_data.get("effect", {})
 		var effect_desc = SkillEffects.get_effect_description(effect)
 		_show_result("%s!" % effect_desc, GameConstants.COLOR_SUCCESS)
