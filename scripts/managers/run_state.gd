@@ -4,11 +4,12 @@ extends RefCounted
 ## RunState owns state. Follows Single Responsibility Principle.
 ##
 ## This class owns the core run data and all subsystems:
-## - Character grid (Phase 5 - stubbed as simple array for now)
+## - Character grid (Phase 5 - 2x3 grid managing character placement)
 ## - Player inventory (items)
 ## - Lingering effects (skill effects waiting for triggers)
 ## - Run pool (content available based on drafted legacies)
 
+const CharacterGridScript = preload("res://scripts/managers/character_grid.gd")
 const PlayerInventoryScript = preload("res://scripts/managers/player_inventory.gd")
 const LingeringEffectsScript = preload("res://scripts/managers/lingering_effects.gd")
 const RunPoolScript = preload("res://scripts/managers/run_pool.gd")
@@ -31,9 +32,18 @@ var encounters_this_round: int = 0
 # SUBSYSTEMS (Composition)
 # =============================================================================
 
-# CharacterGrid will be created in Phase 5 - for now use simple array via TeamManager
-# var grid: CharacterGrid
-var team: Array = []  # Array of CharacterInstance (stub for Phase 5 grid)
+# Phase 5: CharacterGrid manages 2x3 character placement
+var grid = null  # CharacterGridScript instance
+
+# Backwards compatibility: team property maps to grid.get_all_characters()
+var team: Array:
+	get: return grid.get_all_characters() if grid else []
+	set(value):
+		# Migration support: if setting team directly, populate grid
+		if grid:
+			grid.clear()
+			for character in value:
+				grid.place_character_in_first_empty(character)
 
 var inventory  # PlayerInventoryScript instance
 var lingering_effects  # LingeringEffectsScript instance
@@ -52,6 +62,7 @@ var drafted_legacy_ids: Array[String] = []
 # =============================================================================
 
 func _init() -> void:
+	grid = CharacterGridScript.new()
 	inventory = PlayerInventoryScript.new()
 	lingering_effects = LingeringEffectsScript.new()
 	reputation = GameConstants.STARTING_REPUTATION
@@ -68,7 +79,7 @@ func reset() -> void:
 	current_gold = 0
 	starting_gold = 0
 	encounters_this_round = 0
-	team.clear()
+	grid.clear()
 	inventory.clear()
 	lingering_effects.clear()
 	pool = null
@@ -164,44 +175,77 @@ func complete_encounter() -> void:
 
 
 # =============================================================================
-# TEAM MANAGEMENT (Stub for Phase 5 Grid)
+# GRID MANAGEMENT (Phase 5)
 # =============================================================================
 
 func add_character(character: CharacterInstance) -> bool:
 	"""
-	Add a character to the team.
+	Add a character to the grid in the first available slot.
 
 	Returns:
-		True if character was added, false if team is full
+		True if character was added, false if grid is full
 	"""
-	if team.size() >= GameConstants.MAX_GRID_CHARACTERS:
-		return false
-	team.append(character)
-	return true
+	return grid.place_character_in_first_empty(character)
 
 
-func remove_character(index: int) -> CharacterInstance:
-	"""Remove a character from the team by index."""
-	if index < 0 or index >= team.size():
-		return null
-	var character = team[index]
-	team.remove_at(index)
-	return character
+func add_character_at(character: CharacterInstance, row: int, col: int) -> bool:
+	"""
+	Add a character to a specific grid position.
+
+	Returns:
+		True if character was placed, false if slot is occupied or invalid
+	"""
+	return grid.place_character(character, row, col)
+
+
+func remove_character(row: int, col: int) -> CharacterInstance:
+	"""Remove a character from a specific grid position."""
+	return grid.remove_character(row, col)
+
+
+func remove_character_by_index(index: int) -> CharacterInstance:
+	"""
+	Remove a character by linear index (backwards compatibility).
+	Index maps row-major: 0-2 = front row, 3-5 = back row
+	"""
+	var row = index / GameConstants.GRID_COLS
+	var col = index % GameConstants.GRID_COLS
+	return grid.remove_character(row, col)
+
+
+func swap_characters(from_row: int, from_col: int, to_row: int, to_col: int) -> bool:
+	"""Swap characters between two grid positions."""
+	return grid.swap_positions(from_row, from_col, to_row, to_col)
+
+
+func get_character_at(row: int, col: int) -> CharacterInstance:
+	"""Get character at a specific grid position."""
+	return grid.get_character_at(row, col)
 
 
 func get_team() -> Array:
-	"""Get all characters in the team."""
-	return team
+	"""Get all characters in the grid (backwards compatible)."""
+	return grid.get_all_characters()
 
 
 func get_team_size() -> int:
-	"""Get current team size."""
-	return team.size()
+	"""Get current number of characters in grid."""
+	return grid.get_character_count()
 
 
 func is_team_full() -> bool:
-	"""Check if team is at maximum capacity."""
-	return team.size() >= GameConstants.MAX_GRID_CHARACTERS
+	"""Check if grid is at maximum capacity (6 characters)."""
+	return grid.is_full()
+
+
+func get_first_empty_slot() -> Vector2i:
+	"""Get the first empty grid slot, or Vector2i(-1, -1) if full."""
+	return grid.get_first_empty_slot()
+
+
+func get_empty_slots() -> Array[Vector2i]:
+	"""Get all empty grid slot positions."""
+	return grid.get_empty_slots()
 
 
 # =============================================================================
@@ -210,10 +254,6 @@ func is_team_full() -> bool:
 
 func to_dict() -> Dictionary:
 	"""Serialize run state for saving."""
-	var team_data: Array = []
-	for character in team:
-		team_data.append(character.to_dict())
-
 	return {
 		"run_id": run_id,
 		"current_round": current_round,
@@ -224,7 +264,7 @@ func to_dict() -> Dictionary:
 		"current_gold": current_gold,
 		"starting_gold": starting_gold,
 		"encounters_this_round": encounters_this_round,
-		"team": team_data,
+		"grid": grid.to_dict(),
 		"inventory": inventory.to_dict(),
 		"lingering_effects": lingering_effects.to_dict(),
 		"pool": pool.to_dict() if pool else {},
@@ -247,12 +287,17 @@ static func from_dict(data: Dictionary):
 	state.starting_gold = data.get("starting_gold", 0)
 	state.encounters_this_round = data.get("encounters_this_round", 0)
 
-	# Restore team
-	var team_data = data.get("team", [])
-	for char_data in team_data:
-		var character = CharacterInstance.from_dict(char_data)
-		if character:
-			state.team.append(character)
+	# Restore grid (Phase 5)
+	var grid_data = data.get("grid", {})
+	if not grid_data.is_empty():
+		state.grid = CharacterGridScript.from_dict(grid_data)
+	else:
+		# Backwards compatibility: restore from team array
+		var team_data = data.get("team", [])
+		for char_data in team_data:
+			var character = CharacterInstance.from_dict(char_data)
+			if character:
+				state.grid.place_character_in_first_empty(character)
 
 	# Restore inventory
 	var inventory_data = data.get("inventory", {})
@@ -286,6 +331,25 @@ func calculate_total_income() -> int:
 	# Note: In the legacy system, starting gold comes from legacy incomes, not character incomes
 	# This method is kept for backwards compatibility
 	var total = 0
-	for character in team:
+	for character in grid.get_all_characters():
 		total += character.stats.get(GameConstants.STAT_INCOME, 0)
 	return total
+
+
+# =============================================================================
+# GRID ACCESS (Phase 5 additions)
+# =============================================================================
+
+func get_grid():
+	"""Get the character grid directly. Returns CharacterGrid instance."""
+	return grid
+
+
+func get_front_row() -> Array[CharacterInstance]:
+	"""Get all characters in the front row."""
+	return grid.get_front_row()
+
+
+func get_back_row() -> Array[CharacterInstance]:
+	"""Get all characters in the back row."""
+	return grid.get_back_row()

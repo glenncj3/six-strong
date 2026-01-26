@@ -203,11 +203,7 @@ func save_run_state() -> void:
 	if not is_run_active or _run_state == null:
 		return
 
-	# Also sync team manager state to run state
-	_run_state.team = []
-	for char in _team_manager.get_team():
-		_run_state.team.append(char)
-
+	# Phase 5: No longer need to sync team manager - RunState owns grid directly
 	var save_data = _run_state.to_dict()
 	JsonPersistence.save_json(SAVE_PATH, save_data)
 
@@ -233,9 +229,9 @@ func load_run_state() -> bool:
 	# Restore RunState from saved data
 	_run_state = RunStateScript.from_dict(save_data)
 
-	# Sync team manager from run state
+	# Phase 5: Sync team manager from grid for backwards compatibility
 	_team_manager.clear()
-	for character in _run_state.team:
+	for character in _run_state.get_team():
 		_team_manager.add_character(character)
 
 	# Reconnect lingering effect signals
@@ -447,6 +443,156 @@ func get_inventory_stat_modifier(stat_name: String) -> int:
 	if not _run_state:
 		return 0
 	return _run_state.inventory.get_total_stat_modifier(stat_name)
+
+
+# =============================================================================
+# CHARACTER ACQUISITION (Phase 5)
+# =============================================================================
+
+signal character_acquired(character: CharacterInstance)
+signal grid_full_character_pending(character: CharacterInstance)
+
+var _pending_character: CharacterInstance = null
+
+
+func acquire_character(char_id: String) -> Dictionary:
+	"""
+	Acquire a new character during the run.
+
+	If the grid has space, the character is placed immediately.
+	If the grid is full, the character becomes pending and grid_full_character_pending
+	is emitted. The UI should show the replacement popup.
+
+	Args:
+		char_id: ID of the character to acquire
+
+	Returns:
+		Dictionary with:
+		- "success": bool - whether acquisition started
+		- "placed": bool - whether character was immediately placed
+		- "grid_full": bool - whether replacement is needed
+		- "character": CharacterInstance - the acquired character
+		- "error": String - error message if failed
+	"""
+	if not _run_state:
+		return {"success": false, "error": "no_active_run", "placed": false, "grid_full": false, "character": null}
+
+	var char_instance = CharacterInstance.from_master_data(char_id)
+	if not char_instance:
+		return {"success": false, "error": "invalid_character_id", "placed": false, "grid_full": false, "character": null}
+
+	# Try to place in grid
+	if _run_state.add_character(char_instance):
+		# Placed successfully
+		_team_manager.add_character(char_instance)  # Backwards compat
+		character_acquired.emit(char_instance)
+		trigger_character_acquired_effects(char_instance)
+		save_run_state()
+		return {"success": true, "placed": true, "grid_full": false, "character": char_instance, "error": ""}
+	else:
+		# Grid is full - store as pending
+		_pending_character = char_instance
+		grid_full_character_pending.emit(char_instance)
+		return {"success": true, "placed": false, "grid_full": true, "character": char_instance, "error": ""}
+
+
+func get_pending_character() -> CharacterInstance:
+	"""Get the character waiting for replacement (if any)."""
+	return _pending_character
+
+
+func is_grid_full() -> bool:
+	"""Check if the character grid is full."""
+	if not _run_state:
+		return false
+	return _run_state.is_team_full()
+
+
+func get_character_grid():
+	"""Get the character grid (for UI binding)."""
+	if not _run_state:
+		return null
+	return _run_state.get_grid()
+
+
+func replace_character_at(row: int, col: int, new_character: CharacterInstance = null) -> CharacterInstance:
+	"""
+	Replace the character at a grid position.
+
+	If new_character is null, uses the pending character.
+
+	Args:
+		row: Grid row (0 = front, 1 = back)
+		col: Grid column (0-2)
+		new_character: Character to place (or null to use pending)
+
+	Returns:
+		The removed character, or null if failed
+	"""
+	if not _run_state:
+		return null
+
+	var char_to_place = new_character if new_character else _pending_character
+	if not char_to_place:
+		return null
+
+	# Remove existing character
+	var removed = _run_state.remove_character(row, col)
+
+	# Place new character
+	if _run_state.add_character_at(char_to_place, row, col):
+		# Clear pending if we used it
+		if char_to_place == _pending_character:
+			_pending_character = null
+
+		# Update team manager for backwards compat
+		if removed:
+			_team_manager.remove_character(_team_manager.get_team().find(removed))
+		_team_manager.add_character(char_to_place)
+
+		character_acquired.emit(char_to_place)
+		trigger_character_acquired_effects(char_to_place)
+		save_run_state()
+
+	return removed
+
+
+func cancel_pending_character() -> void:
+	"""Cancel acquisition of the pending character."""
+	_pending_character = null
+
+
+func swap_grid_positions(from_row: int, from_col: int, to_row: int, to_col: int) -> bool:
+	"""
+	Swap characters between two grid positions.
+
+	Args:
+		from_row, from_col: First position
+		to_row, to_col: Second position
+
+	Returns:
+		True if swap succeeded
+	"""
+	if not _run_state:
+		return false
+	if _run_state.swap_characters(from_row, from_col, to_row, to_col):
+		save_run_state()
+		return true
+	return false
+
+
+func get_character_at_grid(row: int, col: int) -> CharacterInstance:
+	"""Get character at a specific grid position."""
+	if not _run_state:
+		return null
+	return _run_state.get_character_at(row, col)
+
+
+func get_grid_empty_slots() -> Array[Vector2i]:
+	"""Get all empty grid positions."""
+	if not _run_state:
+		return []
+	return _run_state.get_empty_slots()
 
 
 # =============================================================================

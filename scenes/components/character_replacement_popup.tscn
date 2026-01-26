@@ -1,0 +1,90 @@
+[gd_scene load_steps=3 format=3 uid="uid://char_replace_popup1"]
+
+[ext_resource type="Script" path="res://scenes/components/character_replacement_popup.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.18, 0.14, 0.13, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.72, 0.53, 0.15, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="CharacterReplacementPopup" type="PanelContainer"]
+custom_minimum_size = Vector2(650, 700)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -325.0
+offset_top = -350.0
+offset_right = 325.0
+offset_bottom = 350.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+script = ExtResource("1_script")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.92, 0.85, 1)
+theme_override_font_sizes/font_size = 28
+text = "Team Full!"
+horizontal_alignment = 1
+
+[node name="InstructionLabel" type="Label" parent="Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.66, 0.54, 1)
+theme_override_font_sizes/font_size = 16
+text = "Tap a character to replace them with:"
+horizontal_alignment = 1
+
+[node name="NewCharacterPanel" type="PanelContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="VBox" type="VBoxContainer" parent="Content/NewCharacterPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TileContainer" type="CenterContainer" parent="Content/NewCharacterPanel/VBox"]
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+
+[node name="CharacterName" type="Label" parent="Content/NewCharacterPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84, 0.31, 1)
+theme_override_font_sizes/font_size = 20
+text = "New Character"
+horizontal_alignment = 1
+
+[node name="SeparatorLabel" type="Label" parent="Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.66, 0.54, 1)
+theme_override_font_sizes/font_size = 14
+text = "Current Team:"
+horizontal_alignment = 1
+
+[node name="GridContainer" type="Control" parent="Content"]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonContainer" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+alignment = 1
+
+[node name="CancelButton" type="Button" parent="Content/ButtonContainer"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Cancel"
