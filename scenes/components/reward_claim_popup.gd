@@ -1,8 +1,9 @@
-extends PanelContainer
+extends ModalPopup
 class_name RewardClaimPopup
 ## Reusable popup for claiming items or skills with character selection.
 ## Shows reward details (icon, name, description, stats) and a character selector.
 ## Used by treasure chest, reward encounters, and anywhere players receive loot.
+## Extends ModalPopup for standardized overlay and cleanup handling.
 
 signal claimed(reward_id: String, character_index: int)
 
@@ -20,21 +21,12 @@ var _reward_id: String = ""
 var _reward_type: String = "item"  # "item" or "skill"
 var _eligible_char_indices: Array = []
 var _selector: OptionButton = null
-var _overlay: ColorRect = null
-var _original_parent: Node = null
 
 
 func _ready() -> void:
+	super._ready()  # Call base class (sets visible = false)
 	_apply_styling()
 	confirm_button.pressed.connect(_on_confirm_pressed)
-	visible = false
-
-
-func _exit_tree() -> void:
-	"""Clean up overlay when popup is removed from tree."""
-	if _overlay and is_instance_valid(_overlay):
-		_overlay.queue_free()
-		_overlay = null
 
 
 func _apply_styling() -> void:
@@ -260,23 +252,16 @@ func _format_stat_name(stat_name: String) -> String:
 
 func _show_popup() -> void:
 	"""Show the popup as a modal overlay on top of everything."""
-	# Store original parent for cleanup
-	_original_parent = get_parent()
+	show_modal()
 
-	# Find the scene root to add overlay on top
-	var scene_root = get_tree().current_scene
 
-	# Create dimming overlay
-	_overlay = ColorRect.new()
-	_overlay.color = Color(0, 0, 0, 0.5)
-	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP  # Block clicks behind
-	scene_root.add_child(_overlay)
+func hide_popup() -> void:
+	"""Hide the popup and clean up overlay."""
+	hide_modal()
 
-	# Reparent popup to scene root
-	reparent(scene_root)
 
-	# Center the popup
+func _center_popup() -> void:
+	"""Center popup with fixed size for reward display. Overrides base class."""
 	set_anchors_preset(Control.PRESET_CENTER)
 	anchor_left = 0.5
 	anchor_top = 0.5
@@ -288,24 +273,6 @@ func _show_popup() -> void:
 	offset_bottom = 200
 	grow_horizontal = Control.GROW_DIRECTION_BOTH
 	grow_vertical = Control.GROW_DIRECTION_BOTH
-
-	visible = true
-	move_to_front()
-
-
-func hide_popup() -> void:
-	"""Hide the popup and clean up overlay."""
-	visible = false
-
-	# Remove overlay
-	if _overlay and is_instance_valid(_overlay):
-		_overlay.queue_free()
-		_overlay = null
-
-	# Restore to original parent if valid (allows reuse without reparenting issues)
-	if _original_parent and is_instance_valid(_original_parent):
-		reparent(_original_parent)
-		_original_parent = null
 
 
 func _on_confirm_pressed() -> void:
