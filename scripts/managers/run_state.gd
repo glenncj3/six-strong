@@ -19,7 +19,7 @@ const RunPoolScript = preload("res://scripts/managers/run_pool.gd")
 # =============================================================================
 
 var run_id: String = ""
-var current_round: int = 0
+var current_round: int = 1  # Runs start at round 1
 var current_phase: String = "encounter"
 var reputation: int = 20
 var wins: int = 0
@@ -75,7 +75,7 @@ func _init() -> void:
 func reset() -> void:
 	"""Reset all state for a new run."""
 	run_id = ""
-	current_round = 0
+	current_round = 1  # Runs start at round 1
 	current_phase = "encounter"
 	reputation = GameConstants.STARTING_REPUTATION
 	wins = 0
@@ -346,7 +346,7 @@ static func from_dict(data: Dictionary):
 	var state = script.new()
 
 	state.run_id = data.get("run_id", "")
-	state.current_round = data.get("current_round", 0)
+	state.current_round = data.get("current_round", 1)  # Default to round 1
 	state.current_phase = data.get("current_phase", "encounter")
 	state.reputation = data.get("reputation", GameConstants.STARTING_REPUTATION)
 	state.wins = data.get("wins", 0)
