@@ -107,6 +107,10 @@ func start_new_run_with_legacies(drafted_legacies: Array) -> void:
 	# Create RunPool from drafted legacies
 	_run_state.pool = RunPoolScript.from_legacies(drafted_legacies)
 
+	# Phase 6: Set RunPool on EncounterFactory for content filtering
+	if EncounterFactory:
+		EncounterFactory.set_run_pool(_run_state.pool)
+
 	# Calculate starting gold from legacy incomes
 	var starting_gold = 0
 	for legacy in drafted_legacies:
@@ -238,6 +242,10 @@ func load_run_state() -> bool:
 	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)
 	_run_state.lingering_effects.effect_triggered.connect(_on_lingering_effect_triggered)
 
+	# Phase 6: Restore RunPool on EncounterFactory if pool exists
+	if _run_state.pool != null and EncounterFactory:
+		EncounterFactory.set_run_pool(_run_state.pool)
+
 	is_run_active = true
 
 	return true
@@ -346,6 +354,10 @@ func _clear_run_state() -> void:
 	is_run_active = false
 	_run_state = null
 	_team_manager.clear()
+
+	# Phase 6: Clear RunPool from EncounterFactory
+	if EncounterFactory:
+		EncounterFactory.clear_run_pool()
 
 	JsonPersistence.delete_file(SAVE_PATH)
 

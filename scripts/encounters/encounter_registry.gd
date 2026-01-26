@@ -61,6 +61,10 @@ static func _register_default_handlers() -> void:
 			"create_ui": WheelOfFortuneEncounterUI.create_ui,
 			"get_reward_preview": WheelOfFortuneEncounterUI.get_reward_preview
 		},
+		"character_shop": {
+			"create_ui": CharacterShopEncounterUI.create_ui,
+			"get_reward_preview": CharacterShopEncounterUI.get_reward_preview
+		},
 	}
 
 	for type_name in ui_handlers:

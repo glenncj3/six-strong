@@ -5,10 +5,19 @@ extends Node
 # Phase 2 Refactor:
 # - Item availability now checks player inventory (not character equipment)
 # - Skills are instant effects (no character tracking)
+#
+# Phase 6 Refactor:
+# - Integrates with RunPool for content filtering (DRY)
+# - Delegates all content picking to RunPool.pick_random()
+# - Supports base encounters (always available) + legacy encounters (from run pool)
+# - Encounter weighting: base = 100 (from JSON), legacy = 100 + prestige bonuses
+
+const RunPoolScript = preload("res://scripts/managers/run_pool.gd")
 
 signal encounter_generated(encounter_type: String)
 
 var _encounter_types: Array = []
+var _run_pool = null  # RunPool instance for filtering content
 
 # Mapping from string constant names to their values (GDScript const members aren't reflectable)
 var _constant_map: Dictionary = {
@@ -30,6 +39,7 @@ var _cache_round: int = -1
 var _cache_max_level: int = 0
 var _cached_items: Array = []
 var _cached_skills: Array = []
+var _cached_characters: Array = []
 
 
 func _ready() -> void:
@@ -42,10 +52,39 @@ func _ready() -> void:
 		"pick_learnable_skills": _gen_pick_learnable_skills,
 		"pick_shop_offerings": _gen_pick_shop_offerings,
 		"pick_mystery_elements": _gen_pick_mystery_elements,
+		"pick_characters": _gen_pick_characters,
 	}
 
 	# Use GameData's cached encounter types (single source of truth)
 	_encounter_types = GameData.get_encounter_types()
+
+
+# =============================================================================
+# RUN POOL INTEGRATION (Phase 6)
+# =============================================================================
+
+func set_run_pool(pool) -> void:
+	"""
+	Set the RunPool for content filtering.
+	Called by RunManager when a run starts with legacies.
+
+	Args:
+		pool: RunPool instance from drafted legacies
+	"""
+	_run_pool = pool
+	# Invalidate cache when pool changes
+	_cache_round = -1
+
+
+func clear_run_pool() -> void:
+	"""Clear the RunPool (called when run ends)."""
+	_run_pool = null
+	_cache_round = -1
+
+
+func has_run_pool() -> bool:
+	"""Check if a RunPool is set."""
+	return _run_pool != null
 
 
 func generate_encounter_options(count: int) -> Array:
@@ -224,8 +263,35 @@ func _refresh_cache_if_needed() -> void:
 	if current_round != _cache_round or max_level != _cache_max_level:
 		_cache_round = current_round
 		_cache_max_level = max_level
-		_cached_items = _filter_pool_by_level(GameData.get_all_item_upgrades(), max_level)
-		_cached_skills = _filter_pool_by_level(GameData.get_all_skills(), max_level)
+
+		# Phase 6: If RunPool is available, use it for filtering (DRY)
+		if _run_pool != null:
+			# Get item IDs from RunPool, then fetch full data from GameData
+			var item_ids = _run_pool.pick_random(RunPoolScript.ContentType.ITEM, 999, max_level)
+			_cached_items = []
+			for item_id in item_ids:
+				var item_data = GameData.get_item_upgrade_by_id(item_id)
+				if not item_data.is_empty():
+					_cached_items.append(item_data)
+
+			var skill_ids = _run_pool.pick_random(RunPoolScript.ContentType.SKILL, 999, max_level)
+			_cached_skills = []
+			for skill_id in skill_ids:
+				var skill_data = GameData.get_skill_by_id(skill_id)
+				if not skill_data.is_empty():
+					_cached_skills.append(skill_data)
+
+			var char_ids = _run_pool.pick_random(RunPoolScript.ContentType.CHARACTER, 999, max_level)
+			_cached_characters = []
+			for char_id in char_ids:
+				var char_data = GameData.get_character_by_id(char_id)
+				if not char_data.is_empty():
+					_cached_characters.append(char_data)
+		else:
+			# Fallback to filtering all content by level (legacy behavior)
+			_cached_items = _filter_pool_by_level(GameData.get_all_item_upgrades(), max_level)
+			_cached_skills = _filter_pool_by_level(GameData.get_all_skills(), max_level)
+			_cached_characters = _filter_pool_by_level(GameData.get_all_characters(), max_level)
 
 
 func _get_cached_items() -> Array:
@@ -238,6 +304,12 @@ func _get_cached_skills() -> Array:
 	"""Get level-filtered skills from cache."""
 	_refresh_cache_if_needed()
 	return _cached_skills
+
+
+func _get_cached_characters() -> Array:
+	"""Get level-filtered characters from cache (Phase 6)."""
+	_refresh_cache_if_needed()
+	return _cached_characters
 
 
 func _gen_pick_learnable_skill(_params: Dictionary) -> String:
@@ -348,3 +420,75 @@ func _gen_pick_mystery_elements(params: Dictionary) -> Array:
 func _get_element_display_name(element: String) -> String:
 	"""Get capitalized display name for an element."""
 	return element.capitalize()
+
+
+# =============================================================================
+# CHARACTER PICKING (Phase 6)
+# =============================================================================
+
+func _gen_pick_characters(params: Dictionary) -> Array:
+	"""
+	Pick characters for character shop encounter.
+	Uses RunPool for filtering if available (DRY), otherwise falls back to all characters.
+
+	Args:
+		params: { "count": int }
+
+	Returns:
+		Array of character offering dictionaries with:
+		- id, name, description, image_path, cost, level_requirement, base_stats
+	"""
+	var count = int(params.get("count", 3))
+	var offerings: Array = []
+
+	var available_chars = _get_cached_characters()
+	if available_chars.is_empty():
+		return offerings
+
+	# Shuffle and pick
+	available_chars = available_chars.duplicate()
+	available_chars.shuffle()
+
+	for i in range(mini(count, available_chars.size())):
+		var char_data = available_chars[i]
+		offerings.append({
+			"offering_type": "character",
+			"id": char_data.get("id", ""),
+			"name": char_data.get("name", "Unknown"),
+			"description": char_data.get("description", ""),
+			"image_path": char_data.get("image_path", ""),
+			"cost": char_data.get("cost", 40),
+			"level_requirement": char_data.get("level_requirement", 1),
+			"base_stats": char_data.get("base_stats", {})
+		})
+
+	return offerings
+
+
+func pick_characters_for_encounter(count: int, max_level: int = 999) -> Array:
+	"""
+	Public method to pick characters for any encounter that can reward characters.
+	Delegates to RunPool if available for proper pool filtering.
+
+	Args:
+		count: Number of characters to pick
+		max_level: Maximum level requirement
+
+	Returns:
+		Array of character data dictionaries
+	"""
+	if _run_pool != null:
+		# Use RunPool for proper filtering (DRY)
+		var char_ids = _run_pool.pick_random(RunPoolScript.ContentType.CHARACTER, count, max_level)
+		var result: Array = []
+		for char_id in char_ids:
+			var char_data = GameData.get_character_by_id(char_id)
+			if not char_data.is_empty():
+				result.append(char_data)
+		return result
+	else:
+		# Fallback: filter all characters by level
+		var all_chars = GameData.get_all_characters()
+		var filtered = _filter_pool_by_level(all_chars, max_level)
+		filtered.shuffle()
+		return filtered.slice(0, mini(count, filtered.size()))
