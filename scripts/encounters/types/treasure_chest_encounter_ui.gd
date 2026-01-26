@@ -241,7 +241,7 @@ static func _get_element_color(element: String) -> Color:
 			return Color("#5A5A5A")
 
 
-static func _get_element_image(element: String) -> String:
+static func _get_element_image(_element: String) -> String:
 	"""Get placeholder image path for an element."""
 	# Use chest image as placeholder for all mystery items
 	return "res://assets/encounters/chest.png"

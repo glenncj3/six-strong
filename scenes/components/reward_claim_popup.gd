@@ -5,7 +5,6 @@ class_name RewardClaimPopup
 ## Used by treasure chest, reward encounters, and anywhere players receive loot.
 
 signal claimed(reward_id: String, character_index: int)
-signal cancelled
 
 @onready var header_label: Label = $MarginContainer/ContentVBox/HeaderLabel
 @onready var icon: TextureRect = $MarginContainer/ContentVBox/ItemHeader/Icon
