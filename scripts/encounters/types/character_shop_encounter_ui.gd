@@ -11,10 +11,6 @@ extends RefCounted
 
 const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")
 
-# We need to store state for the replacement callback since signals can't bind arbitrary data
-# This is a necessary exception - the callback comes from an external signal
-static var _pending_state: Dictionary = {}
-
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create character shop encounter UI."""
@@ -163,29 +159,17 @@ static func _on_character_selected(tile_data: Dictionary, state: Dictionary) -> 
 
 static func _wait_for_replacement(state: Dictionary) -> void:
 	"""Wait for the player to complete or cancel character replacement."""
-	# Store state for the callback (necessary because signals can't bind arbitrary data)
-	_pending_state = state
-
-	# Connect to RunManager signals for replacement result
-	if not RunManager.character_acquired.is_connected(_on_replacement_completed):
-		RunManager.character_acquired.connect(_on_replacement_completed)
+	# Use CONNECT_ONE_SHOT with bound state - no static variable needed
+	# The signal auto-disconnects after firing once, and state is passed directly
+	RunManager.character_acquired.connect(_on_replacement_completed.bind(state), CONNECT_ONE_SHOT)
 
 
-static func _on_replacement_completed(_character) -> void:
+static func _on_replacement_completed(_character, state: Dictionary) -> void:
 	"""Called when character replacement is completed."""
-	# Disconnect signal
-	if RunManager.character_acquired.is_connected(_on_replacement_completed):
-		RunManager.character_acquired.disconnect(_on_replacement_completed)
-
-	# Use stored state
-	var state = _pending_state
-	_pending_state = {}
-
-	if state.is_empty():
-		return
-
+	# Signal auto-disconnected via CONNECT_ONE_SHOT, state passed via bind()
 	var result_label: Label = state.get("result_label")
-	SkillEncounterHelpers.show_result(result_label, "New member joined!", GameConstants.COLOR_SUCCESS)
+	if result_label:
+		SkillEncounterHelpers.show_result(result_label, "New member joined!", GameConstants.COLOR_SUCCESS)
 	_complete_encounter(state)
 
 
