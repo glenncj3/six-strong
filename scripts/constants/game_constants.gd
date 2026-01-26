@@ -509,3 +509,20 @@ enum TransitionType {
 	WIPE_RADIAL,   # Radial wipe from center
 	WIPE_HORIZONTAL # Horizontal wipe
 }
+
+# =============================================================================
+# VISUAL LAYER CONSTANTS (CanvasLayer values)
+# =============================================================================
+
+# Layer hierarchy (higher = renders on top):
+#   0-99:   Gameplay content (scenes loaded into SceneContainer)
+#   100:    Scene transitions (fade, wipe, etc.)
+#   150:    Persistent HUD (RunHUD, TeamHUD)
+#   200:    Modal popups (reserved for future ModalLayer)
+#   250:    Tooltips (reserved for future use)
+
+const LAYER_GAMEPLAY := 0
+const LAYER_TRANSITION := 100
+const LAYER_HUD := 150
+const LAYER_MODAL := 200
+const LAYER_TOOLTIP := 250
