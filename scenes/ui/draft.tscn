@@ -35,7 +35,7 @@ theme_override_constants/separation = 8
 [node name="InstructionLabel" type="Label" parent="MainContainer/VBoxContainer"]
 layout_mode = 2
 theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 48
 text = "SELECT CHARACTER 1 OF 3"
 horizontal_alignment = 1
 vertical_alignment = 1

@@ -7,7 +7,6 @@ const CharacterInfoPanelScene = preload("res://scenes/components/character_info_
 
 @onready var tiles_container: HBoxContainer = $VBoxContainer/TilesContainer
 @onready var info_panel_clip: Control = $VBoxContainer/InfoPanelClip
-@onready var title_label: Label = $VBoxContainer/TitleLabel
 
 var _is_draft_mode: bool = false
 var _visibility: HudVisibilityHelper = null
@@ -18,7 +17,6 @@ func _ready() -> void:
 	add_to_group("team_hud")
 	visible = false
 	_visibility = HudVisibilityHelper.new(self)
-	title_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	_setup_info_panel()
 	SceneManager.scene_loaded.connect(_on_scene_loaded)
 
