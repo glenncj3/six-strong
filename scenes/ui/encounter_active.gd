@@ -55,22 +55,21 @@ func _setup_encounter() -> void:
 		push_error("EncounterActive: Unknown encounter type: %s" % encounter_type)
 		return
 
-	# Create context with callbacks for handlers
-	var context = {
-		"set_gold_label": _set_gold_label,
-		"on_buy_item": _on_buy_item,
-		"on_buy_skill": _on_buy_skill,
-		"on_xp_select": _on_xp_character_selected,
-		"on_encounter_complete": _enable_complete,
-		"on_gold_reward": _on_gold_reward,
-		"on_health_restore": _on_health_restore,
-		"on_skill_learn": _on_skill_learn,
-		"on_gold_spend": _on_gold_spend,
-		"on_xp_reward_all": _on_xp_reward_all,
-	}
+	# Create typed context with callbacks for handlers
+	var context = EncounterContext.new()
+	context.set_gold_label = _set_gold_label
+	context.on_buy_item = _on_buy_item
+	context.on_buy_skill = _on_buy_skill
+	context.on_xp_select = _on_xp_character_selected
+	context.on_encounter_complete = _enable_complete
+	context.on_gold_reward = _on_gold_reward
+	context.on_health_restore = _on_health_restore
+	context.on_skill_learn = _on_skill_learn
+	context.on_gold_spend = _on_gold_spend
+	context.on_xp_reward_all = _on_xp_reward_all
 
-	# Create UI using the handler
-	var ui = EncounterHandlers.create_ui(encounter_data, context)
+	# Create UI using the handler (convert to dict for backwards compatibility)
+	var ui = EncounterHandlers.create_ui(encounter_data, context.to_dict())
 	if ui:
 		content_container.add_child(ui)
 
