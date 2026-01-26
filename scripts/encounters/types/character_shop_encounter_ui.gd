@@ -41,13 +41,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 
 	var tile_size = UIScaler.calculate_tile_size(GameConstants.DESIGN_WIDTH, GameConstants.TEAM_SIZE, 48.0, 8.0, 180.0)
 
-	# First pass: create tiles
-	for i in range(offerings.size()):
-		var tile = PurchasableTileScene.instantiate()
-		hbox.add_child(tile)
-		tiles.append(tile)
-
-	# Add spacer and result label area
+	# Add spacer and result label area (create before tiles so state is ready)
 	vbox.add_child(UIHelpers.create_spacer(8))
 	var result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true)
 	result_label.visible = false
@@ -62,12 +56,15 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 		"on_gold_spend": on_gold_spend
 	}
 
-	# Second pass: setup tiles with bound state
+	# Create and setup tiles in single pass - call _setup_tile directly after add_child
+	# (ready signal fires during add_child, so connecting after would be too late)
 	for i in range(offerings.size()):
 		var offering = offerings[i]
 		var tile_data = _build_character_tile_data(offering)
-		var tile = tiles[i]
-		tile.ready.connect(_setup_tile.bind(tile, tile_data, tile_size, state))
+		var tile = PurchasableTileScene.instantiate()
+		hbox.add_child(tile)
+		tiles.append(tile)
+		_setup_tile(tile, tile_data, tile_size, state)
 
 	return vbox
 

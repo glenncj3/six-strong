@@ -37,9 +37,10 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 
 	var tile_size = UIScaler.calculate_tile_size(GameConstants.DESIGN_WIDTH, GameConstants.TEAM_SIZE, 48.0, 8.0, 180.0)
 
+	# Create and setup tiles in single pass - call _setup_tile directly after add_child
+	# (ready signal fires during add_child, so connecting after would be too late)
 	for i in range(mystery_options.size()):
 		var option = mystery_options[i]
-		# Build tile data for mystery option
 		var tile_data = {
 			"id": option["element"],
 			"element": option["element"],
@@ -51,9 +52,8 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 
 		var tile = PurchasableTileScene.instantiate()
 		hbox.add_child(tile)
-		# Bind all state to the tile setup and click handler to avoid static variable issues
-		tile.ready.connect(_setup_tile.bind(tile, tile_data, tile_size, option["element"], tiles, vbox, gold_bonus, on_complete, on_gold_reward))
 		tiles.append(tile)
+		_setup_tile(tile, tile_data, tile_size, option["element"], tiles, vbox, gold_bonus, on_complete, on_gold_reward)
 
 	return vbox
 

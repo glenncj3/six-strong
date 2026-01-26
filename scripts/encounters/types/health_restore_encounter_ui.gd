@@ -28,12 +28,6 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 
 	var tile_size = UIScaler.calculate_tile_size(GameConstants.DESIGN_WIDTH, GameConstants.TEAM_SIZE, 48.0, 8.0, 180.0)
 
-	# First pass: create tiles
-	for i in range(heal_options.size()):
-		var tile = PurchasableTileScene.instantiate()
-		hbox.add_child(tile)
-		tiles.append(tile)
-
 	# Character selector (hidden until option is selected)
 	var char_selector_container = UIHelpers.create_vbox_container(8)
 	char_selector_container.visible = false
@@ -50,10 +44,10 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 		"on_gold_spend": on_gold_spend
 	}
 
-	# Second pass: setup tiles with bound state
+	# Create and setup tiles in single pass - call _setup_tile directly after add_child
+	# (ready signal fires during add_child, so connecting after would be too late)
 	for i in range(heal_options.size()):
 		var option = heal_options[i]
-		# Build tile data with display info (use index as unique ID)
 		var tile_data = {
 			"id": "heal_option_%d" % i,
 			"heal_amount": option.get("heal_amount", 10),
@@ -62,8 +56,10 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 			"image_path": "res://assets/encounters/fountain.png"
 		}
 
-		var tile = tiles[i]
-		tile.ready.connect(_setup_tile.bind(tile, tile_data, tile_size, state))
+		var tile = PurchasableTileScene.instantiate()
+		hbox.add_child(tile)
+		tiles.append(tile)
+		_setup_tile(tile, tile_data, tile_size, state)
 
 	return vbox
 
