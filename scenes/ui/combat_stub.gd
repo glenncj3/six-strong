@@ -30,6 +30,12 @@ func _ready() -> void:
 		push_error("CombatStub: No combat data found!")
 
 
+func _exit_tree() -> void:
+	# Disconnect from autoload signals to prevent memory leaks
+	if RunFlowController.combat_completed.is_connected(_on_combat_completed):
+		RunFlowController.combat_completed.disconnect(_on_combat_completed)
+
+
 func _apply_visual_styling() -> void:
 	"""Apply consistent visual styling."""
 	title_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)

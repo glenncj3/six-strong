@@ -49,6 +49,14 @@ func _ready() -> void:
 	_setup_ambient_effects()
 
 
+func _exit_tree() -> void:
+	# Disconnect from autoload signals to prevent memory leaks
+	if PlayerAccount.gems_changed.is_connected(_on_gems_changed):
+		PlayerAccount.gems_changed.disconnect(_on_gems_changed)
+	if PlayerAccount.reroll_tokens_changed.is_connected(_on_reroll_tokens_changed):
+		PlayerAccount.reroll_tokens_changed.disconnect(_on_reroll_tokens_changed)
+
+
 
 func _apply_visual_styling() -> void:
 	"""Apply fantasy aesthetic styling to the menu."""
