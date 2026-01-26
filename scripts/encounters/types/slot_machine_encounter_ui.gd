@@ -98,9 +98,10 @@ class SlotMachineController extends VBoxContainer:
 		result_label = UIHelpers.create_label(
 			"",
 			GameConstants.FONT_SIZE_REWARD,
-			GameConstants.COLOR_SUCCESS,
+			Color.WHITE,
 			true
 		)
+		result_label.theme_type_variation = "HeaderLabel"
 		result_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		add_child(result_label)
 
@@ -157,15 +158,14 @@ class SlotMachineController extends VBoxContainer:
 		button_box.alignment = BoxContainer.ALIGNMENT_CENTER
 		button_box.add_theme_constant_override("separation", 16)
 
-		spin_button = UIHelpers.create_button("Spins: %d" % spins_remaining, _on_spin_pressed, 160, 50)
+		spin_button = UIHelpers.create_button("Spins: %d" % spins_remaining, _on_spin_pressed, 180, 50)
 		UIStyles.setup_success_button(spin_button)
-		spin_button.add_theme_font_size_override("font_size", 20)
 		button_box.add_child(spin_button)
 
 		extra_spin_button = UIHelpers.create_button(
 			"Bonus Spin: %dg" % extra_spin_cost,
 			_on_extra_spin_pressed,
-			160,
+			180,
 			50
 		)
 		UIStyles.setup_button(extra_spin_button)
@@ -263,7 +263,6 @@ class SlotMachineController extends VBoxContainer:
 			_update_button_states()
 			_start_spin()
 		else:
-			result_label.add_theme_color_override("font_color", GameConstants.COLOR_DANGER)
 			result_label.text = "Not enough %s!" % extra_spin_resource
 
 
@@ -406,7 +405,6 @@ class SlotMachineController extends VBoxContainer:
 			_play_small_win_effect()
 		else:
 			message = "No match..."
-			result_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
 
 		# Award gold
 		if reward > 0:
@@ -417,7 +415,6 @@ class SlotMachineController extends VBoxContainer:
 			else:
 				RunManager.add_gold(reward)
 
-			result_label.add_theme_color_override("font_color", GameConstants.COLOR_SUCCESS)
 			message += " (Total: +%d)" % total_winnings
 
 		result_label.text = message

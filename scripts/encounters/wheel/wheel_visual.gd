@@ -247,9 +247,10 @@ func _create_result_display() -> Control:
 
 	var label = Label.new()
 	label.name = "ResultLabel"
+	label.theme_type_variation = "HeaderLabel"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_REWARD)
-	label.add_theme_color_override("font_color", GameConstants.COLOR_SUCCESS)
+	label.add_theme_color_override("font_color", Color.WHITE)
 	container.add_child(label)
 
 	return container
@@ -371,7 +372,6 @@ func _get_segment_at_pointer() -> int:
 func show_result(reward: RewardDefinition) -> void:
 	var label: Label = result_display.get_node("ResultLabel")
 	label.text = "You won: %s!" % reward.get_label()
-	label.add_theme_color_override("font_color", reward.get_color())
 
 	result_display.visible = true
 	result_display.modulate.a = 0

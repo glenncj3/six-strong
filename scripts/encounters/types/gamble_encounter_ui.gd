@@ -19,8 +19,9 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 
 	vbox.add_child(UIHelpers.create_spacer(20))
 
-	var result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_REWARD, GameConstants.COLOR_TEXT_LIGHT, true)
+	var result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_REWARD, Color.WHITE, true)
 	result_label.name = "ResultLabel"
+	result_label.theme_type_variation = "HeaderLabel"
 	vbox.add_child(result_label)
 
 	var buttons_container = HBoxContainer.new()
@@ -74,10 +75,8 @@ static func _on_gamble_pressed(bet: int, multiplier: int, container: Control, on
 		else:
 			RunManager.add_gold(winnings)
 		result_label.text = "YOU WON! +%d Gold!" % winnings
-		result_label.modulate = GameConstants.COLOR_SUCCESS
 	else:
 		result_label.text = "You lost... -%d Gold" % bet
-		result_label.modulate = GameConstants.COLOR_DANGER
 
 	UIContainerHelpers.disable_all_buttons(container)
 	if on_complete.is_valid():
