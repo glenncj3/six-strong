@@ -107,12 +107,12 @@ func assert_signal_not_connected(obj: Object, signal_name: String, target: Objec
 
 # Helper to wait for a frame
 func wait_frame():
-	await get_tree().process_frame
+	await process_frame
 
 
 # Helper to wait for physics frame
 func wait_physics_frame():
-	await get_tree().physics_frame
+	await physics_frame
 
 
 # Output helpers

@@ -17,7 +17,11 @@ func _run() -> void:
 		"paladin": Color.WHITE,
 		"necromancer": Color.DARK_VIOLET,
 		"monk": Color.TAN,
-		"assassin": Color.BLACK
+		"assassin": Color.BLACK,
+		"warden": Color.DARK_GREEN,
+		"beastmaster": Color.SADDLE_BROWN,
+		"warchief": Color.DARK_RED,
+		"shieldbearer": Color.STEEL_BLUE
 	}
 
 	for char_name in characters:
@@ -43,7 +47,15 @@ func _run() -> void:
 		"arcane_staff": Color.MEDIUM_PURPLE,
 		"shadow_cloak": Color.DIM_GRAY,
 		"plate_armor": Color.LIGHT_STEEL_BLUE,
-		"vampiric_blade": Color.DARK_RED
+		"vampiric_blade": Color.DARK_RED,
+		"shield_emblem": Color.GOLD,
+		"cloak_of_shadows": Color.SLATE_GRAY,
+		"hunters_bow": Color.FOREST_GREEN,
+		"beast_trophy": Color.BROWN,
+		"forest_cloak": Color.DARK_OLIVE_GREEN,
+		"war_banner": Color.CRIMSON,
+		"soldiers_shield": Color.SLATE_GRAY,
+		"war_horn": Color.BRONZE
 	}
 
 	for item_name in items:
@@ -62,11 +74,41 @@ func _run() -> void:
 		"inner_peace": Color.LIGHT_BLUE,
 		"backstab": Color.BLACK,
 		"battle_cry": Color.GOLD,
-		"swiftness": Color.CYAN
+		"swiftness": Color.CYAN,
+		"healing_surge": Color.LAWN_GREEN,
+		"gold_rush": Color.GOLDENROD,
+		"training_session": Color.CORNFLOWER_BLUE,
+		"fortune_blessing": Color.YELLOW,
+		"minor_heal": Color.PALE_GREEN,
+		"jackpot": Color.GOLD,
+		"battle_hardening": Color.DARK_SLATE_GRAY,
+		"group_training": Color.MEDIUM_BLUE,
+		"emergency_funds": Color.DARK_GOLDENROD,
+		"team_restoration": Color.SPRING_GREEN,
+		"future_mana": Color.MEDIUM_ORCHID,
+		"combat_prep": Color.INDIAN_RED,
+		"eagle_eye": Color.SKY_BLUE,
+		"hunters_mark": Color.FOREST_GREEN,
+		"natures_gift": Color.MEDIUM_SEA_GREEN,
+		"war_cry": Color.ORANGE,
+		"bloodlust": Color.FIREBRICK,
+		"iron_will": Color.DIM_GRAY
 	}
 
 	for skill_name in skills:
 		_create_placeholder("res://assets/skills/%s.png" % skill_name, 64, 64, skills[skill_name])
+
+	# Legacy icons (128x128)
+	var legacies = {
+		"knight_order": Color.CRIMSON,
+		"shadow_guild": Color.DARK_SLATE_GRAY,
+		"arcane_academy": Color.MEDIUM_PURPLE,
+		"wild_hunt": Color.FOREST_GREEN,
+		"iron_legion": Color.DARK_RED
+	}
+
+	for legacy_name in legacies:
+		_create_placeholder("res://assets/sprites/legacies/%s.png" % legacy_name, 128, 128, legacies[legacy_name])
 
 	# Encounter icons (128x128)
 	_create_placeholder("res://assets/encounters/merchant.png", 128, 128, Color.ORANGE)

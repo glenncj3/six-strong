@@ -9,8 +9,8 @@
       "starting_character_options": ["char_warrior_001", "char_paladin_001"],
       "starting_item_options": ["item_shield_emblem"],
       "character_pool": ["char_warrior_001", "char_paladin_001", "char_cleric_001"],
-      "item_pool": ["item_rusty_sword", "item_holy_mace", "item_prayer_book"],
-      "skill_pool": ["skill_power_strike", "skill_iron_skin", "skill_vitality"],
+      "item_pool": ["item_rusty_sword", "item_holy_mace", "item_prayer_book", "item_chainmail"],
+      "skill_pool": ["skill_power_strike", "skill_iron_skin", "skill_vitality", "skill_healing_surge"],
       "unique_encounters": ["enc_knight_tournament", "enc_holy_blessing"],
       "prestige_rewards": [
         {
@@ -20,7 +20,7 @@
             "starting_items": ["item_shield_emblem"],
             "characters": ["char_warrior_001"],
             "items": ["item_rusty_sword"],
-            "skills": [],
+            "skills": ["skill_power_strike"],
             "encounters": []
           }
         },
@@ -30,8 +30,8 @@
             "starting_characters": ["char_paladin_001"],
             "starting_items": [],
             "characters": ["char_paladin_001"],
-            "items": ["item_holy_mace"],
-            "skills": ["skill_power_strike"],
+            "items": ["item_holy_mace", "item_chainmail"],
+            "skills": ["skill_iron_skin", "skill_healing_surge"],
             "encounters": ["enc_knight_tournament"],
             "encounter_weight_bonus": 10
           }
@@ -43,7 +43,7 @@
             "starting_items": [],
             "characters": ["char_cleric_001"],
             "items": ["item_prayer_book"],
-            "skills": ["skill_iron_skin", "skill_vitality"],
+            "skills": ["skill_vitality"],
             "encounters": ["enc_holy_blessing"],
             "encounter_weight_bonus": 10
           }
@@ -59,8 +59,8 @@
       "starting_character_options": ["char_rogue_001", "char_assassin_001"],
       "starting_item_options": ["item_cloak_of_shadows"],
       "character_pool": ["char_rogue_001", "char_assassin_001", "char_monk_001"],
-      "item_pool": ["item_rusty_dagger", "item_poison_blade", "item_fighting_gloves"],
-      "skill_pool": ["skill_dodge", "skill_backstab", "skill_inner_peace"],
+      "item_pool": ["item_rusty_dagger", "item_poison_blade", "item_fighting_gloves", "item_leather_armor"],
+      "skill_pool": ["skill_dodge", "skill_backstab", "skill_inner_peace", "skill_gold_rush"],
       "unique_encounters": ["enc_black_market", "enc_heist_opportunity"],
       "prestige_rewards": [
         {
@@ -70,7 +70,7 @@
             "starting_items": ["item_cloak_of_shadows"],
             "characters": ["char_rogue_001"],
             "items": ["item_rusty_dagger"],
-            "skills": [],
+            "skills": ["skill_gold_rush"],
             "encounters": []
           }
         },
@@ -80,8 +80,8 @@
             "starting_characters": ["char_assassin_001"],
             "starting_items": [],
             "characters": ["char_assassin_001"],
-            "items": ["item_poison_blade"],
-            "skills": ["skill_dodge"],
+            "items": ["item_poison_blade", "item_leather_armor"],
+            "skills": ["skill_dodge", "skill_backstab"],
             "encounters": ["enc_black_market"],
             "encounter_weight_bonus": 15
           }
@@ -93,7 +93,7 @@
             "starting_items": [],
             "characters": ["char_monk_001"],
             "items": ["item_fighting_gloves"],
-            "skills": ["skill_backstab", "skill_inner_peace"],
+            "skills": ["skill_inner_peace"],
             "encounters": ["enc_heist_opportunity"],
             "encounter_weight_bonus": 10
           }
@@ -107,20 +107,20 @@
       "image_path": "res://assets/sprites/legacies/arcane_academy.png",
       "income": 12,
       "starting_character_options": ["char_mage_001", "char_necromancer_001"],
-      "starting_item_options": [],
+      "starting_item_options": ["item_wooden_staff"],
       "character_pool": ["char_mage_001", "char_necromancer_001"],
-      "item_pool": ["item_wooden_staff", "item_skull_staff"],
-      "skill_pool": ["skill_arcane_blast", "skill_life_drain"],
+      "item_pool": ["item_wooden_staff", "item_skull_staff", "item_lucky_charm"],
+      "skill_pool": ["skill_arcane_blast", "skill_life_drain", "skill_future_mana", "skill_fortune_blessing"],
       "unique_encounters": ["enc_spell_library", "enc_mana_font"],
       "prestige_rewards": [
         {
           "prestige": 1,
           "unlocks": {
             "starting_characters": ["char_mage_001"],
-            "starting_items": [],
+            "starting_items": ["item_wooden_staff"],
             "characters": ["char_mage_001"],
             "items": ["item_wooden_staff"],
-            "skills": [],
+            "skills": ["skill_arcane_blast"],
             "encounters": []
           }
         },
@@ -131,7 +131,7 @@
             "starting_items": [],
             "characters": ["char_necromancer_001"],
             "items": ["item_skull_staff"],
-            "skills": ["skill_arcane_blast"],
+            "skills": ["skill_future_mana", "skill_fortune_blessing"],
             "encounters": ["enc_spell_library"],
             "encounter_weight_bonus": 10
           }
@@ -142,9 +142,109 @@
             "starting_characters": [],
             "starting_items": [],
             "characters": [],
-            "items": [],
+            "items": ["item_lucky_charm"],
             "skills": ["skill_life_drain"],
             "encounters": ["enc_mana_font"],
+            "encounter_weight_bonus": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "legacy_wild_hunt",
+      "name": "Wild Hunt",
+      "description": "Hunters and rangers who live by the bow and track prey through the wilderness",
+      "image_path": "res://assets/sprites/legacies/wild_hunt.png",
+      "income": 18,
+      "starting_character_options": ["char_ranger_001", "char_warden_001"],
+      "starting_item_options": ["item_beast_trophy"],
+      "character_pool": ["char_ranger_001", "char_warden_001", "char_beastmaster_001"],
+      "item_pool": ["item_short_bow", "item_hunters_bow", "item_forest_cloak", "item_beast_trophy"],
+      "skill_pool": ["skill_eagle_eye", "skill_hunters_mark", "skill_natures_gift", "skill_minor_heal"],
+      "unique_encounters": ["enc_beast_hunt", "enc_forest_shrine"],
+      "prestige_rewards": [
+        {
+          "prestige": 1,
+          "unlocks": {
+            "starting_characters": ["char_ranger_001"],
+            "starting_items": ["item_beast_trophy"],
+            "characters": ["char_ranger_001"],
+            "items": ["item_short_bow"],
+            "skills": ["skill_eagle_eye"],
+            "encounters": []
+          }
+        },
+        {
+          "prestige": 2,
+          "unlocks": {
+            "starting_characters": ["char_warden_001"],
+            "starting_items": [],
+            "characters": ["char_warden_001"],
+            "items": ["item_hunters_bow", "item_forest_cloak"],
+            "skills": ["skill_hunters_mark", "skill_minor_heal"],
+            "encounters": ["enc_beast_hunt"],
+            "encounter_weight_bonus": 10
+          }
+        },
+        {
+          "prestige": 3,
+          "unlocks": {
+            "starting_characters": [],
+            "starting_items": [],
+            "characters": ["char_beastmaster_001"],
+            "items": ["item_beast_trophy"],
+            "skills": ["skill_natures_gift"],
+            "encounters": ["enc_forest_shrine"],
+            "encounter_weight_bonus": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "legacy_iron_legion",
+      "name": "Iron Legion",
+      "description": "Battle-hardened warriors who know no fear and fight to the last",
+      "image_path": "res://assets/sprites/legacies/iron_legion.png",
+      "income": 16,
+      "starting_character_options": ["char_berserker_001", "char_warchief_001"],
+      "starting_item_options": ["item_war_horn"],
+      "character_pool": ["char_berserker_001", "char_warchief_001", "char_shieldbearer_001"],
+      "item_pool": ["item_battle_axe", "item_war_banner", "item_soldiers_shield", "item_war_horn"],
+      "skill_pool": ["skill_war_cry", "skill_bloodlust", "skill_iron_will", "skill_battle_hardening"],
+      "unique_encounters": ["enc_war_camp", "enc_gladiator_pit"],
+      "prestige_rewards": [
+        {
+          "prestige": 1,
+          "unlocks": {
+            "starting_characters": ["char_berserker_001"],
+            "starting_items": ["item_war_horn"],
+            "characters": ["char_berserker_001"],
+            "items": ["item_battle_axe"],
+            "skills": ["skill_war_cry"],
+            "encounters": []
+          }
+        },
+        {
+          "prestige": 2,
+          "unlocks": {
+            "starting_characters": ["char_warchief_001"],
+            "starting_items": [],
+            "characters": ["char_warchief_001"],
+            "items": ["item_war_banner", "item_soldiers_shield"],
+            "skills": ["skill_bloodlust", "skill_battle_hardening"],
+            "encounters": ["enc_war_camp"],
+            "encounter_weight_bonus": 10
+          }
+        },
+        {
+          "prestige": 3,
+          "unlocks": {
+            "starting_characters": [],
+            "starting_items": [],
+            "characters": ["char_shieldbearer_001"],
+            "items": ["item_war_horn"],
+            "skills": ["skill_iron_will"],
+            "encounters": ["enc_gladiator_pit"],
             "encounter_weight_bonus": 15
           }
         }

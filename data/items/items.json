@@ -116,6 +116,78 @@
       "stat_modifiers": {"income": 2},
       "slot": "accessory",
       "cost": 20
+    },
+    {
+      "id": "item_shield_emblem",
+      "name": "Shield Emblem",
+      "description": "A symbol of the Knight's Order.",
+      "image_path": "res://assets/items/shield_emblem.png",
+      "stat_modifiers": {"defendRate": 5},
+      "slot": "accessory",
+      "cost": 15
+    },
+    {
+      "id": "item_cloak_of_shadows",
+      "name": "Cloak of Shadows",
+      "description": "Melts into darkness.",
+      "image_path": "res://assets/items/cloak_of_shadows.png",
+      "stat_modifiers": {"defendRate": 3},
+      "slot": "armor",
+      "cost": 15
+    },
+    {
+      "id": "item_hunters_bow",
+      "name": "Hunter's Bow",
+      "description": "A finely crafted bow for tracking prey.",
+      "image_path": "res://assets/items/hunters_bow.png",
+      "stat_modifiers": {},
+      "slot": "weapon",
+      "cost": 20
+    },
+    {
+      "id": "item_beast_trophy",
+      "name": "Beast Trophy",
+      "description": "A trophy from a fearsome hunt.",
+      "image_path": "res://assets/items/beast_trophy.png",
+      "stat_modifiers": {"health": 8},
+      "slot": "accessory",
+      "cost": 18
+    },
+    {
+      "id": "item_forest_cloak",
+      "name": "Forest Cloak",
+      "description": "Woven from enchanted leaves.",
+      "image_path": "res://assets/items/forest_cloak.png",
+      "stat_modifiers": {"defendRate": 5, "health": 5},
+      "slot": "armor",
+      "cost": 20
+    },
+    {
+      "id": "item_war_banner",
+      "name": "War Banner",
+      "description": "Inspires allies in battle.",
+      "image_path": "res://assets/items/war_banner.png",
+      "stat_modifiers": {"health": 10},
+      "slot": "accessory",
+      "cost": 18
+    },
+    {
+      "id": "item_soldiers_shield",
+      "name": "Soldier's Shield",
+      "description": "Standard military issue.",
+      "image_path": "res://assets/items/soldiers_shield.png",
+      "stat_modifiers": {"defendRate": 10},
+      "slot": "armor",
+      "cost": 20
+    },
+    {
+      "id": "item_war_horn",
+      "name": "War Horn",
+      "description": "Rallies troops to battle.",
+      "image_path": "res://assets/items/war_horn.png",
+      "stat_modifiers": {"health": 5},
+      "slot": "accessory",
+      "cost": 15
     }
   ]
 }

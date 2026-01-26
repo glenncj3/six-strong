@@ -37,7 +37,7 @@
         "value": 15
       },
       "cost": 12,
-      "level_requirement": 2
+      "level_requirement": 1
     },
     {
       "id": "skill_fortune_blessing",
@@ -52,7 +52,7 @@
       },
       "trigger": "next_character_acquired",
       "cost": 18,
-      "level_requirement": 3
+      "level_requirement": 1
     },
     {
       "id": "skill_minor_heal",
@@ -78,7 +78,7 @@
         "value": 50
       },
       "cost": 25,
-      "level_requirement": 4
+      "level_requirement": 1
     },
     {
       "id": "skill_battle_hardening",
@@ -93,7 +93,7 @@
       },
       "trigger": "next_character_acquired",
       "cost": 15,
-      "level_requirement": 2
+      "level_requirement": 1
     },
     {
       "id": "skill_group_training",
@@ -106,7 +106,7 @@
         "value": 25
       },
       "cost": 20,
-      "level_requirement": 3
+      "level_requirement": 1
     },
     {
       "id": "skill_emergency_funds",
@@ -132,7 +132,7 @@
         "value": 50
       },
       "cost": 22,
-      "level_requirement": 4
+      "level_requirement": 1
     },
     {
       "id": "skill_future_mana",
@@ -147,7 +147,7 @@
       },
       "trigger": "next_character_acquired",
       "cost": 14,
-      "level_requirement": 2
+      "level_requirement": 1
     },
     {
       "id": "skill_combat_prep",
@@ -161,7 +161,197 @@
       },
       "trigger": "next_combat",
       "cost": 16,
-      "level_requirement": 3
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_power_strike",
+      "name": "Power Strike",
+      "description": "Channel strength for a devastating blow.",
+      "image_path": "res://assets/skills/power_strike.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "grant_xp",
+        "value": 20
+      },
+      "cost": 12,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_iron_skin",
+      "name": "Iron Skin",
+      "description": "Harden your body against damage.",
+      "image_path": "res://assets/skills/iron_skin.png",
+      "effect_type": "lingering",
+      "effect": {
+        "type": "next_character_stat_boost",
+        "stat": "defendRate",
+        "value": 8
+      },
+      "trigger": "next_character_acquired",
+      "cost": 14,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_vitality",
+      "name": "Vitality",
+      "description": "Boost your life force.",
+      "image_path": "res://assets/skills/vitality.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "heal_team",
+        "value": 25
+      },
+      "cost": 12,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_dodge",
+      "name": "Dodge",
+      "description": "Evade incoming attacks.",
+      "image_path": "res://assets/skills/dodge.png",
+      "effect_type": "lingering",
+      "effect": {
+        "type": "next_character_stat_boost",
+        "stat": "defendRate",
+        "value": 12
+      },
+      "trigger": "next_character_acquired",
+      "cost": 16,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_backstab",
+      "name": "Backstab",
+      "description": "Strike from the shadows.",
+      "image_path": "res://assets/skills/backstab.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "grant_gold",
+        "value": 30
+      },
+      "cost": 15,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_inner_peace",
+      "name": "Inner Peace",
+      "description": "Find harmony within.",
+      "image_path": "res://assets/skills/inner_peace.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "heal_team",
+        "value": 35
+      },
+      "cost": 18,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_arcane_blast",
+      "name": "Arcane Blast",
+      "description": "Unleash a burst of magical energy.",
+      "image_path": "res://assets/skills/arcane_blast.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "grant_xp",
+        "value": 25
+      },
+      "cost": 15,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_life_drain",
+      "name": "Life Drain",
+      "description": "Steal life force from enemies.",
+      "image_path": "res://assets/skills/life_drain.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "heal_team",
+        "value": 40
+      },
+      "cost": 20,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_eagle_eye",
+      "name": "Eagle Eye",
+      "description": "See through any cover.",
+      "image_path": "res://assets/skills/eagle_eye.png",
+      "effect_type": "lingering",
+      "effect": {
+        "type": "next_character_stat_boost",
+        "stat": "defendRate",
+        "value": 5
+      },
+      "trigger": "next_character_acquired",
+      "cost": 10,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_hunters_mark",
+      "name": "Hunter's Mark",
+      "description": "Mark prey for the hunt.",
+      "image_path": "res://assets/skills/hunters_mark.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "grant_gold",
+        "value": 20
+      },
+      "cost": 10,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_natures_gift",
+      "name": "Nature's Gift",
+      "description": "The wild grants its blessing.",
+      "image_path": "res://assets/skills/natures_gift.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "heal_team",
+        "value": 30
+      },
+      "cost": 15,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_war_cry",
+      "name": "War Cry",
+      "description": "Rally allies with a battle shout.",
+      "image_path": "res://assets/skills/war_cry.png",
+      "effect_type": "lingering",
+      "effect": {
+        "type": "next_character_stat_boost",
+        "stat": "health",
+        "value": 15
+      },
+      "trigger": "next_character_acquired",
+      "cost": 14,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_bloodlust",
+      "name": "Bloodlust",
+      "description": "Enter a battle frenzy.",
+      "image_path": "res://assets/skills/bloodlust.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "grant_xp",
+        "value": 30
+      },
+      "cost": 18,
+      "level_requirement": 1
+    },
+    {
+      "id": "skill_iron_will",
+      "name": "Iron Will",
+      "description": "Unbreakable determination.",
+      "image_path": "res://assets/skills/iron_will.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "heal_team",
+        "value": 20
+      },
+      "cost": 10,
+      "level_requirement": 1
     }
   ]
 }

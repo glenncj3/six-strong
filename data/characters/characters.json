@@ -71,7 +71,7 @@
       "description": "A ferocious warrior who deals massive damage",
       "image_path": "res://assets/characters/berserker.png",
       "cost": 55,
-      "level_requirement": 2,
+      "level_requirement": 1,
       "base_stats": {
         "health": 110,
         "mana": 5,
@@ -84,7 +84,7 @@
       "description": "A holy knight who combines martial prowess with divine magic",
       "image_path": "res://assets/characters/paladin.png",
       "cost": 60,
-      "level_requirement": 2,
+      "level_requirement": 1,
       "base_stats": {
         "health": 105,
         "mana": 5,
@@ -97,7 +97,7 @@
       "description": "A master of dark magic who draws power from death",
       "image_path": "res://assets/characters/necromancer.png",
       "cost": 65,
-      "level_requirement": 3,
+      "level_requirement": 1,
       "base_stats": {
         "health": 75,
         "mana": 5,
@@ -110,7 +110,7 @@
       "description": "A disciplined fighter who channels inner energy",
       "image_path": "res://assets/characters/monk.png",
       "cost": 50,
-      "level_requirement": 2,
+      "level_requirement": 1,
       "base_stats": {
         "health": 85,
         "mana": 5,
@@ -123,11 +123,63 @@
       "description": "A deadly killer who eliminates targets with precision",
       "image_path": "res://assets/characters/assassin.png",
       "cost": 60,
-      "level_requirement": 3,
+      "level_requirement": 1,
       "base_stats": {
         "health": 65,
         "mana": 5,
         "defendRate": 12
+      }
+    },
+    {
+      "id": "char_warden_001",
+      "name": "Forest Warden",
+      "description": "A guardian of nature who protects the wild lands",
+      "image_path": "res://assets/characters/warden.png",
+      "cost": 50,
+      "level_requirement": 1,
+      "base_stats": {
+        "health": 95,
+        "mana": 5,
+        "defendRate": 12
+      }
+    },
+    {
+      "id": "char_beastmaster_001",
+      "name": "Beast Master",
+      "description": "Commands wild creatures in battle",
+      "image_path": "res://assets/characters/beastmaster.png",
+      "cost": 55,
+      "level_requirement": 1,
+      "base_stats": {
+        "health": 80,
+        "mana": 5,
+        "defendRate": 8
+      }
+    },
+    {
+      "id": "char_warchief_001",
+      "name": "War Chief",
+      "description": "A battle-hardened commander who inspires troops",
+      "image_path": "res://assets/characters/warchief.png",
+      "cost": 55,
+      "level_requirement": 1,
+      "base_stats": {
+        "health": 105,
+        "mana": 5,
+        "defendRate": 10
+      }
+    },
+    {
+      "id": "char_shieldbearer_001",
+      "name": "Shield Bearer",
+      "description": "An immovable defender who protects allies",
+      "image_path": "res://assets/characters/shieldbearer.png",
+      "cost": 45,
+      "level_requirement": 1,
+      "base_stats": {
+        "health": 120,
+        "mana": 5,
+        "defendRate": 25
       }
     }
   ]
