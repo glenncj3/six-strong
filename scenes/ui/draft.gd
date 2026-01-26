@@ -12,7 +12,6 @@ extends Control
 
 # Preload scenes
 const LegacyTileScene = preload("res://scenes/components/legacy_tile.tscn")
-const CharacterInfoPanelScene = preload("res://scenes/components/character_info_panel.tscn")
 
 # Draft manager handles business logic
 var draft_manager: LegacyDraftManager = null
@@ -22,7 +21,6 @@ var options_tiles_container: HBoxContainer = null
 var legacy_tiles: Array = []  # References to option tiles
 var select_buttons: Array = []  # SELECT buttons for each option
 var buttons_container: HBoxContainer = null  # Container for SELECT/UNLOCK buttons below tiles
-var options_info_panel: Node = null  # Info panel for previewing starting character
 
 
 func _ready() -> void:
@@ -68,25 +66,6 @@ func _setup_options_display() -> void:
 	buttons_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	buttons_container.add_theme_constant_override("separation", 8)
 	vbox.add_child(buttons_container)
-
-	# Info panel that drops down below option tiles (for starting character preview)
-	var tile_height = _get_tile_size()
-	var info_margin = MarginContainer.new()
-	info_margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	info_margin.custom_minimum_size = Vector2(0, tile_height)
-	info_margin.add_theme_constant_override("margin_left", 13)
-	info_margin.add_theme_constant_override("margin_right", 13)
-	vbox.add_child(info_margin)
-
-	var info_panel_clip = Control.new()
-	info_panel_clip.clip_contents = true
-	info_panel_clip.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	info_margin.add_child(info_panel_clip)
-
-	options_info_panel = CharacterInfoPanelScene.instantiate()
-	options_info_panel.slide_down = true
-	info_panel_clip.add_child(options_info_panel)
-	options_info_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 
 
 # =============================================================================
@@ -137,10 +116,6 @@ func _update_options_display(options: Array) -> void:
 	if options.size() == 0:
 		return
 
-	# Hide info panel from previous options
-	if options_info_panel and options_info_panel.is_showing():
-		options_info_panel.hide_panel()
-
 	UIHelpers.clear_children(options_tiles_container)
 	legacy_tiles.clear()
 
@@ -151,7 +126,6 @@ func _update_options_display(options: Array) -> void:
 		var tile = LegacyTileScene.instantiate()
 		options_tiles_container.add_child(tile)
 		tile.setup(legacy, tile_size)
-		tile.tile_clicked.connect(_on_option_tile_clicked)
 		legacy_tiles.append(tile)
 
 	_create_select_buttons()
@@ -187,25 +161,6 @@ func _create_select_buttons() -> void:
 
 		buttons_container.add_child(button)
 		select_buttons.append(button)
-
-
-func _on_option_tile_clicked(legacy: LegacyData) -> void:
-	# Show starting character preview in info panel
-	if not options_info_panel:
-		return
-
-	var starting_char_id = legacy.selected_starting_character_id
-	if starting_char_id.is_empty():
-		return
-
-	var char_instance = CharacterInstance.from_master_data(starting_char_id)
-	if char_instance == null:
-		return
-
-	if options_info_panel.is_showing() and options_info_panel.current_char_instance == char_instance:
-		options_info_panel.hide_panel()
-	else:
-		options_info_panel.show_character(char_instance)
 
 
 func _on_option_button_pressed(option_index: int) -> void:

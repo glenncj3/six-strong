@@ -87,7 +87,6 @@ static func _show_character_selector(state: Dictionary) -> void:
 	char_selector_container.visible = true
 
 	var selected_option: Dictionary = state.selected_option
-	var on_gold_spend: Callable = state.on_gold_spend
 
 	var cost = selected_option.get("cost", 0)
 	var can_afford = RunManager.get_gold() >= cost

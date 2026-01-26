@@ -60,7 +60,8 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 
 static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float, element: String, tiles: Array, container: Control, gold_bonus: int, on_complete: Callable, on_gold_reward: Callable) -> void:
 	"""Setup tile after it enters the scene tree."""
-	tile.setup(tile_data, tile_size)
+	# Defer setup until tile enters the scene tree and @onready vars are initialized
+	tile.ready.connect(func(): tile.setup(tile_data, tile_size), CONNECT_ONE_SHOT)
 	# Color tile based on element
 	tile.set_tile_color(_get_element_color(element))
 	# Bind all required state to the click handler

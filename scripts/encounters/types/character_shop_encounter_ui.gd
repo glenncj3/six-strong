@@ -116,7 +116,6 @@ static func _on_character_selected(tile_data: Dictionary, state: Dictionary) -> 
 	"""Handle character tile selection - purchase immediately."""
 	var tiles: Array = state.tiles
 	var result_label: Label = state.result_label
-	var on_complete: Callable = state.on_complete
 	var on_gold_spend: Callable = state.on_gold_spend
 
 	var char_id = tile_data.get("id", "")
