@@ -3,8 +3,10 @@ extends RefCounted
 ## UI creation for Wheel of Fortune encounters.
 ## Player spins a wheel with 6 segments for varied rewards.
 ## First spin is free; player may pay gold for one additional spin.
-
-const RewardClaimPopupScene = preload("res://scenes/components/reward_claim_popup.tscn")
+##
+## Phase 2 Refactor:
+## - Items go to player inventory (no character selection)
+## - Skills are instant effects (no character selection)
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
@@ -33,10 +35,6 @@ class WheelEncounterContainer extends VBoxContainer:
 	var spin_again_button: Button
 	var take_prize_button: Button
 	var action_container: HBoxContainer
-	var reward_popup: RewardClaimPopup = null
-
-	# State tracking
-	var eligible_char_indices: Array = []
 
 
 	func initialize(p_encounter_data: Dictionary, p_context: Dictionary) -> void:
@@ -142,16 +140,14 @@ class WheelEncounterContainer extends VBoxContainer:
 				_show_choice_buttons()
 
 			WheelState.State.SELECTING_TARGET:
-				spin_button.visible = false
-				spin_again_button.visible = false
-				take_prize_button.visible = false
-				_show_reward_claim_popup()
+				# Phase 2: Items/skills no longer need character selection
+				# Apply the reward directly
+				_apply_reward_directly()
 
 			WheelState.State.COMPLETE:
 				spin_button.visible = false
 				spin_again_button.visible = false
 				take_prize_button.visible = false
-				_cleanup_popup()
 
 
 	func _show_choice_buttons() -> void:
@@ -171,154 +167,16 @@ class WheelEncounterContainer extends VBoxContainer:
 		# Take prize button
 		take_prize_button.visible = true
 		take_prize_button.disabled = false
-
-		# Check if reward needs character selection
-		if controller.reward_requires_selection():
-			take_prize_button.text = "Choose Character"
-		else:
-			take_prize_button.text = "Take Prize"
+		take_prize_button.text = "Take Prize"
 
 
-	func _show_reward_claim_popup() -> void:
-		"""Show popup for item/skill reward claiming."""
-		_cleanup_popup()
-
-		var eligible = controller.get_eligible_characters()
-		eligible_char_indices = eligible["indices"]
-		var eligible_chars: Array = eligible["characters"]
-
-		if eligible_chars.is_empty():
-			# No eligible characters, apply fallback
+	func _apply_reward_directly() -> void:
+		"""Apply the reward directly without character selection (Phase 2)."""
+		var success = controller.accept_reward()
+		if not success:
+			# Apply fallback if needed
 			var fallback = RewardApplicator.get_fallback_reward(controller.current_reward)
-			controller.current_reward = fallback
-			_on_take_prize_pressed()
-			return
-
-		# Create and show the popup
-		reward_popup = WheelOfFortuneEncounterUI.RewardClaimPopupScene.instantiate()
-		var scene_root = get_tree().current_scene
-		scene_root.add_child(reward_popup)
-
-		# Connect signals
-		reward_popup.claimed.connect(_on_popup_claimed)
-
-		# Determine reward type and show appropriate popup
-		var reward = controller.current_reward
-		if reward.type == RewardTypes.RewardType.ITEM or reward.type == RewardTypes.RewardType.ITEM_RANDOM:
-			var item_id = reward.params.get("item_id", "")
-			if item_id.is_empty():
-				# Random item - pick one now
-				item_id = _pick_random_item_for_reward()
-				reward.params["item_id"] = item_id
-
-			reward_popup.show_item(
-				item_id,
-				eligible_chars,
-				eligible_char_indices,
-				"",  # No header
-				"",  # No bonus
-				"Claim",
-				0  # Free (already won)
-			)
-		elif reward.type == RewardTypes.RewardType.SKILL or reward.type == RewardTypes.RewardType.SKILL_RANDOM:
-			var skill_id = reward.params.get("skill_id", "")
-			if skill_id.is_empty():
-				# Random skill - pick one now
-				skill_id = _pick_random_skill_for_reward()
-				reward.params["skill_id"] = skill_id
-
-			reward_popup.show_skill(
-				skill_id,
-				eligible_chars,
-				eligible_char_indices,
-				"",  # No header
-				"",  # No bonus
-				"Learn",
-				0  # Free (already won)
-			)
-
-
-	func _pick_random_item_for_reward() -> String:
-		"""Pick a random item for the reward."""
-		var team = RunManager.get_team()
-		var max_level = 1
-		for char_instance in team:
-			max_level = maxi(max_level, char_instance.level)
-
-		var all_items = GameData.get_all_item_upgrades()
-		var valid_items: Array = []
-
-		for item in all_items:
-			var item_id = item["id"]
-			var level_req = item.get("level_requirement", 1)
-			if level_req > max_level:
-				continue
-
-			# Check if at least one character can equip
-			for char_instance in team:
-				if item_id in char_instance.equipped_item_upgrades:
-					continue
-				var total = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
-				if total >= GameConstants.MAX_RUN_ITEMS:
-					continue
-				valid_items.append(item_id)
-				break
-
-		if valid_items.is_empty():
-			return ""
-
-		valid_items.shuffle()
-		return valid_items[0]
-
-
-	func _pick_random_skill_for_reward() -> String:
-		"""Pick a random skill for the reward."""
-		var team = RunManager.get_team()
-		var max_level = 1
-		for char_instance in team:
-			max_level = maxi(max_level, char_instance.level)
-
-		var all_skills = GameData.get_all_skills()
-		var valid_skills: Array = []
-
-		for skill in all_skills:
-			var skill_id = skill["id"]
-			var level_req = skill.get("level_requirement", 1)
-			if level_req > max_level:
-				continue
-
-			# Check if at least one character can learn
-			for char_instance in team:
-				if skill_id in char_instance.learned_skills:
-					continue
-				if char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS:
-					continue
-				valid_skills.append(skill_id)
-				break
-
-		if valid_skills.is_empty():
-			return ""
-
-		valid_skills.shuffle()
-		return valid_skills[0]
-
-
-	func _on_popup_claimed(_reward_id: String, char_index: int) -> void:
-		"""Handle claim from popup."""
-		var team = RunManager.get_team()
-		var target_char = team[char_index]
-
-		var success = controller.accept_reward(target_char)
-		if success:
-			_cleanup_popup()
-
-
-	func _cleanup_popup() -> void:
-		"""Clean up the reward popup if it exists."""
-		if reward_popup and is_instance_valid(reward_popup):
-			reward_popup.hide_popup()
-			reward_popup.queue_free()
-			reward_popup = null
+			RewardApplicator.apply_reward(fallback, context)
 
 
 	func _on_spin_pressed() -> void:
@@ -353,15 +211,11 @@ class WheelEncounterContainer extends VBoxContainer:
 
 	func _on_take_prize_pressed() -> void:
 		"""Handle take prize button press."""
-		if controller.reward_requires_selection():
-			controller.begin_target_selection()
-		else:
-			# Apply reward directly
-			var success = controller.accept_reward()
-			if success:
-				_update_gold_display()
-
-
+		# Phase 2: No character selection needed for items/skills
+		# Apply reward directly
+		var success = controller.accept_reward()
+		if success:
+			_update_gold_display()
 
 
 	func _on_spin_started() -> void:

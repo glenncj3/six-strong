@@ -1,5 +1,5 @@
 extends Node
-# Test runner for Phase 0 + Phase 1 Legacy System tests
+# Test runner for Phase 0 + Phase 1 + Phase 2 Legacy System tests
 # Attach this script to a Node and run the scene to execute all tests
 #
 # Usage in Godot:
@@ -13,10 +13,13 @@ const Phase1CharInstance = preload("res://tests/test_character_instance_phase1.g
 const Phase1StatCalc = preload("res://tests/test_stat_calculator_phase1.gd")
 const Phase1CharJson = preload("res://tests/test_character_json_phase1.gd")
 
+# Preload Phase 2 test classes
+const Phase2PlayerInventory = preload("res://tests/test_player_inventory_phase2.gd")
+
 
 func _ready() -> void:
 	print("============================================================")
-	print("LEGACY REFACTOR TEST SUITE (Phase 0 + Phase 1)")
+	print("LEGACY REFACTOR TEST SUITE (Phase 0 + Phase 1 + Phase 2)")
 	print("============================================================")
 	print("")
 
@@ -97,6 +100,21 @@ func _ready() -> void:
 	total_failed += char_json_results.failed
 	all_errors.append_array(char_json_results.errors)
 	_print_suite_summary("CharacterJSON", char_json_results)
+	print("")
+
+	# ==========================================================================
+	# PHASE 2 TESTS (Player-Level Item System)
+	# ==========================================================================
+	print("--- PHASE 2: Player-Level Item System ---")
+	print("")
+
+	# Run PlayerInventory tests
+	print("Running PlayerInventory (Phase 2) tests...")
+	var inventory_results = Phase2PlayerInventory.run_all_tests()
+	total_passed += inventory_results.passed
+	total_failed += inventory_results.failed
+	all_errors.append_array(inventory_results.errors)
+	_print_suite_summary("PlayerInventory", inventory_results)
 	print("")
 
 	# ==========================================================================

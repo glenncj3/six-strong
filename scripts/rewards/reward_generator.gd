@@ -2,12 +2,15 @@ class_name RewardGenerator
 extends RefCounted
 ## Generate random rewards for encounters.
 ## Includes wheel segment generation and random item/skill resolution.
+##
+## Phase 2 Refactor:
+## - Items are checked against player inventory (not character equipment)
+## - Skills will be instant effects in Phase 3
 
 
 ## Generate a random item reward
 ## Returns RewardDefinition with type ITEM (resolved) or GOLD (fallback)
 static func generate_random_item(max_cost: int = 0, max_level: int = 0) -> RewardDefinition:
-	var team = RunManager.get_team()
 	var team_max_level = _get_team_max_level()
 
 	if max_level <= 0:
@@ -24,14 +27,12 @@ static func generate_random_item(max_cost: int = 0, max_level: int = 0) -> Rewar
 		if max_cost > 0 and item.get("cost", 0) > max_cost:
 			continue
 
-		# Check if at least one character can equip this item
-		for char_instance in team:
-			var already_equipped = item["id"] in char_instance.equipped_item_upgrades
-			var total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
-			var max_items_reached = total_items >= GameConstants.MAX_RUN_ITEMS
-			if not already_equipped and not max_items_reached:
-				available_items.append(item)
-				break
+		# Check if player already has this item in inventory
+		var item_id = item["id"]
+		if RunManager.has_item_in_inventory(item_id):
+			continue
+
+		available_items.append(item)
 
 	if available_items.is_empty():
 		# Fallback to gold
@@ -44,8 +45,8 @@ static func generate_random_item(max_cost: int = 0, max_level: int = 0) -> Rewar
 
 ## Generate a random skill reward
 ## Returns RewardDefinition with type SKILL (resolved) or GOLD (fallback)
+## Note: In Phase 3, skills will be instant effects. For now, we just pick a skill.
 static func generate_random_skill(max_cost: int = 0, max_level: int = 0) -> RewardDefinition:
-	var team = RunManager.get_team()
 	var team_max_level = _get_team_max_level()
 
 	if max_level <= 0:
@@ -62,13 +63,9 @@ static func generate_random_skill(max_cost: int = 0, max_level: int = 0) -> Rewa
 		if max_cost > 0 and skill.get("cost", 0) > max_cost:
 			continue
 
-		# Check if at least one character can learn this skill
-		for char_instance in team:
-			var already_learned = skill["id"] in char_instance.learned_skills
-			var max_skills_reached = char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS
-			if not already_learned and not max_skills_reached:
-				available_skills.append(skill)
-				break
+		# Phase 3: Skills are instant effects, so we don't track "learned" skills
+		# For now, allow any skill that passes level/cost filters
+		available_skills.append(skill)
 
 	if available_skills.is_empty():
 		# Fallback to gold

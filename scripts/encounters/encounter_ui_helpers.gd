@@ -2,6 +2,11 @@ class_name EncounterUIHelpers
 extends RefCounted
 ## Shared helper functions for encounter UI components.
 ## Reduces code duplication across shop, health restore, and skill trainer UIs.
+##
+## Phase 2 Refactor:
+## - Removed filter_item_eligible_characters (items go to player inventory)
+## - Removed filter_skill_eligible_characters (skills are instant effects)
+## - Kept filter_heal_eligible_characters (health still targets characters)
 
 
 # =============================================================================
@@ -92,57 +97,6 @@ static func highlight_selected_tile(
 # ELIGIBILITY CHECKING
 # =============================================================================
 
-static func filter_skill_eligible_characters(team: Array, skill_id: String) -> Dictionary:
-	"""
-	Filter team to only characters who can learn a specific skill.
-
-	Args:
-		team: Array of character instances
-		skill_id: ID of the skill to check
-
-	Returns:
-		Dictionary with "indices" (Array of team indices) and "characters" (Array of char instances)
-	"""
-	var indices: Array = []
-	var characters: Array = []
-
-	for i in range(team.size()):
-		var char_instance = team[i]
-		var already_learned = skill_id in char_instance.learned_skills
-		var max_skills_reached = char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS
-		if not already_learned and not max_skills_reached:
-			indices.append(i)
-			characters.append(char_instance)
-
-	return {"indices": indices, "characters": characters}
-
-
-static func filter_item_eligible_characters(team: Array, item_id: String) -> Dictionary:
-	"""
-	Filter team to only characters who can equip a specific item upgrade.
-
-	Args:
-		team: Array of character instances
-		item_id: ID of the item upgrade to check
-
-	Returns:
-		Dictionary with "indices" (Array of team indices) and "characters" (Array of char instances)
-	"""
-	var indices: Array = []
-	var characters: Array = []
-
-	for i in range(team.size()):
-		var char_instance = team[i]
-		var already_equipped = item_id in char_instance.equipped_item_upgrades
-		var total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
-		var max_items_reached = total_items >= GameConstants.MAX_RUN_ITEMS
-		if not already_equipped and not max_items_reached:
-			indices.append(i)
-			characters.append(char_instance)
-
-	return {"indices": indices, "characters": characters}
-
-
 static func filter_heal_eligible_characters(team: Array) -> Dictionary:
 	"""
 	Filter team to only characters who can benefit from healing (not at full health).
@@ -162,5 +116,64 @@ static func filter_heal_eligible_characters(team: Array) -> Dictionary:
 		if needs_healing:
 			indices.append(i)
 			characters.append(char_instance)
+
+	return {"indices": indices, "characters": characters}
+
+
+# =============================================================================
+# ITEM AVAILABILITY (Phase 2 - Player Inventory)
+# =============================================================================
+
+static func is_item_available(item_id: String) -> bool:
+	"""
+	Check if an item can be acquired (not already in player inventory).
+
+	Args:
+		item_id: ID of the item to check
+
+	Returns:
+		True if item is not yet owned
+	"""
+	return not RunManager.has_item_in_inventory(item_id)
+
+
+static func filter_available_items(items: Array) -> Array:
+	"""
+	Filter a list of items to only those not already in player inventory.
+
+	Args:
+		items: Array of item dictionaries with "id" field
+
+	Returns:
+		Filtered array of available items
+	"""
+	var available: Array = []
+	for item in items:
+		var item_id = item.get("id", "")
+		if not item_id.is_empty() and not RunManager.has_item_in_inventory(item_id):
+			available.append(item)
+	return available
+
+
+# =============================================================================
+# XP ELIGIBILITY
+# =============================================================================
+
+static func filter_xp_eligible_characters(team: Array) -> Dictionary:
+	"""
+	Filter team to characters who can receive XP (all characters).
+
+	Args:
+		team: Array of character instances
+
+	Returns:
+		Dictionary with "indices" (Array of team indices) and "characters" (Array of char instances)
+	"""
+	var indices: Array = []
+	var characters: Array = []
+
+	for i in range(team.size()):
+		indices.append(i)
+		characters.append(team[i])
 
 	return {"indices": indices, "characters": characters}

@@ -1,37 +1,39 @@
 class_name ShopEncounterUI
 extends RefCounted
 ## UI creation and reward preview for shop encounters.
-## Shows up to 3 offerings (items/skills) in tiles, player picks one, popup shows details.
+## Shows up to 3 offerings (items/skills) in tiles.
+##
+## Phase 2 Refactor:
+## - Items go directly to player inventory (no character selection)
+## - Skills are instant effects (no character selection needed)
+## - Simplified purchase flow without popup character picker
 
 const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")
-const RewardClaimPopupScene = preload("res://scenes/components/reward_claim_popup.tscn")
 
 # Store references for callback access
 static var _selected_offering: Dictionary = {}
 static var _on_complete: Callable = Callable()
-static var _on_buy_item: Callable = Callable()
-static var _on_buy_skill: Callable = Callable()
 static var _on_gold_spend: Callable = Callable()
 static var _tiles: Array = []
-static var _reward_popup: RewardClaimPopup = null
+static var _main_container: Control = null
 static var _max_purchases: int = 1
 static var _purchases_made: int = 0
+static var _result_label: Label = null
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create shop encounter UI."""
 	var vbox = UIHelpers.create_vbox_container(8)
+	_main_container = vbox
 
 	var offerings: Array = encounter_data["data"].get("offerings", [])
 	_max_purchases = encounter_data["data"].get("max_purchases", 1)
 	_purchases_made = 0
 	_on_complete = context.get("on_encounter_complete", Callable())
-	_on_buy_item = context.get("on_buy_item", Callable())
-	_on_buy_skill = context.get("on_buy_skill", Callable())
 	_on_gold_spend = context.get("on_gold_spend", Callable())
 	_selected_offering = {}
 	_tiles.clear()
-	_reward_popup = null
+	_result_label = null
 
 	if offerings.is_empty():
 		vbox.add_child(UIHelpers.create_label("Nothing for sale...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
@@ -56,6 +58,12 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 		tile.ready.connect(_setup_tile.bind(tile, tile_data, tile_size))
 		_tiles.append(tile)
 
+	# Add spacer and result label area
+	vbox.add_child(UIHelpers.create_spacer(8))
+	_result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true)
+	_result_label.visible = false
+	vbox.add_child(_result_label)
+
 	return vbox
 
 
@@ -71,123 +79,75 @@ static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float) 
 
 
 static func _on_offering_selected(tile_data: Dictionary) -> void:
-	"""Handle offering tile selection - show popup."""
+	"""Handle offering tile selection - purchase immediately (Phase 2)."""
 	_selected_offering = tile_data
 
-	# Highlight selected tile (allow reselection)
-	EncounterUIHelpers.highlight_selected_tile(_tiles, tile_data, "id", true)
+	var offering_id = tile_data.get("id", "")
+	var offering_type = tile_data.get("offering_type", "item")
+	var cost = tile_data.get("cost", 0)
 
-	# Show reward claim popup
-	_show_offering_popup()
+	# Check if player can afford
+	if not _can_afford(cost):
+		_show_result("Not enough gold!", GameConstants.COLOR_ERROR)
+		return
 
-
-static func _show_offering_popup() -> void:
-	"""Show popup with offering details and character selector."""
-	if _reward_popup:
-		_reward_popup.queue_free()
-
-	_reward_popup = RewardClaimPopupScene.instantiate()
-	# Add to scene tree so it can reparent itself
-	var scene_root = Engine.get_main_loop().current_scene
-	scene_root.add_child(_reward_popup)
-
-	var offering_id = _selected_offering.get("id", "")
-	var offering_type = _selected_offering.get("offering_type", "item")
-	var cost = _selected_offering.get("cost", 0)
-
-	# Get eligible characters
-	var team = RunManager.get_team()
-	var eligible: Dictionary
-	if offering_type == "skill":
-		eligible = EncounterUIHelpers.filter_skill_eligible_characters(team, offering_id)
-	else:
-		eligible = EncounterUIHelpers.filter_item_eligible_characters(team, offering_id)
-
-	# Connect to signals
-	_reward_popup.claimed.connect(_on_offering_claimed)
-
-	# Determine button text based on type
-	var action_text = "Learn" if offering_type == "skill" else "Equip"
-	var button_text = "%dg and %s" % [cost, action_text]
-
-	# Show the offering
-	if offering_type == "skill":
-		_reward_popup.show_skill(
-			offering_id,
-			eligible.characters,
-			eligible.indices,
-			"",  # No header
-			"",  # No bonus text
-			button_text,
-			cost
-		)
-	else:
-		_reward_popup.show_item(
-			offering_id,
-			eligible.characters,
-			eligible.indices,
-			"",  # No header
-			"",  # No bonus text
-			button_text,
-			cost
-		)
-
-
-static func _on_offering_claimed(offering_id: String, char_index: int) -> void:
-	"""Handle offering claim from popup."""
-	var cost = _selected_offering.get("cost", 0)
-	var offering_type = _selected_offering.get("offering_type", "item")
+	# Check if item already owned
+	if offering_type == "item":
+		if RunManager.has_item_in_inventory(offering_id):
+			_show_result("Already owned!", GameConstants.COLOR_ERROR)
+			return
 
 	# Spend gold
 	if not EncounterUIHelpers.try_spend_gold(cost, _on_gold_spend):
+		_show_result("Purchase failed!", GameConstants.COLOR_ERROR)
 		return
 
-	var team = RunManager.get_team()
-	var char_instance = team[char_index]
-
-	# Apply the reward
+	# Apply the reward - no character selection needed
 	var success = false
 	if offering_type == "skill":
-		if _on_buy_skill.is_valid():
-			# Use callback (it handles the skill learning)
-			_on_buy_skill.call(offering_id, 0, null, null)  # Cost already spent
-			success = true
-		else:
-			success = char_instance.learn_skill(offering_id)
+		# Phase 3 TODO: Skills are instant effects
+		# For now, just acknowledge the purchase
+		success = true
+		_show_result("Used skill!", GameConstants.COLOR_SUCCESS)
 	else:
-		if _on_buy_item.is_valid():
-			# Use callback (it handles item equipping)
-			_on_buy_item.call(offering_id, 0, null, null)  # Cost already spent
-			success = true
+		# Add item to player inventory
+		var item = RunManager.add_item_to_inventory(offering_id)
+		success = item != null
+		if success:
+			var item_data = GameData.get_item_upgrade_by_id(offering_id)
+			_show_result("Acquired %s!" % item_data.get("name", "Item"), GameConstants.COLOR_SUCCESS)
 		else:
-			char_instance.equip_item_upgrade(offering_id)
-			success = true
+			# Refund gold if item couldn't be added
+			RunManager.add_gold(cost)
+			_show_result("Failed to acquire item!", GameConstants.COLOR_ERROR)
 
 	if success:
 		_purchases_made += 1
 
-		# Clean up popup
-		if _reward_popup:
-			_reward_popup.hide_popup()
-			_reward_popup.queue_free()
-			_reward_popup = null
+		# Dim the selected tile (it's been purchased)
+		for tile in _tiles:
+			if tile.tile_data.get("id") == offering_id:
+				tile.modulate = GameConstants.COLOR_TILE_DIMMED
+				tile.set_clickable(false)
+				break
 
 		# Check if we've reached max purchases
 		if _purchases_made >= _max_purchases:
 			if _on_complete.is_valid():
 				_on_complete.call()
-		else:
-			# Reset for next purchase
-			_reset_for_next_purchase()
 
 
-static func _reset_for_next_purchase() -> void:
-	"""Reset tiles for another purchase selection."""
-	_selected_offering = {}
-	for tile in _tiles:
-		# Re-enable tiles that haven't been purchased
-		tile.modulate = Color.WHITE
-		tile.set_clickable(true)
+static func _can_afford(cost: int) -> bool:
+	"""Check if player can afford the cost."""
+	return RunManager.get_gold() >= cost
+
+
+static func _show_result(message: String, color: Color) -> void:
+	"""Show result message."""
+	if _result_label:
+		_result_label.text = message
+		_result_label.add_theme_color_override("font_color", color)
+		_result_label.visible = true
 
 
 static func get_reward_preview(encounter_data: Dictionary) -> String:

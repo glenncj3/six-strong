@@ -1,6 +1,10 @@
 extends Node
 # EncounterFactory Singleton
 # Generates random encounter options from JSON configuration
+#
+# Phase 2 Refactor:
+# - Item availability now checks player inventory (not character equipment)
+# - Skills are instant effects (no character tracking)
 
 signal encounter_generated(encounter_type: String)
 
@@ -237,50 +241,35 @@ func _get_cached_skills() -> Array:
 
 
 func _gen_pick_learnable_skill(_params: Dictionary) -> String:
+	"""Pick a random skill (Phase 2: skills are instant effects, always available)."""
 	var all_skills = _get_cached_skills()
-	var team = RunManager.get_team()
 
-	var learnable_skills: Array = []
-	for skill in all_skills:
-		var skill_id = skill["id"]
-		for char_instance in team:
-			if skill_id not in char_instance.learned_skills:
-				learnable_skills.append(skill)
-				break
+	if all_skills.is_empty():
+		return ""
 
-	learnable_skills.shuffle()
-
-	if learnable_skills.size() > 0:
-		return learnable_skills[0]["id"]
-	return ""
+	all_skills.shuffle()
+	return all_skills[0]["id"]
 
 
 func _gen_pick_learnable_skills(params: Dictionary) -> Array:
-	"""Pick multiple learnable skills for the team."""
+	"""Pick multiple skills (Phase 2: skills are instant effects, always available)."""
 	var count = int(params.get("count", 3))
 	var all_skills = _get_cached_skills()
-	var team = RunManager.get_team()
 
-	var learnable_skills: Array = []
-	for skill in all_skills:
-		var skill_id = skill["id"]
-		# Check if at least one character can learn this skill
-		for char_instance in team:
-			var already_learned = skill_id in char_instance.learned_skills
-			var max_skills_reached = char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS
-			if not already_learned and not max_skills_reached:
-				learnable_skills.append(skill["id"])
-				break
+	if all_skills.is_empty():
+		return []
 
-	learnable_skills.shuffle()
-	return learnable_skills.slice(0, count)
+	all_skills.shuffle()
+	var result: Array = []
+	for i in range(mini(count, all_skills.size())):
+		result.append(all_skills[i]["id"])
+	return result
 
 
 func _gen_pick_shop_offerings(params: Dictionary) -> Array:
 	"""Pick a mix of items and skills for the shop (max 3 total)."""
 	var count = int(params.get("count", 3))
 	var offerings: Array = []
-	var team = RunManager.get_team()
 
 	var available_items = _get_cached_items()
 	var available_skills = _get_cached_skills()
@@ -288,26 +277,16 @@ func _gen_pick_shop_offerings(params: Dictionary) -> Array:
 	# Mix items and skills randomly, filtering to only include acquirable ones
 	var pool: Array = []
 
+	# Phase 2: Items are checked against player inventory
 	for item in available_items:
 		var item_id = item["id"]
-		# Check if at least one character can equip this item
-		for char_instance in team:
-			var already_equipped = item_id in char_instance.equipped_item_upgrades
-			var total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
-			var max_items_reached = total_items >= GameConstants.MAX_RUN_ITEMS
-			if not already_equipped and not max_items_reached:
-				pool.append({"type": "item", "data": item})
-				break
+		# Check if player already has this item
+		if not RunManager.has_item_in_inventory(item_id):
+			pool.append({"type": "item", "data": item})
 
+	# Phase 2: Skills are instant effects, always available
 	for skill in available_skills:
-		var skill_id = skill["id"]
-		# Check if at least one character can learn this skill
-		for char_instance in team:
-			var already_learned = skill_id in char_instance.learned_skills
-			var max_skills_reached = char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS
-			if not already_learned and not max_skills_reached:
-				pool.append({"type": "skill", "data": skill})
-				break
+		pool.append({"type": "skill", "data": skill})
 
 	pool.shuffle()
 
@@ -331,21 +310,16 @@ func _gen_pick_shop_offerings(params: Dictionary) -> Array:
 func _gen_pick_mystery_elements(params: Dictionary) -> Array:
 	"""Pick mystery item options with different elements for treasure chest."""
 	var count = int(params.get("count", 3))
-	var team = RunManager.get_team()
 
-	# Get all available item upgrades that at least one character can equip (from cache)
+	# Phase 2: Get items not in player inventory (from cache)
 	var available_items = _get_cached_items()
 	var equippable_items: Array = []
 
 	for item in available_items:
 		var item_id = item["id"]
-		for char_instance in team:
-			var already_equipped = item_id in char_instance.equipped_item_upgrades
-			var total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
-			var max_items_reached = total_items >= GameConstants.MAX_RUN_ITEMS
-			if not already_equipped and not max_items_reached:
-				equippable_items.append(item)
-				break
+		# Check if player already has this item
+		if not RunManager.has_item_in_inventory(item_id):
+			equippable_items.append(item)
 
 	# Group items by element
 	var items_by_element: Dictionary = {}

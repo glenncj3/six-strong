@@ -4,6 +4,7 @@ extends Node
 # Refactored to follow Single Responsibility Principle
 
 const SaveDataValidatorScript = preload("res://scripts/utils/save_data_validator.gd")
+const PlayerInventoryScript = preload("res://scripts/managers/player_inventory.gd")
 
 signal run_started
 signal round_changed(new_round: int)
@@ -13,6 +14,7 @@ signal phase_changed(new_phase: String)
 # Draft-specific signals (emitted by draft scene, listened by HUDs)
 signal draft_character_added(char_instance: CharacterInstance)
 signal draft_gold_updated(amount: int)
+signal item_acquired(item: ItemInstance)
 
 # Save file path
 const SAVE_PATH = "user://active_run.json"
@@ -28,6 +30,7 @@ var run_id: String = ""
 # Focused managers (Single Responsibility Principle)
 var _team_manager: TeamManager = TeamManager.new()
 var _combat_generator: CombatGenerator = CombatGenerator.new()
+var _player_inventory = PlayerInventoryScript.new()
 
 # Progression (kept in RunManager as it's core run state)
 var current_round: int = 0
@@ -117,6 +120,7 @@ func save_run_state() -> void:
 		"starting_gold": starting_gold,
 		"current_gold": current_gold,
 		"team": _team_manager.to_array(),
+		"inventory": _player_inventory.to_array(),
 		"encounter_history": encounter_history
 	}
 
@@ -155,6 +159,10 @@ func load_run_state() -> bool:
 
 	# Restore team via TeamManager
 	_team_manager.load_from_array(team_data)
+
+	# Restore inventory (Phase 2)
+	var inventory_data = save_data.get("inventory", [])
+	_player_inventory.load_from_array(inventory_data)
 
 	is_run_active = true
 
@@ -244,6 +252,7 @@ func _clear_run_state() -> void:
 	is_run_active = false
 	run_id = ""
 	_team_manager.clear()
+	_player_inventory.clear()
 	current_round = 0
 	current_phase = PHASE_ENCOUNTER
 	encounters_this_round = 0
@@ -296,6 +305,48 @@ func is_encounter_phase() -> bool:
 
 func is_combat_phase() -> bool:
 	return current_phase == PHASE_COMBAT
+
+
+# =============================================================================
+# PLAYER INVENTORY (Phase 2)
+# =============================================================================
+
+func get_player_inventory():
+	"""Get the player's item inventory."""
+	return _player_inventory
+
+
+func get_player_items() -> Array:
+	"""Get all items in the player's inventory."""
+	return _player_inventory.get_all_items()
+
+
+func add_item_to_inventory(item_id: String, is_upgrade: bool = true) -> ItemInstance:
+	"""
+	Add an item to the player's inventory by ID.
+
+	Args:
+		item_id: ID of the item in GameData
+		is_upgrade: True for item upgrades (default), false for regular items
+
+	Returns:
+		The created ItemInstance, or null if invalid
+	"""
+	var item = _player_inventory.add_item_by_id(item_id, is_upgrade)
+	if item != null:
+		item_acquired.emit(item)
+		save_run_state()
+	return item
+
+
+func has_item_in_inventory(item_id: String) -> bool:
+	"""Check if the player has an item with the given ID."""
+	return _player_inventory.has_item(item_id)
+
+
+func get_inventory_stat_modifier(stat_name: String) -> int:
+	"""Get the total modifier for a stat from all player items."""
+	return _player_inventory.get_total_stat_modifier(stat_name)
 
 
 # =============================================================================

@@ -2,20 +2,21 @@ class_name TreasureChestEncounterUI
 extends RefCounted
 ## UI creation and reward preview for treasure chest encounters.
 ## Shows 3 mystery item options with different elements. Player picks one to reveal
-## a random item of that element, then chooses which character receives it plus gold bonus.
+## a random item of that element, which goes directly to player inventory.
+##
+## Phase 2 Refactor:
+## - Items go to player inventory (no character selection)
+## - Simplified UI flow without character picker
 
 const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")
-const RewardClaimPopupScene = preload("res://scenes/components/reward_claim_popup.tscn")
 
 # Store references for callback access
 static var _selected_option: Dictionary = {}
 static var _revealed_item_id: String = ""
 static var _on_complete: Callable = Callable()
-static var _on_buy_item: Callable = Callable()
 static var _on_gold_reward: Callable = Callable()
 static var _tiles: Array = []
 static var _main_container: Control = null
-static var _reward_popup: RewardClaimPopup = null
 static var _gold_bonus: int = 2
 
 
@@ -27,12 +28,10 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var mystery_options: Array = encounter_data["data"].get("mystery_options", [])
 	_gold_bonus = encounter_data["data"].get("gold_bonus", 2)
 	_on_complete = context.get("on_encounter_complete", Callable())
-	_on_buy_item = context.get("on_buy_item", Callable())
 	_on_gold_reward = context.get("on_gold_reward", Callable())
 	_selected_option = {}
 	_revealed_item_id = ""
 	_tiles.clear()
-	_reward_popup = null
 
 	if mystery_options.is_empty():
 		vbox.add_child(UIHelpers.create_label("The chest is empty...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
@@ -79,29 +78,33 @@ static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float, 
 
 
 static func _on_option_selected(tile_data: Dictionary) -> void:
-	"""Handle mystery option tile selection - reveal the item immediately."""
+	"""Handle mystery option tile selection - reveal and acquire the item immediately."""
 	_selected_option = tile_data
 
 	# Dim all tiles and highlight selected (disable further selection)
 	EncounterUIHelpers.highlight_selected_tile(_tiles, tile_data, "id", false)
 
-	# Pick a random item of this element now (before showing popup)
+	# Pick a random item of this element that's not already owned
 	var element = tile_data.get("element", "")
-	_revealed_item_id = _pick_random_item_of_element_any_char(element)
+	_revealed_item_id = _pick_random_item_of_element(element)
 
 	if _revealed_item_id.is_empty():
-		# No valid item found - shouldn't happen with proper filtering
-		_show_no_item_message()
+		# No valid item found - give gold instead
+		_show_no_item_fallback()
 		return
 
-	# Show the reveal popup with the item
-	_show_reward_popup()
+	# Add item to player inventory and show result
+	_acquire_item_and_complete()
 
 
-static func _pick_random_item_of_element_any_char(element: String) -> String:
-	"""Pick a random item of the given element that at least one character can equip."""
+static func _pick_random_item_of_element(element: String) -> String:
+	"""Pick a random item of the given element that's not in player inventory."""
 	var all_items = GameData.get_all_item_upgrades()
 	var team = RunManager.get_team()
+	var max_level = 1
+	for char_instance in team:
+		max_level = maxi(max_level, char_instance.level)
+
 	var valid_items: Array = []
 
 	for item in all_items:
@@ -111,18 +114,15 @@ static func _pick_random_item_of_element_any_char(element: String) -> String:
 		var item_id = item["id"]
 		var level_req = item.get("level_requirement", 1)
 
-		# Check if at least one character can equip this
-		for char_instance in team:
-			if char_instance.level < level_req:
-				continue
-			if item_id in char_instance.equipped_item_upgrades:
-				continue
-			var total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
-			if total_items >= GameConstants.MAX_RUN_ITEMS:
-				continue
-			# This character can equip it
-			valid_items.append(item_id)
-			break
+		# Check level requirement
+		if level_req > max_level:
+			continue
+
+		# Check if already in player inventory
+		if RunManager.has_item_in_inventory(item_id):
+			continue
+
+		valid_items.append(item_id)
 
 	if valid_items.is_empty():
 		return ""
@@ -131,86 +131,51 @@ static func _pick_random_item_of_element_any_char(element: String) -> String:
 	return valid_items[0]
 
 
-static func _show_no_item_message() -> void:
-	"""Show message when no item is available."""
-	var msg = UIHelpers.create_label("Bad luck! No items available for this element.", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_DANGER, true)
+static func _show_no_item_fallback() -> void:
+	"""Show message when no item is available, give gold instead."""
+	# Give extra gold as compensation
+	var fallback_gold = _gold_bonus * 3
+
+	if _on_gold_reward.is_valid():
+		_on_gold_reward.call(fallback_gold)
+	else:
+		RunManager.add_gold(fallback_gold)
+
+	# Show message
+	var msg = UIHelpers.create_label(
+		"No items available! Received +%d Gold instead." % fallback_gold,
+		GameConstants.FONT_SIZE_BODY,
+		GameConstants.COLOR_GOLD,
+		true
+	)
 	_main_container.add_child(msg)
 
 	if _on_complete.is_valid():
 		_on_complete.call()
 
 
-static func _show_reward_popup() -> void:
-	"""Show popup with revealed item using RewardClaimPopup component."""
-	if _reward_popup:
-		_reward_popup.queue_free()
-
-	_reward_popup = RewardClaimPopupScene.instantiate()
-	# Add to scene root so popup can reparent itself on top
-	var scene_root = Engine.get_main_loop().current_scene
-	scene_root.add_child(_reward_popup)
-
-	# Get eligible characters for this specific item
-	var team = RunManager.get_team()
-	var eligible = _filter_item_eligible_for_revealed(team, _revealed_item_id)
-
-	# Connect to claimed signal
-	_reward_popup.claimed.connect(_on_reward_claimed)
-
-	# Show the item with gold bonus
-	_reward_popup.show_item(
-		_revealed_item_id,
-		eligible.characters,
-		eligible.indices,
-		"",
-		"+%d Gold" % _gold_bonus,
-		"+%dg and Claim" % _gold_bonus
-	)
-
-
-static func _filter_item_eligible_for_revealed(team: Array, item_id: String) -> Dictionary:
-	"""Filter team to characters who can equip the revealed item."""
-	var indices: Array = []
-	var characters: Array = []
-
-	var item_data = GameData.get_item_upgrade_by_id(item_id)
-	var level_req = item_data.get("level_requirement", 1)
-
-	for i in range(team.size()):
-		var char_instance = team[i]
-
-		# Check level requirement
-		if char_instance.level < level_req:
-			continue
-
-		# Check not already equipped
-		if item_id in char_instance.equipped_item_upgrades:
-			continue
-
-		# Check has room
-		var total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
-		if total_items >= GameConstants.MAX_RUN_ITEMS:
-			continue
-
-		indices.append(i)
-		characters.append(char_instance)
-
-	return {"indices": indices, "characters": characters}
-
-
-static func _on_reward_claimed(reward_id: String, char_index: int) -> void:
-	"""Handle reward claim from popup."""
-	var team = RunManager.get_team()
-	var char_instance = team[char_index]
-
-	# Award the item - equip directly since popup already selected the character
-	char_instance.equip_item_upgrade(reward_id)
+static func _acquire_item_and_complete() -> void:
+	"""Add item to player inventory and complete the encounter."""
+	# Add item to inventory
+	RunManager.add_item_to_inventory(_revealed_item_id)
 
 	# Award gold bonus
 	if _on_gold_reward.is_valid():
 		_on_gold_reward.call(_gold_bonus)
 	else:
 		RunManager.add_gold(_gold_bonus)
+
+	# Show what was acquired
+	var item_data = GameData.get_item_upgrade_by_id(_revealed_item_id)
+	var item_name = item_data.get("name", "Item")
+
+	var result_label = UIHelpers.create_label(
+		"Acquired: %s (+%dg)" % [item_name, _gold_bonus],
+		GameConstants.FONT_SIZE_BODY,
+		GameConstants.COLOR_SUCCESS,
+		true
+	)
+	_main_container.add_child(result_label)
 
 	# Complete encounter
 	if _on_complete.is_valid():

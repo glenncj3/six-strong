@@ -2,6 +2,10 @@ class_name RewardApplicator
 extends RefCounted
 ## Static methods to apply any reward to the game state.
 ## Handles validation, application, and fallback logic.
+##
+## Phase 2 Refactor:
+## - Items now go to player inventory (no character selection)
+## - Skills will be instant effects in Phase 3 (currently disabled)
 
 
 ## Result of applying a reward
@@ -19,10 +23,11 @@ class ApplyResult:
 
 ## Apply a reward to the game state
 ## Returns ApplyResult with success status and message
+## Note: target_char is only used for HEALTH and XP rewards now
 static func apply_reward(
 	definition: RewardDefinition,
 	context: Dictionary = {},
-	target_char: Variant = null  # CharacterInstance or null
+	target_char: Variant = null  # CharacterInstance or null (only for health/XP)
 ) -> ApplyResult:
 	match definition.type:
 		RewardTypes.RewardType.GOLD:
@@ -32,13 +37,13 @@ static func apply_reward(
 		RewardTypes.RewardType.XP:
 			return _apply_xp(definition, context, target_char)
 		RewardTypes.RewardType.ITEM:
-			return _apply_item(definition, context, target_char)
+			return _apply_item(definition, context)
 		RewardTypes.RewardType.SKILL:
-			return _apply_skill(definition, context, target_char)
+			return _apply_skill(definition, context)
 		RewardTypes.RewardType.ITEM_RANDOM:
-			return _apply_random_item(definition, context, target_char)
+			return _apply_random_item(definition, context)
 		RewardTypes.RewardType.SKILL_RANDOM:
-			return _apply_random_skill(definition, context, target_char)
+			return _apply_random_skill(definition, context)
 
 	return ApplyResult.new(false, "Unknown reward type")
 
@@ -57,19 +62,19 @@ static func can_apply_reward(
 		RewardTypes.RewardType.XP:
 			return {"valid": true, "reason": ""}
 		RewardTypes.RewardType.ITEM:
-			return _can_apply_item(definition, target_char)
+			return _can_apply_item(definition)
 		RewardTypes.RewardType.SKILL:
-			return _can_apply_skill(definition, target_char)
+			return _can_apply_skill(definition)
 		RewardTypes.RewardType.ITEM_RANDOM:
-			return _can_apply_random_item(definition, target_char)
+			return _can_apply_random_item(definition)
 		RewardTypes.RewardType.SKILL_RANDOM:
-			return _can_apply_random_skill(definition, target_char)
+			return _can_apply_random_skill(definition)
 
 	return {"valid": false, "reason": "Unknown reward type"}
 
 
 ## Get a fallback reward when the primary can't be applied
-## e.g., gold if skill slots are full
+## e.g., gold if item already owned
 static func get_fallback_reward(definition: RewardDefinition) -> RewardDefinition:
 	# Fallback amounts based on type
 	match definition.type:
@@ -89,25 +94,44 @@ static func get_fallback_reward(definition: RewardDefinition) -> RewardDefinitio
 
 ## Get eligible characters for a reward
 ## Returns Dictionary with "indices": Array[int], "characters": Array[CharacterInstance]
+## Note: Items and skills no longer need character selection in Phase 2
 static func get_eligible_characters(definition: RewardDefinition) -> Dictionary:
 	var team = RunManager.get_team()
 
 	match definition.type:
 		RewardTypes.RewardType.HEALTH:
 			return EncounterUIHelpers.filter_heal_eligible_characters(team)
-		RewardTypes.RewardType.ITEM:
-			var item_id = definition.params.get("item_id", "")
-			return EncounterUIHelpers.filter_item_eligible_characters(team, item_id)
-		RewardTypes.RewardType.SKILL:
-			var skill_id = definition.params.get("skill_id", "")
-			return EncounterUIHelpers.filter_skill_eligible_characters(team, skill_id)
-		RewardTypes.RewardType.ITEM_RANDOM:
-			return _filter_any_item_eligible_characters(team)
-		RewardTypes.RewardType.SKILL_RANDOM:
-			return _filter_any_skill_eligible_characters(team)
+		RewardTypes.RewardType.XP:
+			# XP can be given to any character
+			var indices: Array = []
+			var characters: Array = []
+			for i in range(team.size()):
+				indices.append(i)
+				characters.append(team[i])
+			return {"indices": indices, "characters": characters}
+		RewardTypes.RewardType.ITEM, RewardTypes.RewardType.ITEM_RANDOM:
+			# Items go to player inventory - no character selection needed
+			return {"indices": [], "characters": [], "no_selection_needed": true}
+		RewardTypes.RewardType.SKILL, RewardTypes.RewardType.SKILL_RANDOM:
+			# Skills are instant effects - no character selection needed
+			return {"indices": [], "characters": [], "no_selection_needed": true}
 
-	# XP and Gold don't need character selection
+	# Gold doesn't need character selection
 	return {"indices": [], "characters": []}
+
+
+## Check if a reward requires character selection
+static func requires_character_selection(definition: RewardDefinition) -> bool:
+	match definition.type:
+		RewardTypes.RewardType.HEALTH:
+			return definition.target == RewardTypes.RewardTarget.SINGLE
+		RewardTypes.RewardType.XP:
+			return definition.target == RewardTypes.RewardTarget.SINGLE
+		RewardTypes.RewardType.ITEM, RewardTypes.RewardType.ITEM_RANDOM:
+			return false  # Items go to player inventory
+		RewardTypes.RewardType.SKILL, RewardTypes.RewardType.SKILL_RANDOM:
+			return false  # Skills are instant effects
+	return false
 
 
 # =============================================================================
@@ -202,93 +226,94 @@ static func _apply_xp(definition: RewardDefinition, context: Dictionary, target_
 			if on_xp_select.is_valid():
 				on_xp_select.call(i, amount, null)
 			else:
-				team[i].xp += amount
+				team[i].add_experience(amount)
 
 	var result = ApplyResult.new(true, "+%d XP to %d characters" % [amount, targets.size()])
 	result.actual_reward = definition
 	return result
 
 
-static func _apply_item(definition: RewardDefinition, context: Dictionary, target_char: Variant) -> ApplyResult:
-	if target_char == null:
-		return ApplyResult.new(false, "No character selected for item")
-
+static func _apply_item(definition: RewardDefinition, context: Dictionary) -> ApplyResult:
+	"""Apply item reward - items go to player inventory (Phase 2)."""
 	var item_id = definition.params.get("item_id", "")
 	if item_id.is_empty():
 		return ApplyResult.new(false, "Invalid item ID")
 
 	# Check eligibility
-	var can_apply = _can_apply_item(definition, target_char)
+	var can_apply = _can_apply_item(definition)
 	if not can_apply["valid"]:
 		# Try fallback
 		var fallback = get_fallback_reward(definition)
-		var fallback_result = apply_reward(fallback, context, target_char)
+		var fallback_result = apply_reward(fallback, context)
 		fallback_result.fallback_used = true
 		return fallback_result
 
-	# Apply item via context callback or directly
+	# Apply item via context callback or directly to player inventory
 	var on_buy_item = context.get("on_buy_item", Callable())
 	if on_buy_item.is_valid():
-		# The callback signature is (item_id, cost, selector, button)
-		# For free rewards, pass 0 cost and null for UI elements
+		# The callback should add to player inventory
 		on_buy_item.call(item_id, 0, null, null)
 	else:
-		target_char.equipped_item_upgrades.append(item_id)
+		RunManager.add_item_to_inventory(item_id)
 
-	var item_data = GameData.get_item_upgrade(item_id)
-	var result = ApplyResult.new(true, "Equipped %s" % item_data.get("name", "Item"))
+	var item_data = GameData.get_item_upgrade_by_id(item_id)
+	var result = ApplyResult.new(true, "Acquired %s" % item_data.get("name", "Item"))
 	result.actual_reward = definition
 	return result
 
 
-static func _apply_skill(definition: RewardDefinition, context: Dictionary, target_char: Variant) -> ApplyResult:
-	if target_char == null:
-		return ApplyResult.new(false, "No character selected for skill")
-
+static func _apply_skill(definition: RewardDefinition, context: Dictionary) -> ApplyResult:
+	"""
+	Apply skill reward.
+	Phase 2: Skills will become instant effects in Phase 3.
+	For now, we just give gold as a placeholder.
+	"""
 	var skill_id = definition.params.get("skill_id", "")
 	if skill_id.is_empty():
 		return ApplyResult.new(false, "Invalid skill ID")
 
 	# Check eligibility
-	var can_apply = _can_apply_skill(definition, target_char)
+	var can_apply = _can_apply_skill(definition)
 	if not can_apply["valid"]:
-		# Try fallback
+		# Fallback to gold
 		var fallback = get_fallback_reward(definition)
-		var fallback_result = apply_reward(fallback, context, target_char)
+		var fallback_result = apply_reward(fallback, context)
 		fallback_result.fallback_used = true
 		return fallback_result
 
-	# Apply skill via context callback or directly
+	# Apply skill via context callback
 	var on_buy_skill = context.get("on_buy_skill", Callable())
 	if on_buy_skill.is_valid():
 		on_buy_skill.call(skill_id, 0, null, null)
 	else:
-		target_char.learned_skills.append(skill_id)
+		# Phase 3 TODO: Execute skill effect immediately
+		# For now, just acknowledge the skill was "used"
+		pass
 
 	var skill_data = GameData.get_skill(skill_id)
-	var result = ApplyResult.new(true, "Learned %s" % skill_data.get("name", "Skill"))
+	var result = ApplyResult.new(true, "Used %s" % skill_data.get("name", "Skill"))
 	result.actual_reward = definition
 	return result
 
 
-static func _apply_random_item(definition: RewardDefinition, context: Dictionary, target_char: Variant) -> ApplyResult:
+static func _apply_random_item(definition: RewardDefinition, context: Dictionary) -> ApplyResult:
 	# Resolve to a concrete item
 	var resolved = RewardGenerator.resolve_reward(definition)
 	if resolved.type == RewardTypes.RewardType.GOLD:
 		# Fallback was used during resolution
-		return apply_reward(resolved, context, target_char)
+		return apply_reward(resolved, context)
 
-	return _apply_item(resolved, context, target_char)
+	return _apply_item(resolved, context)
 
 
-static func _apply_random_skill(definition: RewardDefinition, context: Dictionary, target_char: Variant) -> ApplyResult:
+static func _apply_random_skill(definition: RewardDefinition, context: Dictionary) -> ApplyResult:
 	# Resolve to a concrete skill
 	var resolved = RewardGenerator.resolve_reward(definition)
 	if resolved.type == RewardTypes.RewardType.GOLD:
 		# Fallback was used during resolution
-		return apply_reward(resolved, context, target_char)
+		return apply_reward(resolved, context)
 
-	return _apply_skill(resolved, context, target_char)
+	return _apply_skill(resolved, context)
 
 
 # =============================================================================
@@ -313,105 +338,39 @@ static func _can_apply_health(definition: RewardDefinition, target_char: Variant
 	return {"valid": true, "reason": ""}
 
 
-static func _can_apply_item(definition: RewardDefinition, target_char: Variant) -> Dictionary:
-	if target_char == null:
-		return {"valid": false, "reason": "No character selected"}
-
+static func _can_apply_item(definition: RewardDefinition) -> Dictionary:
+	"""Check if item can be applied - items go to player inventory (Phase 2)."""
 	var item_id = definition.params.get("item_id", "")
 	if item_id.is_empty():
 		return {"valid": false, "reason": "Invalid item ID"}
 
-	# Check if already equipped
-	if item_id in target_char.equipped_item_upgrades:
-		return {"valid": false, "reason": "Already equipped"}
+	# Check if already in player inventory
+	if RunManager.has_item_in_inventory(item_id):
+		return {"valid": false, "reason": "Already owned"}
 
-	# Check item slots
-	var total_items = target_char.equipped_items.size() + target_char.equipped_item_upgrades.size()
-	if total_items >= GameConstants.MAX_RUN_ITEMS:
-		return {"valid": false, "reason": "Item slots full"}
-
+	# No slot limit for player inventory (Phase 2)
 	return {"valid": true, "reason": ""}
 
 
-static func _can_apply_skill(definition: RewardDefinition, target_char: Variant) -> Dictionary:
-	if target_char == null:
-		return {"valid": false, "reason": "No character selected"}
-
+static func _can_apply_skill(definition: RewardDefinition) -> Dictionary:
+	"""Check if skill can be applied."""
 	var skill_id = definition.params.get("skill_id", "")
 	if skill_id.is_empty():
 		return {"valid": false, "reason": "Invalid skill ID"}
 
-	# Check if already learned
-	if skill_id in target_char.learned_skills:
-		return {"valid": false, "reason": "Already learned"}
-
-	# Check skill slots
-	if target_char.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS:
-		return {"valid": false, "reason": "Skill slots full"}
-
+	# Phase 3 TODO: Skills are instant effects, so they can always be applied
+	# For now, always allow
 	return {"valid": true, "reason": ""}
 
 
-static func _can_apply_random_item(_definition: RewardDefinition, target_char: Variant) -> Dictionary:
-	if target_char == null:
-		# Check if any character has space
-		var team = RunManager.get_team()
-		for char_instance in team:
-			var char_total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
-			if char_total_items < GameConstants.MAX_RUN_ITEMS:
-				return {"valid": true, "reason": ""}
-		return {"valid": false, "reason": "All item slots full"}
-
-	var total_items = target_char.equipped_items.size() + target_char.equipped_item_upgrades.size()
-	if total_items >= GameConstants.MAX_RUN_ITEMS:
-		return {"valid": false, "reason": "Item slots full"}
-
+static func _can_apply_random_item(_definition: RewardDefinition) -> Dictionary:
+	"""Check if a random item can be applied."""
+	# With player inventory, we can always add items (no slot limit)
+	# But we might want to check if there are any items available
 	return {"valid": true, "reason": ""}
 
 
-static func _can_apply_random_skill(_definition: RewardDefinition, target_char: Variant) -> Dictionary:
-	if target_char == null:
-		# Check if any character has space
-		var team = RunManager.get_team()
-		for char_instance in team:
-			if char_instance.learned_skills.size() < GameConstants.MAX_RUN_SKILLS:
-				return {"valid": true, "reason": ""}
-		return {"valid": false, "reason": "All skill slots full"}
-
-	if target_char.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS:
-		return {"valid": false, "reason": "Skill slots full"}
-
+static func _can_apply_random_skill(_definition: RewardDefinition) -> Dictionary:
+	"""Check if a random skill can be applied."""
+	# Skills are instant effects in Phase 3
 	return {"valid": true, "reason": ""}
-
-
-# =============================================================================
-# HELPER METHODS
-# =============================================================================
-
-static func _filter_any_item_eligible_characters(team: Array) -> Dictionary:
-	"""Filter to characters who have space for any item."""
-	var indices: Array = []
-	var characters: Array = []
-
-	for i in range(team.size()):
-		var char_instance = team[i]
-		var total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
-		if total_items < GameConstants.MAX_RUN_ITEMS:
-			indices.append(i)
-			characters.append(char_instance)
-
-	return {"indices": indices, "characters": characters}
-
-
-static func _filter_any_skill_eligible_characters(team: Array) -> Dictionary:
-	"""Filter to characters who have space for any skill."""
-	var indices: Array = []
-	var characters: Array = []
-
-	for i in range(team.size()):
-		var char_instance = team[i]
-		if char_instance.learned_skills.size() < GameConstants.MAX_RUN_SKILLS:
-			indices.append(i)
-			characters.append(char_instance)
-
-	return {"indices": indices, "characters": characters}

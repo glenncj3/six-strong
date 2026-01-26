@@ -1,6 +1,8 @@
 class_name ItemInstance
 extends RefCounted
-# ItemInstance - Runtime representation of an item
+# ItemInstance - Runtime representation of an item during a run
+# Phase 2 Refactor: Items are now player-owned, not character-owned.
+# Items are stored in PlayerInventory and provide team-wide bonuses.
 
 var item_id: String = ""
 var name: String = ""
