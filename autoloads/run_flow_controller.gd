@@ -28,7 +28,7 @@ func complete_combat(won: bool, combat_data: Dictionary) -> void:
 	if run_over:
 		var victory = RunManager.did_player_win()
 		var reward_data = RunManager.end_run(victory)
-		SceneManager.set_scene_data("run_results", reward_data)
+		SceneTransitionData.set_run_results(reward_data)
 	else:
 		RunManager.advance_round()
 

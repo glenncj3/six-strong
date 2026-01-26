@@ -21,8 +21,8 @@ func _ready() -> void:
 
 	result_label.text = ""
 
-	# Get selected combat data from SceneManager
-	combat_data = SceneManager.get_scene_data("selected_combat", {})
+	# Get selected combat data from typed SceneTransitionData
+	combat_data = SceneTransitionData.get_combat()
 	if not combat_data.is_empty():
 		_setup_display()
 		_play_entrance_animations()

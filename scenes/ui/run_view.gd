@@ -43,7 +43,7 @@ func _generate_encounter_options() -> void:
 
 
 func _on_encounter_selected(encounter_data: Dictionary) -> void:
-	SceneManager.set_scene_data("selected_encounter", encounter_data)
+	SceneTransitionData.set_encounter(encounter_data)
 	SceneManager.go_to("encounter_active")
 
 
@@ -58,7 +58,7 @@ func _generate_combat_options() -> void:
 
 
 func _on_combat_selected(combat_data: Dictionary) -> void:
-	SceneManager.set_scene_data("selected_combat", combat_data)
+	SceneTransitionData.set_combat(combat_data)
 	SceneManager.go_to("combat_stub")
 
 

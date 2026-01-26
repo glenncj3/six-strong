@@ -21,8 +21,8 @@ func _ready() -> void:
 	complete_button.disabled = true  # Enable after encounter interaction
 	skip_button.pressed.connect(_on_skip_pressed)
 
-	# Get selected encounter data from SceneManager
-	encounter_data = SceneManager.get_scene_data("selected_encounter", {})
+	# Get selected encounter data from typed SceneTransitionData
+	encounter_data = SceneTransitionData.get_encounter()
 	if not encounter_data.is_empty():
 		_setup_encounter()
 		_play_entrance_animations()

@@ -255,7 +255,7 @@ func _on_concede_confirmed() -> void:
 		SceneManager.go_to("main_menu")
 	else:
 		var reward_data = RunManager.end_run(false)
-		SceneManager.set_scene_data("run_results", reward_data)
+		SceneTransitionData.set_run_results(reward_data)
 		SceneManager.go_to("run_results")
 
 

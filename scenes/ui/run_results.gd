@@ -45,8 +45,8 @@ func _ready() -> void:
 	PlayerAccount.gems_changed.connect(_on_gems_changed)
 	PlayerAccount.reroll_tokens_changed.connect(_on_reroll_tokens_changed)
 
-	# Get run data from SceneManager
-	run_data = SceneManager.get_scene_data("run_results", {})
+	# Get run data from typed SceneTransitionData
+	run_data = SceneTransitionData.get_run_results()
 	if not run_data.is_empty():
 		was_victory = run_data.get("victory", false)
 	else:

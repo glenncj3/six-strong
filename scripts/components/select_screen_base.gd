@@ -80,8 +80,21 @@ func _generate_and_display_options() -> void:
 
 func _on_option_selected(option_data: Dictionary) -> void:
 	"""Handle option selection."""
-	SceneManager.set_scene_data(_get_data_key(), option_data)
+	_store_selection_data(option_data)
 	SceneManager.go_to(_get_next_scene())
+
+
+func _store_selection_data(option_data: Dictionary) -> void:
+	"""Store selection data in SceneTransitionData. Override for custom handling."""
+	var key = _get_data_key()
+	match key:
+		"selected_encounter":
+			SceneTransitionData.set_encounter(option_data)
+		"selected_combat":
+			SceneTransitionData.set_combat(option_data)
+		_:
+			push_warning("SelectScreenBase: Unknown data key '%s', using legacy storage" % key)
+			SceneManager.set_scene_data(key, option_data)
 
 
 func _on_back_pressed() -> void:
