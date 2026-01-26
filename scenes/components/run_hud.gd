@@ -42,6 +42,7 @@ func _ready() -> void:
 	RunManager.round_changed.connect(_on_stats_changed)
 	RunManager.reputation_changed.connect(_on_stats_changed)
 	RunManager.gold_changed.connect(_on_stats_changed)
+	RunManager.draft_gold_updated.connect(_on_draft_gold_updated)
 	PlayerAccount.gems_changed.connect(_on_gems_changed)
 	SceneManager.scene_loaded.connect(_on_scene_loaded)
 
@@ -181,6 +182,11 @@ func _update_stats() -> void:
 		reputation_label.modulate = Color.YELLOW
 	else:
 		reputation_label.modulate = Color.WHITE
+
+
+func _on_draft_gold_updated(amount: int) -> void:
+	"""Handle draft gold updated signal from RunManager."""
+	update_draft_gold(amount)
 
 
 ## Update gold display during draft (called by draft scene as characters are selected)

@@ -14,11 +14,12 @@ var info_panel: Node = null
 
 
 func _ready() -> void:
-	add_to_group("team_hud")
+	add_to_group("team_hud")  # Keep for backwards compatibility
 	visible = false
 	_visibility = HudVisibilityHelper.new(self)
 	_setup_info_panel()
 	SceneManager.scene_loaded.connect(_on_scene_loaded)
+	RunManager.draft_character_added.connect(_on_draft_character_added)
 
 
 func _setup_info_panel() -> void:
@@ -66,6 +67,11 @@ func reset_for_draft() -> void:
 	if info_panel and info_panel.is_showing():
 		info_panel.hide_panel()
 	_add_placeholder_tiles()
+
+
+func _on_draft_character_added(char_instance: CharacterInstance) -> void:
+	"""Handle draft character added signal from RunManager."""
+	add_drafted_character(char_instance)
 
 
 func add_drafted_character(char_instance: CharacterInstance) -> void:

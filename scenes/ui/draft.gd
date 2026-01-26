@@ -102,10 +102,8 @@ func _on_character_drafted(_char_data: Dictionary, char_instance: CharacterInsta
 	_update_instruction()
 	_update_run_hud_gold()
 
-	# Notify TeamHUD about the drafted character
-	var team_hud = get_tree().get_first_node_in_group("team_hud")
-	if team_hud:
-		team_hud.add_drafted_character(char_instance)
+	# Notify HUDs about the drafted character via RunManager signal
+	RunManager.notify_draft_character_added(char_instance)
 
 	if not draft_manager.is_draft_complete():
 		draft_manager.generate_options()
@@ -126,9 +124,8 @@ func _update_run_hud_gold() -> void:
 	var total_gold := 0
 	for char_instance in draft_manager.drafted_instances:
 		total_gold += char_instance.income
-	var run_hud = get_tree().get_first_node_in_group("run_hud")
-	if run_hud:
-		run_hud.update_draft_gold(total_gold)
+	# Notify HUDs about gold change via RunManager signal
+	RunManager.notify_draft_gold_updated(total_gold)
 
 
 # =============================================================================

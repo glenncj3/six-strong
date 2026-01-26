@@ -8,6 +8,9 @@ signal round_changed(new_round: int)
 signal reputation_changed(new_reputation: int)
 signal gold_changed(new_gold: int)
 signal phase_changed(new_phase: String)
+# Draft-specific signals (emitted by draft scene, listened by HUDs)
+signal draft_character_added(char_instance: CharacterInstance)
+signal draft_gold_updated(amount: int)
 
 # Save file path
 const SAVE_PATH = "user://active_run.json"
@@ -406,6 +409,20 @@ func capture_team_data() -> Array:
 			"level": char_instance.level
 		})
 	return team_data
+
+
+# =============================================================================
+# DRAFT EVENTS - Forwarded from draft scene to HUDs
+# =============================================================================
+
+func notify_draft_character_added(char_instance: CharacterInstance) -> void:
+	"""Called by draft scene when a character is drafted. Notifies HUDs."""
+	draft_character_added.emit(char_instance)
+
+
+func notify_draft_gold_updated(amount: int) -> void:
+	"""Called by draft scene when draft gold total changes. Notifies HUDs."""
+	draft_gold_updated.emit(amount)
 
 
 # =============================================================================
