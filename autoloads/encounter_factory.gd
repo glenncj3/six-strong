@@ -21,6 +21,12 @@ var _constant_map: Dictionary = {
 
 var _generators: Dictionary = {}
 
+# Cache for filtered pools (invalidated when round/team changes)
+var _cache_round: int = -1
+var _cache_max_level: int = 0
+var _cached_items: Array = []
+var _cached_skills: Array = []
+
 
 func _ready() -> void:
 	_generators = {
@@ -206,8 +212,32 @@ func _filter_pool_by_level(pool: Array, max_level: int) -> Array:
 	return filtered
 
 
+func _refresh_cache_if_needed() -> void:
+	"""Refresh cached filtered pools if round or team changed."""
+	var current_round = RunManager.current_round
+	var max_level = _get_team_max_level()
+
+	if current_round != _cache_round or max_level != _cache_max_level:
+		_cache_round = current_round
+		_cache_max_level = max_level
+		_cached_items = _filter_pool_by_level(GameData.get_all_item_upgrades(), max_level)
+		_cached_skills = _filter_pool_by_level(GameData.get_all_skills(), max_level)
+
+
+func _get_cached_items() -> Array:
+	"""Get level-filtered items from cache."""
+	_refresh_cache_if_needed()
+	return _cached_items
+
+
+func _get_cached_skills() -> Array:
+	"""Get level-filtered skills from cache."""
+	_refresh_cache_if_needed()
+	return _cached_skills
+
+
 func _gen_pick_learnable_skill(_params: Dictionary) -> String:
-	var all_skills = _filter_pool_by_level(GameData.get_all_skills(), _get_team_max_level())
+	var all_skills = _get_cached_skills()
 	var team = RunManager.get_team()
 
 	var learnable_skills: Array = []
@@ -228,7 +258,7 @@ func _gen_pick_learnable_skill(_params: Dictionary) -> String:
 func _gen_pick_learnable_skills(params: Dictionary) -> Array:
 	"""Pick multiple learnable skills for the team."""
 	var count = int(params.get("count", 3))
-	var all_skills = _filter_pool_by_level(GameData.get_all_skills(), _get_team_max_level())
+	var all_skills = _get_cached_skills()
 	var team = RunManager.get_team()
 
 	var learnable_skills: Array = []
@@ -250,11 +280,10 @@ func _gen_pick_shop_offerings(params: Dictionary) -> Array:
 	"""Pick a mix of items and skills for the shop (max 3 total)."""
 	var count = int(params.get("count", 3))
 	var offerings: Array = []
-	var team_max_level = _get_team_max_level()
 	var team = RunManager.get_team()
 
-	var available_items = _filter_pool_by_level(GameData.get_all_item_upgrades(), team_max_level)
-	var available_skills = _filter_pool_by_level(GameData.get_all_skills(), team_max_level)
+	var available_items = _get_cached_items()
+	var available_skills = _get_cached_skills()
 
 	# Mix items and skills randomly, filtering to only include acquirable ones
 	var pool: Array = []
@@ -302,11 +331,10 @@ func _gen_pick_shop_offerings(params: Dictionary) -> Array:
 func _gen_pick_mystery_elements(params: Dictionary) -> Array:
 	"""Pick mystery item options with different elements for treasure chest."""
 	var count = int(params.get("count", 3))
-	var team_max_level = _get_team_max_level()
 	var team = RunManager.get_team()
 
-	# Get all available item upgrades that at least one character can equip
-	var available_items = _filter_pool_by_level(GameData.get_all_item_upgrades(), team_max_level)
+	# Get all available item upgrades that at least one character can equip (from cache)
+	var available_items = _get_cached_items()
 	var equippable_items: Array = []
 
 	for item in available_items:
