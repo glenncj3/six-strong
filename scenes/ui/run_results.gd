@@ -17,7 +17,7 @@ extends Control
 @onready var rewards_panel = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel
 @onready var rewards_title = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer/RewardsTitle
 @onready var gems_label = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer/GemsLabel
-@onready var character_fame_container = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer/CharacterXPContainer
+@onready var legacy_fame_container = $ScrollContainer/MainContainer/RewardsPanelContainer/RewardsPanel/RewardsContainer/CharacterXPContainer
 
 @onready var prestige_ups_panel = $ScrollContainer/MainContainer/RankUpsPanelContainer
 @onready var rank_ups_panel = $ScrollContainer/MainContainer/RankUpsPanelContainer/RankUpsPanel
@@ -158,17 +158,31 @@ func _display_rewards() -> void:
 	var gem_reward = run_data.get("gem_reward", 0)
 	var fame_reward = run_data.get("fame_reward", 0)
 	prestige_ups = run_data.get("prestige_ups", [])
+	var drafted_legacy_ids = run_data.get("drafted_legacy_ids", [])
 
 	gems_label.text = "+%d %s Gems" % [gem_reward, GameConstants.EMOJI_GEM]
 	gems_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 
-	for char_data in run_data.get("team", []):
-		var fame_label = Label.new()
-		fame_label.text = "%s: +%d Fame" % [char_data["name"], fame_reward]
-		fame_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		fame_label.add_theme_font_size_override("font_size", 22)
-		fame_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
-		character_fame_container.add_child(fame_label)
+	# Display legacy fame (Phase 7: Fame goes to legacies)
+	if drafted_legacy_ids.size() > 0:
+		for legacy_id in drafted_legacy_ids:
+			var legacy = PlayerAccount.get_legacy_data(legacy_id)
+			var legacy_name = legacy.legacy_name if legacy else legacy_id
+			var fame_label = Label.new()
+			fame_label.text = "%s: +%d Fame" % [legacy_name, fame_reward]
+			fame_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			fame_label.add_theme_font_size_override("font_size", 22)
+			fame_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+			legacy_fame_container.add_child(fame_label)
+	else:
+		# Fallback: Display character fame for backwards compatibility
+		for char_data in run_data.get("team", []):
+			var fame_label = Label.new()
+			fame_label.text = "%s: +%d Fame" % [char_data["name"], fame_reward]
+			fame_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			fame_label.add_theme_font_size_override("font_size", 22)
+			fame_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+			legacy_fame_container.add_child(fame_label)
 
 
 func _display_prestige_ups() -> void:
@@ -208,8 +222,12 @@ func _display_prestige_ups() -> void:
 		# Connect header button to toggle details
 		header_button.pressed.connect(_toggle_prestige_details.bind(header_button, details_container, prestige_up["name"]))
 
-		# Populate details with unlocked content
-		_display_prestige_rewards(details_container, prestige_up["id"], prestige_up["new_prestige"])
+		# Populate details with unlocked content based on type
+		var entity_type = prestige_up.get("type", "character")
+		if entity_type == "legacy":
+			_display_legacy_prestige_rewards(details_container, prestige_up["id"], prestige_up["new_prestige"])
+		else:
+			_display_prestige_rewards(details_container, prestige_up["id"], prestige_up["new_prestige"])
 
 
 
@@ -223,7 +241,7 @@ func _toggle_prestige_details(header_button: Button, details_container: VBoxCont
 
 
 func _display_prestige_rewards(container: VBoxContainer, char_id: String, new_prestige: int) -> void:
-	"""Display what was unlocked at the new prestige level."""
+	"""Display what was unlocked at the new prestige level (character-based, deprecated)."""
 	var char_master = GameData.get_character_by_id(char_id)
 	if char_master.is_empty():
 		return
@@ -271,6 +289,85 @@ func _display_prestige_rewards(container: VBoxContainer, char_id: String, new_pr
 					container.add_child(stat_label)
 
 			break
+
+
+func _display_legacy_prestige_rewards(container: VBoxContainer, legacy_id: String, new_prestige: int) -> void:
+	"""Display what was unlocked at the new prestige level for a legacy."""
+	var legacy_master = GameData.get_legacy(legacy_id)
+	if legacy_master.is_empty():
+		return
+
+	if not legacy_master.has("prestige_rewards"):
+		return
+
+	# Find rewards for this prestige level
+	for prestige_reward in legacy_master["prestige_rewards"]:
+		if prestige_reward.get("prestige", 0) == new_prestige:
+			var unlocks = prestige_reward.get("unlocks", {})
+			var has_unlocks = false
+
+			# Collect all unlock categories
+			var unlock_categories = [
+				{"key": "starting_characters", "label": "Starting Characters"},
+				{"key": "starting_items", "label": "Starting Items"},
+				{"key": "characters", "label": "Characters"},
+				{"key": "items", "label": "Items"},
+				{"key": "skills", "label": "Skills"},
+				{"key": "encounters", "label": "Encounters"}
+			]
+
+			for category in unlock_categories:
+				var ids = unlocks.get(category.key, [])
+				if ids.size() > 0:
+					if not has_unlocks:
+						# Add header on first unlock found
+						var unlocks_label = Label.new()
+						unlocks_label.text = "Unlocked:"
+						unlocks_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+						unlocks_label.add_theme_font_size_override("font_size", 20)
+						unlocks_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
+						container.add_child(unlocks_label)
+						has_unlocks = true
+
+					for item_id in ids:
+						var display_name = _get_legacy_unlock_name(category.key, item_id)
+						var reward_label = Label.new()
+						reward_label.text = "  %s: %s" % [category.label.trim_suffix("s"), display_name]
+						reward_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+						reward_label.add_theme_font_size_override("font_size", 20)
+						reward_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+						container.add_child(reward_label)
+
+			# Display encounter weight bonus if present
+			var weight_bonus = unlocks.get("encounter_weight_bonus", 0)
+			if weight_bonus > 0:
+				var bonus_label = Label.new()
+				bonus_label.text = "  Encounter Weight: +%d" % weight_bonus
+				bonus_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				bonus_label.add_theme_font_size_override("font_size", 20)
+				bonus_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+				container.add_child(bonus_label)
+
+			break
+
+
+func _get_legacy_unlock_name(category: String, item_id: String) -> String:
+	"""Get display name for a legacy unlock."""
+	match category:
+		"starting_characters", "characters":
+			var char_data = GameData.get_character_by_id(item_id)
+			return char_data.get("name", item_id)
+		"starting_items", "items":
+			var item_data = GameData.get_item_by_id(item_id)
+			return item_data.get("name", item_id)
+		"skills":
+			var skill_data = GameData.get_skill_by_id(item_id)
+			return skill_data.get("name", item_id)
+		"encounters":
+			var enc_data = GameData.get_encounter_type(item_id)
+			return enc_data.get("name", item_id)
+		_:
+			return item_id
 
 
 func _get_reward_name(reward: Dictionary) -> String:

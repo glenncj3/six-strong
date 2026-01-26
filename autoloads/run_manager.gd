@@ -293,15 +293,19 @@ func _apply_end_of_run_rewards(victory: bool) -> Dictionary:
 
 	# Calculate rewards
 	var gem_reward = RewardCalculator.calculate_gem_reward(victory, wins_count, rep)
-	var fame_reward = RewardCalculator.calculate_character_fame_reward(victory, wins_count)
 
 	# Apply gem reward
 	PlayerAccount.add_gems(gem_reward)
 
-	# Apply fame to drafted legacies (Phase 4 - legacy system)
+	# Apply fame to drafted legacies (Phase 7 - legacy fame distribution)
 	var prestige_ups_list = []
+	var fame_reward = 0
+
 	if _run_state and _run_state.drafted_legacy_ids.size() > 0:
-		# Fame goes to legacies in legacy system
+		# Use legacy fame formula (Phase 7)
+		fame_reward = RewardCalculator.calculate_legacy_fame_reward(victory, wins_count)
+
+		# Distribute fame to all drafted legacies equally
 		for legacy_id in _run_state.drafted_legacy_ids:
 			var result = PlayerAccount.award_legacy_fame(legacy_id, fame_reward)
 			if result.get("prestige_increased", false):
@@ -315,6 +319,7 @@ func _apply_end_of_run_rewards(victory: bool) -> Dictionary:
 				})
 	else:
 		# Fallback to character fame for backwards compatibility
+		fame_reward = RewardCalculator.calculate_character_fame_reward(victory, wins_count)
 		for char_data in team_data:
 			var char_id = char_data["id"]
 			var old_data = PlayerAccount.get_character_data(char_id)
@@ -405,6 +410,13 @@ func is_combat_phase() -> bool:
 func get_run_pool():
 	"""Get the run's content pool (or null if no active run)."""
 	return _run_state.pool if _run_state else null
+
+
+func get_drafted_legacy_ids() -> Array[String]:
+	"""Get the IDs of legacies drafted for this run (for fame distribution)."""
+	if _run_state:
+		return _run_state.drafted_legacy_ids
+	return []
 
 
 # =============================================================================
