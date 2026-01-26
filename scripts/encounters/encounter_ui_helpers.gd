@@ -99,7 +99,8 @@ static func highlight_selected_tile(
 
 static func filter_heal_eligible_characters(team: Array) -> Dictionary:
 	"""
-	Filter team to only characters who can benefit from healing (not at full health).
+	Return all team members as eligible for healing.
+	Players can heal any character, even at full health (overheal or just confirmation).
 
 	Args:
 		team: Array of character instances
@@ -111,11 +112,8 @@ static func filter_heal_eligible_characters(team: Array) -> Dictionary:
 	var characters: Array = []
 
 	for i in range(team.size()):
-		var char_instance = team[i]
-		var needs_healing = char_instance.current_health < char_instance.max_health
-		if needs_healing:
-			indices.append(i)
-			characters.append(char_instance)
+		indices.append(i)
+		characters.append(team[i])
 
 	return {"indices": indices, "characters": characters}
 
