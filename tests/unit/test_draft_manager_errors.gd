@@ -1,8 +1,8 @@
 extends SceneTree
-# Tests for DraftManager error propagation
-# Verifies that DraftManager properly signals errors instead of silent failures
+# Tests for LegacyDraftManager error propagation (Phase 4)
+# Verifies that LegacyDraftManager properly signals errors instead of silent failures
 #
-# Run with: godot --headless --path "C:\Users\glenn\Dev\auto-battle-journey" --script res://tests/unit/test_draft_manager_errors.gd
+# Run with: godot --headless --path "C:\Users\glenn\Dev\six-strong" --script res://tests/unit/test_draft_manager_errors.gd
 
 var tests_passed := 0
 var tests_failed := 0
@@ -14,7 +14,7 @@ func _init():
 
 func _run_tests():
 	print("\n========================================")
-	print("DraftManager Error Propagation Tests")
+	print("LegacyDraftManager Error Propagation Tests")
 	print("========================================\n")
 
 	_test_has_generation_failed_signal()
@@ -28,12 +28,12 @@ func _run_tests():
 
 
 func _test_has_generation_failed_signal():
-	"""Verify DraftManager has a generation_failed signal."""
-	print("TEST: DraftManager has generation_failed signal")
+	"""Verify LegacyDraftManager has a generation_failed signal."""
+	print("TEST: LegacyDraftManager has generation_failed signal")
 
-	var file = FileAccess.open("res://scripts/managers/draft_manager.gd", FileAccess.READ)
+	var file = FileAccess.open("res://scripts/managers/legacy_draft_manager.gd", FileAccess.READ)
 	if file == null:
-		_fail("Cannot open draft_manager.gd")
+		_fail("Cannot open legacy_draft_manager.gd")
 		return
 
 	var content = file.get_as_text()
@@ -41,18 +41,18 @@ func _test_has_generation_failed_signal():
 
 	# Check for generation_failed signal
 	if content.contains("signal generation_failed"):
-		_pass("DraftManager has generation_failed signal")
+		_pass("LegacyDraftManager has generation_failed signal")
 	else:
-		_fail("DraftManager missing generation_failed signal")
+		_fail("LegacyDraftManager missing generation_failed signal")
 
 
 func _test_generate_options_returns_bool():
 	"""Verify generate_options() returns bool to indicate success/failure."""
 	print("TEST: generate_options() returns bool")
 
-	var file = FileAccess.open("res://scripts/managers/draft_manager.gd", FileAccess.READ)
+	var file = FileAccess.open("res://scripts/managers/legacy_draft_manager.gd", FileAccess.READ)
 	if file == null:
-		_fail("Cannot open draft_manager.gd")
+		_fail("Cannot open legacy_draft_manager.gd")
 		return
 
 	var content = file.get_as_text()

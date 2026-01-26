@@ -1,0 +1,82 @@
+[gd_scene load_steps=4 format=3 uid="uid://c6legacy8tile1"]
+
+[ext_resource type="Script" path="res://scenes/components/legacy_tile.gd" id="1_script"]
+
+[sub_resource type="Shader" id="Shader_haze"]
+code = "shader_type canvas_item;
+
+uniform float opacity : hint_range(0.0, 1.0) = 0.85;
+uniform float vertical_squeeze : hint_range(1.0, 4.0) = 2.2;
+
+void fragment() {
+	vec2 uv = UV - vec2(0.5);
+	uv.y *= vertical_squeeze;
+	float d = length(uv);
+	float alpha = smoothstep(0.5, 0.05, d) * opacity;
+	COLOR = vec4(0.0, 0.0, 0.0, alpha);
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_haze"]
+shader = SubResource("Shader_haze")
+
+[node name="LegacyTile" type="PanelContainer"]
+clip_contents = true
+custom_minimum_size = Vector2(100, 100)
+script = ExtResource("1_script")
+
+[node name="ContentMargin" type="MarginContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Portrait" type="TextureRect" parent="ContentMargin"]
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="NameMargin" type="MarginContainer" parent="ContentMargin"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_vertical = 8
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_right = 4
+
+[node name="NameHaze" type="ColorRect" parent="ContentMargin/NameMargin"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 80)
+mouse_filter = 2
+material = SubResource("ShaderMaterial_haze")
+
+[node name="NameLabel" type="Label" parent="ContentMargin/NameMargin"]
+layout_mode = 2
+theme_type_variation = "HeaderLabel"
+theme_override_font_sizes/font_size = 18
+text = "Legacy Name"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="InfoContainer" type="VBoxContainer" parent="ContentMargin"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 2
+
+[node name="IncomeLabel" type="Label" parent="ContentMargin/InfoContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Income: 15"
+
+[node name="PrestigeLabel" type="Label" parent="ContentMargin/InfoContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Prestige: 1"
+
+[node name="StarterLabel" type="Label" parent="ContentMargin/InfoContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Starts: Warrior"
+
+[node name="BorderOverlay" type="Panel" parent="."]
+layout_mode = 2
+mouse_filter = 2

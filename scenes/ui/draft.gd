@@ -1,8 +1,8 @@
 extends Control
-# Draft - Character selection UI for starting a run
-# Uses DraftManager for business logic, this scene handles UI only
-# Header bar is handled by the persistent RunHUD
-# Team tiles are handled by the persistent TeamHUD
+## Draft - Legacy selection UI for starting a run
+## Uses LegacyDraftManager for business logic, this scene handles UI only
+## Header bar is handled by the persistent RunHUD
+## Team tiles will show starting characters from drafted legacies
 
 @onready var background: ColorRect = $Background
 @onready var instruction_label = $MainContainer/VBoxContainer/InstructionLabel
@@ -11,18 +11,18 @@ extends Control
 @onready var confirm_button = $ConfirmButton
 
 # Preload scenes
-const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
+const LegacyTileScene = preload("res://scenes/components/legacy_tile.tscn")
 const CharacterInfoPanelScene = preload("res://scenes/components/character_info_panel.tscn")
 
 # Draft manager handles business logic
-var draft_manager: DraftManager = null
+var draft_manager: LegacyDraftManager = null
 
 # UI state
 var options_tiles_container: HBoxContainer = null
-var character_tiles: Array = []  # References to option tiles
+var legacy_tiles: Array = []  # References to option tiles
 var select_buttons: Array = []  # SELECT buttons for each option
 var buttons_container: HBoxContainer = null  # Container for SELECT/UNLOCK buttons below tiles
-var options_info_panel: Node = null  # Local info panel for option tiles (drops down)
+var options_info_panel: Node = null  # Info panel for previewing starting character
 
 
 func _ready() -> void:
@@ -43,10 +43,10 @@ func _play_entrance_animations() -> void:
 
 
 func _setup_draft_manager() -> void:
-	draft_manager = DraftManager.new()
-	draft_manager.options_generated.connect(_on_options_generated)
-	draft_manager.character_drafted.connect(_on_character_drafted)
-	draft_manager.draft_complete.connect(_on_draft_complete)
+	draft_manager = LegacyDraftManager.new()
+	draft_manager.draft_options_generated.connect(_on_options_generated)
+	draft_manager.legacy_drafted.connect(_on_legacy_drafted)
+	draft_manager.draft_completed.connect(_on_draft_complete)
 	draft_manager.generation_failed.connect(_on_generation_failed)
 
 
@@ -69,8 +69,7 @@ func _setup_options_display() -> void:
 	buttons_container.add_theme_constant_override("separation", 8)
 	vbox.add_child(buttons_container)
 
-	# Info panel that drops down below option tiles
-	# Height matches tile size; width matches TeamHUD panel (4% anchors = ~13px extra per side)
+	# Info panel that drops down below option tiles (for starting character preview)
 	var tile_height = _get_tile_size()
 	var info_margin = MarginContainer.new()
 	info_margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -94,22 +93,26 @@ func _setup_options_display() -> void:
 # DRAFT MANAGER SIGNAL HANDLERS
 # =============================================================================
 
-func _on_options_generated(options: Array, instances: Array) -> void:
-	_update_options_display(instances)
+func _on_options_generated(options: Array) -> void:
+	_update_options_display(options)
 
 
-func _on_character_drafted(_char_data: Dictionary, char_instance: CharacterInstance) -> void:
+func _on_legacy_drafted(legacy: LegacyData) -> void:
 	_update_instruction()
 	_update_run_hud_gold()
 
-	# Notify HUDs about the drafted character via RunManager signal
-	RunManager.notify_draft_character_added(char_instance)
+	# Notify HUDs about the starting character via RunManager signal
+	var starting_char_id = legacy.selected_starting_character_id
+	if not starting_char_id.is_empty():
+		var char_instance = CharacterInstance.from_master_data(starting_char_id)
+		if char_instance:
+			RunManager.notify_draft_character_added(char_instance)
 
 	if not draft_manager.is_draft_complete():
 		draft_manager.generate_options()
 
 
-func _on_draft_complete(_team: Array) -> void:
+func _on_draft_complete(_drafted_legacies: Array) -> void:
 	_show_confirm_state()
 
 
@@ -121,9 +124,7 @@ func _on_generation_failed(error_message: String) -> void:
 
 
 func _update_run_hud_gold() -> void:
-	var total_gold := 0
-	for char_instance in draft_manager.drafted_instances:
-		total_gold += char_instance.income
+	var total_gold = draft_manager.calculate_starting_gold()
 	# Notify HUDs about gold change via RunManager signal
 	RunManager.notify_draft_gold_updated(total_gold)
 
@@ -132,8 +133,8 @@ func _update_run_hud_gold() -> void:
 # UI UPDATES
 # =============================================================================
 
-func _update_options_display(instances: Array) -> void:
-	if instances.size() == 0:
+func _update_options_display(options: Array) -> void:
+	if options.size() == 0:
 		return
 
 	# Hide info panel from previous options
@@ -141,16 +142,17 @@ func _update_options_display(instances: Array) -> void:
 		options_info_panel.hide_panel()
 
 	UIHelpers.clear_children(options_tiles_container)
-	character_tiles.clear()
+	legacy_tiles.clear()
 
 	var tile_size = _get_tile_size()
 
-	for char_instance in instances:
-		var tile = CharacterTileScene.instantiate()
+	for option in options:
+		var legacy: LegacyData = option["legacy"]
+		var tile = LegacyTileScene.instantiate()
 		options_tiles_container.add_child(tile)
-		tile.setup(char_instance, tile_size)
+		tile.setup(legacy, tile_size)
 		tile.tile_clicked.connect(_on_option_tile_clicked)
-		character_tiles.append(tile)
+		legacy_tiles.append(tile)
 
 	_create_select_buttons()
 
@@ -161,13 +163,13 @@ func _create_select_buttons() -> void:
 	for child in buttons_container.get_children():
 		child.queue_free()
 
-	if character_tiles.is_empty():
+	if legacy_tiles.is_empty():
 		return
 
 	var current_options = draft_manager.current_options
 
-	for i in range(min(character_tiles.size(), current_options.size())):
-		var tile = character_tiles[i]
+	for i in range(min(legacy_tiles.size(), current_options.size())):
+		var tile = legacy_tiles[i]
 		var option = current_options[i]
 
 		var button = Button.new()
@@ -187,9 +189,19 @@ func _create_select_buttons() -> void:
 		select_buttons.append(button)
 
 
-func _on_option_tile_clicked(char_instance: CharacterInstance) -> void:
+func _on_option_tile_clicked(legacy: LegacyData) -> void:
+	# Show starting character preview in info panel
 	if not options_info_panel:
 		return
+
+	var starting_char_id = legacy.selected_starting_character_id
+	if starting_char_id.is_empty():
+		return
+
+	var char_instance = CharacterInstance.from_master_data(starting_char_id)
+	if char_instance == null:
+		return
+
 	if options_info_panel.is_showing() and options_info_panel.current_char_instance == char_instance:
 		options_info_panel.hide_panel()
 	else:
@@ -201,20 +213,22 @@ func _on_option_button_pressed(option_index: int) -> void:
 	if option.is_empty():
 		return
 
+	var legacy: LegacyData = option["legacy"]
+
 	if option["is_owned"]:
-		draft_manager.select_character(option["char_data"])
+		draft_manager.select_legacy(legacy)
 	else:
-		draft_manager.unlock_and_select(option["char_data"], option["unlock_cost"])
+		draft_manager.unlock_and_select(legacy, option["unlock_cost"])
 
 
 func _update_instruction() -> void:
 	if not draft_manager.is_draft_complete():
-		instruction_label.text = "SELECT CHARACTER %d OF %d" % [
+		instruction_label.text = "SELECT LEGACY %d OF %d" % [
 			draft_manager.get_current_selection_number(),
-			GameConstants.TEAM_SIZE
+			draft_manager.get_total_rounds()
 		]
 	else:
-		instruction_label.text = "Team Complete!"
+		instruction_label.text = "Legacies Selected!"
 
 
 func _show_confirm_state() -> void:
@@ -235,14 +249,14 @@ func _on_reroll_pressed() -> void:
 
 func _on_confirm_pressed() -> void:
 	if not draft_manager.is_draft_complete():
-		push_error("Draft: Must select exactly %d characters" % GameConstants.TEAM_SIZE)
+		push_error("Draft: Must select exactly %d legacies" % draft_manager.get_total_rounds())
 		return
 	_start_run()
 
 
 func _start_run() -> void:
-	var char_ids = draft_manager.get_drafted_character_ids()
-	RunManager.start_new_run(char_ids)
+	var drafted_legacies = draft_manager.get_drafted_legacies()
+	RunManager.start_new_run_with_legacies(drafted_legacies)
 
 	SceneManager.go_to("run_view")
 

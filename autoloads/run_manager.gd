@@ -1,71 +1,69 @@
 extends Node
-# RunManager Singleton
-# Manages active run state - now delegates to focused managers
-# Refactored to follow Single Responsibility Principle
-#
-# Phase 3 Additions:
-# - Lingering effects tracking and triggers
-# - Skill effect registry
+## RunManager Singleton
+## Manages active run state - delegates to RunState composite for state ownership
+## Follows Single Responsibility Principle - orchestrates run flow, doesn't own state
+##
+## Phase 4 Refactor:
+## - State delegated to RunState composite (SRP fix)
+## - Support for legacy-based runs via start_new_run_with_legacies()
+## - RunPool created from drafted legacies
 
 const SaveDataValidatorScript = preload("res://scripts/utils/save_data_validator.gd")
-const PlayerInventoryScript = preload("res://scripts/managers/player_inventory.gd")
-const LingeringEffectsScript = preload("res://scripts/managers/lingering_effects.gd")
+const RunStateScript = preload("res://scripts/managers/run_state.gd")
+const RunPoolScript = preload("res://scripts/managers/run_pool.gd")
 const SkillEffectRegistryScript = preload("res://scripts/skills/skill_effect_registry.gd")
 const SkillContextScript = preload("res://scripts/skills/skill_context.gd")
 const SkillEffectsScript = preload("res://scripts/skills/skill_effects.gd")
+
+# =============================================================================
+# SIGNALS
+# =============================================================================
 
 signal run_started
 signal round_changed(new_round: int)
 signal reputation_changed(new_reputation: int)
 signal gold_changed(new_gold: int)
 signal phase_changed(new_phase: String)
+
 # Draft-specific signals (emitted by draft scene, listened by HUDs)
 signal draft_character_added(char_instance: CharacterInstance)
 signal draft_gold_updated(amount: int)
 signal item_acquired(item: ItemInstance)
+
 # Phase 3: Lingering effect signals
 signal lingering_effect_added(effect: Dictionary)
 signal lingering_effect_triggered(effect: Dictionary, trigger: String)
 
-# Save file path
-const SAVE_PATH = "user://active_run.json"
+# =============================================================================
+# CONSTANTS
+# =============================================================================
 
-# Phase constants
+const SAVE_PATH = "user://active_run.json"
 const PHASE_ENCOUNTER = "encounter"
 const PHASE_COMBAT = "combat"
 
-# Run state
-var is_run_active: bool = false
-var run_id: String = ""
+# =============================================================================
+# STATE
+# =============================================================================
 
-# Focused managers (Single Responsibility Principle)
-var _team_manager: TeamManager = TeamManager.new()
-var _combat_generator: CombatGenerator = CombatGenerator.new()
-var _player_inventory = PlayerInventoryScript.new()
-var _lingering_effects = LingeringEffectsScript.new()
+var is_run_active: bool = false
+
+# RunState composite owns all run data (Phase 4 - SRP fix)
+var _run_state = null  # RunStateScript instance
+
+# Skill registry (managed here as it's a singleton-like resource)
 var _skill_registry = SkillEffectRegistryScript.new()
 
-# Progression (kept in RunManager as it's core run state)
-var current_round: int = 0
-var current_phase: String = PHASE_ENCOUNTER
-var encounters_this_round: int = 0
-var reputation: int = GameConstants.STARTING_REPUTATION
-var wins: int = 0
-var losses: int = 0
-var starting_gold: int = 0
-var current_gold: int = 0
+# TeamManager kept for backwards compatibility during transition
+var _team_manager: TeamManager = TeamManager.new()
 
-# History (for statistics)
-var encounter_history: Array = []
 
+# =============================================================================
+# LIFECYCLE
+# =============================================================================
 
 func _ready() -> void:
-	# Initialize skill effect registry with built-in effects
 	_init_skill_registry()
-
-	# Connect lingering effect signals
-	_lingering_effects.effect_added.connect(_on_lingering_effect_added)
-	_lingering_effects.effect_triggered.connect(_on_lingering_effect_triggered)
 
 
 func _init_skill_registry() -> void:
@@ -74,6 +72,78 @@ func _init_skill_registry() -> void:
 	SkillEffectsScript.register_all(_skill_registry)
 
 
+# =============================================================================
+# RUN STATE ACCESS
+# =============================================================================
+
+func get_run_state():
+	"""Get the current run state (or null if no active run)."""
+	return _run_state
+
+
+# =============================================================================
+# RUN LIFECYCLE - LEGACY SYSTEM (Phase 4)
+# =============================================================================
+
+func start_new_run_with_legacies(drafted_legacies: Array) -> void:
+	"""
+	Start a new run with drafted legacies.
+
+	Args:
+		drafted_legacies: Array of LegacyData objects from draft phase
+	"""
+	if drafted_legacies.size() == 0:
+		push_error("RunManager: Must draft at least one legacy")
+		return
+
+	# Create new RunState
+	_run_state = RunStateScript.new()
+	_run_state.run_id = "run_%d" % Time.get_unix_time_from_system()
+
+	# Store drafted legacy IDs for fame distribution at run end
+	for legacy in drafted_legacies:
+		_run_state.drafted_legacy_ids.append(legacy.id)
+
+	# Create RunPool from drafted legacies
+	_run_state.pool = RunPoolScript.from_legacies(drafted_legacies)
+
+	# Calculate starting gold from legacy incomes
+	var starting_gold = 0
+	for legacy in drafted_legacies:
+		starting_gold += legacy.income
+	_run_state.starting_gold = starting_gold
+	_run_state.current_gold = starting_gold
+
+	# Add starting characters from each legacy
+	_team_manager.clear()
+	for legacy in drafted_legacies:
+		var starting_char_id = legacy.selected_starting_character_id
+		if not starting_char_id.is_empty():
+			var char_instance = CharacterInstance.from_master_data(starting_char_id)
+			if char_instance:
+				_team_manager.add_character(char_instance)
+				_run_state.add_character(char_instance)
+
+	# Add starting items to inventory from each legacy
+	for legacy in drafted_legacies:
+		var starting_item_id = legacy.selected_starting_item_id
+		if not starting_item_id.is_empty():
+			_run_state.inventory.add_item_by_id(starting_item_id, false)
+
+	# Connect lingering effect signals
+	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)
+	_run_state.lingering_effects.effect_triggered.connect(_on_lingering_effect_triggered)
+
+	is_run_active = true
+
+	save_run_state()
+	run_started.emit()
+
+
+# =============================================================================
+# RUN LIFECYCLE - LEGACY SUPPORT (backwards compatibility)
+# =============================================================================
+
 func has_active_run() -> bool:
 	"""Check if there's a saved run to resume."""
 	return JsonPersistence.file_exists(SAVE_PATH)
@@ -81,7 +151,8 @@ func has_active_run() -> bool:
 
 func start_new_run(drafted_character_ids: Array) -> void:
 	"""
-	Start a new run with drafted characters.
+	Start a new run with drafted characters (legacy method).
+	DEPRECATED: Use start_new_run_with_legacies() for new code.
 
 	Args:
 		drafted_character_ids: Array of character IDs from PlayerAccount
@@ -90,12 +161,13 @@ func start_new_run(drafted_character_ids: Array) -> void:
 		push_error("RunManager: Must draft exactly %d characters" % GameConstants.TEAM_SIZE)
 		return
 
-	# Generate run ID
-	run_id = "run_%d" % Time.get_unix_time_from_system()
+	# Create new RunState
+	_run_state = RunStateScript.new()
+	_run_state.run_id = "run_%d" % Time.get_unix_time_from_system()
 
 	# Initialize team via TeamManager
 	_team_manager.clear()
-	starting_gold = 0
+	var starting_gold = 0
 
 	for char_id in drafted_character_ids:
 		var char_data = PlayerAccount.get_character_data(char_id)
@@ -103,55 +175,40 @@ func start_new_run(drafted_character_ids: Array) -> void:
 			push_error("RunManager: Character data not found: %s" % char_id)
 			continue
 
-		# Create runtime instance
 		var char_instance = CharacterInstance.new(char_data)
 		_team_manager.add_character(char_instance)
+		_run_state.add_character(char_instance)
 
 	# Calculate starting gold from team income
 	starting_gold = _team_manager.calculate_total_income()
+	_run_state.starting_gold = starting_gold
+	_run_state.current_gold = starting_gold
 
-	# Initialize run state
-	current_round = 0
-	current_phase = PHASE_ENCOUNTER
-	encounters_this_round = 0
-	reputation = GameConstants.STARTING_REPUTATION
-	wins = 0
-	losses = 0
-	current_gold = starting_gold
-	encounter_history.clear()
+	# Connect lingering effect signals
+	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)
+	_run_state.lingering_effects.effect_triggered.connect(_on_lingering_effect_triggered)
+
 	is_run_active = true
 
-	# Clear lingering effects from any previous run
-	_lingering_effects.clear()
-	_player_inventory.clear()
-
-	# Save initial state
 	save_run_state()
-
 	run_started.emit()
 
 
+# =============================================================================
+# SAVE / LOAD
+# =============================================================================
+
 func save_run_state() -> void:
 	"""Save current run state to file."""
-	if not is_run_active:
+	if not is_run_active or _run_state == null:
 		return
 
-	var save_data = {
-		"run_id": run_id,
-		"round": current_round,
-		"phase": current_phase,
-		"encounters_this_round": encounters_this_round,
-		"reputation": reputation,
-		"wins": wins,
-		"losses": losses,
-		"starting_gold": starting_gold,
-		"current_gold": current_gold,
-		"team": _team_manager.to_array(),
-		"inventory": _player_inventory.to_array(),
-		"lingering_effects": _lingering_effects.to_array(),
-		"encounter_history": encounter_history
-	}
+	# Also sync team manager state to run state
+	_run_state.team = []
+	for char in _team_manager.get_team():
+		_run_state.team.append(char)
 
+	var save_data = _run_state.to_dict()
 	JsonPersistence.save_json(SAVE_PATH, save_data)
 
 
@@ -167,34 +224,23 @@ func load_run_state() -> bool:
 		push_error("RunManager: Save data validation failed, cannot load run")
 		return false
 
-	# Validate team members exist in PlayerAccount
+	# Validate team members exist
 	var team_data = save_data.get("team", [])
 	if not _validate_team_data(team_data):
 		push_error("RunManager: Team validation failed, save may be corrupt")
 		return false
 
-	# Restore run state
-	run_id = save_data.get("run_id", "")
-	current_round = save_data.get("round", 0)
-	current_phase = save_data.get("phase", PHASE_ENCOUNTER)
-	encounters_this_round = save_data.get("encounters_this_round", 0)
-	reputation = save_data.get("reputation", GameConstants.STARTING_REPUTATION)
-	wins = save_data.get("wins", 0)
-	losses = save_data.get("losses", 0)
-	starting_gold = save_data.get("starting_gold", 0)
-	current_gold = save_data.get("current_gold", 0)
-	encounter_history = save_data.get("encounter_history", [])
+	# Restore RunState from saved data
+	_run_state = RunStateScript.from_dict(save_data)
 
-	# Restore team via TeamManager
-	_team_manager.load_from_array(team_data)
+	# Sync team manager from run state
+	_team_manager.clear()
+	for character in _run_state.team:
+		_team_manager.add_character(character)
 
-	# Restore inventory (Phase 2)
-	var inventory_data = save_data.get("inventory", [])
-	_player_inventory.load_from_array(inventory_data)
-
-	# Restore lingering effects (Phase 3)
-	var lingering_data = save_data.get("lingering_effects", [])
-	_lingering_effects.load_from_array(lingering_data)
+	# Reconnect lingering effect signals
+	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)
+	_run_state.lingering_effects.effect_triggered.connect(_on_lingering_effect_triggered)
 
 	is_run_active = true
 
@@ -208,13 +254,16 @@ func _validate_team_data(team_data: Array) -> bool:
 		if char_id.is_empty():
 			push_warning("RunManager: Team member missing base_character_id")
 			return false
-		# Verify character exists in game data
 		var master_data = GameData.get_character_by_id(char_id)
 		if master_data.is_empty():
 			push_warning("RunManager: Team member references unknown character: %s" % char_id)
 			return false
 	return true
 
+
+# =============================================================================
+# END RUN
+# =============================================================================
 
 func end_run(victory: bool) -> Dictionary:
 	"""
@@ -234,8 +283,8 @@ func end_run(victory: bool) -> Dictionary:
 
 func _apply_end_of_run_rewards(victory: bool) -> Dictionary:
 	"""Calculate and apply end-of-run rewards. Returns display data."""
-	var wins_count = wins
-	var rep = reputation
+	var wins_count = _run_state.wins if _run_state else 0
+	var rep = _run_state.reputation if _run_state else 0
 	var team_data = capture_team_data()
 
 	# Calculate rewards
@@ -245,63 +294,68 @@ func _apply_end_of_run_rewards(victory: bool) -> Dictionary:
 	# Apply gem reward
 	PlayerAccount.add_gems(gem_reward)
 
-	# Apply fame and track prestige changes
+	# Apply fame to drafted legacies (Phase 4 - legacy system)
 	var prestige_ups_list = []
-	for char_data in team_data:
-		var char_id = char_data["id"]
-		var old_data = PlayerAccount.get_character_data(char_id)
-		var old_prestige = old_data.get("prestige", 1)
+	if _run_state and _run_state.drafted_legacy_ids.size() > 0:
+		# Fame goes to legacies in legacy system
+		for legacy_id in _run_state.drafted_legacy_ids:
+			var result = PlayerAccount.award_legacy_fame(legacy_id, fame_reward)
+			if result.get("prestige_increased", false):
+				var legacy = PlayerAccount.get_legacy_data(legacy_id)
+				prestige_ups_list.append({
+					"name": legacy.legacy_name if legacy else legacy_id,
+					"old_prestige": result.get("new_prestige", 1) - result.get("levels_gained", 1),
+					"new_prestige": result.get("new_prestige", 1),
+					"id": legacy_id,
+					"type": "legacy"
+				})
+	else:
+		# Fallback to character fame for backwards compatibility
+		for char_data in team_data:
+			var char_id = char_data["id"]
+			var old_data = PlayerAccount.get_character_data(char_id)
+			var old_prestige = old_data.get("prestige", 1)
 
-		PlayerAccount.add_character_fame(char_id, fame_reward)
+			PlayerAccount.add_character_fame(char_id, fame_reward)
 
-		var new_data = PlayerAccount.get_character_data(char_id)
-		var new_prestige = new_data.get("prestige", 1)
-		if new_prestige > old_prestige:
-			prestige_ups_list.append({
-				"name": char_data["name"],
-				"old_prestige": old_prestige,
-				"new_prestige": new_prestige,
-				"id": char_id
-			})
+			var new_data = PlayerAccount.get_character_data(char_id)
+			var new_prestige = new_data.get("prestige", 1)
+			if new_prestige > old_prestige:
+				prestige_ups_list.append({
+					"name": char_data["name"],
+					"old_prestige": old_prestige,
+					"new_prestige": new_prestige,
+					"id": char_id,
+					"type": "character"
+				})
 
 	return {
 		"victory": victory,
-		"round": current_round,
+		"round": _run_state.current_round if _run_state else 0,
 		"wins": wins_count,
-		"losses": losses,
-		"gold": current_gold,
+		"losses": _run_state.losses if _run_state else 0,
+		"gold": _run_state.current_gold if _run_state else 0,
 		"reputation": rep,
-		"starting_gold": starting_gold,
+		"starting_gold": _run_state.starting_gold if _run_state else 0,
 		"team": team_data,
 		"gem_reward": gem_reward,
 		"fame_reward": fame_reward,
-		"prestige_ups": prestige_ups_list
+		"prestige_ups": prestige_ups_list,
+		"drafted_legacy_ids": _run_state.drafted_legacy_ids.duplicate() if _run_state else []
 	}
 
 
 func _clear_run_state() -> void:
 	"""Clear all run state and delete save file."""
 	is_run_active = false
-	run_id = ""
+	_run_state = null
 	_team_manager.clear()
-	_player_inventory.clear()
-	_lingering_effects.clear()
-	current_round = 0
-	current_phase = PHASE_ENCOUNTER
-	encounters_this_round = 0
-	reputation = GameConstants.STARTING_REPUTATION
-	wins = 0
-	losses = 0
-	starting_gold = 0
-	current_gold = 0
-	encounter_history.clear()
 
-	# Delete save file
 	JsonPersistence.delete_file(SAVE_PATH)
 
 
 # =============================================================================
-# GETTERS - Delegated to TeamManager where appropriate
+# GETTERS (Delegate to RunState where appropriate)
 # =============================================================================
 
 func get_team() -> Array[CharacterInstance]:
@@ -309,35 +363,40 @@ func get_team() -> Array[CharacterInstance]:
 
 
 func get_round() -> int:
-	return current_round
+	return _run_state.current_round if _run_state else 0
 
 
 func get_reputation() -> int:
-	return reputation
+	return _run_state.reputation if _run_state else 0
 
 
 func get_wins() -> int:
-	return wins
+	return _run_state.wins if _run_state else 0
 
 
 func get_losses() -> int:
-	return losses
+	return _run_state.losses if _run_state else 0
 
 
 func get_gold() -> int:
-	return current_gold
+	return _run_state.current_gold if _run_state else 0
 
 
 func get_phase() -> String:
-	return current_phase
+	return _run_state.current_phase if _run_state else PHASE_ENCOUNTER
 
 
 func is_encounter_phase() -> bool:
-	return current_phase == PHASE_ENCOUNTER
+	return get_phase() == PHASE_ENCOUNTER
 
 
 func is_combat_phase() -> bool:
-	return current_phase == PHASE_COMBAT
+	return get_phase() == PHASE_COMBAT
+
+
+func get_run_pool():
+	"""Get the run's content pool (or null if no active run)."""
+	return _run_state.pool if _run_state else null
 
 
 # =============================================================================
@@ -346,12 +405,14 @@ func is_combat_phase() -> bool:
 
 func get_player_inventory():
 	"""Get the player's item inventory."""
-	return _player_inventory
+	return _run_state.inventory if _run_state else null
 
 
 func get_player_items() -> Array:
 	"""Get all items in the player's inventory."""
-	return _player_inventory.get_all_items()
+	if _run_state:
+		return _run_state.inventory.get_all_items()
+	return []
 
 
 func add_item_to_inventory(item_id: String, is_upgrade: bool = true) -> ItemInstance:
@@ -365,7 +426,9 @@ func add_item_to_inventory(item_id: String, is_upgrade: bool = true) -> ItemInst
 	Returns:
 		The created ItemInstance, or null if invalid
 	"""
-	var item = _player_inventory.add_item_by_id(item_id, is_upgrade)
+	if not _run_state:
+		return null
+	var item = _run_state.inventory.add_item_by_id(item_id, is_upgrade)
 	if item != null:
 		item_acquired.emit(item)
 		save_run_state()
@@ -374,12 +437,16 @@ func add_item_to_inventory(item_id: String, is_upgrade: bool = true) -> ItemInst
 
 func has_item_in_inventory(item_id: String) -> bool:
 	"""Check if the player has an item with the given ID."""
-	return _player_inventory.has_item(item_id)
+	if not _run_state:
+		return false
+	return _run_state.inventory.has_item(item_id)
 
 
 func get_inventory_stat_modifier(stat_name: String) -> int:
 	"""Get the total modifier for a stat from all player items."""
-	return _player_inventory.get_total_stat_modifier(stat_name)
+	if not _run_state:
+		return 0
+	return _run_state.inventory.get_total_stat_modifier(stat_name)
 
 
 # =============================================================================
@@ -393,7 +460,7 @@ func get_skill_registry():
 
 func get_lingering_effects():
 	"""Get the lingering effects manager."""
-	return _lingering_effects
+	return _run_state.lingering_effects if _run_state else null
 
 
 func add_lingering_effect(skill_data: Dictionary) -> bool:
@@ -406,7 +473,9 @@ func add_lingering_effect(skill_data: Dictionary) -> bool:
 	Returns:
 		True if effect was added successfully
 	"""
-	var effect_id = _lingering_effects.add_effect(skill_data, current_round)
+	if not _run_state:
+		return false
+	var effect_id = _run_state.lingering_effects.add_effect(skill_data, _run_state.current_round)
 	if effect_id > 0:
 		save_run_state()
 		return true
@@ -423,8 +492,10 @@ func trigger_lingering_effects(trigger_type: String) -> Array[Dictionary]:
 	Returns:
 		Array of triggered effect entries
 	"""
+	if not _run_state:
+		return []
 	var context = _create_skill_context()
-	var triggered = _lingering_effects.trigger(trigger_type, context, _skill_registry)
+	var triggered = _run_state.lingering_effects.trigger(trigger_type, context, _skill_registry)
 	if triggered.size() > 0:
 		save_run_state()
 	return triggered
@@ -440,8 +511,10 @@ func trigger_character_acquired_effects(character: CharacterInstance) -> Array[D
 	Returns:
 		Array of triggered effect entries
 	"""
+	if not _run_state:
+		return []
 	var context = _create_skill_context()
-	var triggered = _lingering_effects.trigger_for_character(
+	var triggered = _run_state.lingering_effects.trigger_for_character(
 		"next_character_acquired",
 		character,
 		context
@@ -453,12 +526,16 @@ func trigger_character_acquired_effects(character: CharacterInstance) -> Array[D
 
 func has_pending_effects(trigger_type: String) -> bool:
 	"""Check if there are any lingering effects waiting for a trigger."""
-	return _lingering_effects.has_effects_for_trigger(trigger_type)
+	if not _run_state:
+		return false
+	return _run_state.lingering_effects.has_effects_for_trigger(trigger_type)
 
 
 func get_pending_effects(trigger_type: String) -> Array[Dictionary]:
 	"""Get all pending effects for a trigger type."""
-	return _lingering_effects.get_effects_by_trigger(trigger_type)
+	if not _run_state:
+		return []
+	return _run_state.lingering_effects.get_effects_by_trigger(trigger_type)
 
 
 func _create_skill_context():
@@ -482,55 +559,59 @@ func _on_lingering_effect_triggered(effect: Dictionary, trigger: String) -> void
 
 func advance_round() -> void:
 	"""Move to next round (after encounter + combat)."""
-	current_round += 1
-	current_phase = PHASE_ENCOUNTER
-	encounters_this_round = 0
+	if not _run_state:
+		return
+	_run_state.advance_round()
 
 	# Trigger any "next_round" lingering effects
 	trigger_lingering_effects("next_round")
 
-	round_changed.emit(current_round)
-	phase_changed.emit(current_phase)
+	round_changed.emit(_run_state.current_round)
+	phase_changed.emit(_run_state.current_phase)
 	save_run_state()
 
 
 func set_phase(phase: String) -> void:
 	"""Set the current phase."""
+	if not _run_state:
+		return
 	if phase != PHASE_ENCOUNTER and phase != PHASE_COMBAT:
 		push_error("RunManager: Invalid phase: %s" % phase)
 		return
-	current_phase = phase
-	phase_changed.emit(current_phase)
+	_run_state.set_phase(phase)
+	phase_changed.emit(_run_state.current_phase)
 	save_run_state()
 
 
 func complete_encounter() -> void:
 	"""Complete encounter phase. Switches to combat after ENCOUNTERS_PER_ROUND encounters."""
-	encounters_this_round += 1
+	if not _run_state:
+		return
+	_run_state.complete_encounter()
 
 	# Trigger any "next_encounter" lingering effects for next encounter
-	# (but not when switching to combat)
-	if encounters_this_round < GameConstants.ENCOUNTERS_PER_ROUND:
+	if _run_state.encounters_this_round < GameConstants.ENCOUNTERS_PER_ROUND:
 		trigger_lingering_effects("next_encounter")
 
-	if encounters_this_round >= GameConstants.ENCOUNTERS_PER_ROUND:
-		current_phase = PHASE_COMBAT
-	phase_changed.emit(current_phase)
+	phase_changed.emit(_run_state.current_phase)
 	save_run_state()
 
 
 func add_gold(amount: int) -> void:
 	"""Add gold (from combat rewards, etc.)."""
-	current_gold += amount
-	gold_changed.emit(current_gold)
+	if not _run_state:
+		return
+	_run_state.add_gold(amount)
+	gold_changed.emit(_run_state.current_gold)
 	save_run_state()
 
 
 func spend_gold(amount: int) -> bool:
 	"""Spend gold (returns false if not enough)."""
-	if current_gold >= amount:
-		current_gold -= amount
-		gold_changed.emit(current_gold)
+	if not _run_state:
+		return false
+	if _run_state.spend_gold(amount):
+		gold_changed.emit(_run_state.current_gold)
 		save_run_state()
 		return true
 	return false
@@ -566,35 +647,41 @@ func attempt_purchase(cost: int, char_index: int, action: Callable) -> Dictionar
 
 func add_win() -> void:
 	"""Record a combat victory (rewards handled by apply_combat_rewards)."""
-	wins += 1
+	if not _run_state:
+		return
+	_run_state.add_win()
 	save_run_state()
 
 
 func add_loss() -> void:
 	"""Record a combat loss."""
-	losses += 1
+	if not _run_state:
+		return
+	_run_state.add_loss()
 	save_run_state()
 
 
 func lose_reputation(amount: int) -> void:
 	"""Lose reputation (from combat loss)."""
-	reputation = max(0, reputation - amount)
-	reputation_changed.emit(reputation)
+	if not _run_state:
+		return
+	_run_state.lose_reputation(amount)
+	reputation_changed.emit(_run_state.reputation)
 	save_run_state()
 
 
 func is_run_over() -> bool:
 	"""Check if run is over (win or loss condition met)."""
-	if wins >= GameConstants.WINS_FOR_VICTORY:
-		return true  # Victory
-	if reputation <= 0:
-		return true  # Defeat
-	return false
+	if not _run_state:
+		return false
+	return _run_state.is_run_over()
 
 
 func did_player_win() -> bool:
 	"""Check if player won (only valid if is_run_over() is true)."""
-	return wins >= GameConstants.WINS_FOR_VICTORY
+	if not _run_state:
+		return false
+	return _run_state.is_victory()
 
 
 # =============================================================================
@@ -603,7 +690,7 @@ func did_player_win() -> bool:
 
 func get_phase_name() -> String:
 	"""Get current phase name for display."""
-	return current_phase
+	return get_phase()
 
 
 func get_team_summary() -> Dictionary:
@@ -646,6 +733,8 @@ func notify_draft_gold_updated(amount: int) -> void:
 # COMBAT GENERATION - Delegated to CombatGenerator
 # =============================================================================
 
+var _combat_generator: CombatGenerator = CombatGenerator.new()
+
 func generate_combat_options(count: int) -> Array:
 	"""
 	Generate random combat options (AI enemies or Player Ghosts).
@@ -678,5 +767,40 @@ func apply_combat_rewards(won: bool, combat_data: Dictionary) -> void:
 		RewardCalculator.apply_combat_victory_rewards(_team_manager, add_gold, combat_data)
 	else:
 		# Lose reputation equal to round number
-		var reputation_loss = RewardCalculator.calculate_reputation_loss(current_round)
+		var reputation_loss = RewardCalculator.calculate_reputation_loss(get_round())
 		lose_reputation(reputation_loss)
+
+
+# =============================================================================
+# DEPRECATED ACCESSORS (kept for backwards compatibility)
+# =============================================================================
+
+var run_id: String:
+	get: return _run_state.run_id if _run_state else ""
+
+var current_round: int:
+	get: return get_round()
+
+var current_phase: String:
+	get: return get_phase()
+
+var encounters_this_round: int:
+	get: return _run_state.encounters_this_round if _run_state else 0
+
+var reputation: int:
+	get: return get_reputation()
+
+var wins: int:
+	get: return get_wins()
+
+var losses: int:
+	get: return get_losses()
+
+var starting_gold: int:
+	get: return _run_state.starting_gold if _run_state else 0
+
+var current_gold: int:
+	get: return get_gold()
+
+var encounter_history: Array:
+	get: return []  # Deprecated - no longer tracked in RunState

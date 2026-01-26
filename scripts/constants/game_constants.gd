@@ -59,14 +59,28 @@ const COMBAT_WIN_XP := 30  # XP per character per combat win
 
 # Win/loss conditions
 const WINS_FOR_VICTORY := 10
-const TEAM_SIZE := 3
+const TEAM_SIZE := 3  # DEPRECATED: Use MAX_GRID_CHARACTERS for Phase 5+
 const DRAFT_OPTIONS_PER_PICK := 3
 const DRAFT_OWNED_OPTIONS := 2  # Remaining filled by random
 const ENCOUNTERS_PER_ROUND := 1  # How many encounters occur before each combat
 
-# Per-character run limits
+# Per-character run limits (DEPRECATED: Skills are instant, items unlimited)
 const MAX_RUN_ITEMS := 6
 const MAX_RUN_SKILLS := 6
+
+# =============================================================================
+# CHARACTER GRID CONSTANTS (Phase 5)
+# =============================================================================
+
+const GRID_ROWS := 2  # Front row and back row
+const GRID_COLS := 3  # 3 characters per row
+const MAX_GRID_CHARACTERS := 6  # GRID_ROWS * GRID_COLS - replaces TEAM_SIZE
+
+# =============================================================================
+# LEGACY SYSTEM CONSTANTS (Phase 4)
+# =============================================================================
+
+const LEGACY_UNLOCK_COST := 500  # Gems to unlock a legacy during draft
 
 # =============================================================================
 # STAT NAMES
