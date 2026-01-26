@@ -40,7 +40,7 @@ size_flags_vertical = 3
 [node name="Title" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 64
+theme_override_font_sizes/font_size = 128
 text = "AUTO BATTLER"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -57,19 +57,19 @@ theme_override_constants/separation = 16
 [node name="PlayButton" type="Button" parent="MarginContainer/VBoxContainer/ButtonContainer"]
 custom_minimum_size = Vector2(280, 60)
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 64
 text = "PLAY"
 
 [node name="CollectionButton" type="Button" parent="MarginContainer/VBoxContainer/ButtonContainer"]
 custom_minimum_size = Vector2(280, 60)
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 64
 text = "COLLECTION"
 
 [node name="QuitButton" type="Button" parent="MarginContainer/VBoxContainer/ButtonContainer"]
 custom_minimum_size = Vector2(280, 60)
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 64
 text = "QUIT"
 
 [node name="Spacer3" type="Control" parent="MarginContainer/VBoxContainer"]
