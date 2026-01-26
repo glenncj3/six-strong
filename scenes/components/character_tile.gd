@@ -57,7 +57,7 @@ func setup(character_instance: CharacterInstance, tile_size: float) -> void:
 	var char_master = _configure_display(char_instance.base_character_id, tile_size)
 	if char_master.is_empty():
 		return
-	name_label.text = "%s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
+	name_label.text = char_instance.get_character_name()
 
 
 func setup_from_data(character_data: Dictionary, tile_size: float) -> void:

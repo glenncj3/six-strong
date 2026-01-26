@@ -6,9 +6,14 @@ extends RefCounted
 ## Content from multiple legacies is merged with deduplication.
 ## Encounters from legacies have weighted selection based on prestige bonuses.
 ##
+## Item types:
+## - Items: Regular items that go directly into the pool
+## - Item Upgrades: Conditional items that only appear if player owns the base item
+##
 ## Usage:
 ##   var pool = RunPool.from_legacies(drafted_legacies)
 ##   var items = pool.pick_random(RunPool.ContentType.ITEM, 3, max_level)
+##   var upgrades = pool.get_available_item_upgrades(player_inventory, max_level)
 
 # =============================================================================
 # CONTENT TYPE ENUM
@@ -17,6 +22,7 @@ extends RefCounted
 enum ContentType {
 	CHARACTER,
 	ITEM,
+	ITEM_UPGRADE,
 	SKILL,
 	ENCOUNTER
 }
@@ -27,7 +33,8 @@ enum ContentType {
 
 # Pools map content_id -> level_requirement
 var _character_pool: Dictionary = {}  # { "knight": 1, "paladin": 3 }
-var _item_pool: Dictionary = {}
+var _item_pool: Dictionary = {}  # Regular items: { "item_rusty_sword": 1 }
+var _item_upgrade_pool: Dictionary = {}  # { "itemup_flaming_sword": { "level": 4, "upgrades_item": "item_rusty_sword" } }
 var _skill_pool: Dictionary = {}
 
 # Encounter pool stores weight and level
@@ -89,15 +96,31 @@ func _add_legacy_content(legacy: LegacyData, game_data) -> void:
 		var level_req = char_data.get("level_requirement", 1)
 		_character_pool[char_id] = level_req
 
-	# Add unlocked items
+	# Add unlocked items (regular items go directly into pool)
 	for item_id in legacy.unlocked_items:
 		if _item_pool.has(item_id):
 			continue
 		var item_data = game_data.get_item_by_id(item_id)
 		if item_data.is_empty():
-			item_data = game_data.get_item_upgrade_by_id(item_id)
+			push_warning("RunPool: Item not found: %s" % item_id)
+			continue
 		var level_req = item_data.get("level_requirement", 1)
 		_item_pool[item_id] = level_req
+
+	# Add unlocked item upgrades (conditional on owning base item)
+	for upgrade_id in legacy.unlocked_item_upgrades:
+		if _item_upgrade_pool.has(upgrade_id):
+			continue
+		var upgrade_data = game_data.get_item_upgrade_by_id(upgrade_id)
+		if upgrade_data.is_empty():
+			push_warning("RunPool: Item upgrade not found: %s" % upgrade_id)
+			continue
+		var level_req = upgrade_data.get("level_requirement", 1)
+		var upgrades_item = upgrade_data.get("upgrades_item", "")
+		_item_upgrade_pool[upgrade_id] = {
+			"level": level_req,
+			"upgrades_item": upgrades_item
+		}
 
 	# Add unlocked skills
 	for skill_id in legacy.unlocked_skills:
@@ -145,7 +168,7 @@ func pick_random(type: ContentType, count: int, max_level: int = 999) -> Array[S
 	var available: Array[String] = []
 
 	for id in pool:
-		var level_req = pool[id] if pool[id] is int else pool[id].get("level", 1)
+		var level_req = pool[id].get("level", 1) if pool[id] is Dictionary else int(pool[id])
 		if level_req <= max_level:
 			available.append(id)
 
@@ -153,6 +176,66 @@ func pick_random(type: ContentType, count: int, max_level: int = 999) -> Array[S
 	var result_count = min(count, available.size())
 
 	var result: Array[String] = []
+	for i in range(result_count):
+		result.append(available[i])
+
+	return result
+
+
+func get_available_item_upgrades(player_inventory, max_level: int = 999) -> Array[String]:
+	"""
+	Get item upgrades that are available based on player's current inventory.
+
+	Item upgrades only appear if the player owns the base item they upgrade.
+
+	Args:
+		player_inventory: PlayerInventory instance with player's current items
+		max_level: Maximum level requirement to include
+
+	Returns:
+		Array of item upgrade IDs that the player can currently acquire
+	"""
+	var available: Array[String] = []
+
+	if player_inventory == null:
+		return available
+
+	for upgrade_id in _item_upgrade_pool:
+		var upgrade_data = _item_upgrade_pool[upgrade_id]
+		var level_req = upgrade_data.get("level", 1)
+		var base_item_id = upgrade_data.get("upgrades_item", "")
+
+		# Check level requirement
+		if level_req > max_level:
+			continue
+
+		# Check if player owns the base item
+		if base_item_id.is_empty():
+			continue
+
+		if player_inventory.has_item(base_item_id):
+			available.append(upgrade_id)
+
+	return available
+
+
+func pick_random_item_upgrades(player_inventory, count: int, max_level: int = 999) -> Array[String]:
+	"""
+	Pick random item upgrades that are available based on player's inventory.
+
+	Args:
+		player_inventory: PlayerInventory instance
+		count: Number of upgrades to pick
+		max_level: Maximum level requirement
+
+	Returns:
+		Array of item upgrade IDs (may be fewer than count)
+	"""
+	var available = get_available_item_upgrades(player_inventory, max_level)
+	available.shuffle()
+
+	var result: Array[String] = []
+	var result_count = min(count, available.size())
 	for i in range(result_count):
 		result.append(available[i])
 
@@ -224,6 +307,8 @@ func _get_pool_for_type(type: ContentType) -> Dictionary:
 			return _character_pool
 		ContentType.ITEM:
 			return _item_pool
+		ContentType.ITEM_UPGRADE:
+			return _item_upgrade_pool
 		ContentType.SKILL:
 			return _skill_pool
 		ContentType.ENCOUNTER:
@@ -246,11 +331,18 @@ func get_all(type: ContentType, max_level: int = 999) -> Array[String]:
 	var result: Array[String] = []
 
 	for id in pool:
-		var level_req = pool[id] if pool[id] is int else pool[id].get("level", 1)
+		var level_req = pool[id].get("level", 1) if pool[id] is Dictionary else int(pool[id])
 		if level_req <= max_level:
 			result.append(id)
 
 	return result
+
+
+func get_upgrade_base_item(upgrade_id: String) -> String:
+	"""Get the base item ID that an upgrade replaces."""
+	if _item_upgrade_pool.has(upgrade_id):
+		return _item_upgrade_pool[upgrade_id].get("upgrades_item", "")
+	return ""
 
 
 func get_encounter_weight(enc_id: String) -> int:
@@ -280,8 +372,16 @@ func add_character(char_id: String, level_requirement: int = 1) -> void:
 
 
 func add_item(item_id: String, level_requirement: int = 1) -> void:
-	"""Manually add an item to the pool."""
+	"""Manually add a regular item to the pool."""
 	_item_pool[item_id] = level_requirement
+
+
+func add_item_upgrade(upgrade_id: String, upgrades_item: String, level_requirement: int = 1) -> void:
+	"""Manually add an item upgrade to the pool."""
+	_item_upgrade_pool[upgrade_id] = {
+		"level": level_requirement,
+		"upgrades_item": upgrades_item
+	}
 
 
 func add_skill(skill_id: String, level_requirement: int = 1) -> void:
@@ -303,6 +403,7 @@ func to_dict() -> Dictionary:
 	return {
 		"character_pool": _character_pool.duplicate(),
 		"item_pool": _item_pool.duplicate(),
+		"item_upgrade_pool": _item_upgrade_pool.duplicate(),
 		"skill_pool": _skill_pool.duplicate(),
 		"encounter_pool": _encounter_pool.duplicate(),
 		"source_legacy_ids": Array(_source_legacy_ids)
@@ -316,6 +417,7 @@ static func from_dict(data: Dictionary):
 
 	pool._character_pool = data.get("character_pool", {}).duplicate()
 	pool._item_pool = data.get("item_pool", {}).duplicate()
+	pool._item_upgrade_pool = data.get("item_upgrade_pool", {}).duplicate()
 	pool._skill_pool = data.get("skill_pool", {}).duplicate()
 	pool._encounter_pool = data.get("encounter_pool", {}).duplicate()
 

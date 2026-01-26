@@ -23,7 +23,10 @@ const FONT_SIZE_TINY := 12
 
 # Account progression
 const FAME_PER_PRESTIGE := 100  # Fame needed to increase a character's prestige (persistent)
+
+# Player level progression (per-run)
 const XP_PER_LEVEL := 100  # XP needed to level up during a run
+const MAX_PLAYER_LEVEL := 5  # Maximum player level (gates all content at this level)
 
 # Starting resources
 const STARTING_GEMS := 1000

@@ -24,7 +24,7 @@ static func create_team_selector(team: Array) -> OptionButton:
 	var selector = OptionButton.new()
 	selector.add_item("Select Character...")
 	for i in range(team.size()):
-		selector.add_item("%s (Lv.%d)" % [team[i].get_character_name(), team[i].level])
+		selector.add_item(team[i].get_character_name())
 	return selector
 
 

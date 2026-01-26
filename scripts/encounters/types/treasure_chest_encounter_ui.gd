@@ -100,10 +100,7 @@ static func _on_option_selected(tile_data: Dictionary) -> void:
 static func _pick_random_item_of_element(element: String) -> String:
 	"""Pick a random item of the given element that's not in player inventory."""
 	var all_items = GameData.get_all_item_upgrades()
-	var team = RunManager.get_team()
-	var max_level = 1
-	for char_instance in team:
-		max_level = maxi(max_level, char_instance.level)
+	var max_level = RunManager.get_player_level()
 
 	var valid_items: Array = []
 

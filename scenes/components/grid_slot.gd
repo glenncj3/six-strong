@@ -5,7 +5,9 @@ class_name GridSlot
 ## Supports drag-and-drop for character repositioning.
 
 signal slot_clicked(row: int, col: int, character: CharacterInstance)
+@warning_ignore("unused_signal")  # Reserved for future drag-and-drop
 signal drag_started(row: int, col: int, character: CharacterInstance)
+@warning_ignore("unused_signal")  # Reserved for future drag-and-drop
 signal drop_received(row: int, col: int, from_row: int, from_col: int)
 
 const SLOT_BORDER_WIDTH := 3
@@ -99,7 +101,7 @@ func set_character(char_instance: CharacterInstance) -> void:
 	portrait.visible = true
 	UIHelpers.set_texture_safe(portrait, char_master.get("image_path", ""))
 	name_label.visible = true
-	name_label.text = "%s (Lv.%d)" % [char_master.get("name", "?"), character.level]
+	name_label.text = char_master.get("name", "?")
 	empty_label.visible = false
 	row_indicator.visible = false
 

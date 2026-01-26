@@ -157,16 +157,16 @@ static func distribute_fame_to_legacies(
 
 
 static func apply_combat_victory_rewards(
-	team_manager: TeamManager,
 	gold_callback: Callable,
+	xp_callback: Callable,
 	combat_data: Dictionary
 ) -> Dictionary:
 	"""
-	Apply combat victory rewards to team and gold.
+	Apply combat victory rewards (gold and player XP).
 
 	Args:
-		team_manager: TeamManager to distribute XP to
 		gold_callback: Callable to add gold (e.g., RunManager.add_gold)
+		xp_callback: Callable to add player XP (e.g., RunManager.add_player_xp)
 		combat_data: The combat option data
 
 	Returns:
@@ -175,7 +175,7 @@ static func apply_combat_victory_rewards(
 	var rewards = calculate_combat_rewards(combat_data)
 
 	gold_callback.call(rewards["gold"])
-	team_manager.distribute_experience(rewards["xp"])
+	xp_callback.call(rewards["xp"])
 
 	return rewards
 

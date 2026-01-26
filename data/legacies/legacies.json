@@ -20,6 +20,7 @@
             "starting_items": ["item_shield_emblem"],
             "characters": ["char_warrior_001"],
             "items": ["item_rusty_sword"],
+            "item_upgrades": [],
             "skills": ["skill_power_strike"],
             "encounters": []
           }
@@ -31,6 +32,7 @@
             "starting_items": [],
             "characters": ["char_paladin_001"],
             "items": ["item_holy_mace", "item_chainmail"],
+            "item_upgrades": ["itemup_flaming_sword"],
             "skills": ["skill_iron_skin", "skill_healing_surge"],
             "encounters": ["enc_knight_tournament"],
             "encounter_weight_bonus": 10
@@ -43,6 +45,7 @@
             "starting_items": [],
             "characters": ["char_cleric_001"],
             "items": ["item_prayer_book"],
+            "item_upgrades": ["itemup_plate_armor"],
             "skills": ["skill_vitality"],
             "encounters": ["enc_holy_blessing"],
             "encounter_weight_bonus": 10
@@ -70,6 +73,7 @@
             "starting_items": ["item_cloak_of_shadows"],
             "characters": ["char_rogue_001"],
             "items": ["item_rusty_dagger"],
+            "item_upgrades": [],
             "skills": ["skill_gold_rush"],
             "encounters": []
           }
@@ -81,6 +85,7 @@
             "starting_items": [],
             "characters": ["char_assassin_001"],
             "items": ["item_poison_blade", "item_leather_armor"],
+            "item_upgrades": ["itemup_shadow_cloak"],
             "skills": ["skill_dodge", "skill_backstab"],
             "encounters": ["enc_black_market"],
             "encounter_weight_bonus": 15
@@ -93,6 +98,7 @@
             "starting_items": [],
             "characters": ["char_monk_001"],
             "items": ["item_fighting_gloves"],
+            "item_upgrades": ["itemup_vampiric_blade"],
             "skills": ["skill_inner_peace"],
             "encounters": ["enc_heist_opportunity"],
             "encounter_weight_bonus": 10
@@ -120,6 +126,7 @@
             "starting_items": ["item_wooden_staff"],
             "characters": ["char_mage_001"],
             "items": ["item_wooden_staff"],
+            "item_upgrades": [],
             "skills": ["skill_arcane_blast"],
             "encounters": []
           }
@@ -131,6 +138,7 @@
             "starting_items": [],
             "characters": ["char_necromancer_001"],
             "items": ["item_skull_staff"],
+            "item_upgrades": ["itemup_arcane_staff"],
             "skills": ["skill_future_mana", "skill_fortune_blessing"],
             "encounters": ["enc_spell_library"],
             "encounter_weight_bonus": 10
@@ -143,6 +151,7 @@
             "starting_items": [],
             "characters": [],
             "items": ["item_lucky_charm"],
+            "item_upgrades": [],
             "skills": ["skill_life_drain"],
             "encounters": ["enc_mana_font"],
             "encounter_weight_bonus": 15
@@ -170,6 +179,7 @@
             "starting_items": ["item_beast_trophy"],
             "characters": ["char_ranger_001"],
             "items": ["item_short_bow"],
+            "item_upgrades": [],
             "skills": ["skill_eagle_eye"],
             "encounters": []
           }
@@ -181,6 +191,7 @@
             "starting_items": [],
             "characters": ["char_warden_001"],
             "items": ["item_hunters_bow", "item_forest_cloak"],
+            "item_upgrades": [],
             "skills": ["skill_hunters_mark", "skill_minor_heal"],
             "encounters": ["enc_beast_hunt"],
             "encounter_weight_bonus": 10
@@ -193,6 +204,7 @@
             "starting_items": [],
             "characters": ["char_beastmaster_001"],
             "items": ["item_beast_trophy"],
+            "item_upgrades": [],
             "skills": ["skill_natures_gift"],
             "encounters": ["enc_forest_shrine"],
             "encounter_weight_bonus": 10
@@ -220,6 +232,7 @@
             "starting_items": ["item_war_horn"],
             "characters": ["char_berserker_001"],
             "items": ["item_battle_axe"],
+            "item_upgrades": [],
             "skills": ["skill_war_cry"],
             "encounters": []
           }
@@ -231,6 +244,7 @@
             "starting_items": [],
             "characters": ["char_warchief_001"],
             "items": ["item_war_banner", "item_soldiers_shield"],
+            "item_upgrades": ["itemup_iron_sword"],
             "skills": ["skill_bloodlust", "skill_battle_hardening"],
             "encounters": ["enc_war_camp"],
             "encounter_weight_bonus": 10
@@ -243,6 +257,7 @@
             "starting_items": [],
             "characters": ["char_shieldbearer_001"],
             "items": ["item_war_horn"],
+            "item_upgrades": [],
             "skills": ["skill_iron_will"],
             "encounters": ["enc_gladiator_pit"],
             "encounter_weight_bonus": 15

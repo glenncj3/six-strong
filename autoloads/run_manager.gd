@@ -24,6 +24,8 @@ signal round_changed(new_round: int)
 signal reputation_changed(new_reputation: int)
 signal gold_changed(new_gold: int)
 signal phase_changed(new_phase: String)
+signal player_level_changed(new_level: int)
+signal player_xp_changed(new_xp: int)
 
 # Draft-specific signals (emitted by draft scene, listened by HUDs)
 signal draft_character_added(char_instance: CharacterInstance)
@@ -112,11 +114,11 @@ func start_new_run_with_legacies(drafted_legacies: Array) -> void:
 		EncounterFactory.set_run_pool(_run_state.pool)
 
 	# Calculate starting gold from legacy incomes
-	var starting_gold = 0
+	var total_starting_gold = 0
 	for legacy in drafted_legacies:
-		starting_gold += legacy.income
-	_run_state.starting_gold = starting_gold
-	_run_state.current_gold = starting_gold
+		total_starting_gold += legacy.income
+	_run_state.starting_gold = total_starting_gold
+	_run_state.current_gold = total_starting_gold
 
 	# Add starting characters from each legacy
 	_team_manager.clear()
@@ -171,7 +173,6 @@ func start_new_run(drafted_character_ids: Array) -> void:
 
 	# Initialize team via TeamManager
 	_team_manager.clear()
-	var starting_gold = 0
 
 	for char_id in drafted_character_ids:
 		var char_data = PlayerAccount.get_character_data(char_id)
@@ -184,9 +185,9 @@ func start_new_run(drafted_character_ids: Array) -> void:
 		_run_state.add_character(char_instance)
 
 	# Calculate starting gold from team income
-	starting_gold = _team_manager.calculate_total_income()
-	_run_state.starting_gold = starting_gold
-	_run_state.current_gold = starting_gold
+	var total_income = _team_manager.calculate_total_income()
+	_run_state.starting_gold = total_income
+	_run_state.current_gold = total_income
 
 	# Connect lingering effect signals
 	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)
@@ -281,7 +282,7 @@ func end_run(victory: bool) -> Dictionary:
 		Dictionary with run stats, reward amounts, and prestige changes
 	"""
 	var reward_data = _apply_end_of_run_rewards(victory)
-	_clear_run_state()
+	clear_run_state()
 	return reward_data
 
 
@@ -354,7 +355,7 @@ func _apply_end_of_run_rewards(victory: bool) -> Dictionary:
 	}
 
 
-func _clear_run_state() -> void:
+func clear_run_state() -> void:
 	"""Clear all run state and delete save file."""
 	is_run_active = false
 	_run_state = null
@@ -462,11 +463,40 @@ func has_item_in_inventory(item_id: String) -> bool:
 	return _run_state.inventory.has_item(item_id)
 
 
+func get_inventory():
+	"""Get the player's inventory (for item upgrade availability checks)."""
+	if not _run_state:
+		return null
+	return _run_state.inventory
+
+
 func get_inventory_stat_modifier(stat_name: String) -> int:
 	"""Get the total modifier for a stat from all player items."""
 	if not _run_state:
 		return 0
 	return _run_state.inventory.get_total_stat_modifier(stat_name)
+
+
+func apply_item_upgrade(upgrade_id: String, base_item_id: String) -> ItemInstance:
+	"""
+	Apply an item upgrade, replacing the base item with the upgrade.
+
+	Args:
+		upgrade_id: ID of the item upgrade to apply
+		base_item_id: ID of the base item being replaced
+
+	Returns:
+		The new ItemInstance if successful, null if failed
+	"""
+	if not _run_state:
+		return null
+
+	var upgrade_item = _run_state.inventory.replace_item_with_upgrade(base_item_id, upgrade_id)
+	if upgrade_item != null:
+		item_acquired.emit(upgrade_item)
+		save_run_state()
+
+	return upgrade_item
 
 
 # =============================================================================
@@ -787,6 +817,50 @@ func spend_gold(amount: int) -> bool:
 	return false
 
 
+# =============================================================================
+# PLAYER LEVEL PROGRESSION
+# =============================================================================
+
+func add_player_xp(amount: int) -> bool:
+	"""
+	Add XP to the player. Player level gates what content is available.
+
+	Args:
+		amount: XP to add
+
+	Returns:
+		True if player leveled up
+	"""
+	if not _run_state:
+		return false
+	var leveled_up = _run_state.add_player_xp(amount)
+	player_xp_changed.emit(_run_state.player_xp)
+	if leveled_up:
+		player_level_changed.emit(_run_state.player_level)
+	save_run_state()
+	return leveled_up
+
+
+func get_player_level() -> int:
+	"""Get current player level (1-5)."""
+	return _run_state.get_player_level() if _run_state else 1
+
+
+func get_player_xp() -> int:
+	"""Get current XP progress toward next level."""
+	return _run_state.get_player_xp() if _run_state else 0
+
+
+func get_player_xp_progress() -> float:
+	"""Get XP progress as percentage (0.0 to 1.0)."""
+	return _run_state.get_xp_progress() if _run_state else 0.0
+
+
+func is_player_max_level() -> bool:
+	"""Check if player has reached maximum level."""
+	return _run_state.is_max_level() if _run_state else false
+
+
 func attempt_purchase(cost: int, char_index: int, action: Callable) -> Dictionary:
 	"""
 	Attempt a gold purchase with character selection and action.
@@ -874,13 +948,12 @@ func get_character_by_index(index: int) -> CharacterInstance:
 
 
 func capture_team_data() -> Array:
-	"""Capture team member data as an Array of Dictionaries (id, name, level)."""
+	"""Capture team member data as an Array of Dictionaries (id, name)."""
 	var team_data = []
 	for char_instance in _team_manager.get_team():
 		team_data.append({
 			"id": char_instance.base_character_id,
-			"name": char_instance.get_character_name(),
-			"level": char_instance.level
+			"name": char_instance.get_character_name()
 		})
 	return team_data
 
@@ -934,7 +1007,7 @@ func apply_combat_rewards(won: bool, combat_data: Dictionary) -> void:
 	trigger_lingering_effects("next_combat")
 
 	if won:
-		RewardCalculator.apply_combat_victory_rewards(_team_manager, add_gold, combat_data)
+		RewardCalculator.apply_combat_victory_rewards(add_gold, add_player_xp, combat_data)
 	else:
 		# Lose reputation equal to round number
 		var reputation_loss = RewardCalculator.calculate_reputation_loss(get_round())

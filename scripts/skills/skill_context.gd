@@ -37,8 +37,8 @@ var spend_gold: Callable = Callable()
 # XP ACCESS
 # =============================================================================
 
-## Callable to distribute XP to all team members: func(xp: int) -> void
-var distribute_xp: Callable = Callable()
+## Callable to add XP to the player: func(xp: int) -> bool
+var add_player_xp: Callable = Callable()
 
 # =============================================================================
 # INVENTORY ACCESS
@@ -81,8 +81,8 @@ func has_gold_access() -> bool:
 
 
 func has_xp_access() -> bool:
-	"""Check if XP distribution is available."""
-	return distribute_xp.is_valid() or team_manager != null
+	"""Check if player XP operations are available."""
+	return add_player_xp.is_valid()
 
 
 func has_lingering_access() -> bool:
@@ -120,17 +120,12 @@ func heal_all_characters(amount: int) -> void:
 		heal_character(character, amount)
 
 
-func grant_xp_to_all(amount: int) -> void:
-	"""Grant XP to all team members."""
-	if distribute_xp.is_valid():
-		distribute_xp.call(amount)
-	elif team_manager != null and team_manager.has_method("distribute_experience"):
-		team_manager.distribute_experience(amount)
+func grant_xp_to_player(amount: int) -> void:
+	"""Grant XP to the player (gates content availability)."""
+	if add_player_xp.is_valid():
+		add_player_xp.call(amount)
 	else:
-		# Fallback: directly add XP to each character
-		for character in get_all_characters():
-			if character.has_method("add_experience"):
-				character.add_experience(amount)
+		push_warning("SkillContext: add_player_xp not available")
 
 
 # =============================================================================
@@ -165,9 +160,9 @@ static func from_run_manager(run_manager):
 	if run_manager.has_method("spend_gold"):
 		context.spend_gold = run_manager.spend_gold
 
-	# XP access
-	if context.team_manager != null and context.team_manager.has_method("distribute_experience"):
-		context.distribute_xp = context.team_manager.distribute_experience
+	# XP access (player level system)
+	if run_manager.has_method("add_player_xp"):
+		context.add_player_xp = run_manager.add_player_xp
 
 	# Inventory access
 	if run_manager.get("_player_inventory") != null:

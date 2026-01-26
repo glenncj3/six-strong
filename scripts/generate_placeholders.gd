@@ -55,7 +55,7 @@ func _run() -> void:
 		"forest_cloak": Color.DARK_OLIVE_GREEN,
 		"war_banner": Color.CRIMSON,
 		"soldiers_shield": Color.SLATE_GRAY,
-		"war_horn": Color.BRONZE
+		"war_horn": Color.SIENNA
 	}
 
 	for item_name in items:

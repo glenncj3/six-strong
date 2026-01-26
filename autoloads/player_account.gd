@@ -12,7 +12,6 @@ extends Node
 signal gems_changed(new_amount: int)
 signal reroll_tokens_changed(new_amount: int)
 signal character_unlocked(char_id: String)
-signal character_prestige_up(char_id: String, new_prestige: int)
 
 # Legacy system signals (Phase 0)
 signal legacy_unlocked(legacy_id: String)
@@ -30,7 +29,8 @@ const SAVE_PATH = "user://player_account.json"
 # Save format version for clean slate detection
 # Version 1: Old character-centric format
 # Version 2: New legacy-centric format (Phase 0+)
-const SAVE_FORMAT_VERSION = 2
+# Version 3: Player level system + 5 placeholder legacies
+const SAVE_FORMAT_VERSION = 3
 
 # Default starting legacies to unlock
 const STARTING_LEGACY_IDS = ["legacy_knight_order", "legacy_shadow_guild", "legacy_arcane_academy", "legacy_wild_hunt", "legacy_iron_legion"]
@@ -73,6 +73,13 @@ func save_account() -> void:
 	}
 
 	JsonPersistence.save_json(SAVE_PATH, save_data)
+
+
+func reset_account() -> void:
+	"""Delete save file and create a fresh account."""
+	JsonPersistence.delete_file(SAVE_PATH)
+	_create_default_account()
+	print("PlayerAccount: Account reset to defaults")
 
 
 func load_account() -> void:
@@ -185,7 +192,6 @@ func _setup_manager_connections() -> void:
 
 	# Forward character collection signals
 	_safe_connect(_collection.character_unlocked, _on_character_unlocked)
-	_safe_connect(_collection.character_prestige_up, _on_character_prestige_up)
 
 	# Forward legacy collection signals (Phase 0)
 	_safe_connect(_legacy_collection.legacy_unlocked, _on_legacy_unlocked)
@@ -208,9 +214,6 @@ func _on_reroll_tokens_changed(amount: int) -> void:
 
 func _on_character_unlocked(char_id: String) -> void:
 	character_unlocked.emit(char_id)
-
-func _on_character_prestige_up(char_id: String, new_prestige: int) -> void:
-	character_prestige_up.emit(char_id, new_prestige)
 
 func _on_legacy_unlocked(legacy_id: String) -> void:
 	legacy_unlocked.emit(legacy_id)

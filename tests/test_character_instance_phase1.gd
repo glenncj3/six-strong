@@ -1,6 +1,7 @@
 extends Node
 # Test script for CharacterInstance class (Phase 1 refactor)
 # Tests the simplified character model: no items, no skills, with grid position
+# Characters are now static content - no leveling (player levels up instead)
 # Note: No class_name - loaded via preload in run_tests.gd
 
 
@@ -17,10 +18,9 @@ static func run_all_tests() -> Dictionary:
 	_test_stats_from_master_data(results)
 	_test_grid_position(results)
 	_test_no_items_or_skills(results)
-	_test_level_up_bonus(results)
 	_test_combat_functions(results)
 	_test_serialization(results)
-	_test_from_master_data_factory(results)
+	_test_from_dict_factory(results)
 
 	return results
 
@@ -58,20 +58,8 @@ class MockGameData:
 
 static func _test_initial_state(results: Dictionary) -> void:
 	"""Test that a character instance starts with correct initial state."""
-	# Note: This test uses a simplified approach since we can't easily mock GameData in static context
-	# In production, CharacterInstance would use the real GameData autoload
-
-	var mock_data = {
-		"id": "char_test_001",
-		"name": "Test Warrior",
-		"base_stats": {"health": 100, "mana": 5, "defendRate": 15}
-	}
-
-	# Create mock stats directly for testing
 	var instance = CharacterInstance.new()
 	instance.base_character_id = "char_test_001"
-	instance.level = 1
-	instance.experience = 0
 	instance.stats = {
 		"health": 100,
 		"mana": 5,
@@ -79,19 +67,14 @@ static func _test_initial_state(results: Dictionary) -> void:
 	}
 	instance.current_health = 100
 
-	if instance.level != 1:
-		results.failed += 1
-		results.errors.append("Initial level should be 1, got %d" % instance.level)
-		return
-
-	if instance.experience != 0:
-		results.failed += 1
-		results.errors.append("Initial experience should be 0, got %d" % instance.experience)
-		return
-
 	if instance.grid_position != Vector2i(-1, -1):
 		results.failed += 1
 		results.errors.append("Initial grid position should be (-1, -1)")
+		return
+
+	if instance.base_character_id != "char_test_001":
+		results.failed += 1
+		results.errors.append("base_character_id should be char_test_001")
 		return
 
 	results.passed += 1
@@ -123,12 +106,6 @@ static func _test_stats_from_master_data(results: Dictionary) -> void:
 	if instance.defend_rate != 15:
 		results.failed += 1
 		results.errors.append("defend_rate should be 15, got %d" % instance.defend_rate)
-		return
-
-	# Verify no income stat (Phase 1 change)
-	if instance.stats.has("income"):
-		results.failed += 1
-		results.errors.append("Character should not have income stat in Phase 1")
 		return
 
 	results.passed += 1
@@ -220,41 +197,19 @@ static func _test_no_items_or_skills(results: Dictionary) -> void:
 		results.errors.append("to_dict should not include learned_skills")
 		return
 
+	# Characters no longer have level/experience (player levels instead)
+	if data.has("level"):
+		results.failed += 1
+		results.errors.append("to_dict should not include level (player levels, not characters)")
+		return
+
+	if data.has("experience"):
+		results.failed += 1
+		results.errors.append("to_dict should not include experience")
+		return
+
 	results.passed += 1
 	print("  [PASS] test_no_items_or_skills")
-
-
-static func _test_level_up_bonus(results: Dictionary) -> void:
-	"""Test that leveling up provides stat bonuses."""
-	var instance = CharacterInstance.new()
-	instance.base_character_id = "char_test_001"
-	instance.stats = {"health": 100, "mana": 5, "defendRate": 15}
-	instance.current_health = 100
-
-	var initial_health = instance.max_health
-
-	# Add experience to level up
-	var leveled_up = instance.add_experience(100)  # XP_PER_LEVEL = 100
-
-	if not leveled_up:
-		results.failed += 1
-		results.errors.append("Should have leveled up with 100 XP")
-		return
-
-	if instance.level != 2:
-		results.failed += 1
-		results.errors.append("Level should be 2 after level up, got %d" % instance.level)
-		return
-
-	# Health should increase by 5 per level
-	var expected_health = initial_health + 5
-	if instance.max_health != expected_health:
-		results.failed += 1
-		results.errors.append("max_health should be %d after level up, got %d" % [expected_health, instance.max_health])
-		return
-
-	results.passed += 1
-	print("  [PASS] test_level_up_bonus")
 
 
 static func _test_combat_functions(results: Dictionary) -> void:
@@ -317,8 +272,6 @@ static func _test_serialization(results: Dictionary) -> void:
 	"""Test to_dict serialization includes grid_position."""
 	var instance = CharacterInstance.new()
 	instance.base_character_id = "char_test_001"
-	instance.level = 3
-	instance.experience = 50
 	instance.stats = {"health": 115, "mana": 5, "defendRate": 15}
 	instance.current_health = 80
 	instance.set_grid_position(1, 2)
@@ -328,16 +281,6 @@ static func _test_serialization(results: Dictionary) -> void:
 	if data.base_character_id != "char_test_001":
 		results.failed += 1
 		results.errors.append("Serialized base_character_id mismatch")
-		return
-
-	if data.level != 3:
-		results.failed += 1
-		results.errors.append("Serialized level should be 3")
-		return
-
-	if data.experience != 50:
-		results.failed += 1
-		results.errors.append("Serialized experience should be 50")
 		return
 
 	if data.current_health != 80:
@@ -359,12 +302,10 @@ static func _test_serialization(results: Dictionary) -> void:
 	print("  [PASS] test_serialization")
 
 
-static func _test_from_master_data_factory(results: Dictionary) -> void:
+static func _test_from_dict_factory(results: Dictionary) -> void:
 	"""Test from_dict deserialization."""
 	var saved_data = {
 		"base_character_id": "char_test_001",
-		"level": 5,
-		"experience": 25,
 		"current_health": 75,
 		"stats": {"health": 120, "mana": 5, "defendRate": 15},
 		"grid_position": {"x": 0, "y": 1}
@@ -373,16 +314,9 @@ static func _test_from_master_data_factory(results: Dictionary) -> void:
 	# Note: from_dict would normally use GameData, but we're testing structure
 	var instance = CharacterInstance.new()
 	instance.base_character_id = saved_data.base_character_id
-	instance.level = saved_data.level
-	instance.experience = saved_data.experience
 	instance.current_health = saved_data.current_health
 	instance.stats = saved_data.stats.duplicate()
 	instance.grid_position = Vector2i(saved_data.grid_position.x, saved_data.grid_position.y)
-
-	if instance.level != 5:
-		results.failed += 1
-		results.errors.append("Deserialized level should be 5")
-		return
 
 	if instance.grid_position != Vector2i(0, 1):
 		results.failed += 1
@@ -394,5 +328,10 @@ static func _test_from_master_data_factory(results: Dictionary) -> void:
 		results.errors.append("Deserialized max_health should be 120")
 		return
 
+	if instance.current_health != 75:
+		results.failed += 1
+		results.errors.append("Deserialized current_health should be 75")
+		return
+
 	results.passed += 1
-	print("  [PASS] test_from_master_data_factory")
+	print("  [PASS] test_from_dict_factory")

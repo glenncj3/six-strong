@@ -189,10 +189,6 @@ static func generate_segment_weights(segments: Array) -> Array:
 	return weights
 
 
-## Get team max level helper
+## Get player level helper (gates content availability)
 static func _get_team_max_level() -> int:
-	var team = RunManager.get_team()
-	var max_level = 1
-	for char_instance in team:
-		max_level = maxi(max_level, char_instance.level)
-	return max_level
+	return RunManager.get_player_level()

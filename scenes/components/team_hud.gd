@@ -184,7 +184,7 @@ func _update_grid_display() -> void:
 # SLOT INTERACTION
 # =============================================================================
 
-func _on_slot_clicked(row: int, col: int, character: CharacterInstance) -> void:
+func _on_slot_clicked(_row: int, _col: int, character: CharacterInstance) -> void:
 	"""Handle slot click."""
 	if character == null:
 		# Empty slot clicked - could show context menu or do nothing

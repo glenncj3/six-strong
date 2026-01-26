@@ -37,7 +37,8 @@ var _generators: Dictionary = {}
 # Cache for filtered pools (invalidated when round/team changes)
 var _cache_round: int = -1
 var _cache_max_level: int = 0
-var _cached_items: Array = []
+var _cached_items: Array = []  # Regular items from pool
+var _cached_item_upgrades: Array = []  # Item upgrades available based on player inventory
 var _cached_skills: Array = []
 var _cached_characters: Array = []
 
@@ -237,12 +238,8 @@ func _gen_pick_from_pool(params: Dictionary, pool: Array, default_min: int, defa
 
 
 func _get_team_max_level() -> int:
-	"""Get the highest level among team members."""
-	var team = RunManager.get_team()
-	var max_level = 1
-	for char_instance in team:
-		max_level = maxi(max_level, char_instance.level)
-	return max_level
+	"""Get the player's current level (gates content availability)."""
+	return RunManager.get_player_level()
 
 
 func _filter_pool_by_level(pool: Array, max_level: int) -> Array:
@@ -266,13 +263,23 @@ func _refresh_cache_if_needed() -> void:
 
 		# Phase 6: If RunPool is available, use it for filtering (DRY)
 		if _run_pool != null:
-			# Get item IDs from RunPool, then fetch full data from GameData
+			# Get regular items from RunPool (items go directly into pool)
 			var item_ids = _run_pool.pick_random(RunPoolScript.ContentType.ITEM, 999, max_level)
 			_cached_items = []
 			for item_id in item_ids:
-				var item_data = GameData.get_item_upgrade_by_id(item_id)
+				var item_data = GameData.get_item_by_id(item_id)
 				if not item_data.is_empty():
 					_cached_items.append(item_data)
+
+			# Get item upgrades that are available based on player's inventory
+			# Item upgrades only appear if player owns the base item
+			var player_inventory = RunManager.get_inventory()
+			var upgrade_ids = _run_pool.get_available_item_upgrades(player_inventory, max_level)
+			_cached_item_upgrades = []
+			for upgrade_id in upgrade_ids:
+				var upgrade_data = GameData.get_item_upgrade_by_id(upgrade_id)
+				if not upgrade_data.is_empty():
+					_cached_item_upgrades.append(upgrade_data)
 
 			var skill_ids = _run_pool.pick_random(RunPoolScript.ContentType.SKILL, 999, max_level)
 			_cached_skills = []
@@ -289,15 +296,22 @@ func _refresh_cache_if_needed() -> void:
 					_cached_characters.append(char_data)
 		else:
 			# Fallback to filtering all content by level (legacy behavior)
-			_cached_items = _filter_pool_by_level(GameData.get_all_item_upgrades(), max_level)
+			_cached_items = _filter_pool_by_level(GameData.get_all_items(), max_level)
+			_cached_item_upgrades = _filter_pool_by_level(GameData.get_all_item_upgrades(), max_level)
 			_cached_skills = _filter_pool_by_level(GameData.get_all_skills(), max_level)
 			_cached_characters = _filter_pool_by_level(GameData.get_all_characters(), max_level)
 
 
 func _get_cached_items() -> Array:
-	"""Get level-filtered items from cache."""
+	"""Get level-filtered regular items from cache."""
 	_refresh_cache_if_needed()
 	return _cached_items
+
+
+func _get_cached_item_upgrades() -> Array:
+	"""Get item upgrades available based on player inventory."""
+	_refresh_cache_if_needed()
+	return _cached_item_upgrades
 
 
 func _get_cached_skills() -> Array:
@@ -339,24 +353,29 @@ func _gen_pick_learnable_skills(params: Dictionary) -> Array:
 
 
 func _gen_pick_shop_offerings(params: Dictionary) -> Array:
-	"""Pick a mix of items and skills for the shop (max 3 total)."""
+	"""Pick a mix of items, item upgrades, and skills for the shop."""
 	var count = int(params.get("count", 3))
 	var offerings: Array = []
 
 	var available_items = _get_cached_items()
+	var available_upgrades = _get_cached_item_upgrades()
 	var available_skills = _get_cached_skills()
 
-	# Mix items and skills randomly, filtering to only include acquirable ones
+	# Mix items, upgrades, and skills randomly
 	var pool: Array = []
 
-	# Phase 2: Items are checked against player inventory
+	# Regular items: player can buy if they don't already own it
 	for item in available_items:
 		var item_id = item["id"]
-		# Check if player already has this item
 		if not RunManager.has_item_in_inventory(item_id):
 			pool.append({"type": "item", "data": item})
 
-	# Phase 2: Skills are instant effects, always available
+	# Item upgrades: available because player owns the base item (pre-filtered)
+	# Player can buy to replace their base item with the upgrade
+	for upgrade in available_upgrades:
+		pool.append({"type": "item_upgrade", "data": upgrade})
+
+	# Skills are instant effects, always available
 	for skill in available_skills:
 		pool.append({"type": "skill", "data": skill})
 
@@ -373,7 +392,8 @@ func _gen_pick_shop_offerings(params: Dictionary) -> Array:
 			"description": data.get("description", ""),
 			"image_path": data.get("image_path", ""),
 			"cost": data.get("cost", 20),
-			"level_requirement": data.get("level_requirement", 1)
+			"level_requirement": data.get("level_requirement", 1),
+			"upgrades_item": data.get("upgrades_item", "")  # For item upgrades
 		})
 
 	return offerings
@@ -383,19 +403,24 @@ func _gen_pick_mystery_elements(params: Dictionary) -> Array:
 	"""Pick mystery item options with different elements for treasure chest."""
 	var count = int(params.get("count", 3))
 
-	# Phase 2: Get items not in player inventory (from cache)
+	# Combine regular items and available item upgrades
 	var available_items = _get_cached_items()
-	var equippable_items: Array = []
+	var available_upgrades = _get_cached_item_upgrades()
+	var acquirable: Array = []
 
+	# Regular items player doesn't own
 	for item in available_items:
 		var item_id = item["id"]
-		# Check if player already has this item
 		if not RunManager.has_item_in_inventory(item_id):
-			equippable_items.append(item)
+			acquirable.append(item)
 
-	# Group items by element
+	# Item upgrades (already filtered to those player can use)
+	for upgrade in available_upgrades:
+		acquirable.append(upgrade)
+
+	# Group by element
 	var items_by_element: Dictionary = {}
-	for item in equippable_items:
+	for item in acquirable:
 		var element = item.get("element", "neutral")
 		if not items_by_element.has(element):
 			items_by_element[element] = []

@@ -13,6 +13,7 @@ const AmbientParticlesScene = preload("res://scenes/effects/ambient_particles.ts
 @onready var play_button = $MarginContainer/VBoxContainer/ButtonContainer/PlayButton
 @onready var collection_button = $MarginContainer/VBoxContainer/ButtonContainer/CollectionButton
 @onready var quit_button = $MarginContainer/VBoxContainer/ButtonContainer/QuitButton
+@onready var reset_button = $MarginContainer/VBoxContainer/ButtonContainer/ResetButton
 @onready var header_bar = $HeaderBar
 @onready var button_container = $MarginContainer/VBoxContainer/ButtonContainer
 
@@ -35,6 +36,7 @@ func _ready() -> void:
 	play_button.pressed.connect(_on_play_pressed)
 	collection_button.pressed.connect(_on_collection_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
+	reset_button.pressed.connect(_on_reset_pressed)
 
 	# Check for active run to resume
 	if RunManager.has_active_run():
@@ -71,6 +73,7 @@ func _apply_visual_styling() -> void:
 	UIStyles.apply_button_styles(play_button)
 	UIStyles.apply_button_styles(collection_button)
 	UIStyles.apply_button_styles(quit_button)
+	UIStyles.apply_button_styles(reset_button)
 
 
 func _apply_button_effects() -> void:
@@ -131,6 +134,26 @@ func _on_collection_pressed() -> void:
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
+
+
+func _on_reset_pressed() -> void:
+	# Show confirmation dialog
+	var dialog = ConfirmationDialog.new()
+	dialog.dialog_text = "Reset all progress?\n\nThis will delete your save data and start fresh."
+	dialog.ok_button_text = "Reset"
+	dialog.cancel_button_text = "Cancel"
+	dialog.confirmed.connect(_confirm_reset.bind(dialog))
+	dialog.canceled.connect(dialog.queue_free)
+	add_child(dialog)
+	dialog.popup_centered()
+
+
+func _confirm_reset(dialog: ConfirmationDialog) -> void:
+	dialog.queue_free()
+	PlayerAccount.reset_account()
+	RunManager.clear_run_state()
+	_update_currency_display()
+	play_button.text = "PLAY"
 
 
 func _input(event: InputEvent) -> void:

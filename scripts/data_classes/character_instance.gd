@@ -1,16 +1,12 @@
 class_name CharacterInstance
 extends RefCounted
 # CharacterInstance - Runtime representation of a character during a run
-# Phase 1 Refactor: Simplified to remove item/skill tracking
-# Characters are now run-time acquisitions, like items
-# Stats = base_stats + level bonuses only (no items/skills/prestige)
+# Characters are run-time acquisitions like items/skills.
+# They have level_requirement in master data that gates when they appear.
+# Stats = base_stats only (no leveling, no items/skills/prestige modifiers)
 
 # Persistent identifiers
 var base_character_id: String = ""
-
-# Runtime progression
-var level: int = 1
-var experience: int = 0
 
 # Current state
 var current_health: int = 0
@@ -122,35 +118,6 @@ func is_back_row() -> bool:
 
 
 # =============================================================================
-# PROGRESSION
-# =============================================================================
-
-func add_experience(xp: int) -> bool:
-	"""
-	Add experience, returns true if leveled up.
-	"""
-	experience += xp
-
-	if experience >= GameConstants.XP_PER_LEVEL:
-		experience -= GameConstants.XP_PER_LEVEL
-		level += 1
-		_apply_level_bonus()
-		return true
-
-	return false
-
-
-func _apply_level_bonus() -> void:
-	"""Apply stat bonuses from leveling up."""
-	# Simple level bonus: +5 health per level
-	# Can be expanded later for more complex leveling
-	stats[GameConstants.STAT_HEALTH] = stats.get(GameConstants.STAT_HEALTH, 0) + 5
-	# Increase current health too if it was at max
-	if current_health == max_health - 5:
-		current_health = max_health
-
-
-# =============================================================================
 # COMBAT
 # =============================================================================
 
@@ -182,8 +149,6 @@ func to_dict() -> Dictionary:
 	"""Serialize to dictionary for saving."""
 	return {
 		"base_character_id": base_character_id,
-		"level": level,
-		"experience": experience,
 		"current_health": current_health,
 		"stats": stats.duplicate(),
 		"grid_position": {"x": grid_position.x, "y": grid_position.y}
@@ -195,8 +160,6 @@ static func from_dict(data: Dictionary, game_data = null) -> CharacterInstance:
 	var instance = CharacterInstance.new({}, game_data)
 
 	instance.base_character_id = data.get("base_character_id", "")
-	instance.level = data.get("level", 1)
-	instance.experience = data.get("experience", 0)
 	instance.current_health = data.get("current_health", 0)
 
 	# Restore stats if saved (otherwise recalculate)
@@ -241,13 +204,19 @@ static func from_master_data(char_id: String, game_data = null) -> CharacterInst
 
 func get_character_name() -> String:
 	"""Get the character's name from master data."""
-	var char_master = _get_game_data().get_character_by_id(base_character_id)
+	var gd = _get_game_data()
+	if gd == null:
+		return "Unknown"
+	var char_master = gd.get_character_by_id(base_character_id)
 	return char_master.get("name", "Unknown")
 
 
 func get_character_description() -> String:
 	"""Get the character's description from master data."""
-	var char_master = _get_game_data().get_character_by_id(base_character_id)
+	var gd = _get_game_data()
+	if gd == null:
+		return ""
+	var char_master = gd.get_character_by_id(base_character_id)
 	return char_master.get("description", "")
 
 
@@ -258,11 +227,10 @@ func get_stat(stat_name: String) -> int:
 
 func recalculate_stats() -> void:
 	"""Recalculate all stats from master data (useful after major changes)."""
-	var char_master = _get_game_data().get_character_by_id(base_character_id)
+	var gd = _get_game_data()
+	if gd == null:
+		return
+	var char_master = gd.get_character_by_id(base_character_id)
 	if char_master.is_empty():
 		return
 	stats = StatCalculator.calculate_character_base_stats(char_master)
-
-	# Apply level bonuses
-	for i in range(level - 1):
-		stats[GameConstants.STAT_HEALTH] = stats.get(GameConstants.STAT_HEALTH, 0) + 5

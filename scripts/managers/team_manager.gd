@@ -42,14 +42,8 @@ func calculate_total_income() -> int:
 	"""Calculate total income from all team members."""
 	var total = 0
 	for char_instance in team:
-		total += char_instance.income
+		total += char_instance.stats.get(GameConstants.STAT_INCOME, 0)
 	return total
-
-
-func distribute_experience(xp: int) -> void:
-	"""Distribute XP to all team members."""
-	for char_instance in team:
-		char_instance.add_experience(xp)
 
 
 func get_summary() -> Dictionary:
@@ -57,7 +51,6 @@ func get_summary() -> Dictionary:
 	var summary = {
 		"total_health": 0,
 		"max_health": 0,
-		"average_level": 0.0,
 		"total_mana": 0
 	}
 
@@ -67,10 +60,7 @@ func get_summary() -> Dictionary:
 	for char_instance in team:
 		summary["total_health"] += char_instance.current_health
 		summary["max_health"] += char_instance.max_health
-		summary["average_level"] += char_instance.level
 		summary["total_mana"] += char_instance.mana
-
-	summary["average_level"] /= team.size()
 
 	return summary
 

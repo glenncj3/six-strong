@@ -110,7 +110,7 @@ func _on_prestige_up_all() -> void:
 func _on_clear_run() -> void:
 	"""Clear any active run state."""
 	if RunManager.is_run_active:
-		RunManager._clear_run_state()
+		RunManager.clear_run_state()
 		print("DebugMenu: Cleared active run")
 		_update_run_controls()
 	else:

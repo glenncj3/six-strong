@@ -58,17 +58,17 @@ static func _effect_grant_gold(effect_data: Dictionary, context) -> void:
 
 static func _effect_grant_xp(effect_data: Dictionary, context) -> void:
 	"""
-	Grant XP to all team members.
+	Grant XP to the player.
 
 	Effect data:
-		- value: int - Amount of XP to grant to each team member
+		- value: int - Amount of XP to grant to the player
 	"""
 	var amount = effect_data.get("value", 0)
 	if amount <= 0:
 		push_warning("SkillEffects: grant_xp called with non-positive value: %d" % amount)
 		return
 
-	context.grant_xp_to_all(amount)
+	context.grant_xp_to_player(amount)
 
 
 # =============================================================================
@@ -120,7 +120,7 @@ static func get_effect_description(effect_data: Dictionary) -> String:
 		"grant_gold":
 			return "Gain %d gold" % value
 		"grant_xp":
-			return "Grant %d XP to all team members" % value
+			return "Grant %d XP to the player" % value
 		"next_character_stat_boost":
 			var stat = effect_data.get("stat", "health")
 			var stat_name = _get_stat_display_name(stat)

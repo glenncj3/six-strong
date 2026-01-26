@@ -102,8 +102,8 @@ func display_character_instance(char_instance: CharacterInstance) -> void:
 	# Set portrait using UIHelpers
 	UIHelpers.set_texture_safe(portrait, char_master.get("image_path", ""))
 
-	# Set name with level
-	name_label.text = "%s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
+	# Set name
+	name_label.text = char_instance.get_character_name()
 
 	# Set description
 	if description_label:

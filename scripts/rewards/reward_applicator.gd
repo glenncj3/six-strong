@@ -102,13 +102,8 @@ static func get_eligible_characters(definition: RewardDefinition) -> Dictionary:
 		RewardTypes.RewardType.HEALTH:
 			return EncounterUIHelpers.filter_heal_eligible_characters(team)
 		RewardTypes.RewardType.XP:
-			# XP can be given to any character
-			var indices: Array = []
-			var characters: Array = []
-			for i in range(team.size()):
-				indices.append(i)
-				characters.append(team[i])
-			return {"indices": indices, "characters": characters}
+			# XP goes to the player - no character selection needed
+			return {"indices": [], "characters": [], "no_selection_needed": true}
 		RewardTypes.RewardType.ITEM, RewardTypes.RewardType.ITEM_RANDOM:
 			# Items go to player inventory - no character selection needed
 			return {"indices": [], "characters": [], "no_selection_needed": true}
@@ -126,7 +121,7 @@ static func requires_character_selection(definition: RewardDefinition) -> bool:
 		RewardTypes.RewardType.HEALTH:
 			return definition.target == RewardTypes.RewardTarget.SINGLE
 		RewardTypes.RewardType.XP:
-			return definition.target == RewardTypes.RewardTarget.SINGLE
+			return false  # XP goes to the player, not characters
 		RewardTypes.RewardType.ITEM, RewardTypes.RewardType.ITEM_RANDOM:
 			return false  # Items go to player inventory
 		RewardTypes.RewardType.SKILL, RewardTypes.RewardType.SKILL_RANDOM:
@@ -199,36 +194,20 @@ static func _apply_health(definition: RewardDefinition, context: Dictionary, tar
 	return result
 
 
-static func _apply_xp(definition: RewardDefinition, context: Dictionary, target_char: Variant) -> ApplyResult:
-	var team = RunManager.get_team()
-	var targets: Array = []
+static func _apply_xp(definition: RewardDefinition, context: Dictionary, _target_char: Variant) -> ApplyResult:
+	"""Apply XP reward - XP goes to the player (gates content availability)."""
 	var amount = definition.params.get("amount", 0)
+	if amount <= 0:
+		return ApplyResult.new(false, "Invalid XP amount")
 
-	match definition.target:
-		RewardTypes.RewardTarget.ALL:
-			targets = team
-		RewardTypes.RewardTarget.RANDOM:
-			if team.size() > 0:
-				targets = [team[randi() % team.size()]]
-		RewardTypes.RewardTarget.SINGLE:
-			if target_char != null:
-				targets = [target_char]
-			else:
-				return ApplyResult.new(false, "No character selected for XP")
+	# Use context callback if available, otherwise use RunManager
+	var on_xp_reward = context.get("on_xp_reward", Callable())
+	if on_xp_reward.is_valid():
+		on_xp_reward.call(amount)
+	else:
+		RunManager.add_player_xp(amount)
 
-	if targets.is_empty():
-		return ApplyResult.new(false, "No valid targets for XP")
-
-	var on_xp_select = context.get("on_xp_select", Callable())
-
-	for i in range(team.size()):
-		if team[i] in targets:
-			if on_xp_select.is_valid():
-				on_xp_select.call(i, amount, null)
-			else:
-				team[i].add_experience(amount)
-
-	var result = ApplyResult.new(true, "+%d XP to %d characters" % [amount, targets.size()])
+	var result = ApplyResult.new(true, "+%d XP" % amount)
 	result.actual_reward = definition
 	return result
 

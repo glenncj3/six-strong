@@ -28,6 +28,10 @@ var current_gold: int = 0
 var starting_gold: int = 0
 var encounters_this_round: int = 0
 
+# Player level progression (gates what content is available from pools)
+var player_level: int = 1
+var player_xp: int = 0
+
 # =============================================================================
 # SUBSYSTEMS (Composition)
 # =============================================================================
@@ -79,6 +83,8 @@ func reset() -> void:
 	current_gold = 0
 	starting_gold = 0
 	encounters_this_round = 0
+	player_level = 1
+	player_xp = 0
 	grid.clear()
 	inventory.clear()
 	lingering_effects.clear()
@@ -125,6 +131,65 @@ func lose_reputation(amount: int) -> void:
 func is_defeated() -> bool:
 	"""Check if reputation has reached 0."""
 	return reputation <= 0
+
+
+# =============================================================================
+# PLAYER LEVEL PROGRESSION
+# =============================================================================
+
+func add_player_xp(amount: int) -> bool:
+	"""
+	Add XP to the player. Player level gates what content is available from pools.
+
+	Args:
+		amount: XP to add
+
+	Returns:
+		True if player leveled up, false otherwise
+	"""
+	if amount <= 0:
+		return false
+
+	# Already at max level
+	if player_level >= GameConstants.MAX_PLAYER_LEVEL:
+		return false
+
+	player_xp += amount
+	var leveled_up = false
+
+	# Process level ups (can gain multiple levels from large XP gains)
+	while player_xp >= GameConstants.XP_PER_LEVEL and player_level < GameConstants.MAX_PLAYER_LEVEL:
+		player_xp -= GameConstants.XP_PER_LEVEL
+		player_level += 1
+		leveled_up = true
+
+	# Cap XP at max level
+	if player_level >= GameConstants.MAX_PLAYER_LEVEL:
+		player_xp = 0
+
+	return leveled_up
+
+
+func get_player_level() -> int:
+	"""Get current player level (1-5)."""
+	return player_level
+
+
+func get_player_xp() -> int:
+	"""Get current XP progress toward next level."""
+	return player_xp
+
+
+func get_xp_progress() -> float:
+	"""Get XP progress as percentage (0.0 to 1.0)."""
+	if player_level >= GameConstants.MAX_PLAYER_LEVEL:
+		return 1.0
+	return float(player_xp) / float(GameConstants.XP_PER_LEVEL)
+
+
+func is_max_level() -> bool:
+	"""Check if player has reached maximum level."""
+	return player_level >= GameConstants.MAX_PLAYER_LEVEL
 
 
 # =============================================================================
@@ -208,6 +273,7 @@ func remove_character_by_index(index: int) -> CharacterInstance:
 	Remove a character by linear index (backwards compatibility).
 	Index maps row-major: 0-2 = front row, 3-5 = back row
 	"""
+	@warning_ignore("integer_division")
 	var row = index / GameConstants.GRID_COLS
 	var col = index % GameConstants.GRID_COLS
 	return grid.remove_character(row, col)
@@ -264,6 +330,8 @@ func to_dict() -> Dictionary:
 		"current_gold": current_gold,
 		"starting_gold": starting_gold,
 		"encounters_this_round": encounters_this_round,
+		"player_level": player_level,
+		"player_xp": player_xp,
 		"grid": grid.to_dict(),
 		"inventory": inventory.to_dict(),
 		"lingering_effects": lingering_effects.to_dict(),
@@ -286,6 +354,8 @@ static func from_dict(data: Dictionary):
 	state.current_gold = data.get("current_gold", 0)
 	state.starting_gold = data.get("starting_gold", 0)
 	state.encounters_this_round = data.get("encounters_this_round", 0)
+	state.player_level = data.get("player_level", 1)
+	state.player_xp = data.get("player_xp", 0)
 
 	# Restore grid (Phase 5)
 	var grid_data = data.get("grid", {})

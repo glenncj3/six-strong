@@ -100,7 +100,7 @@ func _on_legacy_fame_changed(legacy_id: String, new_fame: int) -> void:
 	_notify_change()
 
 
-func _on_legacy_prestige_up_internal(legacy_id: String, new_prestige: int) -> void:
+func _on_legacy_prestige_up_internal(_legacy_id: String, _new_prestige: int) -> void:
 	"""Handle prestige up from prestige tracker (signal forwarding only)."""
 	# Note: The actual unlocks are handled in add_legacy_fame()
 	# This signal is for the raw prestige tracker event

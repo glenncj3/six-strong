@@ -7,6 +7,7 @@ extends RefCounted
 
 signal item_added(item: ItemInstance)
 signal item_removed(item_id: String)
+signal item_upgraded(old_item_id: String, new_item: ItemInstance)
 
 var _items: Array[ItemInstance] = []
 
@@ -103,6 +104,44 @@ func get_item_count_total() -> int:
 func clear() -> void:
 	"""Remove all items from inventory."""
 	_items.clear()
+
+
+# =============================================================================
+# ITEM UPGRADES
+# =============================================================================
+
+func replace_item_with_upgrade(base_item_id: String, upgrade_id: String) -> ItemInstance:
+	"""
+	Replace a base item with its upgrade.
+
+	The base item is removed and the upgrade is added in its place.
+
+	Args:
+		base_item_id: ID of the base item to replace (must be in inventory)
+		upgrade_id: ID of the item upgrade to add
+
+	Returns:
+		The new ItemInstance if successful, null if base item not found
+	"""
+	# Verify the player has the base item
+	if not has_item(base_item_id):
+		push_warning("PlayerInventory: Cannot upgrade - base item not in inventory: %s" % base_item_id)
+		return null
+
+	# Remove the base item
+	remove_item(base_item_id)
+
+	# Add the upgrade (is_upgrade = true)
+	var upgrade_item = ItemInstance.new(upgrade_id, true)
+	if upgrade_item.item_id.is_empty():
+		push_warning("PlayerInventory: Invalid upgrade ID: %s" % upgrade_id)
+		# Try to restore the base item
+		add_item_by_id(base_item_id, false)
+		return null
+
+	add_item(upgrade_item)
+	item_upgraded.emit(base_item_id, upgrade_item)
+	return upgrade_item
 
 
 # =============================================================================

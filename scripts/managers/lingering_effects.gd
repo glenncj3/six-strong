@@ -41,8 +41,8 @@ func add_effect(skill_data: Dictionary, current_round: int = 0) -> int:
 		push_warning("LingeringEffects: Skill data missing 'effect' field")
 		return -1
 
-	var trigger = skill_data.get("trigger", "")
-	if trigger.is_empty():
+	var effect_trigger = skill_data.get("trigger", "")
+	if effect_trigger.is_empty():
 		push_warning("LingeringEffects: Lingering skill missing 'trigger' field")
 		return -1
 
@@ -54,7 +54,7 @@ func add_effect(skill_data: Dictionary, current_round: int = 0) -> int:
 		"skill_id": skill_data.get("id", "unknown"),
 		"skill_name": skill_data.get("name", "Unknown Skill"),
 		"effect": skill_data.get("effect", {}),
-		"trigger": trigger,
+		"trigger": effect_trigger,
 		"added_round": current_round
 	}
 
@@ -64,7 +64,7 @@ func add_effect(skill_data: Dictionary, current_round: int = 0) -> int:
 	return effect_id
 
 
-func add_effect_direct(effect_data: Dictionary, trigger: String, skill_id: String = "", current_round: int = 0) -> int:
+func add_effect_direct(effect_data: Dictionary, effect_trigger: String, skill_id: String = "", current_round: int = 0) -> int:
 	"""
 	Add a lingering effect directly (without full skill data).
 
@@ -85,7 +85,7 @@ func add_effect_direct(effect_data: Dictionary, trigger: String, skill_id: Strin
 		"skill_id": skill_id,
 		"skill_name": "",
 		"effect": effect_data,
-		"trigger": trigger,
+		"trigger": effect_trigger,
 		"added_round": current_round
 	}
 
@@ -134,7 +134,7 @@ func trigger(trigger_type: String, context, effect_registry = null) -> Array[Dic
 	return triggered
 
 
-func trigger_for_character(trigger_type: String, character, context) -> Array[Dictionary]:
+func trigger_for_character(trigger_type: String, character, _context) -> Array[Dictionary]:
 	"""
 	Trigger effects that apply to a specific character (e.g., next_character_acquired).
 

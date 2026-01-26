@@ -141,6 +141,9 @@ func _ready() -> void:
 	print("")
 	print("============================================================")
 
+	# Auto-quit for headless test runs
+	get_tree().quit(total_failed)
+
 
 func _print_suite_summary(suite_name: String, results: Dictionary) -> void:
 	"""Print summary for a test suite."""

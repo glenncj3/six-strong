@@ -85,8 +85,8 @@ func setup_from_instance(char_instance: CharacterInstance) -> void:
 	# Set portrait using UIHelpers
 	UIHelpers.set_texture_safe(portrait, char_master.get("image_path", ""))
 
-	# Set name with level
-	name_label.text = "%s Lv.%d" % [char_instance.get_character_name(), char_instance.level]
+	# Set name
+	name_label.text = char_instance.get_character_name()
 
 	# Display instance stats (includes level bonuses)
 	health_label.text = UIHelpers.format_stat(GameConstants.STAT_HEALTH, char_instance.stats.get(GameConstants.STAT_HEALTH, 0))

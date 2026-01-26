@@ -147,8 +147,8 @@ func _populate(char_instance: CharacterInstance) -> void:
 	if char_master.is_empty():
 		return
 
-	# Name with level
-	name_label.text = "%s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
+	# Name
+	name_label.text = char_instance.get_character_name()
 
 	# Stats summary
 	var hp = char_instance.stats.get(GameConstants.STAT_HEALTH, 0)

@@ -40,6 +40,7 @@ var unlocked_starting_characters: Array[String] = []
 var unlocked_starting_items: Array[String] = []
 var unlocked_characters: Array[String] = []
 var unlocked_items: Array[String] = []
+var unlocked_item_upgrades: Array[String] = []
 var unlocked_skills: Array[String] = []
 var unlocked_encounters: Array[String] = []
 var total_encounter_weight_bonus: int = 0
@@ -145,6 +146,7 @@ func _initialize_fresh_state() -> void:
 	unlocked_starting_items = []
 	unlocked_characters = []
 	unlocked_items = []
+	unlocked_item_upgrades = []
 	unlocked_skills = []
 	unlocked_encounters = []
 	total_encounter_weight_bonus = 0
@@ -172,6 +174,7 @@ func _load_account_state(account: Dictionary) -> void:
 	unlocked_starting_items = _to_string_array(account.get("unlocked_starting_items", []))
 	unlocked_characters = _to_string_array(account.get("unlocked_characters", []))
 	unlocked_items = _to_string_array(account.get("unlocked_items", []))
+	unlocked_item_upgrades = _to_string_array(account.get("unlocked_item_upgrades", []))
 	unlocked_skills = _to_string_array(account.get("unlocked_skills", []))
 	unlocked_encounters = _to_string_array(account.get("unlocked_encounters", []))
 	total_encounter_weight_bonus = account.get("total_encounter_weight_bonus", 0)
@@ -194,6 +197,7 @@ func to_account_dict() -> Dictionary:
 		"unlocked_starting_items": Array(unlocked_starting_items),
 		"unlocked_characters": Array(unlocked_characters),
 		"unlocked_items": Array(unlocked_items),
+		"unlocked_item_upgrades": Array(unlocked_item_upgrades),
 		"unlocked_skills": Array(unlocked_skills),
 		"unlocked_encounters": Array(unlocked_encounters),
 		"total_encounter_weight_bonus": total_encounter_weight_bonus
@@ -250,6 +254,7 @@ func _apply_prestige_rewards(target_prestige: int) -> Dictionary:
 		"starting_items": [],
 		"characters": [],
 		"items": [],
+		"item_upgrades": [],
 		"skills": [],
 		"encounters": []
 	}
@@ -276,11 +281,17 @@ func _apply_prestige_rewards(target_prestige: int) -> Dictionary:
 					unlocked_characters.append(char_id)
 					unlocked_content.characters.append(char_id)
 
-			# Unlock items
+			# Unlock items (regular items for the run pool)
 			for item_id in unlocks.get("items", []):
 				if item_id not in unlocked_items:
 					unlocked_items.append(item_id)
 					unlocked_content.items.append(item_id)
+
+			# Unlock item upgrades (conditional on owning base item during run)
+			for upgrade_id in unlocks.get("item_upgrades", []):
+				if upgrade_id not in unlocked_item_upgrades:
+					unlocked_item_upgrades.append(upgrade_id)
+					unlocked_content.item_upgrades.append(upgrade_id)
 
 			# Unlock skills
 			for skill_id in unlocks.get("skills", []):

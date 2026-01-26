@@ -8,7 +8,6 @@ extends RefCounted
 # TODO (Phase 4+): Remove this class entirely once draft system uses legacies.
 
 signal character_unlocked(char_id: String)
-signal character_prestige_up(char_id: String, new_prestige: int)
 
 # Minimal storage for backwards compatibility
 var _characters: Dictionary = {}
