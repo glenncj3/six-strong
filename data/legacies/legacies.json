@@ -1,0 +1,154 @@
+{
+  "legacies": [
+    {
+      "id": "legacy_knight_order",
+      "name": "Knight's Order",
+      "description": "Stalwart defenders who protect the weak and uphold justice",
+      "image_path": "res://assets/sprites/legacies/knight_order.png",
+      "income": 15,
+      "starting_character_options": ["char_warrior_001", "char_paladin_001"],
+      "starting_item_options": ["item_shield_emblem"],
+      "character_pool": ["char_warrior_001", "char_paladin_001", "char_cleric_001"],
+      "item_pool": ["item_rusty_sword", "item_holy_mace", "item_prayer_book"],
+      "skill_pool": ["skill_power_strike", "skill_iron_skin", "skill_vitality"],
+      "unique_encounters": ["enc_knight_tournament", "enc_holy_blessing"],
+      "prestige_rewards": [
+        {
+          "prestige": 1,
+          "unlocks": {
+            "starting_characters": ["char_warrior_001"],
+            "starting_items": ["item_shield_emblem"],
+            "characters": ["char_warrior_001"],
+            "items": ["item_rusty_sword"],
+            "skills": [],
+            "encounters": []
+          }
+        },
+        {
+          "prestige": 2,
+          "unlocks": {
+            "starting_characters": ["char_paladin_001"],
+            "starting_items": [],
+            "characters": ["char_paladin_001"],
+            "items": ["item_holy_mace"],
+            "skills": ["skill_power_strike"],
+            "encounters": ["enc_knight_tournament"],
+            "encounter_weight_bonus": 10
+          }
+        },
+        {
+          "prestige": 3,
+          "unlocks": {
+            "starting_characters": [],
+            "starting_items": [],
+            "characters": ["char_cleric_001"],
+            "items": ["item_prayer_book"],
+            "skills": ["skill_iron_skin", "skill_vitality"],
+            "encounters": ["enc_holy_blessing"],
+            "encounter_weight_bonus": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "legacy_shadow_guild",
+      "name": "Shadow Guild",
+      "description": "Masters of stealth and subterfuge who strike from the darkness",
+      "image_path": "res://assets/sprites/legacies/shadow_guild.png",
+      "income": 20,
+      "starting_character_options": ["char_rogue_001", "char_assassin_001"],
+      "starting_item_options": ["item_cloak_of_shadows"],
+      "character_pool": ["char_rogue_001", "char_assassin_001", "char_monk_001"],
+      "item_pool": ["item_rusty_dagger", "item_poison_blade", "item_fighting_gloves"],
+      "skill_pool": ["skill_dodge", "skill_backstab", "skill_inner_peace"],
+      "unique_encounters": ["enc_black_market", "enc_heist_opportunity"],
+      "prestige_rewards": [
+        {
+          "prestige": 1,
+          "unlocks": {
+            "starting_characters": ["char_rogue_001"],
+            "starting_items": ["item_cloak_of_shadows"],
+            "characters": ["char_rogue_001"],
+            "items": ["item_rusty_dagger"],
+            "skills": [],
+            "encounters": []
+          }
+        },
+        {
+          "prestige": 2,
+          "unlocks": {
+            "starting_characters": ["char_assassin_001"],
+            "starting_items": [],
+            "characters": ["char_assassin_001"],
+            "items": ["item_poison_blade"],
+            "skills": ["skill_dodge"],
+            "encounters": ["enc_black_market"],
+            "encounter_weight_bonus": 15
+          }
+        },
+        {
+          "prestige": 3,
+          "unlocks": {
+            "starting_characters": [],
+            "starting_items": [],
+            "characters": ["char_monk_001"],
+            "items": ["item_fighting_gloves"],
+            "skills": ["skill_backstab", "skill_inner_peace"],
+            "encounters": ["enc_heist_opportunity"],
+            "encounter_weight_bonus": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "legacy_arcane_academy",
+      "name": "Arcane Academy",
+      "description": "Scholars of the mystical arts who bend reality to their will",
+      "image_path": "res://assets/sprites/legacies/arcane_academy.png",
+      "income": 12,
+      "starting_character_options": ["char_mage_001", "char_necromancer_001"],
+      "starting_item_options": [],
+      "character_pool": ["char_mage_001", "char_necromancer_001"],
+      "item_pool": ["item_wooden_staff", "item_skull_staff"],
+      "skill_pool": ["skill_arcane_blast", "skill_life_drain"],
+      "unique_encounters": ["enc_spell_library", "enc_mana_font"],
+      "prestige_rewards": [
+        {
+          "prestige": 1,
+          "unlocks": {
+            "starting_characters": ["char_mage_001"],
+            "starting_items": [],
+            "characters": ["char_mage_001"],
+            "items": ["item_wooden_staff"],
+            "skills": [],
+            "encounters": []
+          }
+        },
+        {
+          "prestige": 2,
+          "unlocks": {
+            "starting_characters": ["char_necromancer_001"],
+            "starting_items": [],
+            "characters": ["char_necromancer_001"],
+            "items": ["item_skull_staff"],
+            "skills": ["skill_arcane_blast"],
+            "encounters": ["enc_spell_library"],
+            "encounter_weight_bonus": 10
+          }
+        },
+        {
+          "prestige": 3,
+          "unlocks": {
+            "starting_characters": [],
+            "starting_items": [],
+            "characters": [],
+            "items": [],
+            "skills": ["skill_life_drain"],
+            "encounters": ["enc_mana_font"],
+            "encounter_weight_bonus": 15
+          }
+        }
+      ]
+    }
+  ]
+}
