@@ -11,15 +11,11 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var multiplier = encounter_data["data"]["win_multiplier"]
 	var current_gold = RunManager.get_gold()
 
-	vbox.add_child(UIHelpers.create_label("The gambler offers a wager...", GameConstants.FONT_SIZE_HEADING, GameConstants.COLOR_TEXT_LIGHT, true))
-	vbox.add_child(UIHelpers.create_label("Bet: %d Gold" % bet, GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
-	vbox.add_child(UIHelpers.create_label("Win: %dx your bet (%d Gold)" % [multiplier, bet * multiplier], GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true))
-	vbox.add_child(UIHelpers.create_label("Lose: You lose your bet", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_DANGER, true))
-	vbox.add_child(UIHelpers.create_label("(50% chance to win)", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_MUTED, true))
-
-	var gold_label = UIHelpers.create_label("Your Gold: %d" % current_gold, GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_GOLD, true)
-	gold_label.name = "GoldLabel"
-	vbox.add_child(gold_label)
+	var wager_text = "The gambler offers a wager: Bet %dg with a 50%% chance to win %dg, and a 50%% chance to lose it all!" % [bet, bet * multiplier]
+	var wager_label = UIHelpers.create_label(wager_text, 24, GameConstants.COLOR_TEXT_LIGHT, true)
+	wager_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	wager_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_child(wager_label)
 
 	vbox.add_child(UIHelpers.create_spacer(20))
 
@@ -39,17 +35,11 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var gamble_button = UIContainerHelpers.create_button(
 		"GAMBLE!",
 		_on_gamble_pressed.bind(bet, multiplier, vbox, on_complete, on_gold_spend, on_gold_reward),
-		GameConstants.BUTTON_WIDTH_SMALL
+		250, 100
 	)
+	gamble_button.add_theme_font_size_override("font_size", 64)
 	gamble_button.disabled = current_gold < bet
 	buttons_container.add_child(gamble_button)
-
-	var decline_button = UIContainerHelpers.create_button(
-		"Decline",
-		_on_gamble_declined.bind(vbox, on_complete),
-		GameConstants.BUTTON_WIDTH_SMALL
-	)
-	buttons_container.add_child(decline_button)
 
 	return vbox
 
@@ -73,7 +63,6 @@ static func _on_gamble_pressed(bet: int, multiplier: int, container: Control, on
 		return
 
 	var result_label = container.get_node("ResultLabel")
-	var gold_label = container.get_node("GoldLabel")
 
 	# 50% chance to win
 	var won = randf() > 0.5
@@ -90,20 +79,8 @@ static func _on_gamble_pressed(bet: int, multiplier: int, container: Control, on
 		result_label.text = "You lost... -%d Gold" % bet
 		result_label.modulate = GameConstants.COLOR_DANGER
 
-	gold_label.text = "Your Gold: %d" % RunManager.get_gold()
-
 	UIContainerHelpers.disable_all_buttons(container)
 	if on_complete.is_valid():
 		on_complete.call()
 
 
-static func _on_gamble_declined(container: Control, on_complete: Callable) -> void:
-	"""Handle declining to gamble."""
-	UIContainerHelpers.disable_all_buttons(container)
-
-	var result_label = container.get_node("ResultLabel")
-	result_label.text = "You walk away..."
-	result_label.modulate = GameConstants.COLOR_MUTED
-
-	if on_complete.is_valid():
-		on_complete.call()
