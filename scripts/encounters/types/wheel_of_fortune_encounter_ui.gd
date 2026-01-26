@@ -33,6 +33,9 @@ class WheelEncounterContainer extends VBoxContainer:
 	var _on_complete: Callable = Callable()
 	var _context: Dictionary = {}  # Keep context for passing to controller/reward applicator
 
+	# Track active tweens for cleanup on exit
+	var _active_tweens: Array[Tween] = []
+
 	# UI elements
 	var spin_button: Button
 	var spin_again_button: Button
@@ -266,3 +269,32 @@ class WheelEncounterContainer extends VBoxContainer:
 	func _update_gold_display() -> void:
 		"""Gold display is handled by parent encounter UI."""
 		pass
+
+
+	func _exit_tree() -> void:
+		"""Clean up signal connections and tweens when removed from tree."""
+		# Kill any active tweens to prevent callbacks on freed nodes
+		for tween in _active_tweens:
+			if tween and tween.is_valid():
+				tween.kill()
+		_active_tweens.clear()
+
+		# Disconnect controller signals
+		if controller:
+			if controller.state_changed.is_connected(_on_state_changed):
+				controller.state_changed.disconnect(_on_state_changed)
+			if controller.spin_started.is_connected(_on_spin_started):
+				controller.spin_started.disconnect(_on_spin_started)
+			if controller.spin_ended.is_connected(_on_spin_ended):
+				controller.spin_ended.disconnect(_on_spin_ended)
+			if controller.reward_applied.is_connected(_on_reward_applied):
+				controller.reward_applied.disconnect(_on_reward_applied)
+			if controller.extra_spin_purchased.is_connected(_on_extra_spin_purchased):
+				controller.extra_spin_purchased.disconnect(_on_extra_spin_purchased)
+
+		# Disconnect wheel_visual signals
+		if wheel_visual:
+			if wheel_visual.spin_complete.is_connected(_on_visual_spin_complete):
+				wheel_visual.spin_complete.disconnect(_on_visual_spin_complete)
+			if wheel_visual.segment_passed.is_connected(_on_segment_passed):
+				wheel_visual.segment_passed.disconnect(_on_segment_passed)

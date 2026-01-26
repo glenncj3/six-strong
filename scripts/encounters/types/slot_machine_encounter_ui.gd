@@ -74,6 +74,9 @@ class SlotMachineController extends VBoxContainer:
 	var _on_gold_reward: Callable = Callable()
 	var _on_gold_spend: Callable = Callable()
 
+	# Track active tweens for cleanup on exit
+	var _active_tweens: Array[Tween] = []
+
 
 	func initialize(p_encounter_data: Dictionary, p_context: Dictionary) -> void:
 		encounter_data = p_encounter_data
@@ -293,7 +296,7 @@ class SlotMachineController extends VBoxContainer:
 
 		# If all reels are locked, just evaluate immediately
 		if reels_still_spinning == 0:
-			var eval_tween = create_tween()
+			var eval_tween = _create_tween()
 			eval_tween.tween_interval(0.1)
 			eval_tween.tween_callback(_evaluate_spin)
 
@@ -310,7 +313,7 @@ class SlotMachineController extends VBoxContainer:
 		var spin_interval := 1.0 / SYMBOLS_PER_SECOND
 
 		# Use a tween-based approach for symbol cycling
-		var tween = create_tween()
+		var tween = _create_tween()
 		tween.set_loops(int(stop_time / spin_interval))
 
 		# Each loop iteration changes the symbol
@@ -320,13 +323,13 @@ class SlotMachineController extends VBoxContainer:
 			label.add_theme_color_override("font_color", SYMBOL_COLORS[random_symbol])
 
 			# Subtle bounce effect
-			var bounce_tween = create_tween()
+			var bounce_tween = _create_tween()
 			bounce_tween.tween_property(label, "scale", Vector2(1.1, 0.9), 0.05)
 			bounce_tween.tween_property(label, "scale", Vector2(1.0, 1.0), 0.05)
 		).set_delay(spin_interval)
 
 		# Final stop with the determined symbol
-		var stop_tween = create_tween()
+		var stop_tween = _create_tween()
 		stop_tween.tween_interval(stop_time)
 		stop_tween.tween_callback(func():
 			_stop_reel(reel_index, final_symbol)
@@ -342,7 +345,7 @@ class SlotMachineController extends VBoxContainer:
 		label.add_theme_color_override("font_color", SYMBOL_COLORS[symbol])
 
 		# Landing animation - bounce and flash
-		var tween = create_tween()
+		var tween = _create_tween()
 		tween.set_ease(Tween.EASE_OUT)
 		tween.set_trans(Tween.TRANS_BACK)
 
@@ -355,7 +358,7 @@ class SlotMachineController extends VBoxContainer:
 		var style: StyleBoxFlat = panel.get_theme_stylebox("panel").duplicate()
 		panel.add_theme_stylebox_override("panel", style)
 
-		var flash_tween = create_tween()
+		var flash_tween = _create_tween()
 		flash_tween.tween_property(style, "border_color", Color.WHITE, 0.1)
 		flash_tween.tween_property(style, "border_color", GameConstants.COLOR_BORDER_GOLD, 0.2)
 
@@ -363,7 +366,7 @@ class SlotMachineController extends VBoxContainer:
 		reels_still_spinning -= 1
 		if reels_still_spinning <= 0:
 			# Small delay then evaluate
-			var eval_tween = create_tween()
+			var eval_tween = _create_tween()
 			eval_tween.tween_interval(0.3)
 			eval_tween.tween_callback(_evaluate_spin)
 
@@ -437,7 +440,7 @@ class SlotMachineController extends VBoxContainer:
 			style.bg_color = GameConstants.COLOR_GOLD
 			panel.add_theme_stylebox_override("panel", style)
 
-			var tween = create_tween()
+			var tween = _create_tween()
 			tween.set_loops(3)
 			tween.tween_property(style, "bg_color", Color.WHITE, 0.1)
 			tween.tween_property(style, "bg_color", GameConstants.COLOR_GOLD, 0.1)
@@ -448,7 +451,7 @@ class SlotMachineController extends VBoxContainer:
 		# Flash winning reels
 		for i in range(REEL_COUNT):
 			var panel: PanelContainer = reel_labels[i]
-			var tween = create_tween()
+			var tween = _create_tween()
 			tween.tween_property(panel, "modulate", Color(1.5, 1.5, 1.5), 0.1)
 			tween.tween_property(panel, "modulate", Color.WHITE, 0.2)
 
@@ -457,7 +460,7 @@ class SlotMachineController extends VBoxContainer:
 		# Subtle pulse
 		for panel in reel_labels:
 			var label: Label = panel.get_meta("symbol_label")
-			var tween = create_tween()
+			var tween = _create_tween()
 			tween.tween_property(label, "scale", Vector2(1.1, 1.1), 0.1)
 			tween.tween_property(label, "scale", Vector2(1.0, 1.0), 0.1)
 
@@ -466,7 +469,7 @@ class SlotMachineController extends VBoxContainer:
 		spin_button.text = "Spins: %d" % spins_remaining
 
 		# Animate the change
-		var tween = create_tween()
+		var tween = _create_tween()
 		spin_button.pivot_offset = spin_button.size / 2
 		tween.tween_property(spin_button, "scale", Vector2(1.1, 1.1), 0.1)
 		tween.tween_property(spin_button, "scale", Vector2(1.0, 1.0), 0.1)
@@ -493,3 +496,18 @@ class SlotMachineController extends VBoxContainer:
 		# Signal that the encounter can be completed using stored callback
 		if _on_complete.is_valid():
 			_on_complete.call()
+
+
+	func _create_tween() -> Tween:
+		"""Create a tween and track it for cleanup on exit."""
+		var tween = create_tween()
+		_active_tweens.append(tween)
+		return tween
+
+
+	func _exit_tree() -> void:
+		"""Clean up tweens when removed from tree to prevent callbacks on freed nodes."""
+		for tween in _active_tweens:
+			if tween and tween.is_valid():
+				tween.kill()
+		_active_tweens.clear()
