@@ -7,6 +7,7 @@ extends RefCounted
 signal options_generated(options: Array, instances: Array)
 signal character_drafted(char_data: Dictionary, char_instance: CharacterInstance)
 signal draft_complete(team: Array)
+signal generation_failed(error_message: String)
 
 # Draft state
 var drafted_characters: Array = []  # Character data dictionaries
@@ -25,8 +26,9 @@ func reset() -> void:
 	selection_count = 0
 
 
-func generate_options() -> void:
-	"""Generate 3 unique character options (2 owned, 1 random)."""
+func generate_options() -> bool:
+	"""Generate 3 unique character options (2 owned, 1 random).
+	Returns true on success, false on failure. Emits generation_failed signal on error."""
 	current_options.clear()
 	option_instances.clear()
 
@@ -46,8 +48,10 @@ func generate_options() -> void:
 	var all_chars = GameData.get_all_characters()
 
 	if available_owned.size() < 2:
-		push_error("DraftManager: Not enough available owned characters")
-		return
+		var error_msg = "Not enough available owned characters (need 2, have %d)" % available_owned.size()
+		push_error("DraftManager: %s" % error_msg)
+		generation_failed.emit(error_msg)
+		return false
 
 	# Shuffle owned pool
 	available_owned.shuffle()
@@ -76,8 +80,10 @@ func generate_options() -> void:
 			break
 
 	if random_char == null:
-		push_error("DraftManager: Could not find unique random character")
-		return
+		var error_msg = "Could not find unique random character for draft options"
+		push_error("DraftManager: %s" % error_msg)
+		generation_failed.emit(error_msg)
+		return false
 
 	var random_char_id = random_char.get("id", "")
 	var is_owned = PlayerAccount.is_character_unlocked(random_char_id)
@@ -111,6 +117,7 @@ func generate_options() -> void:
 		option_instances.append(char_instance)
 
 	options_generated.emit(current_options, option_instances)
+	return true
 
 
 func is_character_drafted(char_id: String) -> bool:

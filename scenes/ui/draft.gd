@@ -47,6 +47,7 @@ func _setup_draft_manager() -> void:
 	draft_manager.options_generated.connect(_on_options_generated)
 	draft_manager.character_drafted.connect(_on_character_drafted)
 	draft_manager.draft_complete.connect(_on_draft_complete)
+	draft_manager.generation_failed.connect(_on_generation_failed)
 
 
 func _apply_visual_styling() -> void:
@@ -112,6 +113,13 @@ func _on_character_drafted(_char_data: Dictionary, char_instance: CharacterInsta
 
 func _on_draft_complete(_team: Array) -> void:
 	_show_confirm_state()
+
+
+func _on_generation_failed(error_message: String) -> void:
+	"""Handle draft option generation failure."""
+	push_error("Draft: Generation failed - %s" % error_message)
+	instruction_label.text = "ERROR: %s" % error_message
+	instruction_label.add_theme_color_override("font_color", GameConstants.COLOR_DANGER)
 
 
 func _update_run_hud_gold() -> void:
