@@ -16,8 +16,6 @@ const SLOT_BORDER_WIDTH := 3
 @onready var portrait: TextureRect = $ContentMargin/Portrait
 @onready var border_overlay: Panel = $BorderOverlay
 @onready var name_label: Label = $ContentMargin/NameMargin/NameLabel
-@onready var empty_label: Label = $ContentMargin/EmptyLabel
-@onready var row_indicator: Label = $ContentMargin/RowIndicator
 @onready var highlight_rect: ColorRect = $HighlightRect
 
 var row: int = -1
@@ -75,12 +73,6 @@ func setup_slot(slot_row: int, slot_col: int, slot_size: Vector2) -> void:
 	col = slot_col
 	custom_minimum_size = slot_size
 
-	# Show row indicator
-	if row == 0:
-		row_indicator.text = "Front"
-	else:
-		row_indicator.text = "Back"
-
 
 func set_character(char_instance: CharacterInstance) -> void:
 	"""Set a character to display in this slot."""
@@ -102,8 +94,6 @@ func set_character(char_instance: CharacterInstance) -> void:
 	UIHelpers.set_texture_safe(portrait, char_master.get("image_path", ""))
 	name_label.visible = true
 	name_label.text = char_master.get("name", "?")
-	empty_label.visible = false
-	row_indicator.visible = false
 
 	# Update border to gold
 	_set_border_color(GameConstants.COLOR_BORDER_GOLD)
@@ -124,8 +114,6 @@ func _clear_display() -> void:
 	character = null
 	portrait.visible = false
 	name_label.visible = false
-	empty_label.visible = true
-	row_indicator.visible = true
 
 	# Update border to dim
 	_set_border_color(GameConstants.COLOR_BORDER_GOLD.darkened(0.5))

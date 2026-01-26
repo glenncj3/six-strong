@@ -210,11 +210,8 @@ func _get_slot(row: int, col: int):
 
 
 func _get_slot_size() -> Vector2:
-	"""Calculate slot size based on available space."""
-	var available_width = max(size.x, 688) - 24
-	var spacing = 8 * (GameConstants.GRID_COLS - 1)
-	var slot_width = floor((available_width - spacing) / float(GameConstants.GRID_COLS))
-	slot_width = clamp(slot_width, 80, 150)
+	"""Calculate slot size to match legacy tile sizes (3 across)."""
+	var slot_width = UIScaler.calculate_tile_size(size.x, GameConstants.GRID_COLS)
 	return Vector2(slot_width, slot_width)
 
 

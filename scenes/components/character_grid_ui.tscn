@@ -21,24 +21,10 @@ grow_vertical = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="FrontRowLabel" type="Label" parent="GridContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.66, 0.54, 1)
-theme_override_font_sizes/font_size = 14
-text = "Front Row"
-horizontal_alignment = 1
-
 [node name="FrontRow" type="HBoxContainer" parent="GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/separation = 8
-
-[node name="BackRowLabel" type="Label" parent="GridContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.66, 0.54, 1)
-theme_override_font_sizes/font_size = 14
-text = "Back Row"
-horizontal_alignment = 1
 
 [node name="BackRow" type="HBoxContainer" parent="GridContainer"]
 layout_mode = 2
