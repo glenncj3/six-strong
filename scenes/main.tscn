@@ -151,3 +151,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
+
+[node name="ModalLayer" type="CanvasLayer" parent="."]
+layer = 200
