@@ -67,33 +67,33 @@ func _exit_tree() -> void:
 
 func _apply_visual_styling() -> void:
 	"""Apply consistent visual styling."""
-	# Result title
-	result_title.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_TITLE)
-	result_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	# Result title - larger font size
+	result_title.add_theme_font_size_override("font_size", 56)
+	result_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 
 	# Panel styles
 	UIStyles.apply_panel_style(stats_panel, UIStyles.create_dark_panel())
 	UIStyles.apply_panel_style(rewards_panel, UIStyles.create_dark_panel())
 	UIStyles.apply_panel_style(rank_ups_panel, UIStyles.create_dark_panel())
 
-	# Panel titles
-	stats_title.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
+	# Panel titles - larger font size
+	stats_title.add_theme_font_size_override("font_size", 28)
 	stats_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
-	rewards_title.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
+	rewards_title.add_theme_font_size_override("font_size", 28)
 	rewards_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
-	rank_ups_title.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
+	rank_ups_title.add_theme_font_size_override("font_size", 28)
 	rank_ups_title.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 
-	# Stat labels
+	# Stat labels - larger font size
 	for label in [rounds_label, wins_label, losses_label, gold_earned_label, reputation_label]:
-		label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
+		label.add_theme_font_size_override("font_size", 22)
 		label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 
-	# Gems reward label
-	gems_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
+	# Gems reward label - larger font size
+	gems_label.add_theme_font_size_override("font_size", 28)
 
-	# Continue button
-	UIStyles.setup_button(continue_button, GameConstants.FONT_SIZE_BUTTON)
+	# Continue button - larger font size
+	UIStyles.setup_button(continue_button, 28)
 	ButtonEffects.apply_effects(continue_button)
 
 
@@ -132,10 +132,9 @@ func _display_title() -> void:
 	"""Display victory or defeat title."""
 	if was_victory:
 		result_title.text = "VICTORY!"
-		result_title.add_theme_color_override("font_color", GameConstants.COLOR_SUCCESS)
 	else:
 		result_title.text = "DEFEAT"
-		result_title.add_theme_color_override("font_color", GameConstants.COLOR_DANGER)
+	# Title color is already set to gold in _apply_visual_styling
 
 
 func _display_stats() -> void:
@@ -161,13 +160,13 @@ func _display_rewards() -> void:
 	prestige_ups = run_data.get("prestige_ups", [])
 
 	gems_label.text = "+%d %s Gems" % [gem_reward, GameConstants.EMOJI_GEM]
-	gems_label.add_theme_color_override("font_color", GameConstants.COLOR_SUCCESS)
+	gems_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 
 	for char_data in run_data.get("team", []):
 		var fame_label = Label.new()
 		fame_label.text = "%s: +%d Fame" % [char_data["name"], fame_reward]
 		fame_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		fame_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
+		fame_label.add_theme_font_size_override("font_size", 22)
 		fame_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 		character_fame_container.add_child(fame_label)
 
@@ -187,7 +186,7 @@ func _display_prestige_ups() -> void:
 		# Create clickable header button
 		var header_button = Button.new()
 		header_button.text = "%s PRESTIGE UP!  [+]" % prestige_up["name"]
-		header_button.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
+		header_button.add_theme_font_size_override("font_size", 24)
 		header_button.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 		header_button.flat = true
 		header_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -197,6 +196,7 @@ func _display_prestige_ups() -> void:
 		var prestige_label = Label.new()
 		prestige_label.text = "Prestige %d -> Prestige %d" % [prestige_up["old_prestige"], prestige_up["new_prestige"]]
 		prestige_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		prestige_label.add_theme_font_size_override("font_size", 22)
 		prestige_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 		prestige_up_container.add_child(prestige_label)
 
@@ -239,7 +239,8 @@ func _display_prestige_rewards(container: VBoxContainer, char_id: String, new_pr
 				var unlocks_label = Label.new()
 				unlocks_label.text = "Unlocked:"
 				unlocks_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				unlocks_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
+				unlocks_label.add_theme_font_size_override("font_size", 20)
+				unlocks_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 				container.add_child(unlocks_label)
 
 				for reward in prestige_reward["rewards"]:
@@ -247,7 +248,8 @@ func _display_prestige_rewards(container: VBoxContainer, char_id: String, new_pr
 					var reward_name = _get_reward_name(reward)
 					reward_label.text = "  %s" % reward_name
 					reward_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-					reward_label.add_theme_color_override("font_color", GameConstants.COLOR_SUCCESS)
+					reward_label.add_theme_font_size_override("font_size", 20)
+					reward_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 					container.add_child(reward_label)
 
 			# Display stat boosts
@@ -255,7 +257,8 @@ func _display_prestige_rewards(container: VBoxContainer, char_id: String, new_pr
 				var boost_label = Label.new()
 				boost_label.text = "Stat Boost:"
 				boost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				boost_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
+				boost_label.add_theme_font_size_override("font_size", 20)
+				boost_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 				container.add_child(boost_label)
 
 				for stat_name in prestige_reward["stat_boost"]:
@@ -263,7 +266,8 @@ func _display_prestige_rewards(container: VBoxContainer, char_id: String, new_pr
 					var stat_label = Label.new()
 					stat_label.text = "  %s +%d" % [stat_name.replace("_", " ").capitalize(), boost_value]
 					stat_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-					stat_label.add_theme_color_override("font_color", GameConstants.COLOR_SAPPHIRE_LIGHT)
+					stat_label.add_theme_font_size_override("font_size", 20)
+					stat_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 					container.add_child(stat_label)
 
 			break

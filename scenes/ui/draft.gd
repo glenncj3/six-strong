@@ -214,7 +214,7 @@ func _update_instruction() -> void:
 			GameConstants.TEAM_SIZE
 		]
 	else:
-		instruction_label.text = "TEAM COMPLETE - READY TO START"
+		instruction_label.text = "Team Complete!"
 
 
 func _show_confirm_state() -> void:
