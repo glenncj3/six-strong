@@ -30,6 +30,13 @@ func _ready() -> void:
 	visible = false
 
 
+func _exit_tree() -> void:
+	"""Clean up overlay when popup is removed from tree."""
+	if _overlay and is_instance_valid(_overlay):
+		_overlay.queue_free()
+		_overlay = null
+
+
 func _apply_styling() -> void:
 	"""Apply warm panel styling."""
 	var style = StyleBoxFlat.new()
@@ -294,6 +301,11 @@ func hide_popup() -> void:
 	if _overlay and is_instance_valid(_overlay):
 		_overlay.queue_free()
 		_overlay = null
+
+	# Restore to original parent if valid (allows reuse without reparenting issues)
+	if _original_parent and is_instance_valid(_original_parent):
+		reparent(_original_parent)
+		_original_parent = null
 
 
 func _on_confirm_pressed() -> void:
