@@ -203,6 +203,42 @@ All sizes defined in `GameConstants`:
 - **Draft**: Vertical scrolling options, horizontal team display at top
 - **Run View**: Top stats bar, team panel in upper half, action panel in lower half
 
+## Visual Layering Architecture
+
+The game uses CanvasLayers for major visual separation. Layer constants are defined in `GameConstants`:
+
+| Layer | Constant | Purpose |
+|-------|----------|---------|
+| 0 | `LAYER_GAMEPLAY` | Main scene content (SceneContainer) |
+| 100 | `LAYER_TRANSITION` | Fade/wipe scene transitions |
+| 150 | `LAYER_HUD` | Persistent RunHUD, TeamHUD |
+| 200 | `LAYER_MODAL` | Modal popups (ModalLayer) |
+| 250 | `LAYER_TOOLTIP` | Reserved for tooltips |
+
+### Modal Popup Pattern
+
+Modal popups should extend the `ModalPopup` base class (`scripts/components/modal_popup.gd`) which handles:
+- Dimming overlay creation behind the popup
+- Reparenting to scene root for guaranteed top positioning
+- Input blocking on the overlay
+- Proper cleanup on close and tree exit
+- `popup_opened` / `popup_closed` signals
+
+Example usage:
+```gdscript
+extends ModalPopup
+
+func show_my_content(data: Dictionary) -> void:
+    # Setup your content...
+    _setup_display(data)
+    show_modal()  # Shows with overlay
+
+func _on_close_pressed() -> void:
+    hide_modal()  # Cleans up overlay and restores parent
+```
+
+Existing implementations: `RewardClaimPopup`, `DetailPopup`
+
 ## Known Issues
 
 <!-- Document any quirks or bugs as you discover them -->
