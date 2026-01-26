@@ -3,6 +3,8 @@ extends Node
 # Manages active run state - now delegates to focused managers
 # Refactored to follow Single Responsibility Principle
 
+const SaveDataValidatorScript = preload("res://scripts/utils/save_data_validator.gd")
+
 signal run_started
 signal round_changed(new_round: int)
 signal reputation_changed(new_reputation: int)
@@ -123,8 +125,20 @@ func save_run_state() -> void:
 
 func load_run_state() -> bool:
 	"""Load run state from file, returns true if successful."""
-	var save_data = JsonPersistence.load_json(SAVE_PATH)
-	if save_data == null:
+	var raw_data = JsonPersistence.load_json(SAVE_PATH)
+	if raw_data == null:
+		return false
+
+	# Validate save data against schema
+	var save_data = SaveDataValidatorScript.validate_and_fix(raw_data, SaveDataValidatorScript.get_run_state_schema())
+	if save_data.is_empty():
+		push_error("RunManager: Save data validation failed, cannot load run")
+		return false
+
+	# Validate team members exist in PlayerAccount
+	var team_data = save_data.get("team", [])
+	if not _validate_team_data(team_data):
+		push_error("RunManager: Team validation failed, save may be corrupt")
 		return false
 
 	# Restore run state
@@ -140,10 +154,25 @@ func load_run_state() -> bool:
 	encounter_history = save_data.get("encounter_history", [])
 
 	# Restore team via TeamManager
-	_team_manager.load_from_array(save_data.get("team", []))
+	_team_manager.load_from_array(team_data)
 
 	is_run_active = true
 
+	return true
+
+
+func _validate_team_data(team_data: Array) -> bool:
+	"""Validate that team members reference valid characters."""
+	for char_data in team_data:
+		var char_id = char_data.get("base_character_id", "")
+		if char_id.is_empty():
+			push_warning("RunManager: Team member missing base_character_id")
+			return false
+		# Verify character exists in game data
+		var master_data = GameData.get_character_by_id(char_id)
+		if master_data.is_empty():
+			push_warning("RunManager: Team member references unknown character: %s" % char_id)
+			return false
 	return true
 
 
