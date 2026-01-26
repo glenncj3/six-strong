@@ -31,6 +31,7 @@ func _ready() -> void:
 		"pick_learnable_skill": _gen_pick_learnable_skill,
 		"pick_learnable_skills": _gen_pick_learnable_skills,
 		"pick_shop_offerings": _gen_pick_shop_offerings,
+		"pick_mystery_elements": _gen_pick_mystery_elements,
 	}
 
 	# Use GameData's cached encounter types (single source of truth)
@@ -296,3 +297,52 @@ func _gen_pick_shop_offerings(params: Dictionary) -> Array:
 		})
 
 	return offerings
+
+
+func _gen_pick_mystery_elements(params: Dictionary) -> Array:
+	"""Pick mystery item options with different elements for treasure chest."""
+	var count = int(params.get("count", 3))
+	var team_max_level = _get_team_max_level()
+	var team = RunManager.get_team()
+
+	# Get all available item upgrades that at least one character can equip
+	var available_items = _filter_pool_by_level(GameData.get_all_item_upgrades(), team_max_level)
+	var equippable_items: Array = []
+
+	for item in available_items:
+		var item_id = item["id"]
+		for char_instance in team:
+			var already_equipped = item_id in char_instance.equipped_item_upgrades
+			var total_items = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
+			var max_items_reached = total_items >= GameConstants.MAX_RUN_ITEMS
+			if not already_equipped and not max_items_reached:
+				equippable_items.append(item)
+				break
+
+	# Group items by element
+	var items_by_element: Dictionary = {}
+	for item in equippable_items:
+		var element = item.get("element", "neutral")
+		if not items_by_element.has(element):
+			items_by_element[element] = []
+		items_by_element[element].append(item)
+
+	# Get available elements (those with at least one item)
+	var available_elements = items_by_element.keys()
+	available_elements.shuffle()
+
+	# Build mystery options with different elements
+	var options: Array = []
+	for i in range(mini(count, available_elements.size())):
+		var element = available_elements[i]
+		options.append({
+			"element": element,
+			"display_name": _get_element_display_name(element)
+		})
+
+	return options
+
+
+func _get_element_display_name(element: String) -> String:
+	"""Get capitalized display name for an element."""
+	return element.capitalize()

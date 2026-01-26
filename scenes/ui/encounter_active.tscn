@@ -33,7 +33,7 @@ custom_minimum_size = Vector2(0, 10)
 [node name="TitleLabel" type="Label" parent="EncounterContainer"]
 layout_mode = 2
 theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 48
 text = "Encounter Title"
 horizontal_alignment = 1
 

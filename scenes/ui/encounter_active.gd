@@ -116,8 +116,9 @@ func _on_xp_character_selected(char_index: int, xp_amount: int, button: Button) 
 
 	var leveled_up = char_instance.add_experience(xp_amount)
 
-	button.text = "XP Given! %s" % ("(LEVEL UP!)" if leveled_up else "")
-	button.disabled = true
+	if button:
+		button.text = "XP Given! %s" % ("(LEVEL UP!)" if leveled_up else "")
+		button.disabled = true
 
 
 func _on_gold_reward(amount: int) -> void:

@@ -313,6 +313,22 @@ const HEALTH_RESTORE_PERCENTAGE := 0.5
 const ROUND_SCALE_FACTOR := 0.1
 
 # =============================================================================
+# WHEEL OF FORTUNE CONSTANTS
+# =============================================================================
+
+const WHEEL_SPIN_DURATION := 2.5       # Total spin time in seconds
+const WHEEL_MAX_SPEED := 1080.0        # Degrees per second (3 rotations/sec)
+const WHEEL_DECEL_DURATION := 1.2      # Slowdown phase duration
+const WHEEL_BOUNCE_OVERSHOOT := 5.0    # Degrees past target
+const WHEEL_BOUNCE_DURATION := 0.3     # Settle time after bounce
+const WHEEL_SPINUP_DURATION := 0.3     # Time to reach max speed
+
+# Wheel configuration
+const WHEEL_SEGMENT_COUNT := 6         # Number of segments on wheel
+const WHEEL_SPIN_AGAIN_COST := 30      # Gold cost for extra spin
+const WHEEL_SIZE := 300                # Wheel diameter in pixels
+
+# =============================================================================
 # SKILL STAT NAMES
 # =============================================================================
 

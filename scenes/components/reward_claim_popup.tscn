@@ -1,0 +1,81 @@
+[gd_scene load_steps=2 format=3 uid="uid://dqw8r2h5k7pmv"]
+
+[ext_resource type="Script" path="res://scenes/components/reward_claim_popup.gd" id="1_script"]
+
+[node name="RewardClaimPopup" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+script = ExtResource("1_script")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="ContentVBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HeaderLabel" type="Label" parent="MarginContainer/ContentVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "You found:"
+horizontal_alignment = 1
+
+[node name="ItemHeader" type="HBoxContainer" parent="MarginContainer/ContentVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="MarginContainer/ContentVBox/ItemHeader"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameLabel" type="Label" parent="MarginContainer/ContentVBox/ItemHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+text = "Item Name"
+vertical_alignment = 1
+
+[node name="DescriptionLabel" type="Label" parent="MarginContainer/ContentVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Description goes here."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="StatsContainer" type="VBoxContainer" parent="MarginContainer/ContentVBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="BonusLabel" type="Label" parent="MarginContainer/ContentVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "+2 Gold"
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="MarginContainer/ContentVBox"]
+layout_mode = 2
+
+[node name="SelectorLabel" type="Label" parent="MarginContainer/ContentVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Give to:"
+horizontal_alignment = 1
+
+[node name="SelectorContainer" type="VBoxContainer" parent="MarginContainer/ContentVBox"]
+layout_mode = 2
+
+[node name="ConfirmButton" type="Button" parent="MarginContainer/ContentVBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Claim"

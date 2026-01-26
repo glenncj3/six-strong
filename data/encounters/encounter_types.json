@@ -21,12 +21,12 @@
       }
     },
     {
-      "type": "gold_reward",
+      "type": "treasure_chest",
       "name": "Treasure Chest",
-      "description": "You found a chest full of gold!",
+      "description": "Choose a mystery item to claim!",
       "image_path": "res://assets/encounters/chest.png",
-      "weight": 0.8,
-      "immediate_complete": true,
+      "weight": 1.0,
+      "immediate_complete": false,
       "colors": {
         "bg": "#8A7A21",
         "hover": "#AA9A41",
@@ -35,9 +35,9 @@
       },
       "generation": {
         "data_fields": {
-          "gold_amount": {"generator": "random_range", "min": "GOLD_REWARD_MIN", "max": "GOLD_REWARD_MAX"}
-        },
-        "scales_with_round": true
+          "mystery_options": {"generator": "pick_mystery_elements", "count": 3},
+          "gold_bonus": {"generator": "constant", "value": 2}
+        }
       }
     },
     {
@@ -45,7 +45,7 @@
       "name": "Healing Fountain",
       "description": "Purchase healing for your team.",
       "image_path": "res://assets/encounters/fountain.png",
-      "weight": 0.6,
+      "weight": 1.0,
       "immediate_complete": false,
       "colors": {
         "bg": "#2A7A4A",
@@ -68,7 +68,7 @@
       "name": "Skill Trainer",
       "description": "Purchase a skill for your team.",
       "image_path": "res://assets/encounters/trainer.png",
-      "weight": 0.7,
+      "weight": 1.0,
       "immediate_complete": false,
       "colors": {
         "bg": "#6A3A8A",
@@ -87,7 +87,7 @@
       "name": "Mysterious Gambler",
       "description": "Risk gold for a chance at greater rewards.",
       "image_path": "res://assets/encounters/gambler.png",
-      "weight": 0.5,
+      "weight": 1.0,
       "immediate_complete": false,
       "colors": {
         "bg": "#8A2A3A",
@@ -107,7 +107,7 @@
       "name": "Memory Merchant",
       "description": "Test your memory to uncover hidden treasures!",
       "image_path": "res://assets/encounters/chest.png",
-      "weight": 0.6,
+      "weight": 1.0,
       "immediate_complete": false,
       "colors": {
         "bg": "#4A5A6A",
@@ -129,7 +129,7 @@
       "name": "Lucky Spinner",
       "description": "Spin the reels for a chance at riches!",
       "image_path": "res://assets/encounters/chest.png",
-      "weight": 0.5,
+      "weight": 1.0,
       "immediate_complete": false,
       "colors": {
         "bg": "#6A4A8A",
@@ -147,6 +147,26 @@
           "pair_reward": {"generator": "random_range", "min": 10, "max": 20}
         },
         "scales_with_round": true
+      }
+    },
+    {
+      "type": "wheel_of_fortune",
+      "name": "Fortune's Wheel",
+      "description": "Spin the mystical wheel to claim your prize!",
+      "image_path": "res://assets/encounters/chest.png",
+      "weight": 1.0,
+      "immediate_complete": false,
+      "colors": {
+        "bg": "#2D1B4E",
+        "hover": "#3D2B5E",
+        "pressed": "#1D0B3E",
+        "border": "#D9A621"
+      },
+      "generation": {
+        "data_fields": {
+          "spin_again_cost": {"generator": "random_range", "min": 25, "max": 40}
+        },
+        "scales_with_round": false
       }
     }
   ]

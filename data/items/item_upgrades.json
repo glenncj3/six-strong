@@ -8,7 +8,8 @@
       "replaces_slot": "weapon",
       "stat_modifiers": {},
       "level_requirement": 4,
-      "cost": 20
+      "cost": 20,
+      "element": "fire"
     },
     {
       "id": "itemup_iron_sword",
@@ -18,7 +19,8 @@
       "replaces_slot": "weapon",
       "stat_modifiers": {},
       "level_requirement": 2,
-      "cost": 20
+      "cost": 20,
+      "element": "earth"
     },
     {
       "id": "itemup_arcane_staff",
@@ -28,7 +30,8 @@
       "replaces_slot": "weapon",
       "stat_modifiers": {"defendRate": 5},
       "level_requirement": 3,
-      "cost": 20
+      "cost": 20,
+      "element": "arcane"
     },
     {
       "id": "itemup_shadow_cloak",
@@ -38,7 +41,8 @@
       "replaces_slot": "armor",
       "stat_modifiers": {"defendRate": 10},
       "level_requirement": 3,
-      "cost": 20
+      "cost": 20,
+      "element": "shadow"
     },
     {
       "id": "itemup_plate_armor",
@@ -48,7 +52,8 @@
       "replaces_slot": "armor",
       "stat_modifiers": {"defendRate": 25, "health": 25},
       "level_requirement": 4,
-      "cost": 20
+      "cost": 20,
+      "element": "earth"
     },
     {
       "id": "itemup_vampiric_blade",
@@ -58,7 +63,8 @@
       "replaces_slot": "weapon",
       "stat_modifiers": {"health": 15},
       "level_requirement": 5,
-      "cost": 20
+      "cost": 20,
+      "element": "shadow"
     }
   ]
 }
