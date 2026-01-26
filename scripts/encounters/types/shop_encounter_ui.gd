@@ -1,9 +1,10 @@
 class_name ShopEncounterUI
 extends RefCounted
 ## UI creation and reward preview for shop encounters.
-## Shows up to 3 offerings (items/skills) in tiles, player picks one.
+## Shows up to 3 offerings (items/skills) in tiles, player picks one, popup shows details.
 
 const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")
+const RewardClaimPopupScene = preload("res://scenes/components/reward_claim_popup.tscn")
 
 # Store references for callback access
 static var _selected_offering: Dictionary = {}
@@ -12,11 +13,9 @@ static var _on_buy_item: Callable = Callable()
 static var _on_buy_skill: Callable = Callable()
 static var _on_gold_spend: Callable = Callable()
 static var _tiles: Array = []
-static var _char_selector_container: Control = null
-static var _confirm_btn: Button = null
+static var _reward_popup: RewardClaimPopup = null
 static var _max_purchases: int = 1
 static var _purchases_made: int = 0
-static var _eligible_char_indices: Array = []  # Maps selector index to team index
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
@@ -32,6 +31,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	_on_gold_spend = context.get("on_gold_spend", Callable())
 	_selected_offering = {}
 	_tiles.clear()
+	_reward_popup = null
 
 	if offerings.is_empty():
 		vbox.add_child(UIHelpers.create_label("Nothing for sale...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
@@ -56,11 +56,6 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 		tile.ready.connect(_setup_tile.bind(tile, tile_data, tile_size))
 		_tiles.append(tile)
 
-	# Character selector (hidden until offering is selected)
-	_char_selector_container = UIHelpers.create_vbox_container(8)
-	_char_selector_container.visible = false
-	vbox.add_child(_char_selector_container)
-
 	return vbox
 
 
@@ -76,90 +71,106 @@ static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float) 
 
 
 static func _on_offering_selected(tile_data: Dictionary) -> void:
-	"""Handle offering tile selection."""
+	"""Handle offering tile selection - show popup."""
 	_selected_offering = tile_data
 
-	# Dim all tiles and highlight selected (keep all clickable so user can change selection)
+	# Highlight selected tile (allow reselection)
 	EncounterUIHelpers.highlight_selected_tile(_tiles, tile_data, "id", true)
 
-	# Show character selector
-	_show_character_selector()
+	# Show reward claim popup
+	_show_offering_popup()
 
 
-static func _show_character_selector() -> void:
-	"""Show dropdown to select which character receives the item/skill."""
-	UIHelpers.clear_children(_char_selector_container)
-	_char_selector_container.visible = true
+static func _show_offering_popup() -> void:
+	"""Show popup with offering details and character selector."""
+	if _reward_popup:
+		_reward_popup.queue_free()
 
-	var cost = _selected_offering.get("cost", 0)
-	var can_afford = RunManager.get_gold() >= cost
-	var offering_type = _selected_offering.get("offering_type", "item")
+	_reward_popup = RewardClaimPopupScene.instantiate()
+	# Add to scene tree so it can reparent itself
+	var scene_root = Engine.get_main_loop().current_scene
+	scene_root.add_child(_reward_popup)
+
 	var offering_id = _selected_offering.get("id", "")
+	var offering_type = _selected_offering.get("offering_type", "item")
+	var cost = _selected_offering.get("cost", 0)
 
+	# Get eligible characters
 	var team = RunManager.get_team()
-
-	# Filter to only characters who can receive this offering
 	var eligible: Dictionary
 	if offering_type == "skill":
 		eligible = EncounterUIHelpers.filter_skill_eligible_characters(team, offering_id)
 	else:
 		eligible = EncounterUIHelpers.filter_item_eligible_characters(team, offering_id)
-	_eligible_char_indices = eligible.indices
-	var eligible_chars: Array = eligible.characters
 
-	var selector = UIPanelFactory.create_team_selector(eligible_chars)
-	_char_selector_container.add_child(selector)
+	# Connect to signals
+	_reward_popup.claimed.connect(_on_offering_claimed)
 
-	var action_text = "Equip" if offering_type == "item" else "Learn"
-	_confirm_btn = UIContainerHelpers.create_button("%s (%dg)" % [action_text, cost])
-	EncounterUIHelpers.setup_confirm_button(_confirm_btn, action_text, cost, can_afford, not eligible_chars.is_empty())
-	_confirm_btn.pressed.connect(_on_confirm_purchase.bind(selector))
-	_char_selector_container.add_child(_confirm_btn)
+	# Determine button text based on type
+	var action_text = "Learn" if offering_type == "skill" else "Equip"
+	var button_text = "%dg and %s" % [cost, action_text]
+
+	# Show the offering
+	if offering_type == "skill":
+		_reward_popup.show_skill(
+			offering_id,
+			eligible.characters,
+			eligible.indices,
+			"",  # No header
+			"",  # No bonus text
+			button_text,
+			cost
+		)
+	else:
+		_reward_popup.show_item(
+			offering_id,
+			eligible.characters,
+			eligible.indices,
+			"",  # No header
+			"",  # No bonus text
+			button_text,
+			cost
+		)
 
 
-static func _on_confirm_purchase(selector: OptionButton) -> void:
-	"""Confirm purchase for selected character."""
-	var selector_index = selector.selected - 1  # First option is "Select..."
-	if selector_index < 0 or selector_index >= _eligible_char_indices.size():
-		return
-
+static func _on_offering_claimed(offering_id: String, char_index: int) -> void:
+	"""Handle offering claim from popup."""
 	var cost = _selected_offering.get("cost", 0)
 	var offering_type = _selected_offering.get("offering_type", "item")
-	var offering_id = _selected_offering.get("id", "")
 
-	# The buy callbacks handle gold spending internally and disable the button on success
-	var button_was_enabled = not _confirm_btn.disabled
+	# Spend gold
+	if not EncounterUIHelpers.try_spend_gold(cost, _on_gold_spend):
+		return
 
 	var team = RunManager.get_team()
-	var char_index = _eligible_char_indices[selector_index]
+	var char_instance = team[char_index]
 
+	# Apply the reward
+	var success = false
 	if offering_type == "skill":
 		if _on_buy_skill.is_valid():
-			_on_buy_skill.call(offering_id, cost, selector, _confirm_btn)
+			# Use callback (it handles the skill learning)
+			_on_buy_skill.call(offering_id, 0, null, null)  # Cost already spent
+			success = true
 		else:
-			# Fallback: handle locally
-			if RunManager.spend_gold(cost):
-				team[char_index].learn_skill(offering_id)
-				_confirm_btn.disabled = true
-				_confirm_btn.text = "LEARNED"
+			success = char_instance.learn_skill(offering_id)
 	else:
 		if _on_buy_item.is_valid():
-			_on_buy_item.call(offering_id, cost, selector, _confirm_btn)
+			# Use callback (it handles item equipping)
+			_on_buy_item.call(offering_id, 0, null, null)  # Cost already spent
+			success = true
 		else:
-			# Fallback: handle locally
-			if RunManager.spend_gold(cost):
-				team[char_index].equip_item_upgrade(offering_id)
-				_confirm_btn.disabled = true
-				_confirm_btn.text = "PURCHASED"
-
-	# Check if purchase succeeded by seeing if button was disabled
-	var success = button_was_enabled and _confirm_btn.disabled
+			char_instance.equip_item_upgrade(offering_id)
+			success = true
 
 	if success:
 		_purchases_made += 1
 
-		# Hide selector
-		_char_selector_container.visible = false
+		# Clean up popup
+		if _reward_popup:
+			_reward_popup.hide_popup()
+			_reward_popup.queue_free()
+			_reward_popup = null
 
 		# Check if we've reached max purchases
 		if _purchases_made >= _max_purchases:

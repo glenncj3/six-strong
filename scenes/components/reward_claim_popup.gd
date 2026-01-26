@@ -21,6 +21,8 @@ var _reward_id: String = ""
 var _reward_type: String = "item"  # "item" or "skill"
 var _eligible_char_indices: Array = []
 var _selector: OptionButton = null
+var _overlay: ColorRect = null
+var _original_parent: Node = null
 
 
 func _ready() -> void:
@@ -46,7 +48,7 @@ func _apply_styling() -> void:
 	selector_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 
 
-func show_item(item_id: String, eligible_characters: Array, eligible_indices: Array, header_text: String = "You found:", bonus_text: String = "", button_text: String = "Claim") -> void:
+func show_item(item_id: String, eligible_characters: Array, eligible_indices: Array, header_text: String = "", bonus_text: String = "", button_text: String = "Claim", cost: int = 0) -> void:
 	"""
 	Show popup for claiming an item.
 
@@ -54,9 +56,10 @@ func show_item(item_id: String, eligible_characters: Array, eligible_indices: Ar
 		item_id: The item upgrade ID
 		eligible_characters: Array of character instances who can receive the item
 		eligible_indices: Array of team indices corresponding to eligible_characters
-		header_text: Text shown above the item (default: "You found:")
+		header_text: Text shown above the item (optional)
 		bonus_text: Optional bonus text (e.g., "+2 Gold")
 		button_text: Text for the confirm button
+		cost: Gold cost (0 = free)
 	"""
 	_reward_id = item_id
 	_reward_type = "item"
@@ -78,12 +81,13 @@ func show_item(item_id: String, eligible_characters: Array, eligible_indices: Ar
 		item_data.get("stat_modifiers", {}),
 		bonus_text,
 		button_text,
-		eligible_characters
+		eligible_characters,
+		cost
 	)
 	_show_popup()
 
 
-func show_skill(skill_id: String, eligible_characters: Array, eligible_indices: Array, header_text: String = "You learned:", bonus_text: String = "", button_text: String = "Learn") -> void:
+func show_skill(skill_id: String, eligible_characters: Array, eligible_indices: Array, header_text: String = "", bonus_text: String = "", button_text: String = "Learn", cost: int = 0) -> void:
 	"""
 	Show popup for claiming a skill.
 
@@ -91,9 +95,10 @@ func show_skill(skill_id: String, eligible_characters: Array, eligible_indices: 
 		skill_id: The skill ID
 		eligible_characters: Array of character instances who can learn the skill
 		eligible_indices: Array of team indices corresponding to eligible_characters
-		header_text: Text shown above the skill (default: "You learned:")
+		header_text: Text shown above the skill (optional)
 		bonus_text: Optional bonus text
 		button_text: Text for the confirm button
+		cost: Gold cost (0 = free)
 	"""
 	_reward_id = skill_id
 	_reward_type = "skill"
@@ -123,12 +128,13 @@ func show_skill(skill_id: String, eligible_characters: Array, eligible_indices: 
 		effects_dict,
 		bonus_text,
 		button_text,
-		eligible_characters
+		eligible_characters,
+		cost
 	)
 	_show_popup()
 
 
-func show_custom(reward_id: String, reward_type: String, title: String, image_path: String, description: String, stats: Dictionary, eligible_characters: Array, eligible_indices: Array, header_text: String = "You received:", bonus_text: String = "", button_text: String = "Claim") -> void:
+func show_custom(reward_id: String, reward_type: String, title: String, image_path: String, description: String, stats: Dictionary, eligible_characters: Array, eligible_indices: Array, header_text: String = "", bonus_text: String = "", button_text: String = "Claim", cost: int = 0) -> void:
 	"""
 	Show popup with custom reward data.
 
@@ -141,9 +147,10 @@ func show_custom(reward_id: String, reward_type: String, title: String, image_pa
 		stats: Dictionary of stat modifiers to display
 		eligible_characters: Array of character instances
 		eligible_indices: Array of team indices
-		header_text: Header text
+		header_text: Header text (optional)
 		bonus_text: Optional bonus text
 		button_text: Button text
+		cost: Gold cost (0 = free)
 	"""
 	_reward_id = reward_id
 	_reward_type = reward_type
@@ -157,15 +164,17 @@ func show_custom(reward_id: String, reward_type: String, title: String, image_pa
 		stats,
 		bonus_text,
 		button_text,
-		eligible_characters
+		eligible_characters,
+		cost
 	)
 	_show_popup()
 
 
-func _setup_display(header_text: String, title: String, image_path: String, description: String, stats: Dictionary, bonus_text: String, button_text: String, eligible_characters: Array) -> void:
+func _setup_display(header_text: String, title: String, image_path: String, description: String, stats: Dictionary, bonus_text: String, button_text: String, eligible_characters: Array, cost: int = 0) -> void:
 	"""Internal setup for display content."""
-	# Header
+	# Header (hidden if empty)
 	header_label.text = header_text
+	header_label.visible = not header_text.is_empty()
 
 	# Icon
 	UIHelpers.set_texture_safe(icon, image_path)
@@ -204,10 +213,14 @@ func _setup_display(header_text: String, title: String, image_path: String, desc
 	bonus_label.text = bonus_text
 	bonus_label.visible = not bonus_text.is_empty()
 
-	# Character selector
+	# Character selector (hide the label)
+	selector_label.visible = false
 	UIHelpers.clear_children(selector_container)
 	_selector = UIPanelFactory.create_team_selector(eligible_characters)
 	selector_container.add_child(_selector)
+
+	# Check affordability
+	var can_afford = cost <= 0 or RunManager.get_gold() >= cost
 
 	# Confirm button
 	confirm_button.text = button_text
@@ -215,6 +228,10 @@ func _setup_display(header_text: String, title: String, image_path: String, desc
 		UIStyles.setup_danger_button(confirm_button, GameConstants.FONT_SIZE_BUTTON)
 		confirm_button.disabled = true
 		confirm_button.text = "No eligible characters"
+	elif not can_afford:
+		UIStyles.setup_danger_button(confirm_button, GameConstants.FONT_SIZE_BUTTON)
+		confirm_button.disabled = true
+		confirm_button.text = "Not enough gold (%dg)" % cost
 	else:
 		UIStyles.setup_success_button(confirm_button, GameConstants.FONT_SIZE_BUTTON)
 		confirm_button.disabled = false
@@ -236,14 +253,48 @@ func _format_stat_name(stat_name: String) -> String:
 
 
 func _show_popup() -> void:
-	"""Show the popup."""
+	"""Show the popup as a modal overlay on top of everything."""
+	# Store original parent for cleanup
+	_original_parent = get_parent()
+
+	# Find the scene root to add overlay on top
+	var scene_root = get_tree().current_scene
+
+	# Create dimming overlay
+	_overlay = ColorRect.new()
+	_overlay.color = Color(0, 0, 0, 0.5)
+	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP  # Block clicks behind
+	scene_root.add_child(_overlay)
+
+	# Reparent popup to scene root
+	reparent(scene_root)
+
+	# Center the popup
+	set_anchors_preset(Control.PRESET_CENTER)
+	anchor_left = 0.5
+	anchor_top = 0.5
+	anchor_right = 0.5
+	anchor_bottom = 0.5
+	offset_left = -160
+	offset_top = -200
+	offset_right = 160
+	offset_bottom = 200
+	grow_horizontal = Control.GROW_DIRECTION_BOTH
+	grow_vertical = Control.GROW_DIRECTION_BOTH
+
 	visible = true
 	move_to_front()
 
 
 func hide_popup() -> void:
-	"""Hide the popup."""
+	"""Hide the popup and clean up overlay."""
 	visible = false
+
+	# Remove overlay
+	if _overlay and is_instance_valid(_overlay):
+		_overlay.queue_free()
+		_overlay = null
 
 
 func _on_confirm_pressed() -> void:

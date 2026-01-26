@@ -4,6 +4,8 @@ extends RefCounted
 ## Player spins a wheel with 6 segments for varied rewards.
 ## First spin is free; player may pay gold for one additional spin.
 
+const RewardClaimPopupScene = preload("res://scenes/components/reward_claim_popup.tscn")
+
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
 	"""Create wheel of fortune encounter UI."""
@@ -30,8 +32,8 @@ class WheelEncounterContainer extends VBoxContainer:
 	var spin_button: Button
 	var spin_again_button: Button
 	var take_prize_button: Button
-	var char_selector_container: CenterContainer
 	var action_container: HBoxContainer
+	var reward_popup: RewardClaimPopup = null
 
 	# State tracking
 	var eligible_char_indices: Array = []
@@ -67,14 +69,6 @@ class WheelEncounterContainer extends VBoxContainer:
 		wheel_visual.spin_complete.connect(_on_visual_spin_complete)
 		wheel_visual.segment_passed.connect(_on_segment_passed)
 		add_child(wheel_visual)
-
-		# Character selector (hidden until needed) - positioned where wheel is
-		char_selector_container = CenterContainer.new()
-		char_selector_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		char_selector_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		char_selector_container.custom_minimum_size = Vector2(GameConstants.WHEEL_SIZE + 40, GameConstants.WHEEL_SIZE + 80)
-		char_selector_container.visible = false
-		add_child(char_selector_container)
 
 		# Spacer before buttons (at least 20px above skip/finish)
 		add_child(UIHelpers.create_spacer(24))
@@ -131,7 +125,6 @@ class WheelEncounterContainer extends VBoxContainer:
 				spin_button.disabled = false
 				spin_again_button.visible = false
 				take_prize_button.visible = false
-				char_selector_container.visible = false
 
 			WheelState.State.SPINNING, WheelState.State.LANDING:
 				spin_button.visible = true
@@ -152,13 +145,13 @@ class WheelEncounterContainer extends VBoxContainer:
 				spin_button.visible = false
 				spin_again_button.visible = false
 				take_prize_button.visible = false
-				_transition_to_character_selector()
+				_show_reward_claim_popup()
 
 			WheelState.State.COMPLETE:
 				spin_button.visible = false
 				spin_again_button.visible = false
 				take_prize_button.visible = false
-				char_selector_container.visible = false
+				_cleanup_popup()
 
 
 	func _show_choice_buttons() -> void:
@@ -186,57 +179,9 @@ class WheelEncounterContainer extends VBoxContainer:
 			take_prize_button.text = "Take Prize"
 
 
-	func _transition_to_character_selector() -> void:
-		"""Animate wheel off screen and show character selector."""
-		# Build the selector UI first (hidden)
-		_build_character_selector_ui()
-
-		if eligible_char_indices.is_empty():
-			# No eligible characters, apply fallback (already handled in _build)
-			return
-
-		# Hide action buttons
-		action_container.visible = false
-
-		# Position selector off-screen to the right
-		char_selector_container.visible = true
-		char_selector_container.modulate.a = 0
-
-		# Animate wheel rolling off to the left, then hide it to release layout space
-		var wheel_tween = create_tween()
-		wheel_tween.set_parallel(true)
-		wheel_tween.tween_property(wheel_visual, "position:x", -400, 0.4).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
-		wheel_tween.tween_property(wheel_visual, "modulate:a", 0.0, 0.3).set_delay(0.1)
-		wheel_tween.chain().tween_callback(func(): wheel_visual.visible = false)
-
-		# Animate selector sliding in from the right
-		var selector_tween = create_tween()
-		selector_tween.tween_property(char_selector_container, "modulate:a", 1.0, 0.3).set_delay(0.2)
-
-
-	func _transition_back_to_wheel() -> void:
-		"""Animate selector off screen and bring wheel back."""
-		# Animate selector fading out
-		var selector_tween = create_tween()
-		selector_tween.tween_property(char_selector_container, "modulate:a", 0.0, 0.2)
-		selector_tween.tween_callback(func(): char_selector_container.visible = false)
-
-		# Show action buttons again
-		action_container.visible = true
-
-		# Make wheel visible again (was hidden to release layout space)
-		wheel_visual.visible = true
-
-		# Animate wheel rolling back in
-		var wheel_tween = create_tween()
-		wheel_tween.set_parallel(true)
-		wheel_tween.tween_property(wheel_visual, "position:x", 0, 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD).set_delay(0.1)
-		wheel_tween.tween_property(wheel_visual, "modulate:a", 1.0, 0.3).set_delay(0.1)
-
-
-	func _build_character_selector_ui() -> void:
-		"""Build character selection UI for items/skills."""
-		UIHelpers.clear_children(char_selector_container)
+	func _show_reward_claim_popup() -> void:
+		"""Show popup for item/skill reward claiming."""
+		_cleanup_popup()
 
 		var eligible = controller.get_eligible_characters()
 		eligible_char_indices = eligible["indices"]
@@ -249,41 +194,131 @@ class WheelEncounterContainer extends VBoxContainer:
 			_on_take_prize_pressed()
 			return
 
-		# Content VBox - CenterContainer parent will center this
-		var content = VBoxContainer.new()
-		content.alignment = BoxContainer.ALIGNMENT_CENTER
-		content.add_theme_constant_override("separation", 12)
-		char_selector_container.add_child(content)
+		# Create and show the popup
+		reward_popup = WheelOfFortuneEncounterUI.RewardClaimPopupScene.instantiate()
+		var scene_root = get_tree().current_scene
+		scene_root.add_child(reward_popup)
 
-		var label = UIHelpers.create_label(
-			"Select character for: %s" % controller.current_reward.get_label(),
-			GameConstants.FONT_SIZE_BODY,
-			GameConstants.COLOR_TEXT_LIGHT,
-			true
-		)
-		content.add_child(label)
+		# Connect signals
+		reward_popup.claimed.connect(_on_popup_claimed)
 
-		var selector = UIPanelFactory.create_team_selector(eligible_chars)
-		selector.custom_minimum_size.x = 300
-		content.add_child(selector)
+		# Determine reward type and show appropriate popup
+		var reward = controller.current_reward
+		if reward.type == RewardTypes.RewardType.ITEM or reward.type == RewardTypes.RewardType.ITEM_RANDOM:
+			var item_id = reward.params.get("item_id", "")
+			if item_id.is_empty():
+				# Random item - pick one now
+				item_id = _pick_random_item_for_reward()
+				reward.params["item_id"] = item_id
 
-		var confirm_btn = UIHelpers.create_button(
-			"Confirm",
-			_on_confirm_selection.bind(selector),
-			GameConstants.BUTTON_WIDTH_SMALL,
-			GameConstants.BUTTON_HEIGHT_STANDARD
-		)
-		UIStyles.setup_success_button(confirm_btn)
-		content.add_child(confirm_btn)
+			reward_popup.show_item(
+				item_id,
+				eligible_chars,
+				eligible_char_indices,
+				"",  # No header
+				"",  # No bonus
+				"Claim",
+				0  # Free (already won)
+			)
+		elif reward.type == RewardTypes.RewardType.SKILL or reward.type == RewardTypes.RewardType.SKILL_RANDOM:
+			var skill_id = reward.params.get("skill_id", "")
+			if skill_id.is_empty():
+				# Random skill - pick one now
+				skill_id = _pick_random_skill_for_reward()
+				reward.params["skill_id"] = skill_id
 
-		var cancel_btn = UIHelpers.create_button(
-			"Back",
-			_on_cancel_selection,
-			GameConstants.BUTTON_WIDTH_SMALL,
-			GameConstants.BUTTON_HEIGHT_STANDARD
-		)
-		UIStyles.setup_button(cancel_btn)
-		content.add_child(cancel_btn)
+			reward_popup.show_skill(
+				skill_id,
+				eligible_chars,
+				eligible_char_indices,
+				"",  # No header
+				"",  # No bonus
+				"Learn",
+				0  # Free (already won)
+			)
+
+
+	func _pick_random_item_for_reward() -> String:
+		"""Pick a random item for the reward."""
+		var team = RunManager.get_team()
+		var max_level = 1
+		for char_instance in team:
+			max_level = maxi(max_level, char_instance.level)
+
+		var all_items = GameData.get_all_item_upgrades()
+		var valid_items: Array = []
+
+		for item in all_items:
+			var item_id = item["id"]
+			var level_req = item.get("level_requirement", 1)
+			if level_req > max_level:
+				continue
+
+			# Check if at least one character can equip
+			for char_instance in team:
+				if item_id in char_instance.equipped_item_upgrades:
+					continue
+				var total = char_instance.equipped_items.size() + char_instance.equipped_item_upgrades.size()
+				if total >= GameConstants.MAX_RUN_ITEMS:
+					continue
+				valid_items.append(item_id)
+				break
+
+		if valid_items.is_empty():
+			return ""
+
+		valid_items.shuffle()
+		return valid_items[0]
+
+
+	func _pick_random_skill_for_reward() -> String:
+		"""Pick a random skill for the reward."""
+		var team = RunManager.get_team()
+		var max_level = 1
+		for char_instance in team:
+			max_level = maxi(max_level, char_instance.level)
+
+		var all_skills = GameData.get_all_skills()
+		var valid_skills: Array = []
+
+		for skill in all_skills:
+			var skill_id = skill["id"]
+			var level_req = skill.get("level_requirement", 1)
+			if level_req > max_level:
+				continue
+
+			# Check if at least one character can learn
+			for char_instance in team:
+				if skill_id in char_instance.learned_skills:
+					continue
+				if char_instance.learned_skills.size() >= GameConstants.MAX_RUN_SKILLS:
+					continue
+				valid_skills.append(skill_id)
+				break
+
+		if valid_skills.is_empty():
+			return ""
+
+		valid_skills.shuffle()
+		return valid_skills[0]
+
+
+	func _on_popup_claimed(reward_id: String, char_index: int) -> void:
+		"""Handle claim from popup."""
+		var team = RunManager.get_team()
+		var target_char = team[char_index]
+
+		var success = controller.accept_reward(target_char)
+		if success:
+			_cleanup_popup()
+
+
+	func _cleanup_popup() -> void:
+		"""Clean up the reward popup if it exists."""
+		if reward_popup and is_instance_valid(reward_popup):
+			reward_popup.hide_popup()
+			reward_popup.queue_free()
+			reward_popup = null
 
 
 	func _on_spin_pressed() -> void:
@@ -327,26 +362,6 @@ class WheelEncounterContainer extends VBoxContainer:
 				_update_gold_display()
 
 
-	func _on_confirm_selection(selector: OptionButton) -> void:
-		"""Handle character selection confirmation."""
-		var selector_index = selector.selected - 1  # First option is "Select..."
-		if selector_index < 0 or selector_index >= eligible_char_indices.size():
-			return
-
-		var team = RunManager.get_team()
-		var char_index = eligible_char_indices[selector_index]
-		var target_char = team[char_index]
-
-		var success = controller.accept_reward(target_char)
-		if not success:
-			# Show error? For now just stay in selection
-			pass
-
-
-	func _on_cancel_selection() -> void:
-		"""Cancel character selection and go back to choice."""
-		_transition_back_to_wheel()
-		controller.cancel_target_selection()
 
 
 	func _on_spin_started() -> void:

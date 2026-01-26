@@ -1,9 +1,10 @@
 class_name SkillTrainerEncounterUI
 extends RefCounted
 ## UI creation and reward preview for skill trainer encounters.
-## Shows 3 skill options, player picks one, then picks a character to learn it.
+## Shows 3 skill options, player picks one, popup shows skill details and character selector.
 
 const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")
+const RewardClaimPopupScene = preload("res://scenes/components/reward_claim_popup.tscn")
 
 # Store references for callback access
 static var _selected_skill_data: Dictionary = {}
@@ -11,9 +12,7 @@ static var _on_complete: Callable = Callable()
 static var _on_skill_learn: Callable = Callable()
 static var _on_gold_spend: Callable = Callable()
 static var _tiles: Array = []
-static var _char_selector_container: Control = null
-static var _confirm_btn: Button = null
-static var _eligible_char_indices: Array = []  # Maps selector index to team index
+static var _reward_popup: RewardClaimPopup = null
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
@@ -26,6 +25,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	_on_gold_spend = context.get("on_gold_spend", Callable())
 	_selected_skill_data = {}
 	_tiles.clear()
+	_reward_popup = null
 
 	if skill_ids.is_empty():
 		vbox.add_child(UIHelpers.create_label("No skills available...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
@@ -51,11 +51,6 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 		tile.ready.connect(_setup_tile.bind(tile, skill_data, tile_size))
 		_tiles.append(tile)
 
-	# Character selector (hidden until skill is selected)
-	_char_selector_container = UIHelpers.create_vbox_container(8)
-	_char_selector_container.visible = false
-	vbox.add_child(_char_selector_container)
-
 	return vbox
 
 
@@ -67,56 +62,60 @@ static func _setup_tile(tile: Control, skill_data: Dictionary, tile_size: float)
 
 
 static func _on_skill_selected(skill_data: Dictionary) -> void:
-	"""Handle skill tile selection."""
+	"""Handle skill tile selection - show popup."""
 	_selected_skill_data = skill_data
 
+	# Highlight selected tile (allow reselection)
 	EncounterUIHelpers.highlight_selected_tile(_tiles, skill_data, "id", true)
 
-	# Show character selector
-	_show_character_selector()
+	# Show reward claim popup
+	_show_skill_popup()
 
 
-static func _show_character_selector() -> void:
-	"""Show dropdown to select which character learns the skill."""
-	UIHelpers.clear_children(_char_selector_container)
-	_char_selector_container.visible = true
+static func _show_skill_popup() -> void:
+	"""Show popup with skill details and character selector."""
+	if _reward_popup:
+		_reward_popup.queue_free()
 
-	var cost = _selected_skill_data.get("cost", 0)
+	_reward_popup = RewardClaimPopupScene.instantiate()
+	# Add to scene tree temporarily so it can reparent itself
+	var scene_root = Engine.get_main_loop().current_scene
+	scene_root.add_child(_reward_popup)
+
 	var skill_id = _selected_skill_data.get("id", "")
-	var can_afford = RunManager.get_gold() >= cost
-
-	var team = RunManager.get_team()
-
-	# Filter to only characters who can learn this skill
-	var eligible = EncounterUIHelpers.filter_skill_eligible_characters(team, skill_id)
-	_eligible_char_indices = eligible.indices
-	var eligible_chars: Array = eligible.characters
-
-	var selector = UIPanelFactory.create_team_selector(eligible_chars)
-	_char_selector_container.add_child(selector)
-
-	_confirm_btn = UIContainerHelpers.create_button("Learn (%dg)" % cost)
-	EncounterUIHelpers.setup_confirm_button(_confirm_btn, "Learn", cost, can_afford, not eligible_chars.is_empty())
-	_confirm_btn.pressed.connect(_on_confirm_learn.bind(selector))
-	_char_selector_container.add_child(_confirm_btn)
-
-
-static func _on_confirm_learn(selector: OptionButton) -> void:
-	"""Confirm skill learning for selected character."""
-	var selector_index = selector.selected - 1  # First option is "Select..."
-	if selector_index < 0 or selector_index >= _eligible_char_indices.size():
-		return
-
 	var cost = _selected_skill_data.get("cost", 0)
 
+	# Get eligible characters
+	var team = RunManager.get_team()
+	var eligible = EncounterUIHelpers.filter_skill_eligible_characters(team, skill_id)
+
+	# Connect to signals
+	_reward_popup.claimed.connect(_on_skill_claimed)
+
+	# Show the skill
+	_reward_popup.show_skill(
+		skill_id,
+		eligible.characters,
+		eligible.indices,
+		"",  # No header
+		"",  # No bonus text
+		"%dg and Learn" % cost,
+		cost
+	)
+
+
+static func _on_skill_claimed(skill_id: String, char_index: int) -> void:
+	"""Handle skill claim from popup."""
+	var cost = _selected_skill_data.get("cost", 0)
+
+	# Spend gold
 	if not EncounterUIHelpers.try_spend_gold(cost, _on_gold_spend):
 		return
 
 	var team = RunManager.get_team()
-	var char_index = _eligible_char_indices[selector_index]
 	var char_instance = team[char_index]
-	var skill_id = _selected_skill_data.get("id", "")
 
+	# Learn the skill
 	var success = false
 	if _on_skill_learn.is_valid():
 		success = _on_skill_learn.call(char_instance, skill_id)
@@ -124,8 +123,13 @@ static func _on_confirm_learn(selector: OptionButton) -> void:
 		success = char_instance.learn_skill(skill_id)
 
 	if success:
-		# Hide selector and show success
-		_char_selector_container.visible = false
+		# Clean up popup
+		if _reward_popup:
+			_reward_popup.hide_popup()
+			_reward_popup.queue_free()
+			_reward_popup = null
+
+		# Complete encounter
 		if _on_complete.is_valid():
 			_on_complete.call()
 

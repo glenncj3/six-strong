@@ -146,7 +146,9 @@ static func _show_reward_popup() -> void:
 		_reward_popup.queue_free()
 
 	_reward_popup = RewardClaimPopupScene.instantiate()
-	_main_container.add_child(_reward_popup)
+	# Add to scene root so popup can reparent itself on top
+	var scene_root = Engine.get_main_loop().current_scene
+	scene_root.add_child(_reward_popup)
 
 	# Get eligible characters for this specific item
 	var team = RunManager.get_team()
@@ -160,9 +162,9 @@ static func _show_reward_popup() -> void:
 		_revealed_item_id,
 		eligible.characters,
 		eligible.indices,
-		"You found:",
+		"",
 		"+%d Gold" % _gold_bonus,
-		"Claim (+%dg)" % _gold_bonus
+		"+%dg and Claim" % _gold_bonus
 	)
 
 
