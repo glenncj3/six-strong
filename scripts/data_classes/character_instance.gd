@@ -1,8 +1,9 @@
 class_name CharacterInstance
 extends RefCounted
 # CharacterInstance - Runtime representation of a character during a run
-# This is a CLONE of account data - modifications don't affect the account
-# Refactored to use StatCalculator for DRY stat calculations
+# Phase 1 Refactor: Simplified to remove item/skill tracking
+# Characters are now run-time acquisitions, like items
+# Stats = base_stats + level bonuses only (no items/skills/prestige)
 
 # Persistent identifiers
 var base_character_id: String = ""
@@ -17,53 +18,61 @@ var current_health: int = 0
 # Stats dictionary (data-driven, supports any stat)
 var stats: Dictionary = {}
 
-# Equipment and skills during this run
-var equipped_items: Array[String] = []
-var equipped_item_upgrades: Array[String] = []
-var learned_skills: Array[String] = []
+# Grid position for 2x3 character grid
+# Vector2i(row, column) where row 0 = front, row 1 = back
+# Value of Vector2i(-1, -1) indicates not placed in grid
+var grid_position: Vector2i = Vector2i(-1, -1)
 
 # Optional: injected data source for testing (Dependency Inversion)
 var _game_data: Node = null
 
 
-func _init(char_data: Dictionary, game_data: Node = null) -> void:
+func _init(char_data: Dictionary = {}, game_data = null) -> void:
 	"""
-	Initialize from player's character data.
+	Initialize from character master data or save data.
 
 	Args:
-		char_data: Character data from PlayerAccount
-		game_data: Optional injected GameData for testing (defaults to global)
+		char_data: Either master character data or saved character instance data
+		game_data: Optional injected GameData for testing (defaults to global autoload)
 	"""
-	_game_data = game_data if game_data != null else GameData
+	_game_data = game_data
+
+	# Handle empty initialization (for factory methods)
+	if char_data.is_empty():
+		return
 
 	base_character_id = char_data.get("id", "")
 
-	# Get master data
-	var char_master = _get_game_data().get_character_by_id(base_character_id)
+	# Get master data (only if game_data is available)
+	var gd = _get_game_data()
+	if gd == null:
+		# No game data - stats must be set manually
+		return
+
+	var char_master = gd.get_character_by_id(base_character_id)
 	if char_master.is_empty():
 		push_error("CharacterInstance: Master data not found for %s" % base_character_id)
 		return
 
-	# Copy equipped items from account
-	if char_data.has("equipped_items"):
-		equipped_items = Array(char_data["equipped_items"].duplicate(), TYPE_STRING, "", null)
-
 	# Calculate initial stats using StatCalculator
-	stats = StatCalculator.calculate_runtime_stats(
-		char_master,
-		char_data,
-		equipped_items,
-		equipped_item_upgrades,
-		learned_skills
-	)
+	stats = StatCalculator.calculate_character_base_stats(char_master)
 
 	# Set health to max
 	current_health = stats.get(GameConstants.STAT_HEALTH, 0)
 
 
-func _get_game_data() -> Node:
+func _get_game_data():
 	"""Get game data source (supports dependency injection)."""
-	return _game_data if _game_data != null else GameData
+	if _game_data != null:
+		return _game_data
+	# Try to get the autoload - may be null in test mode
+	if Engine.has_singleton("GameData"):
+		return Engine.get_singleton("GameData")
+	# Check if it's available as an autoload node
+	var tree = Engine.get_main_loop()
+	if tree and tree.root and tree.root.has_node("/root/GameData"):
+		return tree.root.get_node("/root/GameData")
+	return null
 
 
 # =============================================================================
@@ -78,21 +87,38 @@ var mana: int:
 	get: return stats.get(GameConstants.STAT_MANA, 0)
 	set(value): stats[GameConstants.STAT_MANA] = value
 
-var income: int:
-	get: return stats.get(GameConstants.STAT_INCOME, 0)
-	set(value): stats[GameConstants.STAT_INCOME] = value
-
 var defend_rate: int:
 	get: return stats.get(GameConstants.STAT_DEFEND_RATE, 0)
 	set(value): stats[GameConstants.STAT_DEFEND_RATE] = value
 
-var item_slots: int:
-	get: return stats.get(GameConstants.STAT_ITEM_SLOTS, 9)
-	set(value): stats[GameConstants.STAT_ITEM_SLOTS] = value
 
-var starting_item_slots: int:
-	get: return stats.get(GameConstants.STAT_STARTING_ITEM_SLOTS, 0)
-	set(value): stats[GameConstants.STAT_STARTING_ITEM_SLOTS] = value
+# =============================================================================
+# GRID PLACEMENT
+# =============================================================================
+
+func set_grid_position(row: int, col: int) -> void:
+	"""Set the character's position in the 2x3 grid."""
+	grid_position = Vector2i(row, col)
+
+
+func clear_grid_position() -> void:
+	"""Remove character from grid (set to invalid position)."""
+	grid_position = Vector2i(-1, -1)
+
+
+func is_in_grid() -> bool:
+	"""Check if character is currently placed in the grid."""
+	return grid_position.x >= 0 and grid_position.y >= 0
+
+
+func is_front_row() -> bool:
+	"""Check if character is in the front row (row 0)."""
+	return grid_position.x == 0
+
+
+func is_back_row() -> bool:
+	"""Check if character is in the back row (row 1)."""
+	return grid_position.x == 1
 
 
 # =============================================================================
@@ -108,72 +134,20 @@ func add_experience(xp: int) -> bool:
 	if experience >= GameConstants.XP_PER_LEVEL:
 		experience -= GameConstants.XP_PER_LEVEL
 		level += 1
+		_apply_level_bonus()
 		return true
 
 	return false
 
 
-# =============================================================================
-# SKILLS
-# =============================================================================
-
-func learn_skill(skill_id: String) -> bool:
-	"""Learn a new skill during the run."""
-	if learned_skills.size() >= GameConstants.MAX_RUN_SKILLS:
-		push_warning("CharacterInstance: Max skills reached (%d)" % GameConstants.MAX_RUN_SKILLS)
-		return false
-
-	if skill_id in learned_skills:
-		push_warning("CharacterInstance: Skill already learned: %s" % skill_id)
-		return false
-
-	var skill_data = _get_game_data().get_skill_by_id(skill_id)
-	if skill_data.is_empty():
-		return false
-
-	learned_skills.append(skill_id)
-
-	# Apply skill effects using StatCalculator
-	var effects = skill_data.get("effects", [])
-	for effect in effects:
-		var effect_type = effect.get("type", "stat_add")
-		var stat_name = effect.get("stat", "")
-		var value = effect.get("value", 0)
-
-		StatCalculator.apply_modifier(stats, stat_name, value, effect_type == "stat_multiply")
-
-	return true
-
-
-# =============================================================================
-# ITEM UPGRADES
-# =============================================================================
-
-func equip_item_upgrade(item_upgrade_id: String) -> bool:
-	"""
-	Equip an item upgrade found during the run.
-	"""
-	var total_items = equipped_items.size() + equipped_item_upgrades.size()
-	if total_items >= GameConstants.MAX_RUN_ITEMS:
-		push_warning("CharacterInstance: Max items reached (%d)" % GameConstants.MAX_RUN_ITEMS)
-		return false
-
-	if item_upgrade_id in equipped_item_upgrades:
-		push_warning("CharacterInstance: Item upgrade already equipped: %s" % item_upgrade_id)
-		return false
-
-	var upgrade_data = _get_game_data().get_item_upgrade_by_id(item_upgrade_id)
-	if upgrade_data.is_empty():
-		return false
-
-	equipped_item_upgrades.append(item_upgrade_id)
-
-	# Apply stat modifiers using StatCalculator
-	var modifiers = upgrade_data.get("stat_modifiers", {})
-	for stat_name in modifiers:
-		StatCalculator.apply_modifier(stats, stat_name, modifiers[stat_name], false)
-
-	return true
+func _apply_level_bonus() -> void:
+	"""Apply stat bonuses from leveling up."""
+	# Simple level bonus: +5 health per level
+	# Can be expanded later for more complex leveling
+	stats[GameConstants.STAT_HEALTH] = stats.get(GameConstants.STAT_HEALTH, 0) + 5
+	# Increase current health too if it was at max
+	if current_health == max_health - 5:
+		current_health = max_health
 
 
 # =============================================================================
@@ -195,6 +169,11 @@ func is_alive() -> bool:
 	return current_health > 0
 
 
+func restore_full_health() -> void:
+	"""Restore character to full health."""
+	current_health = max_health
+
+
 # =============================================================================
 # SERIALIZATION
 # =============================================================================
@@ -207,37 +186,53 @@ func to_dict() -> Dictionary:
 		"experience": experience,
 		"current_health": current_health,
 		"stats": stats.duplicate(),
-		"equipped_items": Array(equipped_items),
-		"equipped_item_upgrades": Array(equipped_item_upgrades),
-		"learned_skills": Array(learned_skills)
+		"grid_position": {"x": grid_position.x, "y": grid_position.y}
 	}
 
 
-static func from_dict(data: Dictionary, game_data: Node = null) -> CharacterInstance:
+static func from_dict(data: Dictionary, game_data = null) -> CharacterInstance:
 	"""Deserialize from dictionary (for loading saves)."""
-	# Create instance with minimal data
-	var instance = CharacterInstance.new({
-		"id": data.get("base_character_id", ""),
-		"equipped_items": data.get("equipped_items", []),
-		"rank": 1
-	}, game_data)
+	var instance = CharacterInstance.new({}, game_data)
 
-	# Restore runtime state
+	instance.base_character_id = data.get("base_character_id", "")
 	instance.level = data.get("level", 1)
 	instance.experience = data.get("experience", 0)
 	instance.current_health = data.get("current_health", 0)
 
-	# Restore stats if saved (otherwise keep calculated)
+	# Restore stats if saved (otherwise recalculate)
 	if data.has("stats"):
 		instance.stats = data["stats"].duplicate()
+	else:
+		# Recalculate from master data if game_data available
+		var gd = instance._get_game_data()
+		if gd != null:
+			var char_master = gd.get_character_by_id(instance.base_character_id)
+			if not char_master.is_empty():
+				instance.stats = StatCalculator.calculate_character_base_stats(char_master)
 
-	# Restore equipment and skills
-	if data.has("equipped_item_upgrades"):
-		instance.equipped_item_upgrades = Array(data["equipped_item_upgrades"], TYPE_STRING, "", null)
-	if data.has("learned_skills"):
-		instance.learned_skills = Array(data["learned_skills"], TYPE_STRING, "", null)
+	# Restore grid position
+	if data.has("grid_position"):
+		var pos = data["grid_position"]
+		instance.grid_position = Vector2i(pos.get("x", -1), pos.get("y", -1))
 
 	return instance
+
+
+static func from_master_data(char_id: String, game_data = null) -> CharacterInstance:
+	"""Create a new character instance directly from master data (character ID)."""
+	# Create instance first to use its _get_game_data method
+	var instance = CharacterInstance.new({}, game_data)
+	var gd = instance._get_game_data()
+	if gd == null:
+		push_error("CharacterInstance: GameData not available")
+		return null
+
+	var char_master = gd.get_character_by_id(char_id)
+	if char_master.is_empty():
+		push_error("CharacterInstance: Master data not found for %s" % char_id)
+		return null
+
+	return CharacterInstance.new({"id": char_id}, game_data)
 
 
 # =============================================================================
@@ -250,18 +245,24 @@ func get_character_name() -> String:
 	return char_master.get("name", "Unknown")
 
 
+func get_character_description() -> String:
+	"""Get the character's description from master data."""
+	var char_master = _get_game_data().get_character_by_id(base_character_id)
+	return char_master.get("description", "")
+
+
 func get_stat(stat_name: String) -> int:
 	"""Get a stat value by name."""
 	return stats.get(stat_name, 0)
 
 
-func recalculate_stats(char_data: Dictionary) -> void:
-	"""Recalculate all stats (useful after major changes)."""
+func recalculate_stats() -> void:
+	"""Recalculate all stats from master data (useful after major changes)."""
 	var char_master = _get_game_data().get_character_by_id(base_character_id)
-	stats = StatCalculator.calculate_runtime_stats(
-		char_master,
-		char_data,
-		equipped_items,
-		equipped_item_upgrades,
-		learned_skills
-	)
+	if char_master.is_empty():
+		return
+	stats = StatCalculator.calculate_character_base_stats(char_master)
+
+	# Apply level bonuses
+	for i in range(level - 1):
+		stats[GameConstants.STAT_HEALTH] = stats.get(GameConstants.STAT_HEALTH, 0) + 5

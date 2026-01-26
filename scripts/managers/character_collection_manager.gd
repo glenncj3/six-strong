@@ -1,13 +1,16 @@
 class_name CharacterCollection
 extends RefCounted
-# CharacterCollection - Manages player's character collection
-# Split from PlayerAccount for Single Responsibility Principle
-# Uses Dictionary for O(1) character lookups instead of Array
+# CharacterCollection - DEPRECATED (Phase 1)
+# This class is retained as a minimal stub for backwards compatibility.
+# All prestige/fame tracking has moved to LegacyCollection.
+# Characters are now run-time acquisitions, not meta-progression anchors.
+#
+# TODO (Phase 4+): Remove this class entirely once draft system uses legacies.
 
 signal character_unlocked(char_id: String)
 signal character_prestige_up(char_id: String, new_prestige: int)
 
-# Characters stored as Dictionary for O(1) lookup: id -> character_data
+# Minimal storage for backwards compatibility
 var _characters: Dictionary = {}
 
 # Callback for persistence (injected by PlayerAccount)
@@ -30,12 +33,11 @@ func _notify_change() -> void:
 
 
 # =============================================================================
-# SERIALIZATION
+# SERIALIZATION (Minimal for backwards compatibility)
 # =============================================================================
 
 func to_dict() -> Dictionary:
 	"""Serialize collection data for saving."""
-	# Convert to array format for JSON compatibility with existing saves
 	var characters_array = []
 	for char_id in _characters:
 		characters_array.append(_characters[char_id])
@@ -50,33 +52,12 @@ static func from_dict(data: Dictionary) -> CharacterCollection:
 	"""Create CharacterCollection from saved data."""
 	var collection = CharacterCollection.new()
 
-	# Support both old array format and new dict format
 	if data.has("characters"):
 		for char_data in data["characters"]:
 			if char_data.has("id"):
-				# Ensure all required fields exist (migration for old saves)
-				_ensure_character_fields(char_data)
 				collection._characters[char_data["id"]] = char_data
 
 	return collection
-
-
-static func _ensure_character_fields(char_data: Dictionary) -> void:
-	"""Ensure character data has all required fields with defaults."""
-	if not char_data.has("fame"):
-		char_data["fame"] = 0
-	if not char_data.has("prestige"):
-		char_data["prestige"] = 1
-	if not char_data.has("unlocked"):
-		char_data["unlocked"] = true
-	if not char_data.has("equipped_items"):
-		char_data["equipped_items"] = []
-	if not char_data.has("unlocked_items"):
-		char_data["unlocked_items"] = []
-	if not char_data.has("unlocked_item_upgrades"):
-		char_data["unlocked_item_upgrades"] = []
-	if not char_data.has("unlocked_skills"):
-		char_data["unlocked_skills"] = []
 
 
 func to_array() -> Array:
@@ -85,14 +66,11 @@ func to_array() -> Array:
 
 
 # =============================================================================
-# CHARACTER QUERIES
+# CHARACTER QUERIES (Minimal stubs)
 # =============================================================================
 
 func get_character_data(char_id: String) -> Dictionary:
-	"""
-	Get player's data for a specific character.
-	O(1) lookup thanks to Dictionary storage.
-	"""
+	"""Get player's data for a specific character."""
 	return _characters.get(char_id, {})
 
 
@@ -121,21 +99,18 @@ func get_character_count() -> int:
 
 
 # =============================================================================
-# CHARACTER MANAGEMENT
+# CHARACTER MANAGEMENT (Minimal for backwards compatibility)
 # =============================================================================
 
 func unlock_character(char_id: String) -> bool:
 	"""
-	Unlock a new character (call after spending gems).
-
-	Returns:
-		true if character was unlocked, false if already owned or invalid
+	Unlock a new character.
+	DEPRECATED: Characters are now acquired during runs, not unlocked in account.
+	This is kept for backwards compatibility during transition.
 	"""
 	if is_character_unlocked(char_id):
-		push_warning("CharacterCollection: Character already unlocked: %s" % char_id)
 		return false
 
-	# Create character data
 	var char_data = _create_character_data(char_id)
 	if char_data.is_empty():
 		return false
@@ -147,154 +122,41 @@ func unlock_character(char_id: String) -> bool:
 
 
 func _create_character_data(char_id: String) -> Dictionary:
-	"""Create initial character data entry."""
+	"""Create minimal character data entry."""
 	var char_master = GameData.get_character_by_id(char_id)
 	if char_master.is_empty():
 		push_error("CharacterCollection: Master data not found: %s" % char_id)
 		return {}
 
-	# Get prestige 1 unlocked items
-	var unlocked_items: Array = []
-	if char_master.has("prestige_rewards") and char_master["prestige_rewards"].size() > 0:
-		var prestige_1_rewards = char_master["prestige_rewards"][0]
-		if prestige_1_rewards.has("rewards"):
-			for reward in prestige_1_rewards["rewards"]:
-				if reward.get("type") == "item":
-					unlocked_items.append(reward["id"])
-
+	# Minimal data - no prestige, no items, no skills
 	return {
 		"id": char_id,
-		"unlocked": true,
-		"prestige": 1,
-		"fame": 0,
-		"equipped_items": unlocked_items.duplicate(),  # Auto-equip starting items
-		"unlocked_items": unlocked_items,
-		"unlocked_item_upgrades": [],
-		"unlocked_skills": []
+		"unlocked": true
 	}
 
 
 # =============================================================================
-# PROGRESSION
+# DEPRECATED METHODS (No-ops for backwards compatibility)
 # =============================================================================
 
-func add_character_fame(char_id: String, fame: int) -> void:
-	"""Add fame to a character, may increase prestige."""
-	if not _characters.has(char_id):
-		push_warning("CharacterCollection: Character not found: %s" % char_id)
-		return
-
-	var char_data = _characters[char_id]
-	char_data["fame"] += fame
-
-	# Check for prestige increase
-	while char_data["fame"] >= GameConstants.FAME_PER_PRESTIGE:
-		char_data["fame"] -= GameConstants.FAME_PER_PRESTIGE
-		char_data["prestige"] += 1
-		_apply_prestige_rewards(char_id, char_data["prestige"])
-		character_prestige_up.emit(char_id, char_data["prestige"])
-
-	_notify_change()
+func add_character_fame(_char_id: String, _fame: int) -> void:
+	"""DEPRECATED: Fame is now awarded to Legacies, not characters."""
+	push_warning("CharacterCollection.add_character_fame is deprecated. Use LegacyCollection.add_legacy_fame instead.")
 
 
-func _apply_prestige_rewards(char_id: String, new_prestige: int) -> void:
-	"""Apply rewards for reaching a new prestige level."""
-	var char_master = GameData.get_character_by_id(char_id)
-	if char_master.is_empty():
-		return
-
-	var char_data = _characters[char_id]
-
-	if not char_master.has("prestige_rewards"):
-		return
-
-	for prestige_reward in char_master["prestige_rewards"]:
-		if prestige_reward.get("prestige") == new_prestige:
-			if prestige_reward.has("rewards"):
-				for reward in prestige_reward["rewards"]:
-					_apply_reward(char_data, reward)
-			break
-
-
-func _apply_reward(char_data: Dictionary, reward: Dictionary) -> void:
-	"""Apply a single reward to character data."""
-	var reward_type = reward.get("type", "")
-	var reward_id = reward.get("id", "")
-
-	match reward_type:
-		"item":
-			if reward_id not in char_data["unlocked_items"]:
-				char_data["unlocked_items"].append(reward_id)
-		"item_upgrade":
-			if reward_id not in char_data["unlocked_item_upgrades"]:
-				char_data["unlocked_item_upgrades"].append(reward_id)
-		"skill":
-			if reward_id not in char_data["unlocked_skills"]:
-				char_data["unlocked_skills"].append(reward_id)
-		_:
-			push_warning("CharacterCollection: Unknown reward type: %s" % reward_type)
-
-
-# =============================================================================
-# EQUIPMENT MANAGEMENT
-# =============================================================================
-
-func equip_item(char_id: String, item_id: String) -> bool:
-	"""Equip an item to a character."""
-	if not _characters.has(char_id):
-		return false
-
-	var char_data = _characters[char_id]
-
-	# Check if item is unlocked
-	if item_id not in char_data["unlocked_items"]:
-		push_warning("CharacterCollection: Item not unlocked: %s" % item_id)
-		return false
-
-	# Check if already equipped
-	if item_id in char_data["equipped_items"]:
-		return true
-
-	char_data["equipped_items"].append(item_id)
-	_notify_change()
-	return true
-
-
-func unequip_item(char_id: String, item_id: String) -> bool:
-	"""Unequip an item from a character."""
-	if not _characters.has(char_id):
-		return false
-
-	var char_data = _characters[char_id]
-
-	if item_id in char_data["equipped_items"]:
-		char_data["equipped_items"].erase(item_id)
-		_notify_change()
-		return true
-
+func equip_item(_char_id: String, _item_id: String) -> bool:
+	"""DEPRECATED: Items are now in player inventory, not on characters."""
+	push_warning("CharacterCollection.equip_item is deprecated. Items belong to player inventory now.")
 	return false
 
 
-func unlock_content(char_id: String, content_type: String, content_id: String) -> bool:
-	"""Unlock content (item, skill, upgrade) for a character."""
-	if not _characters.has(char_id):
-		return false
+func unequip_item(_char_id: String, _item_id: String) -> bool:
+	"""DEPRECATED: Items are now in player inventory, not on characters."""
+	push_warning("CharacterCollection.unequip_item is deprecated. Items belong to player inventory now.")
+	return false
 
-	var char_data = _characters[char_id]
 
-	match content_type:
-		"item":
-			if content_id not in char_data["unlocked_items"]:
-				char_data["unlocked_items"].append(content_id)
-		"item_upgrade":
-			if content_id not in char_data["unlocked_item_upgrades"]:
-				char_data["unlocked_item_upgrades"].append(content_id)
-		"skill":
-			if content_id not in char_data["unlocked_skills"]:
-				char_data["unlocked_skills"].append(content_id)
-		_:
-			push_error("CharacterCollection: Unknown content type: %s" % content_type)
-			return false
-
-	_notify_change()
-	return true
+func unlock_content(_char_id: String, _content_type: String, _content_id: String) -> bool:
+	"""DEPRECATED: Content unlocks are now on Legacies, not characters."""
+	push_warning("CharacterCollection.unlock_content is deprecated. Use LegacyCollection instead.")
+	return false

@@ -1,12 +1,16 @@
 extends PanelContainer
-# CharacterInfoPanel - Sliding panel showing character name, items, and skills
-# Slides up from the bottom when a character tile is clicked
+# CharacterInfoPanel - Sliding panel showing character info
+# Phase 1 Refactor: Simplified to show only character stats (no items/skills)
+# Items are now in player inventory, skills are one-shot effects
 
 @onready var name_label: Label = $MarginContainer/VBoxContainer/NameLabel
-@onready var items_label: Label = $MarginContainer/VBoxContainer/GridsContainer/ItemsSection/ItemsLabel
-@onready var skills_label: Label = $MarginContainer/VBoxContainer/GridsContainer/SkillsSection/SkillsLabel
-@onready var items_grid: GridContainer = $MarginContainer/VBoxContainer/GridsContainer/ItemsSection/ItemsGrid
-@onready var skills_grid: GridContainer = $MarginContainer/VBoxContainer/GridsContainer/SkillsSection/SkillsGrid
+# StatsLabel is created dynamically if it doesn't exist in the scene
+var stats_label: Label = null
+
+# Deprecated nodes - hidden if they exist in scene
+@onready var _items_section = get_node_or_null("MarginContainer/VBoxContainer/GridsContainer/ItemsSection")
+@onready var _skills_section = get_node_or_null("MarginContainer/VBoxContainer/GridsContainer/SkillsSection")
+@onready var _grids_container = get_node_or_null("MarginContainer/VBoxContainer/GridsContainer")
 
 var current_char_instance: CharacterInstance = null
 var _tween: Tween = null
@@ -15,16 +19,39 @@ var _suppress_dismiss: bool = false
 var slide_down: bool = false  # If true, panel drops down from top instead of sliding up from bottom
 
 const SLIDE_DURATION := 0.25
-const MAX_ITEMS := GameConstants.MAX_RUN_ITEMS
-const MAX_SKILLS := GameConstants.MAX_RUN_SKILLS
-const SLOT_ICON_SIZE := 68
 
 
 func _ready() -> void:
 	_apply_style()
+	_hide_deprecated_sections()
+	_ensure_stats_label()
 	# Start hidden (positioned below parent)
 	modulate.a = 0
 	visible = false
+
+
+func _ensure_stats_label() -> void:
+	"""Ensure stats_label exists (create if not in scene)."""
+	var vbox = $MarginContainer/VBoxContainer
+	stats_label = vbox.get_node_or_null("StatsLabel")
+	if stats_label == null:
+		stats_label = Label.new()
+		stats_label.name = "StatsLabel"
+		stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		stats_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_MUTED)
+		# Insert after name label
+		vbox.add_child(stats_label)
+		vbox.move_child(stats_label, 1)
+
+
+func _hide_deprecated_sections() -> void:
+	"""Hide deprecated items/skills sections from Phase 0 scene."""
+	if _grids_container:
+		_grids_container.visible = false
+	if _items_section:
+		_items_section.visible = false
+	if _skills_section:
+		_skills_section.visible = false
 
 
 func _apply_style() -> void:
@@ -37,8 +64,6 @@ func _apply_style() -> void:
 	)
 	add_theme_stylebox_override("panel", style)
 	name_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
-	items_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
-	skills_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 
 
 func _input(event: InputEvent) -> void:
@@ -122,76 +147,19 @@ func _populate(char_instance: CharacterInstance) -> void:
 	if char_master.is_empty():
 		return
 
-	# Name (centered, header style)
-	name_label.text = char_instance.get_character_name()
+	# Name with level
+	name_label.text = "%s (Lv.%d)" % [char_instance.get_character_name(), char_instance.level]
 
-	# Items grid
-	_populate_items_grid(char_instance)
+	# Stats summary
+	var hp = char_instance.stats.get(GameConstants.STAT_HEALTH, 0)
+	var mp = char_instance.stats.get(GameConstants.STAT_MANA, 0)
+	var def = char_instance.stats.get(GameConstants.STAT_DEFEND_RATE, 0)
 
-	# Skills grid
-	_populate_skills_grid(char_instance)
+	stats_label.text = "HP: %d/%d  |  MP: %d  |  DEF: %d%%" % [
+		char_instance.current_health, hp, mp, def
+	]
 
-
-func _populate_items_grid(char_instance: CharacterInstance) -> void:
-	"""Fill the items grid with icons for equipped items and upgrades."""
-	var icons: Array[String] = []
-	for item_id in char_instance.equipped_items:
-		if icons.size() >= MAX_ITEMS:
-			break
-		var item_data = GameData.get_item_by_id(item_id)
-		if not item_data.is_empty():
-			icons.append(item_data.get("image_path", ""))
-	for upgrade_id in char_instance.equipped_item_upgrades:
-		if icons.size() >= MAX_ITEMS:
-			break
-		var upgrade_data = GameData.get_item_upgrade_by_id(upgrade_id)
-		if not upgrade_data.is_empty():
-			icons.append(upgrade_data.get("image_path", ""))
-	_populate_grid(items_grid, icons, MAX_ITEMS)
-
-
-func _populate_skills_grid(char_instance: CharacterInstance) -> void:
-	"""Fill the skills grid with icons for learned skills."""
-	var icons: Array[String] = []
-	for skill_id in char_instance.learned_skills:
-		if icons.size() >= MAX_SKILLS:
-			break
-		var skill_data = GameData.get_skill_by_id(skill_id)
-		if not skill_data.is_empty():
-			icons.append(skill_data.get("image_path", ""))
-	_populate_grid(skills_grid, icons, MAX_SKILLS)
-
-
-func _populate_grid(grid: GridContainer, icons: Array[String], max_slots: int) -> void:
-	"""Fill a grid with icon slots, populated or empty."""
-	UIHelpers.clear_children(grid)
-	for i in range(max_slots):
-		var slot = _create_icon_slot()
-		if i < icons.size() and icons[i] != "":
-			var icon_rect = slot.get_child(0) as TextureRect
-			UIHelpers.set_texture_safe(icon_rect, icons[i])
-		grid.add_child(slot)
-
-
-func _create_icon_slot() -> PanelContainer:
-	"""Create a single icon slot with background and a TextureRect child."""
-	var panel = PanelContainer.new()
-	panel.custom_minimum_size = Vector2(SLOT_ICON_SIZE, SLOT_ICON_SIZE)
-
-	# Slot background style
-	var bg = StyleBoxFlat.new()
-	bg.bg_color = Color(0.15, 0.12, 0.1, 0.6)
-	bg.border_color = GameConstants.COLOR_BORDER_SILVER
-	bg.set_border_width_all(1)
-	bg.set_corner_radius_all(4)
-	panel.add_theme_stylebox_override("panel", bg)
-
-	# Icon TextureRect inside the panel
-	var icon = TextureRect.new()
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	icon.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	panel.add_child(icon)
-
-	return panel
+	# Get description from master data
+	var description = char_master.get("description", "")
+	if not description.is_empty():
+		stats_label.text += "\n\n" + description

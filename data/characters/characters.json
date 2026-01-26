@@ -3,262 +3,132 @@
     {
       "id": "char_warrior_001",
       "name": "Brave Knight",
+      "description": "A stalwart defender who leads the charge into battle",
       "image_path": "res://assets/characters/knight.png",
+      "cost": 40,
+      "level_requirement": 1,
       "base_stats": {
         "health": 100,
         "mana": 5,
-        "income": 3,
-        "startingItemSlots": 1
-      },
-      "prestige_rewards": [
-        {
-          "prestige": 1,
-          "rewards": [
-            {"type": "item", "id": "item_rusty_sword"}
-          ]
-        },
-        {
-          "prestige": 2,
-          "rewards": [
-            {"type": "skill", "id": "skill_power_strike", "level_requirement": 3}
-          ]
-        },
-        {
-          "prestige": 3,
-          "rewards": [
-            {"type": "item_upgrade", "id": "itemup_iron_sword"}
-          ]
-        }
-      ]
+        "defendRate": 15
+      }
     },
     {
       "id": "char_mage_001",
       "name": "Mystic Sage",
+      "description": "A powerful spellcaster who wields arcane forces",
       "image_path": "res://assets/characters/mage.png",
+      "cost": 45,
+      "level_requirement": 1,
       "base_stats": {
         "health": 70,
         "mana": 5,
-        "income": 4,
-        "startingItemSlots": 1
-      },
-      "prestige_rewards": [
-        {
-          "prestige": 1,
-          "rewards": [
-            {"type": "item", "id": "item_wooden_staff"}
-          ]
-        },
-        {
-          "prestige": 2,
-          "rewards": [
-            {"type": "skill", "id": "skill_arcane_blast", "level_requirement": 2}
-          ]
-        }
-      ]
+        "defendRate": 5
+      }
     },
     {
       "id": "char_rogue_001",
       "name": "Shadow Thief",
+      "description": "A nimble rogue who strikes from the shadows",
       "image_path": "res://assets/characters/rogue.png",
+      "cost": 40,
+      "level_requirement": 1,
       "base_stats": {
         "health": 80,
         "mana": 5,
-        "income": 5,
-        "startingItemSlots": 1
-      },
-      "prestige_rewards": [
-        {
-          "prestige": 1,
-          "rewards": [
-            {"type": "item", "id": "item_rusty_dagger"}
-          ]
-        },
-        {
-          "prestige": 2,
-          "rewards": [
-            {"type": "skill", "id": "skill_dodge", "level_requirement": 2}
-          ]
-        }
-      ]
+        "defendRate": 10
+      }
     },
     {
       "id": "char_cleric_001",
       "name": "Holy Priest",
+      "description": "A divine healer who supports allies with holy magic",
       "image_path": "res://assets/characters/cleric.png",
+      "cost": 50,
+      "level_requirement": 1,
       "base_stats": {
         "health": 90,
         "mana": 5,
-        "income": 3,
-        "startingItemSlots": 1
-      },
-      "prestige_rewards": [
-        {
-          "prestige": 1,
-          "rewards": [
-            {"type": "item", "id": "item_prayer_book"}
-          ]
-        },
-        {
-          "prestige": 2,
-          "stat_boost": {"health": 15},
-          "rewards": [
-            {"type": "skill", "id": "skill_vitality", "level_requirement": 1}
-          ]
-        }
-      ]
+        "defendRate": 10
+      }
     },
     {
       "id": "char_ranger_001",
       "name": "Forest Scout",
+      "description": "A skilled archer who strikes from afar",
       "image_path": "res://assets/characters/ranger.png",
+      "cost": 45,
+      "level_requirement": 1,
       "base_stats": {
         "health": 85,
         "mana": 5,
-        "income": 4,
-        "startingItemSlots": 1
-      },
-      "prestige_rewards": [
-        {
-          "prestige": 1,
-          "rewards": [
-            {"type": "item", "id": "item_short_bow"}
-          ]
-        },
-        {
-          "prestige": 2,
-          "rewards": [
-            {"type": "skill", "id": "skill_quick_shot", "level_requirement": 3}
-          ]
-        }
-      ]
+        "defendRate": 8
+      }
     },
     {
       "id": "char_berserker_001",
       "name": "Raging Berserker",
+      "description": "A ferocious warrior who deals massive damage",
       "image_path": "res://assets/characters/berserker.png",
+      "cost": 55,
+      "level_requirement": 2,
       "base_stats": {
         "health": 110,
         "mana": 5,
-        "income": 2,
-        "startingItemSlots": 1
-      },
-      "prestige_rewards": [
-        {
-          "prestige": 1,
-          "rewards": [
-            {"type": "item", "id": "item_battle_axe"}
-          ]
-        },
-        {
-          "prestige": 2,
-          "rewards": [
-            {"type": "skill", "id": "skill_rage", "level_requirement": 2}
-          ]
-        }
-      ]
+        "defendRate": 5
+      }
     },
     {
       "id": "char_paladin_001",
       "name": "Divine Paladin",
+      "description": "A holy knight who combines martial prowess with divine magic",
       "image_path": "res://assets/characters/paladin.png",
+      "cost": 60,
+      "level_requirement": 2,
       "base_stats": {
         "health": 105,
         "mana": 5,
-        "income": 3,
-        "startingItemSlots": 1
-      },
-      "prestige_rewards": [
-        {
-          "prestige": 1,
-          "rewards": [
-            {"type": "item", "id": "item_holy_mace"}
-          ]
-        },
-        {
-          "prestige": 2,
-          "stat_boost": {"defendRate": 10},
-          "rewards": [
-            {"type": "skill", "id": "skill_iron_skin", "level_requirement": 4}
-          ]
-        }
-      ]
+        "defendRate": 20
+      }
     },
     {
       "id": "char_necromancer_001",
       "name": "Dark Necromancer",
+      "description": "A master of dark magic who draws power from death",
       "image_path": "res://assets/characters/necromancer.png",
+      "cost": 65,
+      "level_requirement": 3,
       "base_stats": {
         "health": 75,
         "mana": 5,
-        "income": 5,
-        "startingItemSlots": 1
-      },
-      "prestige_rewards": [
-        {
-          "prestige": 1,
-          "rewards": [
-            {"type": "item", "id": "item_skull_staff"}
-          ]
-        },
-        {
-          "prestige": 2,
-          "stat_boost": {"health": 10},
-          "rewards": [
-            {"type": "skill", "id": "skill_life_drain", "level_requirement": 3}
-          ]
-        }
-      ]
+        "defendRate": 5
+      }
     },
     {
       "id": "char_monk_001",
       "name": "Zen Monk",
+      "description": "A disciplined fighter who channels inner energy",
       "image_path": "res://assets/characters/monk.png",
+      "cost": 50,
+      "level_requirement": 2,
       "base_stats": {
         "health": 85,
         "mana": 5,
-        "income": 3,
-        "startingItemSlots": 1
-      },
-      "prestige_rewards": [
-        {
-          "prestige": 1,
-          "rewards": [
-            {"type": "item", "id": "item_fighting_gloves"}
-          ]
-        },
-        {
-          "prestige": 2,
-          "stat_boost": {"defendRate": 5},
-          "rewards": [
-            {"type": "skill", "id": "skill_inner_peace", "level_requirement": 2}
-          ]
-        }
-      ]
+        "defendRate": 15
+      }
     },
     {
       "id": "char_assassin_001",
       "name": "Silent Assassin",
+      "description": "A deadly killer who eliminates targets with precision",
       "image_path": "res://assets/characters/assassin.png",
+      "cost": 60,
+      "level_requirement": 3,
       "base_stats": {
         "health": 65,
         "mana": 5,
-        "income": 4,
-        "startingItemSlots": 1
-      },
-      "prestige_rewards": [
-        {
-          "prestige": 1,
-          "rewards": [
-            {"type": "item", "id": "item_poison_blade"}
-          ]
-        },
-        {
-          "prestige": 2,
-          "rewards": [
-            {"type": "skill", "id": "skill_backstab", "level_requirement": 4}
-          ]
-        }
-      ]
+        "defendRate": 12
+      }
     }
   ]
 }

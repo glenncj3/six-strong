@@ -1,5 +1,5 @@
 extends Node
-# Test runner for Phase 0 Legacy System tests
+# Test runner for Phase 0 + Phase 1 Legacy System tests
 # Attach this script to a Node and run the scene to execute all tests
 #
 # Usage in Godot:
@@ -8,15 +8,27 @@ extends Node
 #   3. Run the scene
 #   4. Check the Output panel for test results
 
+# Preload Phase 1 test classes (not autoloaded)
+const Phase1CharInstance = preload("res://tests/test_character_instance_phase1.gd")
+const Phase1StatCalc = preload("res://tests/test_stat_calculator_phase1.gd")
+const Phase1CharJson = preload("res://tests/test_character_json_phase1.gd")
+
+
 func _ready() -> void:
 	print("============================================================")
-	print("PHASE 0: LEGACY SYSTEM TEST SUITE")
+	print("LEGACY REFACTOR TEST SUITE (Phase 0 + Phase 1)")
 	print("============================================================")
 	print("")
 
 	var total_passed = 0
 	var total_failed = 0
 	var all_errors = []
+
+	# ==========================================================================
+	# PHASE 0 TESTS (Legacy System)
+	# ==========================================================================
+	print("--- PHASE 0: Legacy System ---")
+	print("")
 
 	# Run PrestigeTracker tests
 	print("Running PrestigeTracker tests...")
@@ -54,7 +66,42 @@ func _ready() -> void:
 	_print_suite_summary("SaveFormatDetection", format_results)
 	print("")
 
-	# Print final summary
+	# ==========================================================================
+	# PHASE 1 TESTS (Character Simplification)
+	# ==========================================================================
+	print("--- PHASE 1: Character Simplification ---")
+	print("")
+
+	# Run CharacterInstance tests
+	print("Running CharacterInstance (Phase 1) tests...")
+	var char_instance_results = Phase1CharInstance.run_all_tests()
+	total_passed += char_instance_results.passed
+	total_failed += char_instance_results.failed
+	all_errors.append_array(char_instance_results.errors)
+	_print_suite_summary("CharacterInstance", char_instance_results)
+	print("")
+
+	# Run StatCalculator tests
+	print("Running StatCalculator (Phase 1) tests...")
+	var stat_calc_results = Phase1StatCalc.run_all_tests()
+	total_passed += stat_calc_results.passed
+	total_failed += stat_calc_results.failed
+	all_errors.append_array(stat_calc_results.errors)
+	_print_suite_summary("StatCalculator", stat_calc_results)
+	print("")
+
+	# Run Character JSON tests
+	print("Running Character JSON (Phase 1) tests...")
+	var char_json_results = Phase1CharJson.run_all_tests()
+	total_passed += char_json_results.passed
+	total_failed += char_json_results.failed
+	all_errors.append_array(char_json_results.errors)
+	_print_suite_summary("CharacterJSON", char_json_results)
+	print("")
+
+	# ==========================================================================
+	# FINAL SUMMARY
+	# ==========================================================================
 	print("============================================================")
 	print("FINAL RESULTS")
 	print("============================================================")
