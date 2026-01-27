@@ -1,0 +1,38 @@
+[
+	{
+		"id": "health",
+		"display_name": "HP",
+		"default": 100,
+		"description": "Character's maximum health points"
+	},
+	{
+		"id": "mana",
+		"display_name": "MP",
+		"default": 5,
+		"description": "Character's maximum mana points"
+	},
+	{
+		"id": "income",
+		"display_name": "Income",
+		"default": 0,
+		"description": "Gold earned per round"
+	},
+	{
+		"id": "defendRate",
+		"display_name": "DEF",
+		"default": 0,
+		"description": "Percentage chance to block damage"
+	},
+	{
+		"id": "itemSlots",
+		"display_name": "Item Slots",
+		"default": 9,
+		"description": "Number of item slots available"
+	},
+	{
+		"id": "startingItemSlots",
+		"display_name": "Starting Slots",
+		"default": 0,
+		"description": "Number of starting item slots"
+	}
+]

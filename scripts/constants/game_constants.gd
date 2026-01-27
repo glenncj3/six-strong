@@ -88,6 +88,9 @@ const LEGACY_UNLOCK_COST := 500  # Gems to unlock a legacy during draft
 # =============================================================================
 # STAT NAMES
 # =============================================================================
+# DEPRECATED: Prefer using StatRegistry for data-driven stat definitions.
+# These constants are kept for backwards compatibility.
+# Use: StatRegistry.get_all_stat_ids(), StatRegistry.get_display_name(), etc.
 
 # Canonical stat names used throughout the system
 const STAT_HEALTH := "health"
@@ -98,6 +101,7 @@ const STAT_ITEM_SLOTS := "itemSlots"
 const STAT_STARTING_ITEM_SLOTS := "startingItemSlots"
 
 # All valid stat names (for validation)
+# DEPRECATED: Use StatRegistry.get_all_stat_ids() instead
 const ALL_STATS := [
 	STAT_HEALTH,
 	STAT_MANA,
@@ -108,6 +112,7 @@ const ALL_STATS := [
 ]
 
 # Display abbreviations for stats (used in UI)
+# DEPRECATED: Use StatRegistry.get_display_name(stat_id) instead
 const STAT_DISPLAY_NAMES := {
 	STAT_HEALTH: "HP",
 	STAT_MANA: "MP",
@@ -118,6 +123,7 @@ const STAT_DISPLAY_NAMES := {
 }
 
 # Default stat values (used when creating new stat blocks)
+# DEPRECATED: Use StatRegistry.get_default_stats() instead
 static func get_default_stats() -> Dictionary:
 	return {
 		STAT_HEALTH: 0,
