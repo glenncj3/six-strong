@@ -10,6 +10,7 @@ extends RefCounted
 ## - Shows name, stats preview, cost
 
 const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")
+const CharacterReplacementPopupScene = preload("res://scenes/components/character_replacement_popup.tscn")
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:
@@ -153,29 +154,76 @@ static func _on_character_selected(tile_data: Dictionary, state: Dictionary) -> 
 	state.purchases_made += 1
 
 	if result.get("grid_full", false):
-		# Grid is full - RunManager will emit signal for replacement popup
-		_show_animated_result(result_label, "Party full!", GameConstants.COLOR_WARNING, false)
-		# Don't complete yet - wait for replacement
-		_wait_for_replacement(state)
+		# Grid is full - show replacement popup
+		_show_animated_result(result_label, "Choose who to replace!", GameConstants.COLOR_WARNING, false)
+		_show_replacement_popup(tile_data, cost, state)
 	else:
 		var char_name = tile_data.get("name", "Character")
 		_show_animated_result(result_label, "Recruited %s!" % char_name, GameConstants.COLOR_SUCCESS)
 		_complete_encounter(state)
 
 
-static func _wait_for_replacement(state: Dictionary) -> void:
-	"""Wait for the player to complete or cancel character replacement."""
-	# Use CONNECT_ONE_SHOT with bound state - no static variable needed
-	# The signal auto-disconnects after firing once, and state is passed directly
-	RunManager.character_acquired.connect(_on_replacement_completed.bind(state), CONNECT_ONE_SHOT)
+static func _show_replacement_popup(tile_data: Dictionary, cost: int, state: Dictionary) -> void:
+	"""Show the character replacement popup when grid is full."""
+	var pending_character = RunManager.get_pending_character()
+	var grid = RunManager.get_character_grid()
+
+	if not pending_character or not grid:
+		# Shouldn't happen, but refund and fail gracefully
+		RunManager.add_gold(cost)
+		_show_animated_result(state.result_label, "Recruitment failed!", GameConstants.COLOR_ERROR)
+		_complete_encounter(state)
+		return
+
+	# Create and show popup
+	var popup = CharacterReplacementPopupScene.instantiate()
+
+	# Add to scene tree (will be reparented by ModalPopup base)
+	var scene_tree = Engine.get_main_loop() as SceneTree
+	scene_tree.root.add_child(popup)
+
+	# Connect signals before showing
+	popup.character_replaced.connect(_on_replacement_confirmed.bind(tile_data, state), CONNECT_ONE_SHOT)
+	popup.replacement_cancelled.connect(_on_replacement_cancelled.bind(cost, state), CONNECT_ONE_SHOT)
+
+	# Show the popup
+	popup.show_replacement(pending_character, grid)
 
 
-static func _on_replacement_completed(_character, state: Dictionary) -> void:
-	"""Called when character replacement is completed."""
-	# Signal auto-disconnected via CONNECT_ONE_SHOT, state passed via bind()
-	var result_label: Label = state.get("result_label")
-	if result_label:
-		_show_animated_result(result_label, "New member joined!", GameConstants.COLOR_SUCCESS)
+static func _on_replacement_confirmed(removed: CharacterInstance, _slot: Vector2i, tile_data: Dictionary, state: Dictionary) -> void:
+	"""Called when player confirms character replacement."""
+	var new_character = RunManager.get_pending_character()
+
+	# Clear the pending character
+	RunManager.cancel_pending_character()
+
+	if new_character:
+		# Sync team manager (popup already modified the grid directly)
+		var team_manager = RunManager._team_manager
+		if removed and team_manager:
+			var idx = team_manager.get_team().find(removed)
+			if idx >= 0:
+				team_manager.remove_character(idx)
+		if team_manager:
+			team_manager.add_character(new_character)
+
+		# Emit signal, trigger effects, and save
+		RunManager.character_acquired.emit(new_character)
+		RunManager.trigger_character_acquired_effects(new_character)
+		RunManager.save_run_state()
+
+	var char_name = tile_data.get("name", "Character")
+	_show_animated_result(state.result_label, "Recruited %s!" % char_name, GameConstants.COLOR_SUCCESS)
+	_complete_encounter(state)
+
+
+static func _on_replacement_cancelled(cost: int, state: Dictionary) -> void:
+	"""Called when player cancels character replacement."""
+	# Refund the gold
+	RunManager.add_gold(cost)
+	RunManager.cancel_pending_character()
+
+	_show_animated_result(state.result_label, "Recruitment cancelled", GameConstants.COLOR_TEXT_LIGHT)
 	_complete_encounter(state)
 
 
