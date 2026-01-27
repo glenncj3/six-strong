@@ -16,6 +16,9 @@ var difficulty: String = ""  # "Easy", "Medium", "Hard"
 # Ghost-specific
 var prestige: int = 0
 
+# Enemy team grid (2x3 CharacterGrid)
+var enemy_team: CharacterGrid = null
+
 # Panel colors for clickable UI
 var bg_color: Color = Color("#3D2E24")
 var hover_color: Color = Color("#5D4E44")
@@ -99,6 +102,9 @@ func to_dict() -> Dictionary:
 	elif type == "ghost":
 		dict["prestige"] = prestige
 
+	if enemy_team != null:
+		dict["enemy_team"] = enemy_team.to_dict()
+
 	return dict
 
 
@@ -117,6 +123,10 @@ static func from_dict(dict: Dictionary) -> CombatOption:
 	option.hover_color = Color(dict.get("hover_color", "#5D4E44"))
 	option.pressed_color = Color(dict.get("pressed_color", "#2D1E14"))
 	option.border_color = Color(dict.get("border_color", "#B88726"))
+
+	if dict.has("enemy_team"):
+		option.enemy_team = CharacterGrid.from_dict(dict["enemy_team"])
+
 	return option
 
 

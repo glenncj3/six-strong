@@ -20,7 +20,7 @@ const SCENES = {
 	"encounter_select": "res://scenes/ui/encounter_select.tscn",
 	"encounter_active": "res://scenes/ui/encounter_active.tscn",
 	"combat_select": "res://scenes/ui/combat_select.tscn",
-	"combat_stub": "res://scenes/ui/combat_stub.tscn",
+	"combat_stub": "res://scenes/ui/combat_scene.tscn",
 	"run_results": "res://scenes/ui/run_results.tscn",
 }
 
