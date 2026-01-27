@@ -23,6 +23,7 @@ func _ready() -> void:
 	_run_player_account_tests()
 	_run_draft_tests()
 	_run_run_lifecycle_tests()
+	_run_save_load_tests()
 	_run_encounter_tests()
 
 	_print_final_results()
@@ -171,8 +172,8 @@ func _run_run_lifecycle_tests():
 	RunManager.spend_gold(50)
 	_assert_eq(RunManager.get_gold(), initial_gold, "Gold spent")
 
-	# Test phase
-	_assert_eq(RunManager.get_phase(), "encounter", "Initial phase")
+	# Test phase - round 1 starts in combat phase (no encounter after draft)
+	_assert_eq(RunManager.get_phase(), "combat", "Initial phase is combat after draft")
 	RunManager.set_phase("combat")
 	_assert_eq(RunManager.get_phase(), "combat", "Phase changed")
 	RunManager.set_phase("encounter")
@@ -188,6 +189,62 @@ func _run_run_lifecycle_tests():
 	# Cleanup
 	RunManager.clear_run_state()
 	_assert_false(RunManager.is_run_active, "Run cleared")
+
+	print("")
+
+
+func _run_save_load_tests():
+	"""Test save/load/resume functionality - critical for resume game button."""
+	print("--- SAVE/LOAD/RESUME TESTS ---")
+
+	# Cleanup any existing state
+	if RunManager.is_run_active:
+		RunManager.clear_run_state()
+	JsonPersistence.delete_file("user://active_run.json")
+
+	# Test 1: has_active_run returns false when no save
+	_assert_false(RunManager.has_active_run(), "has_active_run false when no save")
+
+	# Test 2: Start a run and verify save is created
+	var unlocked = PlayerAccount.get_unlocked_legacies()
+	var legacies: Array[LegacyData] = []
+	for i in range(min(3, unlocked.size())):
+		legacies.append(unlocked[i])
+
+	RunManager.start_new_run_with_legacies(legacies)
+	_assert_true(RunManager.has_active_run(), "has_active_run true after starting run")
+	_assert_true(RunManager.is_run_active, "is_run_active true after start")
+
+	# Capture state for comparison
+	var saved_gold = RunManager.get_gold()
+	var saved_round = RunManager.get_round()
+
+	# Test 3: Clear internal state (simulating app restart) but keep save file
+	RunManager.is_run_active = false
+	RunManager._run_state = null
+	_assert_false(RunManager.is_run_active, "is_run_active false after clearing internal state")
+	_assert_true(RunManager.has_active_run(), "has_active_run still true (save file exists)")
+
+	# Test 4: load_run_state returns true on success
+	var load_result = RunManager.load_run_state()
+	_assert_true(load_result, "load_run_state returns true on success")
+
+	# Test 5: CRITICAL - is_run_active is set to true after successful load
+	_assert_true(RunManager.is_run_active, "is_run_active TRUE after successful load")
+
+	# Test 6: State is properly restored
+	_assert_eq(RunManager.get_gold(), saved_gold, "Gold restored correctly")
+	_assert_eq(RunManager.get_round(), saved_round, "Round restored correctly")
+
+	# Test 7: load_run_state returns false when no save file
+	RunManager.clear_run_state()
+	_assert_false(RunManager.has_active_run(), "No save file after clear")
+
+	var failed_load = RunManager.load_run_state()
+	_assert_false(failed_load, "load_run_state returns false when no save")
+
+	# Test 8: is_run_active stays false after failed load
+	_assert_false(RunManager.is_run_active, "is_run_active stays false after failed load")
 
 	print("")
 

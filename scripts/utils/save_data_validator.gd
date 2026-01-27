@@ -141,18 +141,19 @@ static func _validate_array_constraints(field_name: String, value: Array, field_
 # =============================================================================
 
 ## Schema for active run save data
+## Field names must match RunState.to_dict() output
 static func get_run_state_schema() -> Dictionary:
 	return {
 		"run_id": {"type": "string", "required": true},
-		"round": {"type": "int", "required": true, "min": 0},
-		"phase": {"type": "string", "required": true, "enum": ["encounter", "combat"]},
+		"current_round": {"type": "int", "required": true, "min": 1},  # Runs start at round 1
+		"current_phase": {"type": "string", "required": true, "enum": ["encounter", "combat"]},
 		"encounters_this_round": {"type": "int", "required": false, "default": 0, "min": 0},
 		"reputation": {"type": "int", "required": true, "min": 0},
 		"wins": {"type": "int", "required": true, "min": 0},
 		"losses": {"type": "int", "required": true, "min": 0},
 		"starting_gold": {"type": "int", "required": false, "default": 0, "min": 0},
 		"current_gold": {"type": "int", "required": true, "min": 0},
-		"team": {"type": "array", "required": true, "min_length": 1},
+		"grid": {"type": "dict", "required": true},  # CharacterGrid serialization
 		"encounter_history": {"type": "array", "required": false, "default": []},
 	}
 

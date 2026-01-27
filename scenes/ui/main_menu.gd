@@ -122,10 +122,26 @@ func _on_reroll_tokens_changed(new_amount: int) -> void:
 func _on_play_pressed() -> void:
 	# Check if there's an active run to resume
 	if RunManager.has_active_run():
-		RunManager.load_run_state()
-		SceneManager.go_to("run_view")
+		if RunManager.load_run_state():
+			SceneManager.go_to("run_view")
+		else:
+			# Load failed - save is corrupted, clear it and start fresh
+			push_warning("MainMenu: Failed to load run state, clearing corrupted save")
+			RunManager.clear_run_state()
+			play_button.text = "PLAY"
+			_show_load_error_dialog()
 	else:
 		SceneManager.go_to("draft")
+
+
+func _show_load_error_dialog() -> void:
+	"""Show error dialog when save load fails."""
+	var dialog = AcceptDialog.new()
+	dialog.dialog_text = "Your saved run could not be loaded.\n\nThe save file may be corrupted. Starting a new game."
+	dialog.ok_button_text = "OK"
+	dialog.confirmed.connect(dialog.queue_free)
+	add_child(dialog)
+	dialog.popup_centered()
 
 
 func _on_collection_pressed() -> void:
