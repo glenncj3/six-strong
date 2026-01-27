@@ -30,6 +30,7 @@ func _init(item_data_id: String, is_upgrade: bool = false) -> void:
 
 	if item_data.is_empty():
 		push_error("ItemInstance: Item data not found: %s" % item_id)
+		item_id = ""  # Clear item_id to indicate invalid item
 		return
 
 	name = item_data.get("name", "Unknown Item")

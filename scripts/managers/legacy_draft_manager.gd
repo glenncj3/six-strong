@@ -159,6 +159,16 @@ func select_legacy(legacy: LegacyData) -> bool:
 	if drafted_legacies.size() >= DRAFT_ROUNDS:
 		return false
 
+	# Validate legacy is in current options
+	var is_valid_option = false
+	for option in current_options:
+		if option["legacy"].id == legacy.id:
+			is_valid_option = true
+			break
+	if not is_valid_option:
+		push_warning("LegacyDraftManager: Cannot select legacy not in current options: %s" % legacy.id)
+		return false
+
 	drafted_legacies.append(legacy)
 	selection_count += 1
 

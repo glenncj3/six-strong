@@ -154,7 +154,6 @@ static func get_run_state_schema() -> Dictionary:
 		"starting_gold": {"type": "int", "required": false, "default": 0, "min": 0},
 		"current_gold": {"type": "int", "required": true, "min": 0},
 		"grid": {"type": "dict", "required": true},  # CharacterGrid serialization
-		"encounter_history": {"type": "array", "required": false, "default": []},
 	}
 
 
