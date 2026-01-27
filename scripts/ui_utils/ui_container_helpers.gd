@@ -216,6 +216,9 @@ static func set_texture_safe(texture_rect: TextureRect, path: String) -> bool:
 	Returns:
 		true if texture was set successfully
 	"""
+	if texture_rect == null:
+		push_warning("UIContainerHelpers: TextureRect is null, cannot set texture")
+		return false
 	var texture = load_texture_safe(path)
 	if texture != null:
 		texture_rect.texture = texture

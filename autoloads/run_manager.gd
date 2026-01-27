@@ -140,6 +140,9 @@ func start_new_run_with_legacies(drafted_legacies: Array) -> void:
 	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)
 	_run_state.lingering_effects.effect_triggered.connect(_on_lingering_effect_triggered)
 
+	# Round 1 starts with combat immediately after draft (no encounter phase)
+	_run_state.set_phase(PHASE_COMBAT)
+
 	is_run_active = true
 
 	save_run_state()
@@ -192,6 +195,9 @@ func start_new_run(drafted_character_ids: Array) -> void:
 	# Connect lingering effect signals
 	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)
 	_run_state.lingering_effects.effect_triggered.connect(_on_lingering_effect_triggered)
+
+	# Round 1 starts with combat immediately after draft (no encounter phase)
+	_run_state.set_phase(PHASE_COMBAT)
 
 	is_run_active = true
 

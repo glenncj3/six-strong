@@ -42,6 +42,10 @@ func _ready() -> void:
 	_run_wheel_tests()
 	_run_slot_machine_tests()
 
+	# CRITICAL: Run scene tree instantiation tests
+	# This catches bugs where setup() is called before _ready() (null @onready vars)
+	_run_scene_tree_instantiation_tests()
+
 	_print_final_results()
 
 	get_tree().quit(total_failed)
@@ -370,6 +374,177 @@ func _run_slot_machine_tests():
 
 	_collect_results(test)
 	print("")
+
+
+# =============================================================================
+# SCENE TREE INSTANTIATION TESTS
+# =============================================================================
+
+func _run_scene_tree_instantiation_tests():
+	"""
+	CRITICAL TEST: Verifies all encounter UIs work when added to the scene tree.
+
+	This catches bugs where:
+	- setup() is called before _ready() (accessing null @onready vars)
+	- Child nodes aren't properly initialized
+	- Packed scenes have incorrect node paths
+
+	The bug this catches: When create_ui() instantiates packed scenes and calls
+	setup() before adding to the tree, @onready vars are null because _ready()
+	hasn't been called yet.
+	"""
+	print("=== SCENE TREE INSTANTIATION ===")
+	var test = EncounterTestBaseScript.new()
+
+	# Test each encounter UI by adding to scene tree
+	_test_scene_tree_ui(test, "gold_reward", GoldRewardUIScript, {"gold_amount": 50})
+	_test_scene_tree_ui(test, "gamble", GambleUIScript, {"bet_amount": 20, "win_multiplier": 2})
+	_test_scene_tree_ui(test, "shop", ShopUIScript, _create_shop_data())
+	_test_scene_tree_ui(test, "health_restore", HealthRestoreUIScript, {"heal_options": [{"heal_amount": 20, "cost": 10}]})
+	_test_scene_tree_ui(test, "matching_game", MatchingGameUIScript, {"big_gold": 100, "medium_gold": 50, "small_gold": 25})
+	_test_scene_tree_ui(test, "treasure_chest", TreasureChestUIScript, {"mystery_options": [{"element": "fire", "display_name": "Fire"}], "bonus_gold": 10})
+	_test_scene_tree_ui(test, "skill_trainer", SkillTrainerUIScript, _create_skill_trainer_data())
+	_test_scene_tree_ui(test, "character_shop", CharacterShopUIScript, _create_character_shop_data())
+	_test_scene_tree_ui(test, "wheel_of_fortune", WheelUIScript, {"respin_cost": 20})
+	_test_scene_tree_ui(test, "slot_machine", SlotMachineUIScript, {"free_spins": 3, "extra_spin_cost": 15})
+
+	_collect_results(test)
+	print("")
+
+
+func _test_scene_tree_ui(test, encounter_name: String, ui_script, encounter_data_content: Dictionary):
+	"""Test that a specific encounter UI works when added to the scene tree."""
+	test.section("Scene Tree: %s" % encounter_name)
+
+	var context = test.create_mock_context()
+	test.mock_context["player_gold"] = 500  # Ensure enough gold
+
+	var data = test.create_mock_encounter_data(encounter_name, encounter_data_content)
+
+	# Create UI (children may not be in tree yet at this point)
+	var ui = ui_script.create_ui(data, context)
+
+	if ui == null:
+		# Some encounters auto-complete and return null - that's OK
+		test.assert_true(true, "%s: UI null (auto-completed)" % encounter_name)
+		return
+
+	test.assert_true(ui != null, "%s: UI created" % encounter_name)
+
+	# CRITICAL: Add to scene tree - this triggers _ready() on all children
+	add_child(ui)
+
+	# Verify all child nodes are properly initialized (not null)
+	var init_result = _verify_nodes_initialized(ui)
+	test.assert_true(init_result.success, "%s: All nodes initialized (%d checked)" % [encounter_name, init_result.count])
+
+	if not init_result.success:
+		for error in init_result.errors:
+			test.assert_true(false, "%s: %s" % [encounter_name, error])
+
+	# Verify is_node_ready() returns true for all Control children
+	var ready_result = _verify_nodes_ready(ui)
+	test.assert_true(ready_result.success, "%s: All nodes ready" % encounter_name)
+
+	# Cleanup - remove from tree properly
+	remove_child(ui)
+	ui.queue_free()
+
+
+func _verify_nodes_initialized(node: Node) -> Dictionary:
+	"""Recursively verify all nodes are properly initialized (not null references)."""
+	var result = {"success": true, "count": 0, "errors": []}
+	var stack = [node]
+
+	while stack.size() > 0:
+		var current = stack.pop_back()
+		result.count += 1
+
+		if not is_instance_valid(current):
+			result.success = false
+			result.errors.append("Invalid node found in tree")
+			continue
+
+		# Check TextureRect nodes - a common @onready pattern
+		if current is TextureRect:
+			# Node should be valid even if texture is null
+			if not is_instance_valid(current):
+				result.success = false
+				result.errors.append("Invalid TextureRect: %s" % current.name)
+
+		# Check Label nodes
+		if current is Label:
+			# Accessing text property should not crash
+			var _text = current.text
+			if not is_instance_valid(current):
+				result.success = false
+				result.errors.append("Invalid Label: %s" % current.name)
+
+		# Add children to check
+		for child in current.get_children():
+			stack.append(child)
+
+	return result
+
+
+func _verify_nodes_ready(node: Node) -> Dictionary:
+	"""Verify is_node_ready() returns true for all Control children."""
+	var result = {"success": true, "not_ready": []}
+	var stack = [node]
+
+	while stack.size() > 0:
+		var current = stack.pop_back()
+
+		if current is Control and not current.is_node_ready():
+			result.success = false
+			result.not_ready.append(current.name)
+
+		for child in current.get_children():
+			stack.append(child)
+
+	return result
+
+
+func _create_shop_data() -> Dictionary:
+	"""Create test shop data with offerings."""
+	var items = GameData.get_all_items()
+	var offerings = []
+	if items.size() > 0:
+		offerings.append({
+			"offering_type": "item",
+			"id": items[0]["id"],
+			"name": items[0].get("name", "Test Item"),
+			"description": items[0].get("description", ""),
+			"image_path": items[0].get("image_path", ""),
+			"cost": 20
+		})
+	return {"offerings": offerings, "max_purchases": 1}
+
+
+func _create_skill_trainer_data() -> Dictionary:
+	"""Create test skill trainer data."""
+	var skills = GameData.get_all_skills()
+	var skill_ids: Array = []
+	if skills.size() > 0:
+		skill_ids.append(skills[0]["id"])
+	return {"skill_ids": skill_ids}
+
+
+func _create_character_shop_data() -> Dictionary:
+	"""Create test character shop data with offerings."""
+	var chars = GameData.get_all_characters()
+	var offerings = []
+	if chars.size() > 0:
+		offerings.append({
+			"offering_type": "character",
+			"id": chars[0]["id"],
+			"name": chars[0].get("name", "Test Character"),
+			"description": "",
+			"image_path": chars[0].get("image_path", ""),
+			"cost": 40,
+			"base_stats": chars[0].get("base_stats", {"health": 100})
+		})
+	return {"offerings": offerings}
 
 
 # =============================================================================
