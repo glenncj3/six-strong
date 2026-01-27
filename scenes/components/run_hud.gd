@@ -171,7 +171,7 @@ func _update_stats() -> void:
 	var wins = RunManager.get_wins()
 	var gold = RunManager.get_gold()
 
-	round_label.text = "ROUND %d" % (round_num + 1)
+	round_label.text = "ROUND %d" % round_num
 	reputation_label.text = "%s %d" % [GameConstants.EMOJI_HEART, rep]
 	wins_label.text = "%s %d/%d" % [GameConstants.EMOJI_STAR, wins, GameConstants.WINS_FOR_VICTORY]
 	gold_label.text = "%s %d" % [GameConstants.EMOJI_GOLD, gold]
