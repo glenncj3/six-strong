@@ -27,10 +27,6 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 			on_complete.call()
 		return vbox
 
-	# Instructions label
-	var instructions = UIHelpers.create_label("Hire a new party member:", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true)
-	vbox.add_child(instructions)
-
 	# Create horizontal container for character tiles
 	var hbox = UIHelpers.create_hbox_container(8, BoxContainer.ALIGNMENT_CENTER)
 	vbox.add_child(hbox)
@@ -38,9 +34,12 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var tile_size = UIScaler.calculate_tile_size(GameConstants.DESIGN_WIDTH, GameConstants.TEAM_SIZE, 48.0, 8.0, 180.0)
 
 	# Add spacer and result label area (create before tiles so state is ready)
-	vbox.add_child(UIHelpers.create_spacer(8))
-	var result_label = UIHelpers.create_label("", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_SUCCESS, true)
-	result_label.visible = false
+	vbox.add_child(UIHelpers.create_spacer(16))
+	var result_label = Label.new()
+	result_label.theme_type_variation = "HeaderLabel"
+	result_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_HEADING)
+	result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	result_label.modulate.a = 0.0
 	vbox.add_child(result_label)
 
 	# Create state dictionary to pass through bindings
@@ -123,12 +122,12 @@ static func _on_character_selected(tile_data: Dictionary, state: Dictionary) -> 
 
 	# Check if player can afford
 	if not SkillEncounterHelpers.can_afford(cost):
-		SkillEncounterHelpers.show_result(result_label, "Not enough gold!", GameConstants.COLOR_ERROR)
+		_show_animated_result(result_label, "Not enough gold!", GameConstants.COLOR_ERROR)
 		return
 
 	# Spend gold
 	if not EncounterUIHelpers.try_spend_gold(cost, on_gold_spend):
-		SkillEncounterHelpers.show_result(result_label, "Purchase failed!", GameConstants.COLOR_ERROR)
+		_show_animated_result(result_label, "Purchase failed!", GameConstants.COLOR_ERROR)
 		return
 
 	# Try to acquire the character
@@ -137,7 +136,7 @@ static func _on_character_selected(tile_data: Dictionary, state: Dictionary) -> 
 	if not result.get("success", false):
 		# Refund gold
 		RunManager.add_gold(cost)
-		SkillEncounterHelpers.show_result(result_label, "Failed to recruit!", GameConstants.COLOR_ERROR)
+		_show_animated_result(result_label, "Failed to recruit!", GameConstants.COLOR_ERROR)
 		return
 
 	# Dim the selected tile
@@ -147,12 +146,12 @@ static func _on_character_selected(tile_data: Dictionary, state: Dictionary) -> 
 
 	if result.get("grid_full", false):
 		# Grid is full - RunManager will emit signal for replacement popup
-		SkillEncounterHelpers.show_result(result_label, "Party full! Choose who to replace...", GameConstants.COLOR_WARNING)
+		_show_animated_result(result_label, "Party full!", GameConstants.COLOR_WARNING, false)
 		# Don't complete yet - wait for replacement
 		_wait_for_replacement(state)
 	else:
 		var char_name = tile_data.get("name", "Character")
-		SkillEncounterHelpers.show_result(result_label, "Recruited %s!" % char_name, GameConstants.COLOR_SUCCESS)
+		_show_animated_result(result_label, "Recruited %s!" % char_name, GameConstants.COLOR_SUCCESS)
 		_complete_encounter(state)
 
 
@@ -168,8 +167,47 @@ static func _on_replacement_completed(_character, state: Dictionary) -> void:
 	# Signal auto-disconnected via CONNECT_ONE_SHOT, state passed via bind()
 	var result_label: Label = state.get("result_label")
 	if result_label:
-		SkillEncounterHelpers.show_result(result_label, "New member joined!", GameConstants.COLOR_SUCCESS)
+		_show_animated_result(result_label, "New member joined!", GameConstants.COLOR_SUCCESS)
 	_complete_encounter(state)
+
+
+static func _show_animated_result(label: Label, message: String, color: Color, fade_out: bool = true) -> void:
+	"""Show result message with pop-up and fade animation."""
+	if not label:
+		return
+
+	# Kill any existing tween on this label
+	var existing_tweens = label.get_tree().get_processed_tweens()
+	for tween in existing_tweens:
+		if not tween.is_valid():
+			continue
+		# Can't check tween target directly, so we just set up fresh
+
+	label.text = message
+	label.add_theme_color_override("font_color", color)
+
+	# Reset state for animation
+	label.scale = Vector2(0.5, 0.5)
+	label.pivot_offset = label.size / 2
+	label.modulate.a = 0.0
+
+	var tween = label.create_tween()
+	tween.set_parallel(true)
+
+	# Pop in: scale up and fade in
+	tween.tween_property(label, "scale", Vector2(1.15, 1.15), 0.15) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(label, "modulate:a", 1.0, 0.1)
+
+	# Settle to normal scale
+	tween.set_parallel(false)
+	tween.tween_property(label, "scale", Vector2.ONE, 0.1) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+
+	# Fade out after delay (if enabled)
+	if fade_out:
+		tween.tween_interval(1.5)
+		tween.tween_property(label, "modulate:a", 0.0, 0.5)
 
 
 static func _complete_encounter(state: Dictionary) -> void:
