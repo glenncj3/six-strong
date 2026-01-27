@@ -137,6 +137,9 @@ static func get_default_stats() -> Dictionary:
 # =============================================================================
 # CHARACTER CLASS TYPES
 # =============================================================================
+# DEPRECATED: Prefer using ClassRegistry for data-driven class definitions.
+# These constants are kept for backwards compatibility.
+# Use: ClassRegistry.get_all_class_ids(), ClassRegistry.get_display_name(), etc.
 
 const CLASS_TYPE_WARRIOR := "warrior"
 const CLASS_TYPE_MAGE := "mage"
@@ -149,6 +152,7 @@ const CLASS_TYPE_NECROMANCER := "necromancer"
 const CLASS_TYPE_MONK := "monk"
 const CLASS_TYPE_ASSASSIN := "assassin"
 
+# DEPRECATED: Use ClassRegistry.get_all_class_ids() instead
 const ALL_CLASS_TYPES := [
 	CLASS_TYPE_WARRIOR,
 	CLASS_TYPE_MAGE,
@@ -162,6 +166,7 @@ const ALL_CLASS_TYPES := [
 	CLASS_TYPE_ASSASSIN
 ]
 
+# DEPRECATED: Use ClassRegistry.get_display_name(class_id) instead
 const CLASS_TYPE_DISPLAY_NAMES := {
 	CLASS_TYPE_WARRIOR: "Warrior",
 	CLASS_TYPE_MAGE: "Mage",

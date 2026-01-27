@@ -1,0 +1,52 @@
+[
+	{
+		"id": "warrior",
+		"display_name": "Warrior",
+		"description": "Front-line fighter with high health and defense"
+	},
+	{
+		"id": "mage",
+		"display_name": "Mage",
+		"description": "Spellcaster specializing in elemental damage"
+	},
+	{
+		"id": "rogue",
+		"display_name": "Rogue",
+		"description": "Stealthy attacker with high critical chance"
+	},
+	{
+		"id": "cleric",
+		"display_name": "Cleric",
+		"description": "Holy healer supporting the team"
+	},
+	{
+		"id": "ranger",
+		"display_name": "Ranger",
+		"description": "Ranged combatant with nature magic"
+	},
+	{
+		"id": "berserker",
+		"display_name": "Berserker",
+		"description": "Reckless fighter trading defense for offense"
+	},
+	{
+		"id": "paladin",
+		"display_name": "Paladin",
+		"description": "Holy knight combining offense and support"
+	},
+	{
+		"id": "necromancer",
+		"display_name": "Necromancer",
+		"description": "Dark mage wielding death magic"
+	},
+	{
+		"id": "monk",
+		"display_name": "Monk",
+		"description": "Martial artist with balanced combat skills"
+	},
+	{
+		"id": "assassin",
+		"display_name": "Assassin",
+		"description": "Deadly striker excelling at single-target damage"
+	}
+]
