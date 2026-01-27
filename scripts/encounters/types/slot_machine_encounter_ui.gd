@@ -3,6 +3,9 @@ extends RefCounted
 ## UI creation for slot machine encounters.
 ## Player spins 3 reels to match fantasy symbols for rewards.
 ## Starts with free spins, can pay resource for more.
+##
+## Auto-registration metadata (Phase 4):
+const ENCOUNTER_TYPE := "slot_machine"
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:

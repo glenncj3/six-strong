@@ -543,3 +543,36 @@ const LAYER_TRANSITION := 100
 const LAYER_HUD := 150
 const LAYER_MODAL := 200
 const LAYER_TOOLTIP := 250
+
+# =============================================================================
+# OVERLAY & SHADOW COLORS (Phase 1 Constants Centralization)
+# =============================================================================
+
+const COLOR_OVERLAY_DIM := Color(0, 0, 0, 0.5)       # Modal/popup dim overlay
+const COLOR_SHADOW_LIGHT := Color(0, 0, 0, 0.3)     # Light shadow (panel shadows)
+const COLOR_SHADOW_DARK := Color(0, 0, 0, 0.7)      # Dark shadow (text shadows)
+const COLOR_PLACEHOLDER_TEXT := Color(0.7, 0.7, 0.7) # Gray placeholder text
+const COLOR_HIGHLIGHT_TINT := Color(1.2, 1.2, 1.2)  # Brightened highlight modulate
+const COLOR_CRITICAL_HIT := Color(1.0, 0.3, 0.3)    # Critical hit damage color
+
+# =============================================================================
+# FLOATING NUMBER ANIMATION CONSTANTS
+# =============================================================================
+
+const FLOAT_CRITICAL_PEAK_SCALE := 1.5              # Peak scale for critical hits
+const FLOAT_CRITICAL_RISE_DISTANCE := 70.0          # Rise distance for critical hits
+const FLOAT_CRITICAL_DURATION := 1.2                # Duration for critical hit animation
+
+# =============================================================================
+# ENCOUNTER TILE LAYOUT CONSTANTS
+# =============================================================================
+
+const ENCOUNTER_TILE_MARGIN := 48.0                 # Margin for tile size calculation
+const ENCOUNTER_TILE_SPACING := 8.0                 # Spacing between tiles
+const ENCOUNTER_TILE_MIN_SIZE := 180.0              # Minimum tile size
+
+# =============================================================================
+# MODAL POPUP CONSTANTS
+# =============================================================================
+
+const MODAL_FALLBACK_HALF_SIZE := 150.0             # Fallback half-size when popup has no size

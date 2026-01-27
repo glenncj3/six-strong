@@ -51,7 +51,7 @@ static func create_panel_style(
 
 	# Shadow
 	if with_shadow:
-		style.shadow_color = Color(0, 0, 0, 0.3)
+		style.shadow_color = GameConstants.COLOR_SHADOW_LIGHT
 		style.shadow_offset = SHADOW_OFFSET
 		style.shadow_size = SHADOW_SIZE
 
@@ -313,7 +313,7 @@ static func style_label(label: Label, font_size: int, color: Color = GameConstan
 	label.add_theme_color_override("font_color", color)
 
 
-static func apply_text_shadow(label: Label, shadow_color: Color = Color(0, 0, 0, 0.7), offset: Vector2 = Vector2(1, 2)) -> void:
+static func apply_text_shadow(label: Label, shadow_color: Color = GameConstants.COLOR_SHADOW_DARK, offset: Vector2 = Vector2(1, 2)) -> void:
 	"""Apply text shadow to a label."""
 	label.add_theme_color_override("font_shadow_color", shadow_color)
 	label.add_theme_constant_override("shadow_offset_x", int(offset.x))

@@ -35,9 +35,9 @@ func setup(value: String, color: Color = Color.WHITE, is_critical: bool = false)
 	_is_critical = is_critical
 
 	if is_critical:
-		_peak_scale = 1.5
-		_rise_distance = 70.0
-		_duration = 1.2
+		_peak_scale = GameConstants.FLOAT_CRITICAL_PEAK_SCALE
+		_rise_distance = GameConstants.FLOAT_CRITICAL_RISE_DISTANCE
+		_duration = GameConstants.FLOAT_CRITICAL_DURATION
 
 
 func _play_animation() -> void:
@@ -92,7 +92,7 @@ func _add_shake(tween: Tween) -> void:
 static func create_damage(value: int, is_critical: bool = false) -> FloatingNumber:
 	"""Create a damage number popup."""
 	var popup = _create_instance()
-	var color = GameConstants.COLOR_RUBY if not is_critical else Color(1.0, 0.3, 0.3)
+	var color = GameConstants.COLOR_RUBY if not is_critical else GameConstants.COLOR_CRITICAL_HIT
 	popup.setup("-" + str(value), color, is_critical)
 	return popup
 

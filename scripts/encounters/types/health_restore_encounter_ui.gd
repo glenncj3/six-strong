@@ -1,6 +1,9 @@
 class_name HealthRestoreEncounterUI
 extends RefCounted
 ## UI creation and reward preview for health restore encounters.
+##
+## Auto-registration metadata (Phase 4):
+const ENCOUNTER_TYPE := "health_restore"
 ## Shows 3 heal options, player picks one, then picks a character to heal.
 
 const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")
@@ -26,7 +29,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var hbox = UIHelpers.create_hbox_container(8, BoxContainer.ALIGNMENT_CENTER)
 	vbox.add_child(hbox)
 
-	var tile_size = UIScaler.calculate_tile_size(GameConstants.DESIGN_WIDTH, GameConstants.TEAM_SIZE, 48.0, 8.0, 180.0)
+	var tile_size = EncounterUIHelpers.calculate_purchasable_tile_size()
 
 	# Character selector (hidden until option is selected)
 	var char_selector_container = UIHelpers.create_vbox_container(8)

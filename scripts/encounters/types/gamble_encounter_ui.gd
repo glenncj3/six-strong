@@ -1,6 +1,9 @@
 class_name GambleEncounterUI
 extends RefCounted
 ## UI creation and reward preview for gamble encounters.
+##
+## Auto-registration metadata (Phase 4):
+const ENCOUNTER_TYPE := "gamble"
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:

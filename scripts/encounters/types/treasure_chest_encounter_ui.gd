@@ -1,6 +1,9 @@
 class_name TreasureChestEncounterUI
 extends RefCounted
 ## UI creation and reward preview for treasure chest encounters.
+##
+## Auto-registration metadata (Phase 4):
+const ENCOUNTER_TYPE := "treasure_chest"
 ## Shows 3 mystery item options with different elements. Player picks one to reveal
 ## a random item of that element, which goes directly to player inventory.
 ##
@@ -35,7 +38,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var hbox = UIHelpers.create_hbox_container(8, BoxContainer.ALIGNMENT_CENTER)
 	vbox.add_child(hbox)
 
-	var tile_size = UIScaler.calculate_tile_size(GameConstants.DESIGN_WIDTH, GameConstants.TEAM_SIZE, 48.0, 8.0, 180.0)
+	var tile_size = EncounterUIHelpers.calculate_purchasable_tile_size()
 
 	# Create and setup tiles in single pass - call _setup_tile directly after add_child
 	# (ready signal fires during add_child, so connecting after would be too late)

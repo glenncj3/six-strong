@@ -6,6 +6,10 @@ extends RefCounted
 ## Phase 2 Refactor:
 ## - Items now go to player inventory (no character selection)
 ## - Skills will be instant effects in Phase 3 (currently disabled)
+##
+## Code Quality Refactor (Phase 3):
+## - Uses RewardHandlerRegistry for extensible handler dispatch
+## - Handlers extracted to RewardHandlers class
 
 
 ## Result of applying a reward
@@ -21,6 +25,18 @@ class ApplyResult:
 		fallback_used = p_fallback
 
 
+## Singleton registry instance
+static var _registry: RewardHandlerRegistry = null
+
+
+static func _get_registry() -> RewardHandlerRegistry:
+	"""Get or create the reward handler registry."""
+	if _registry == null:
+		_registry = RewardHandlerRegistry.new()
+		RewardHandlers.register_all(_registry)
+	return _registry
+
+
 ## Apply a reward to the game state
 ## Returns ApplyResult with success status and message
 ## Note: target_char is only used for HEALTH and XP rewards now
@@ -29,23 +45,8 @@ static func apply_reward(
 	context: Dictionary = {},
 	target_char: Variant = null  # CharacterInstance or null (only for health/XP)
 ) -> ApplyResult:
-	match definition.type:
-		RewardTypes.RewardType.GOLD:
-			return _apply_gold(definition, context)
-		RewardTypes.RewardType.HEALTH:
-			return _apply_health(definition, context, target_char)
-		RewardTypes.RewardType.XP:
-			return _apply_xp(definition, context, target_char)
-		RewardTypes.RewardType.ITEM:
-			return _apply_item(definition, context)
-		RewardTypes.RewardType.SKILL:
-			return _apply_skill(definition, context)
-		RewardTypes.RewardType.ITEM_RANDOM:
-			return _apply_random_item(definition, context)
-		RewardTypes.RewardType.SKILL_RANDOM:
-			return _apply_random_skill(definition, context)
-
-	return ApplyResult.new(false, "Unknown reward type")
+	var registry = _get_registry()
+	return registry.execute(definition, context, target_char)
 
 
 ## Check if a reward can be applied
@@ -54,23 +55,8 @@ static func can_apply_reward(
 	definition: RewardDefinition,
 	target_char: Variant = null
 ) -> Dictionary:
-	match definition.type:
-		RewardTypes.RewardType.GOLD:
-			return {"valid": true, "reason": ""}
-		RewardTypes.RewardType.HEALTH:
-			return _can_apply_health(definition, target_char)
-		RewardTypes.RewardType.XP:
-			return {"valid": true, "reason": ""}
-		RewardTypes.RewardType.ITEM:
-			return _can_apply_item(definition)
-		RewardTypes.RewardType.SKILL:
-			return _can_apply_skill(definition)
-		RewardTypes.RewardType.ITEM_RANDOM:
-			return _can_apply_random_item(definition)
-		RewardTypes.RewardType.SKILL_RANDOM:
-			return _can_apply_random_skill(definition)
-
-	return {"valid": false, "reason": "Unknown reward type"}
+	var registry = _get_registry()
+	return registry.validate(definition, target_char)
 
 
 ## Get a fallback reward when the primary can't be applied

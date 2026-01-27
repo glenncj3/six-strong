@@ -44,7 +44,7 @@ func show_modal() -> void:
 
 	# Create dimming overlay
 	_overlay = ColorRect.new()
-	_overlay.color = Color(0, 0, 0, 0.5)
+	_overlay.color = GameConstants.COLOR_OVERLAY_DIM
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	modal_layer.add_child(_overlay)
@@ -109,8 +109,8 @@ func _center_popup() -> void:
 	anchor_right = 0.5
 	anchor_bottom = 0.5
 	# Use current size for offsets
-	var half_width: float = size.x / 2 if size.x > 0 else 150.0
-	var half_height: float = size.y / 2 if size.y > 0 else 150.0
+	var half_width: float = size.x / 2 if size.x > 0 else GameConstants.MODAL_FALLBACK_HALF_SIZE
+	var half_height: float = size.y / 2 if size.y > 0 else GameConstants.MODAL_FALLBACK_HALF_SIZE
 	offset_left = -half_width
 	offset_top = -half_height
 	offset_right = half_width

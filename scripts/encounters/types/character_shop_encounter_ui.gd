@@ -1,6 +1,9 @@
 class_name CharacterShopEncounterUI
 extends RefCounted
 ## UI creation and reward preview for character shop encounters.
+##
+## Auto-registration metadata (Phase 4):
+const ENCOUNTER_TYPE := "character_shop"
 ## Displays 2-3 characters from the run pool for purchase.
 ## Players spend gold to add characters to their grid.
 ##
@@ -32,7 +35,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var hbox = UIHelpers.create_hbox_container(8, BoxContainer.ALIGNMENT_CENTER)
 	vbox.add_child(hbox)
 
-	var tile_size = UIScaler.calculate_tile_size(GameConstants.DESIGN_WIDTH, GameConstants.TEAM_SIZE, 48.0, 8.0, 180.0)
+	var tile_size = EncounterUIHelpers.calculate_purchasable_tile_size()
 
 	# Add spacer and result label area (create before tiles so state is ready)
 	vbox.add_child(UIHelpers.create_spacer(16))

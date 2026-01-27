@@ -153,7 +153,7 @@ static func get_child_count_of_type(container: Node, type: Variant) -> int:
 # PLACEHOLDER UI ELEMENTS
 # =============================================================================
 
-static func create_empty_placeholder(text: String, color: Color = Color(0.7, 0.7, 0.7)) -> Label:
+static func create_empty_placeholder(text: String, color: Color = GameConstants.COLOR_PLACEHOLDER_TEXT) -> Label:
 	"""
 	Create a placeholder label for empty states.
 

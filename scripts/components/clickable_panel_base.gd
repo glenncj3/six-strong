@@ -11,7 +11,7 @@ extends PanelContainer
 ##   4. Override _on_ready() for additional initialization
 
 const InteractiveScaleClass = preload("res://scripts/effects/interactive_scale.gd")
-const HIGHLIGHT_MODULATE := Color(1.2, 1.2, 1.2)
+const HIGHLIGHT_MODULATE := GameConstants.COLOR_HIGHLIGHT_TINT
 
 signal panel_clicked(data: Variant)
 

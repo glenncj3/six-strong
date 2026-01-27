@@ -4,6 +4,9 @@ extends RefCounted
 ## Player spins a wheel with 6 segments for varied rewards.
 ## First spin is free; player may pay gold for one additional spin.
 ##
+## Auto-registration metadata (Phase 4):
+const ENCOUNTER_TYPE := "wheel_of_fortune"
+##
 ## Phase 2 Refactor:
 ## - Items go to player inventory (no character selection)
 ## - Skills are instant effects (no character selection)

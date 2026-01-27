@@ -7,6 +7,100 @@ extends RefCounted
 ## - Removed filter_item_eligible_characters (items go to player inventory)
 ## - Removed filter_skill_eligible_characters (skills are instant effects)
 ## - Kept filter_heal_eligible_characters (health still targets characters)
+##
+## Code Quality Refactor:
+## - Added calculate_purchasable_tile_size() - DRY for tile size calculation
+## - Added handle_empty_offerings() - DRY for empty state handling
+## - Added create_tile_container() - DRY for hbox container setup
+## - Added create_result_label() - DRY for result label creation
+
+
+# =============================================================================
+# TILE LAYOUT HELPERS (Code Quality Refactor)
+# =============================================================================
+
+static func calculate_purchasable_tile_size() -> float:
+	"""
+	Calculate the standard tile size for purchasable encounter tiles.
+	Centralizes the tile size calculation that was duplicated across 5+ encounter UIs.
+
+	Returns:
+		Tile size in pixels
+	"""
+	return UIScaler.calculate_tile_size(
+		GameConstants.DESIGN_WIDTH,
+		GameConstants.TEAM_SIZE,
+		GameConstants.ENCOUNTER_TILE_MARGIN,
+		GameConstants.ENCOUNTER_TILE_SPACING,
+		GameConstants.ENCOUNTER_TILE_MIN_SIZE
+	)
+
+
+static func handle_empty_offerings(
+	container: VBoxContainer,
+	message: String,
+	on_complete: Callable
+) -> bool:
+	"""
+	Handle the empty offerings case by showing a message and completing the encounter.
+	Centralizes the empty-check boilerplate duplicated across encounter UIs.
+
+	Args:
+		container: The VBoxContainer to add the message to
+		message: The message to display (e.g., "Nothing for sale...")
+		on_complete: Callback to signal encounter completion
+
+	Returns:
+		true (always - indicates offerings were empty and handled)
+	"""
+	container.add_child(UIHelpers.create_label(
+		message,
+		GameConstants.FONT_SIZE_BODY,
+		GameConstants.COLOR_TEXT_LIGHT,
+		true
+	))
+	if on_complete.is_valid():
+		on_complete.call()
+	return true
+
+
+static func create_tile_container(parent: Control, spacing: int = 8) -> HBoxContainer:
+	"""
+	Create a centered HBoxContainer for purchasable tiles and add it to the parent.
+	Centralizes the tile container creation pattern.
+
+	Args:
+		parent: Parent control to add the container to
+		spacing: Spacing between tiles (default: 8)
+
+	Returns:
+		The created HBoxContainer
+	"""
+	var hbox = UIHelpers.create_hbox_container(spacing, BoxContainer.ALIGNMENT_CENTER)
+	parent.add_child(hbox)
+	return hbox
+
+
+static func create_result_label(parent: Control) -> Label:
+	"""
+	Create a hidden result label for displaying purchase outcomes.
+	Centralizes the result label creation pattern.
+
+	Args:
+		parent: Parent control to add the label to
+
+	Returns:
+		The created Label (initially invisible)
+	"""
+	var label = UIHelpers.create_label(
+		"",
+		GameConstants.FONT_SIZE_BODY,
+		GameConstants.COLOR_SUCCESS,
+		true
+	)
+	label.visible = false
+	parent.add_child(label)
+	return label
 
 
 # =============================================================================
