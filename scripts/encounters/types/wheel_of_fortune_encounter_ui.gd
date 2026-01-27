@@ -43,7 +43,7 @@ class WheelEncounterContainer extends VBoxContainer:
 	var spin_button: Button
 	var spin_again_button: Button
 	var take_prize_button: Button
-	var action_container: HBoxContainer
+	var side_button_container: VBoxContainer  # Container for buttons to right of wheel
 
 
 	func initialize(p_encounter_data: Dictionary, p_context: Dictionary) -> void:
@@ -74,24 +74,28 @@ class WheelEncounterContainer extends VBoxContainer:
 
 
 	func _build_ui() -> void:
+		# Main area: wheel on left, spin/respin buttons on right
+		var wheel_row = HBoxContainer.new()
+		wheel_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		wheel_row.add_theme_constant_override("separation", 16)
+		add_child(wheel_row)
+
 		# Create wheel visual
 		wheel_visual = WheelVisual.new()
 		wheel_visual.custom_minimum_size = Vector2(GameConstants.WHEEL_SIZE + 40, GameConstants.WHEEL_SIZE + 80)
 		wheel_visual.setup(controller.get_segments())
 		wheel_visual.spin_complete.connect(_on_visual_spin_complete)
 		wheel_visual.segment_passed.connect(_on_segment_passed)
-		add_child(wheel_visual)
+		wheel_row.add_child(wheel_visual)
 
-		# Spacer before buttons (at least 20px above skip/finish)
-		add_child(UIHelpers.create_spacer(24))
+		# Side button container (to the right of wheel, aligned to top)
+		side_button_container = VBoxContainer.new()
+		side_button_container.alignment = BoxContainer.ALIGNMENT_BEGIN
+		side_button_container.add_theme_constant_override("separation", 12)
+		side_button_container.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		wheel_row.add_child(side_button_container)
 
-		# Action buttons container
-		action_container = HBoxContainer.new()
-		action_container.alignment = BoxContainer.ALIGNMENT_CENTER
-		action_container.add_theme_constant_override("separation", 16)
-		add_child(action_container)
-
-		# Spin button
+		# Spin button (in side container)
 		spin_button = UIHelpers.create_button(
 			"SPIN!",
 			_on_spin_pressed,
@@ -100,29 +104,11 @@ class WheelEncounterContainer extends VBoxContainer:
 		)
 		UIStyles.setup_success_button(spin_button)
 		spin_button.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BUTTON_LARGE)
-		action_container.add_child(spin_button)
+		side_button_container.add_child(spin_button)
 
-		# Spin again button (initially hidden)
-		spin_again_button = UIHelpers.create_button(
-			"Respin: %dg" % controller.spin_again_cost,
-			_on_spin_again_pressed,
-			GameConstants.BUTTON_WIDTH_SMALL,
-			GameConstants.BUTTON_HEIGHT_STANDARD
-		)
-		UIStyles.setup_button(spin_again_button)
-		spin_again_button.visible = false
-		action_container.add_child(spin_again_button)
-
-		# Take prize button (initially hidden)
-		take_prize_button = UIHelpers.create_button(
-			"Take Prize",
-			_on_take_prize_pressed,
-			GameConstants.BUTTON_WIDTH_SMALL,
-			GameConstants.BUTTON_HEIGHT_STANDARD
-		)
-		UIStyles.setup_success_button(take_prize_button)
-		take_prize_button.visible = false
-		action_container.add_child(take_prize_button)
+		# Spin again button and take prize button will be instantiated dynamically when needed
+		spin_again_button = null
+		take_prize_button = null
 
 
 	func _on_state_changed(new_state: int) -> void:
@@ -135,15 +121,15 @@ class WheelEncounterContainer extends VBoxContainer:
 			WheelState.State.IDLE:
 				spin_button.visible = true
 				spin_button.disabled = false
-				spin_again_button.visible = false
-				take_prize_button.visible = false
+				_hide_spin_again_button()
+				_hide_take_prize_button()
 
 			WheelState.State.SPINNING, WheelState.State.LANDING:
 				spin_button.visible = true
 				spin_button.disabled = true
 				spin_button.text = "Spinning..."
-				spin_again_button.visible = false
-				take_prize_button.visible = false
+				_hide_spin_again_button()
+				_hide_take_prize_button()
 
 			WheelState.State.SHOWING_RESULT:
 				spin_button.visible = false
@@ -160,15 +146,15 @@ class WheelEncounterContainer extends VBoxContainer:
 
 			WheelState.State.COMPLETE:
 				spin_button.visible = false
-				spin_again_button.visible = false
-				take_prize_button.visible = false
+				_hide_spin_again_button()
+				_hide_take_prize_button()
 
 
 	func _show_choice_buttons() -> void:
 		"""Show spin again / take prize options."""
-		# Spin again button
-		spin_again_button.visible = controller.can_spin_again()
+		# Spin again button - create dynamically if needed
 		if controller.can_spin_again():
+			_create_spin_again_button()
 			if controller.can_afford_extra_spin():
 				spin_again_button.disabled = false
 				spin_again_button.text = "Respin: %dg" % controller.spin_again_cost
@@ -178,10 +164,54 @@ class WheelEncounterContainer extends VBoxContainer:
 				spin_again_button.text = "Not enough gold"
 				UIStyles.setup_danger_button(spin_again_button)
 
-		# Take prize button
-		take_prize_button.visible = true
+		# Take prize button - create dynamically
+		_create_take_prize_button()
 		take_prize_button.disabled = false
 		take_prize_button.text = "Take Prize"
+
+
+	func _create_spin_again_button() -> void:
+		"""Create and add the spin again button beneath the spin button."""
+		if spin_again_button != null:
+			spin_again_button.visible = true
+			return
+
+		spin_again_button = UIHelpers.create_button(
+			"Respin: %dg" % controller.spin_again_cost,
+			_on_spin_again_pressed,
+			GameConstants.BUTTON_WIDTH_SMALL,
+			GameConstants.BUTTON_HEIGHT_STANDARD
+		)
+		UIStyles.setup_button(spin_again_button)
+		side_button_container.add_child(spin_again_button)
+
+
+	func _hide_spin_again_button() -> void:
+		"""Hide or remove the spin again button."""
+		if spin_again_button != null:
+			spin_again_button.visible = false
+
+
+	func _create_take_prize_button() -> void:
+		"""Create and add the take prize button beneath the other buttons."""
+		if take_prize_button != null:
+			take_prize_button.visible = true
+			return
+
+		take_prize_button = UIHelpers.create_button(
+			"Take Prize",
+			_on_take_prize_pressed,
+			GameConstants.BUTTON_WIDTH_SMALL,
+			GameConstants.BUTTON_HEIGHT_STANDARD
+		)
+		UIStyles.setup_success_button(take_prize_button)
+		side_button_container.add_child(take_prize_button)
+
+
+	func _hide_take_prize_button() -> void:
+		"""Hide the take prize button."""
+		if take_prize_button != null:
+			take_prize_button.visible = false
 
 
 	func _apply_reward_directly() -> void:
