@@ -13,10 +13,36 @@ extends RefCounted
 
 static func register_all(registry) -> void:
 	"""Register all built-in skill effects with the registry."""
-	registry.register("heal_team", _effect_heal_team)
-	registry.register("grant_gold", _effect_grant_gold)
-	registry.register("grant_xp", _effect_grant_xp)
-	registry.register("next_character_stat_boost", _effect_next_character_stat_boost)
+	# Instant effects
+	registry.register_effect(
+		"heal_team",
+		_effect_heal_team,
+		"Heal all team members for {value} health",
+		_validate_positive_value,
+		false
+	)
+	registry.register_effect(
+		"grant_gold",
+		_effect_grant_gold,
+		"Gain {value} gold",
+		_validate_positive_value,
+		false
+	)
+	registry.register_effect(
+		"grant_xp",
+		_effect_grant_xp,
+		"Grant {value} XP to the player",
+		_validate_positive_value,
+		false
+	)
+	# Lingering effects
+	registry.register_effect(
+		"next_character_stat_boost",
+		_effect_next_character_stat_boost,
+		"Next character gains +{value} {stat}",
+		_validate_stat_boost,
+		true
+	)
 
 
 # =============================================================================
@@ -98,12 +124,37 @@ static func _effect_next_character_stat_boost(effect_data: Dictionary, context) 
 
 
 # =============================================================================
+# VALIDATORS (used during registration)
+# =============================================================================
+
+static func _validate_positive_value(effect_data: Dictionary) -> bool:
+	"""Validate that effect has a positive value."""
+	return effect_data.get("value", 0) > 0
+
+
+static func _validate_stat_boost(effect_data: Dictionary) -> bool:
+	"""Validate stat boost effect has stat and non-zero value."""
+	var stat = effect_data.get("stat", "")
+	var value = effect_data.get("value", 0)
+	return not stat.is_empty() and value != 0
+
+
+# =============================================================================
 # EFFECT DESCRIPTIONS
 # =============================================================================
+
+# Global registry reference for static method access
+static var _registry: SkillEffectRegistry = null
+
+static func set_registry(registry: SkillEffectRegistry) -> void:
+	"""Set the registry instance for static method access."""
+	_registry = registry
+
 
 static func get_effect_description(effect_data: Dictionary) -> String:
 	"""
 	Generate a human-readable description of an effect.
+	Uses registry if available, otherwise falls back to hardcoded descriptions.
 
 	Args:
 		effect_data: The effect dictionary
@@ -111,6 +162,11 @@ static func get_effect_description(effect_data: Dictionary) -> String:
 	Returns:
 		A description string for display
 	"""
+	# Use registry if available
+	if _registry != null:
+		return _registry.get_effect_description(effect_data)
+
+	# Fallback to hardcoded descriptions for backwards compatibility
 	var effect_type = effect_data.get("type", "")
 	var value = effect_data.get("value", 0)
 
@@ -131,6 +187,7 @@ static func get_effect_description(effect_data: Dictionary) -> String:
 
 static func _get_stat_display_name(stat: String) -> String:
 	"""Convert a stat key to a display-friendly name."""
+	# Use hardcoded mapping to avoid circular dependency with StatRegistry
 	match stat:
 		"health":
 			return "Health"
@@ -140,6 +197,10 @@ static func _get_stat_display_name(stat: String) -> String:
 			return "Defend Rate"
 		"income":
 			return "Income"
+		"itemSlots":
+			return "Item Slots"
+		"startingItemSlots":
+			return "Starting Slots"
 		_:
 			return stat.capitalize()
 
@@ -151,6 +212,7 @@ static func _get_stat_display_name(stat: String) -> String:
 static func is_valid_effect(effect_data: Dictionary) -> bool:
 	"""
 	Check if effect data is valid and can be executed.
+	Uses registry if available, otherwise falls back to hardcoded validation.
 
 	Args:
 		effect_data: The effect dictionary
@@ -158,6 +220,11 @@ static func is_valid_effect(effect_data: Dictionary) -> bool:
 	Returns:
 		True if the effect is valid
 	"""
+	# Use registry if available
+	if _registry != null:
+		return _registry.is_valid_effect(effect_data)
+
+	# Fallback to hardcoded validation for backwards compatibility
 	if not effect_data.has("type"):
 		return false
 
@@ -181,4 +248,8 @@ static func get_effect_value(effect_data: Dictionary) -> int:
 
 static func is_lingering_effect(effect_type: String) -> bool:
 	"""Check if an effect type is a lingering effect (not instant)."""
+	# Use registry if available
+	if _registry != null:
+		return _registry.is_lingering_effect(effect_type)
+	# Fallback to hardcoded list
 	return effect_type in ["next_character_stat_boost"]
