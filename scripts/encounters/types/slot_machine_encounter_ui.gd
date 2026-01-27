@@ -78,7 +78,7 @@ class SlotMachineController extends VBoxContainer:
 	var _on_gold_spend: Callable = Callable()
 
 	# Track active tweens for cleanup on exit
-	var _active_tweens: Array[Tween] = []
+	var _tweens: TweenTracker
 
 
 	func initialize(p_encounter_data: Dictionary, p_context: Dictionary) -> void:
@@ -87,6 +87,9 @@ class SlotMachineController extends VBoxContainer:
 		_on_complete = p_context.get("on_encounter_complete", Callable())
 		_on_gold_reward = p_context.get("on_gold_reward", Callable())
 		_on_gold_spend = p_context.get("on_gold_spend", Callable())
+
+		# Initialize tween tracker
+		_tweens = TweenTracker.new(self)
 
 		set_anchors_preset(Control.PRESET_FULL_RECT)
 		add_theme_constant_override("separation", 10)
@@ -503,14 +506,10 @@ class SlotMachineController extends VBoxContainer:
 
 	func _create_tween() -> Tween:
 		"""Create a tween and track it for cleanup on exit."""
-		var tween = create_tween()
-		_active_tweens.append(tween)
-		return tween
+		return _tweens.create()
 
 
 	func _exit_tree() -> void:
 		"""Clean up tweens when removed from tree to prevent callbacks on freed nodes."""
-		for tween in _active_tweens:
-			if tween and tween.is_valid():
-				tween.kill()
-		_active_tweens.clear()
+		if _tweens:
+			_tweens.kill_all()

@@ -110,14 +110,16 @@ func _verify_has_tween_cleanup(script_path: String):
 
 	var filename = script_path.get_file()
 
-	# Should have tween tracking array
-	if not content.contains("_active_tweens"):
-		_fail("%s missing _active_tweens array for tween tracking" % filename)
+	# Should have tween tracking (either _active_tweens array or TweenTracker)
+	var has_tracking = content.contains("_active_tweens") or content.contains("_tweens: TweenTracker") or content.contains("_tweens:")
+	if not has_tracking:
+		_fail("%s missing tween tracking (_active_tweens or TweenTracker)" % filename)
 		return
 
-	# Should kill tweens in _exit_tree
-	if not content.contains(".kill()"):
-		_fail("%s missing tween.kill() in cleanup" % filename)
+	# Should have cleanup (either manual kill() or TweenTracker.kill_all())
+	var has_cleanup = content.contains(".kill()") or content.contains(".kill_all()")
+	if not has_cleanup:
+		_fail("%s missing tween cleanup (kill() or kill_all())" % filename)
 		return
 
 	_pass("%s has tween tracking and cleanup" % filename)

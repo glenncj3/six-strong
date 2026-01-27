@@ -37,7 +37,7 @@ class WheelEncounterContainer extends VBoxContainer:
 	var _context: Dictionary = {}  # Keep context for passing to controller/reward applicator
 
 	# Track active tweens for cleanup on exit
-	var _active_tweens: Array[Tween] = []
+	var _tweens: TweenTracker
 
 	# UI elements
 	var spin_button: Button
@@ -51,6 +51,9 @@ class WheelEncounterContainer extends VBoxContainer:
 		_context = p_context
 		# Extract and store callback directly at initialization time
 		_on_complete = p_context.get("on_encounter_complete", Callable())
+
+		# Initialize tween tracker
+		_tweens = TweenTracker.new(self)
 
 		set_anchors_preset(Control.PRESET_FULL_RECT)
 		add_theme_constant_override("separation", 10)
@@ -277,10 +280,8 @@ class WheelEncounterContainer extends VBoxContainer:
 	func _exit_tree() -> void:
 		"""Clean up signal connections and tweens when removed from tree."""
 		# Kill any active tweens to prevent callbacks on freed nodes
-		for tween in _active_tweens:
-			if tween and tween.is_valid():
-				tween.kill()
-		_active_tweens.clear()
+		if _tweens:
+			_tweens.kill_all()
 
 		# Disconnect controller signals
 		if controller:
