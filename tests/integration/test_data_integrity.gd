@@ -36,7 +36,7 @@ func _test_character_data_integrity():
 	_assert_true(characters.size() > 0, "Characters exist: %d" % characters.size())
 
 	var required_fields = ["id", "name", "base_stats"]
-	var stat_fields = ["health", "attack", "defense", "speed"]
+	var stat_fields = ["health", "mana", "defend_rate"]
 
 	for char_data in characters:
 		var char_id = char_data.get("id", "UNKNOWN")

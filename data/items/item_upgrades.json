@@ -28,7 +28,7 @@
       "description": "Pulses with magical energy.",
       "image_path": "res://assets/items/arcane_staff.png",
       "upgrades_item": "item_wooden_staff",
-      "stat_modifiers": {"defendRate": 5},
+      "stat_modifiers": {"defend_rate": 5},
       "level_requirement": 3,
       "cost": 20,
       "element": "arcane"
@@ -39,7 +39,7 @@
       "description": "Melts into darkness.",
       "image_path": "res://assets/items/shadow_cloak.png",
       "upgrades_item": "item_cloak_of_shadows",
-      "stat_modifiers": {"defendRate": 10},
+      "stat_modifiers": {"defend_rate": 10},
       "level_requirement": 3,
       "cost": 20,
       "element": "shadow"
@@ -50,7 +50,7 @@
       "description": "Heavy but impenetrable.",
       "image_path": "res://assets/items/plate_armor.png",
       "upgrades_item": "item_chainmail",
-      "stat_modifiers": {"defendRate": 25, "health": 25},
+      "stat_modifiers": {"defend_rate": 25, "health": 25},
       "level_requirement": 4,
       "cost": 20,
       "element": "earth"

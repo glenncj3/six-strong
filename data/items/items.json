@@ -23,7 +23,7 @@
       "name": "Wooden Staff",
       "description": "A simple magical focus.",
       "image_path": "res://assets/items/wooden_staff.png",
-      "stat_modifiers": {"defendRate": 5},
+      "stat_modifiers": {"defend_rate": 5},
       "slot": "weapon",
       "cost": 20
     },
@@ -32,7 +32,7 @@
       "name": "Prayer Book",
       "description": "Divine protection through faith.",
       "image_path": "res://assets/items/prayer_book.png",
-      "stat_modifiers": {"defendRate": 10, "health": 10},
+      "stat_modifiers": {"defend_rate": 10, "health": 10},
       "slot": "weapon",
       "cost": 20
     },
@@ -50,7 +50,7 @@
       "name": "Leather Armor",
       "description": "Basic protection.",
       "image_path": "res://assets/items/leather_armor.png",
-      "stat_modifiers": {"defendRate": 5, "health": 5},
+      "stat_modifiers": {"defend_rate": 5, "health": 5},
       "slot": "armor",
       "cost": 20
     },
@@ -68,7 +68,7 @@
       "name": "Holy Mace",
       "description": "Blessed by the divine.",
       "image_path": "res://assets/items/holy_mace.png",
-      "stat_modifiers": {"defendRate": 5},
+      "stat_modifiers": {"defend_rate": 5},
       "slot": "weapon",
       "cost": 20
     },
@@ -86,7 +86,7 @@
       "name": "Fighting Gloves",
       "description": "For those who fight with their fists.",
       "image_path": "res://assets/items/fighting_gloves.png",
-      "stat_modifiers": {"defendRate": 5},
+      "stat_modifiers": {"defend_rate": 5},
       "slot": "weapon",
       "cost": 20
     },
@@ -104,7 +104,7 @@
       "name": "Chainmail",
       "description": "Solid metal protection.",
       "image_path": "res://assets/items/chainmail.png",
-      "stat_modifiers": {"defendRate": 15, "health": 10},
+      "stat_modifiers": {"defend_rate": 15, "health": 10},
       "slot": "armor",
       "cost": 20
     },
@@ -113,7 +113,7 @@
       "name": "Lucky Charm",
       "description": "A mysterious trinket.",
       "image_path": "res://assets/items/lucky_charm.png",
-      "stat_modifiers": {"income": 2},
+      "stat_modifiers": {"defend_rate": 2},
       "slot": "accessory",
       "cost": 20
     },
@@ -122,7 +122,7 @@
       "name": "Shield Emblem",
       "description": "A symbol of the Knight's Order.",
       "image_path": "res://assets/items/shield_emblem.png",
-      "stat_modifiers": {"defendRate": 5},
+      "stat_modifiers": {"defend_rate": 5},
       "slot": "accessory",
       "cost": 15
     },
@@ -131,7 +131,7 @@
       "name": "Cloak of Shadows",
       "description": "Melts into darkness.",
       "image_path": "res://assets/items/cloak_of_shadows.png",
-      "stat_modifiers": {"defendRate": 3},
+      "stat_modifiers": {"defend_rate": 3},
       "slot": "armor",
       "cost": 15
     },
@@ -158,7 +158,7 @@
       "name": "Forest Cloak",
       "description": "Woven from enchanted leaves.",
       "image_path": "res://assets/items/forest_cloak.png",
-      "stat_modifiers": {"defendRate": 5, "health": 5},
+      "stat_modifiers": {"defend_rate": 5, "health": 5},
       "slot": "armor",
       "cost": 20
     },
@@ -176,7 +176,7 @@
       "name": "Soldier's Shield",
       "description": "Standard military issue.",
       "image_path": "res://assets/items/soldiers_shield.png",
-      "stat_modifiers": {"defendRate": 10},
+      "stat_modifiers": {"defend_rate": 10},
       "slot": "armor",
       "cost": 20
     },

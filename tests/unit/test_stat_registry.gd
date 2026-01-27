@@ -109,7 +109,7 @@ static func _test_initialize_loads_stats() -> bool:
 static func _test_get_all_stat_ids() -> bool:
 	var stat_ids = Registry.get_all_stat_ids()
 	# Should have at least the core stats
-	var expected = ["health", "mana", "income", "defendRate", "itemSlots", "startingItemSlots"]
+	var expected = ["health", "mana", "defend_rate", "speed", "damage", "crit_chance"]
 	for id in expected:
 		if id not in stat_ids:
 			return false
@@ -122,7 +122,7 @@ static func _test_get_display_name() -> bool:
 		return false
 	if Registry.get_display_name("mana") != "MP":
 		return false
-	if Registry.get_display_name("defendRate") != "DEF":
+	if Registry.get_display_name("defend_rate") != "DEF":
 		return false
 	return true
 
@@ -133,9 +133,9 @@ static func _test_get_default_value() -> bool:
 		return false
 	if Registry.get_default_value("mana") != 5:
 		return false
-	if Registry.get_default_value("income") != 0:
+	if Registry.get_default_value("defend_rate") != 0:
 		return false
-	if Registry.get_default_value("itemSlots") != 9:
+	if Registry.get_default_value("speed") != 0:
 		return false
 	return true
 

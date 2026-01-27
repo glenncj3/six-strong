@@ -178,10 +178,9 @@ func start_new_run(drafted_character_ids: Array) -> void:
 		var char_instance = CharacterInstance.new(char_data)
 		_run_state.add_character(char_instance)
 
-	# Calculate starting gold from team income
-	var total_income = _run_state.calculate_total_income()
-	_run_state.starting_gold = total_income
-	_run_state.current_gold = total_income
+	# Starting gold (characters no longer have income)
+	_run_state.starting_gold = 0
+	_run_state.current_gold = 0
 
 	# Connect lingering effect signals
 	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)

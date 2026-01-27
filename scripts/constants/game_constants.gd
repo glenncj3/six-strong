@@ -95,20 +95,20 @@ const LEGACY_UNLOCK_COST := 500  # Gems to unlock a legacy during draft
 # Canonical stat names used throughout the system
 const STAT_HEALTH := "health"
 const STAT_MANA := "mana"
-const STAT_INCOME := "income"
-const STAT_DEFEND_RATE := "defendRate"
-const STAT_ITEM_SLOTS := "itemSlots"
-const STAT_STARTING_ITEM_SLOTS := "startingItemSlots"
+const STAT_DEFEND_RATE := "defend_rate"
+const STAT_SPEED := "speed"
+const STAT_DAMAGE := "damage"
+const STAT_CRIT_CHANCE := "crit_chance"
 
 # All valid stat names (for validation)
 # DEPRECATED: Use StatRegistry.get_all_stat_ids() instead
 const ALL_STATS := [
 	STAT_HEALTH,
 	STAT_MANA,
-	STAT_INCOME,
 	STAT_DEFEND_RATE,
-	STAT_ITEM_SLOTS,
-	STAT_STARTING_ITEM_SLOTS
+	STAT_SPEED,
+	STAT_DAMAGE,
+	STAT_CRIT_CHANCE
 ]
 
 # Display abbreviations for stats (used in UI)
@@ -116,10 +116,10 @@ const ALL_STATS := [
 const STAT_DISPLAY_NAMES := {
 	STAT_HEALTH: "HP",
 	STAT_MANA: "MP",
-	STAT_INCOME: "INC",
 	STAT_DEFEND_RATE: "DEF%",
-	STAT_ITEM_SLOTS: "SLOTS",
-	STAT_STARTING_ITEM_SLOTS: "START"
+	STAT_SPEED: "SPD",
+	STAT_DAMAGE: "DMG",
+	STAT_CRIT_CHANCE: "CRIT%"
 }
 
 # Default stat values (used when creating new stat blocks)
@@ -128,10 +128,10 @@ static func get_default_stats() -> Dictionary:
 	return {
 		STAT_HEALTH: 0,
 		STAT_MANA: 0,
-		STAT_INCOME: 0,
 		STAT_DEFEND_RATE: 0,
-		STAT_ITEM_SLOTS: 9,
-		STAT_STARTING_ITEM_SLOTS: 0
+		STAT_SPEED: 0,
+		STAT_DAMAGE: 0,
+		STAT_CRIT_CHANCE: 0
 	}
 
 # =============================================================================

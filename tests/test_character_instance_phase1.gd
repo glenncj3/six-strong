@@ -38,7 +38,7 @@ static func _get_mock_game_data() -> Dictionary:
 			"base_stats": {
 				"health": 100,
 				"mana": 5,
-				"defendRate": 15
+				"defend_rate": 15
 			}
 		}
 	}
@@ -63,7 +63,7 @@ static func _test_initial_state(results: Dictionary) -> void:
 	instance.stats = {
 		"health": 100,
 		"mana": 5,
-		"defendRate": 15
+		"defend_rate": 15
 	}
 	instance.current_health = 100
 
@@ -89,7 +89,7 @@ static func _test_stats_from_master_data(results: Dictionary) -> void:
 	instance.stats = {
 		"health": 100,
 		"mana": 5,
-		"defendRate": 15
+		"defend_rate": 15
 	}
 	instance.current_health = 100
 
@@ -116,7 +116,7 @@ static func _test_grid_position(results: Dictionary) -> void:
 	"""Test grid position functionality."""
 	var instance = CharacterInstance.new()
 	instance.base_character_id = "char_test_001"
-	instance.stats = {"health": 100, "mana": 5, "defendRate": 15}
+	instance.stats = {"health": 100, "mana": 5, "defend_rate": 15}
 
 	# Initially not in grid
 	if instance.is_in_grid():
@@ -216,7 +216,7 @@ static func _test_combat_functions(results: Dictionary) -> void:
 	"""Test combat-related functions."""
 	var instance = CharacterInstance.new()
 	instance.base_character_id = "char_test_001"
-	instance.stats = {"health": 100, "mana": 5, "defendRate": 15}
+	instance.stats = {"health": 100, "mana": 5, "defend_rate": 15}
 	instance.current_health = 100
 
 	# Take damage
@@ -272,7 +272,7 @@ static func _test_serialization(results: Dictionary) -> void:
 	"""Test to_dict serialization includes grid_position."""
 	var instance = CharacterInstance.new()
 	instance.base_character_id = "char_test_001"
-	instance.stats = {"health": 115, "mana": 5, "defendRate": 15}
+	instance.stats = {"health": 115, "mana": 5, "defend_rate": 15}
 	instance.current_health = 80
 	instance.set_grid_position(1, 2)
 
@@ -307,7 +307,7 @@ static func _test_from_dict_factory(results: Dictionary) -> void:
 	var saved_data = {
 		"base_character_id": "char_test_001",
 		"current_health": 75,
-		"stats": {"health": 120, "mana": 5, "defendRate": 15},
+		"stats": {"health": 120, "mana": 5, "defend_rate": 15},
 		"grid_position": {"x": 0, "y": 1}
 	}
 

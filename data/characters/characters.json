@@ -10,7 +10,9 @@
       "base_stats": {
         "health": 100,
         "mana": 5,
-        "defendRate": 15
+        "defend_rate": 0.15,
+        "speed": 50,
+        "damage": 25
       }
     },
     {
@@ -23,7 +25,9 @@
       "base_stats": {
         "health": 70,
         "mana": 5,
-        "defendRate": 5
+        "defend_rate": 0.05,
+        "speed": 40,
+        "damage": 35
       }
     },
     {
@@ -36,7 +40,9 @@
       "base_stats": {
         "health": 80,
         "mana": 5,
-        "defendRate": 10
+        "defend_rate": 0.1,
+        "speed": 70,
+        "damage": 22
       }
     },
     {
@@ -49,7 +55,9 @@
       "base_stats": {
         "health": 90,
         "mana": 5,
-        "defendRate": 10
+        "defend_rate": 0.1,
+        "speed": 35,
+        "damage": 15
       }
     },
     {
@@ -62,7 +70,9 @@
       "base_stats": {
         "health": 85,
         "mana": 5,
-        "defendRate": 8
+        "defend_rate": 0.08,
+        "speed": 65,
+        "damage": 28
       }
     },
     {
@@ -75,7 +85,9 @@
       "base_stats": {
         "health": 110,
         "mana": 5,
-        "defendRate": 5
+        "defend_rate": 0.05,
+        "speed": 45,
+        "damage": 40
       }
     },
     {
@@ -88,7 +100,9 @@
       "base_stats": {
         "health": 105,
         "mana": 5,
-        "defendRate": 20
+        "defend_rate": 0.2,
+        "speed": 40,
+        "damage": 20
       }
     },
     {
@@ -101,7 +115,9 @@
       "base_stats": {
         "health": 75,
         "mana": 5,
-        "defendRate": 5
+        "defend_rate": 0.05,
+        "speed": 35,
+        "damage": 38
       }
     },
     {
@@ -114,7 +130,9 @@
       "base_stats": {
         "health": 85,
         "mana": 5,
-        "defendRate": 15
+        "defend_rate": 0.15,
+        "speed": 60,
+        "damage": 24
       }
     },
     {
@@ -127,7 +145,9 @@
       "base_stats": {
         "health": 65,
         "mana": 5,
-        "defendRate": 12
+        "defend_rate": 0.12,
+        "speed": 75,
+        "damage": 32
       }
     },
     {
@@ -140,7 +160,9 @@
       "base_stats": {
         "health": 95,
         "mana": 5,
-        "defendRate": 12
+        "defend_rate": 0.12,
+        "speed": 45,
+        "damage": 20
       }
     },
     {
@@ -153,7 +175,9 @@
       "base_stats": {
         "health": 80,
         "mana": 5,
-        "defendRate": 8
+        "defend_rate": 0.08,
+        "speed": 55,
+        "damage": 26
       }
     },
     {
@@ -166,7 +190,9 @@
       "base_stats": {
         "health": 105,
         "mana": 5,
-        "defendRate": 10
+        "defend_rate": 0.1,
+        "speed": 50,
+        "damage": 22
       }
     },
     {
@@ -179,7 +205,9 @@
       "base_stats": {
         "health": 120,
         "mana": 5,
-        "defendRate": 25
+        "defend_rate": 0.25,
+        "speed": 30,
+        "damage": 12
       }
     },
     {
@@ -194,7 +222,9 @@
       "base_stats": {
         "health": 85,
         "mana": 5,
-        "defendRate": 10
+        "defend_rate": 0.1,
+        "speed": 45,
+        "damage": 20
       }
     },
     {
@@ -209,7 +239,9 @@
       "base_stats": {
         "health": 70,
         "mana": 5,
-        "defendRate": 5
+        "defend_rate": 0.05,
+        "speed": 55,
+        "damage": 24
       }
     },
     {
@@ -224,7 +256,9 @@
       "base_stats": {
         "health": 60,
         "mana": 5,
-        "defendRate": 5
+        "defend_rate": 0.05,
+        "speed": 35,
+        "damage": 30
       }
     },
     {
@@ -239,7 +273,9 @@
       "base_stats": {
         "health": 75,
         "mana": 5,
-        "defendRate": 8
+        "defend_rate": 0.08,
+        "speed": 40,
+        "damage": 12
       }
     },
     {
@@ -254,7 +290,9 @@
       "base_stats": {
         "health": 95,
         "mana": 5,
-        "defendRate": 15
+        "defend_rate": 0.15,
+        "speed": 35,
+        "damage": 15
       }
     },
     {
@@ -269,7 +307,9 @@
       "base_stats": {
         "health": 65,
         "mana": 5,
-        "defendRate": 12
+        "defend_rate": 0.12,
+        "speed": 65,
+        "damage": 18
       }
     }
   ]

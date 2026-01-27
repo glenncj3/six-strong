@@ -37,7 +37,7 @@ static func _get_mock_character_master() -> Dictionary:
 		"base_stats": {
 			"health": 100,
 			"mana": 5,
-			"defendRate": 15
+			"defend_rate": 15
 		}
 	}
 
@@ -57,9 +57,9 @@ static func _test_calculate_base_stats(results: Dictionary) -> void:
 		results.errors.append("Mana should be 5, got %d" % stats.get("mana", 0))
 		return
 
-	if stats.get("defendRate", 0) != 15:
+	if stats.get("defend_rate", 0) != 15:
 		results.failed += 1
-		results.errors.append("DefendRate should be 15, got %d" % stats.get("defendRate", 0))
+		results.errors.append("defend_rate should be 15, got %d" % stats.get("defend_rate", 0))
 		return
 
 	results.passed += 1
@@ -75,7 +75,7 @@ static func _test_no_income_stat(results: Dictionary) -> void:
 			"health": 100,
 			"mana": 5,
 			"income": 10,  # Old field - should be ignored
-			"defendRate": 15
+			"defend_rate": 15
 		}
 	}
 
@@ -105,7 +105,7 @@ static func _test_no_item_slots(results: Dictionary) -> void:
 		"base_stats": {
 			"health": 100,
 			"mana": 5,
-			"defendRate": 15,
+			"defend_rate": 15,
 			"itemSlots": 9,  # Old field - should be ignored
 			"startingItemSlots": 2  # Old field - should be ignored
 		}
@@ -200,11 +200,11 @@ static func _test_apply_modifier(results: Dictionary) -> void:
 
 static func _test_apply_stat_modifiers(results: Dictionary) -> void:
 	"""Test apply_stat_modifiers with dictionary of modifiers."""
-	var stats = {"health": 100, "mana": 5, "defendRate": 10}
+	var stats = {"health": 100, "mana": 5, "defend_rate": 10}
 
 	var modifiers = {
 		"health": 25,
-		"defendRate": 5
+		"defend_rate": 5
 	}
 
 	StatCalculator.apply_stat_modifiers(stats, modifiers)
@@ -214,9 +214,9 @@ static func _test_apply_stat_modifiers(results: Dictionary) -> void:
 		results.errors.append("Health should be 125, got %d" % stats.health)
 		return
 
-	if stats.defendRate != 15:
+	if stats.defend_rate != 15:
 		results.failed += 1
-		results.errors.append("DefendRate should be 15, got %d" % stats.defendRate)
+		results.errors.append("defend_rate should be 15, got %d" % stats.defend_rate)
 		return
 
 	if stats.mana != 5:
@@ -230,7 +230,7 @@ static func _test_apply_stat_modifiers(results: Dictionary) -> void:
 
 static func _test_level_bonus_calculation(results: Dictionary) -> void:
 	"""Test calculate_level_bonus applies level bonuses correctly."""
-	var base_stats = {"health": 100, "mana": 5, "defendRate": 15}
+	var base_stats = {"health": 100, "mana": 5, "defend_rate": 15}
 
 	# Level 1 - no bonus
 	var level_1_stats = StatCalculator.calculate_level_bonus(base_stats, 1)
@@ -258,7 +258,7 @@ static func _test_level_bonus_calculation(results: Dictionary) -> void:
 
 static func _test_stats_to_string(results: Dictionary) -> void:
 	"""Test stats_to_string formatting."""
-	var stats = {"health": 150, "mana": 10, "defendRate": 25}
+	var stats = {"health": 150, "mana": 10, "defend_rate": 25}
 
 	var str_result = StatCalculator.stats_to_string(stats)
 

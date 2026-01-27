@@ -61,7 +61,7 @@ func _create_test_character(id: String = "test_char") -> CharacterInstance:
 		"base_stats": {
 			"health": 100,
 			"mana": 50,
-			"defendRate": 10
+			"defend_rate": 10
 		}
 	}
 	return CharacterInstance.from_master_data(char_data)

@@ -253,10 +253,10 @@ func _get_stat_display_name(stat: String) -> String:
 	var stat_names = {
 		"health": "Health",
 		"mana": "Mana",
-		"defendRate": "Defend Rate",
-		"income": "Income",
-		"itemSlots": "Item Slots",
-		"startingItemSlots": "Starting Slots"
+		"defend_rate": "Defend Rate",
+		"speed": "Speed",
+		"damage": "Damage",
+		"crit_chance": "Crit Chance"
 	}
 	if stat_names.has(stat):
 		return stat_names[stat]

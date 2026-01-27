@@ -179,9 +179,14 @@ func _apply_character_effect(effect: Dictionary, character) -> void:
 			character.current_health += value
 		elif stat == "mana":
 			character.mana += value
-		elif stat == "defendRate":
+		elif stat == "defend_rate":
 			character.defend_rate += value
-		# Add more stats as needed
+		elif stat == "speed":
+			character.speed += value
+		elif stat == "damage":
+			character.damage += value
+		elif stat == "crit_chance":
+			character.crit_chance += value
 
 
 func _execute_effect_directly(effect: Dictionary, context) -> void:

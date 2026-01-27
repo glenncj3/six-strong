@@ -87,6 +87,18 @@ var defend_rate: int:
 	get: return stats.get(GameConstants.STAT_DEFEND_RATE, 0)
 	set(value): stats[GameConstants.STAT_DEFEND_RATE] = value
 
+var speed: int:
+	get: return stats.get(GameConstants.STAT_SPEED, 0)
+	set(value): stats[GameConstants.STAT_SPEED] = value
+
+var damage: int:
+	get: return stats.get(GameConstants.STAT_DAMAGE, 0)
+	set(value): stats[GameConstants.STAT_DAMAGE] = value
+
+var crit_chance: int:
+	get: return stats.get(GameConstants.STAT_CRIT_CHANCE, 0)
+	set(value): stats[GameConstants.STAT_CRIT_CHANCE] = value
+
 
 # =============================================================================
 # GRID PLACEMENT

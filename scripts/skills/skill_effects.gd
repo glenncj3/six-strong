@@ -108,7 +108,7 @@ static func _effect_next_character_stat_boost(effect_data: Dictionary, context) 
 	executing immediately.
 
 	Effect data:
-		- stat: String - The stat to boost (health, mana, defendRate)
+		- stat: String - The stat to boost (health, mana, defend_rate, speed, damage, crit_chance)
 		- value: int - Amount to boost
 
 	Note: This is typically called when the skill is acquired, registering
@@ -187,20 +187,19 @@ static func get_effect_description(effect_data: Dictionary) -> String:
 
 static func _get_stat_display_name(stat: String) -> String:
 	"""Convert a stat key to a display-friendly name."""
-	# Use hardcoded mapping to avoid circular dependency with StatRegistry
 	match stat:
 		"health":
 			return "Health"
 		"mana":
 			return "Mana"
-		"defendRate":
+		"defend_rate":
 			return "Defend Rate"
-		"income":
-			return "Income"
-		"itemSlots":
-			return "Item Slots"
-		"startingItemSlots":
-			return "Starting Slots"
+		"speed":
+			return "Speed"
+		"damage":
+			return "Damage"
+		"crit_chance":
+			return "Crit Chance"
 		_:
 			return stat.capitalize()
 

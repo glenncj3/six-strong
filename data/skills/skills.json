@@ -83,12 +83,12 @@
     {
       "id": "skill_battle_hardening",
       "name": "Battle Hardening",
-      "description": "The next character you acquire gains +10 defendRate.",
+      "description": "The next character you acquire gains +10 defend rate.",
       "image_path": "res://assets/skills/battle_hardening.png",
       "effect_type": "lingering",
       "effect": {
         "type": "next_character_stat_boost",
-        "stat": "defendRate",
+        "stat": "defend_rate",
         "value": 10
       },
       "trigger": "next_character_acquired",
@@ -184,7 +184,7 @@
       "effect_type": "lingering",
       "effect": {
         "type": "next_character_stat_boost",
-        "stat": "defendRate",
+        "stat": "defend_rate",
         "value": 8
       },
       "trigger": "next_character_acquired",
@@ -212,7 +212,7 @@
       "effect_type": "lingering",
       "effect": {
         "type": "next_character_stat_boost",
-        "stat": "defendRate",
+        "stat": "defend_rate",
         "value": 12
       },
       "trigger": "next_character_acquired",
@@ -279,7 +279,7 @@
       "effect_type": "lingering",
       "effect": {
         "type": "next_character_stat_boost",
-        "stat": "defendRate",
+        "stat": "defend_rate",
         "value": 5
       },
       "trigger": "next_character_acquired",

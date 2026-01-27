@@ -242,10 +242,14 @@ func _format_stat_name(stat_name: String) -> String:
 			return "Health"
 		"mana":
 			return "Mana"
-		"income":
-			return "Income"
-		"defendRate":
+		"defend_rate":
 			return "Defend Rate"
+		"speed":
+			return "Speed"
+		"damage":
+			return "Damage"
+		"crit_chance":
+			return "Crit Chance"
 		_:
 			return stat_name.capitalize().replace("_", " ")
 

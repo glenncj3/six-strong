@@ -396,15 +396,6 @@ static func from_dict(data: Dictionary):
 # UTILITY
 # =============================================================================
 
-func calculate_total_income() -> int:
-	"""Calculate total income from all team members (legacy system uses legacy income instead)."""
-	# Note: In the legacy system, starting gold comes from legacy incomes, not character incomes
-	# This method is kept for backwards compatibility
-	var total = 0
-	for character in grid.get_all_characters():
-		total += character.stats.get(GameConstants.STAT_INCOME, 0)
-	return total
-
 
 # =============================================================================
 # GRID ACCESS (Phase 5 additions)

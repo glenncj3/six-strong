@@ -12,27 +12,27 @@
 		"description": "Character's maximum mana points"
 	},
 	{
-		"id": "income",
-		"display_name": "Income",
-		"default": 0,
-		"description": "Gold earned per round"
-	},
-	{
-		"id": "defendRate",
+		"id": "defend_rate",
 		"display_name": "DEF",
 		"default": 0,
 		"description": "Percentage chance to block damage"
 	},
 	{
-		"id": "itemSlots",
-		"display_name": "Item Slots",
-		"default": 9,
-		"description": "Number of item slots available"
+		"id": "speed",
+		"display_name": "SPD",
+		"default": 0,
+		"description": "Attack speed - determines action order in combat"
 	},
 	{
-		"id": "startingItemSlots",
-		"display_name": "Starting Slots",
+		"id": "damage",
+		"display_name": "DMG",
 		"default": 0,
-		"description": "Number of starting item slots"
+		"description": "Base attack damage dealt per hit"
+	},
+	{
+		"id": "crit_chance",
+		"display_name": "CRIT",
+		"default": 0,
+		"description": "Percentage chance to land a critical hit"
 	}
 ]
