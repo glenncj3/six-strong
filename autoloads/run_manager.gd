@@ -28,7 +28,6 @@ signal player_level_changed(new_level: int)
 signal player_xp_changed(new_xp: int)
 
 # Draft-specific signals (emitted by draft scene, listened by HUDs)
-signal draft_character_added(char_instance: CharacterInstance)
 signal draft_gold_updated(amount: int)
 signal item_acquired(item: ItemInstance)
 
@@ -970,7 +969,7 @@ func capture_team_data() -> Array:
 
 func notify_draft_character_added(char_instance: CharacterInstance) -> void:
 	"""Called by draft scene when a character is drafted. Notifies HUDs."""
-	draft_character_added.emit(char_instance)
+	character_acquired.emit(char_instance)
 
 
 func notify_draft_gold_updated(amount: int) -> void:

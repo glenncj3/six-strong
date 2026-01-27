@@ -75,6 +75,7 @@ static func _build_character_tile_data(offering: Dictionary) -> Dictionary:
 		"name": offering.get("name", "Unknown"),
 		"description": stat_preview,
 		"image_path": offering.get("image_path", ""),
+		"display_color": offering.get("display_color", ""),
 		"cost": offering.get("cost", 40),
 		"level_requirement": offering.get("level_requirement", 1),
 		"base_stats": base_stats
@@ -106,8 +107,15 @@ static func _format_stat_preview(base_stats: Dictionary) -> String:
 static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float, state: Dictionary) -> void:
 	"""Setup tile after it enters the scene tree."""
 	tile.setup(tile_data, tile_size)
-	# Use a distinct green/brown color for character shop
-	tile.set_tile_color(Color("#4A5A3A"))
+
+	# Use character's display_color if available, otherwise default
+	var display_color_str = tile_data.get("display_color", "")
+	if not display_color_str.is_empty():
+		tile.set_tile_color(Color(display_color_str))
+	else:
+		# Default color for characters without display_color (they have images)
+		tile.set_tile_color(GameConstants.COLOR_PANEL_DARK)
+
 	tile.tile_clicked.connect(_on_character_selected.bind(state))
 
 

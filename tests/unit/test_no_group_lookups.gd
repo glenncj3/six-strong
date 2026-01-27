@@ -64,17 +64,17 @@ func _test_run_manager_has_draft_signals():
 	var content = file.get_as_text()
 	file.close()
 
-	var has_draft_char_signal = content.contains("signal draft_character_added")
+	var has_char_acquired_signal = content.contains("signal character_acquired")
 	var has_draft_gold_signal = content.contains("signal draft_gold_updated")
 	var has_notify_char = content.contains("func notify_draft_character_added")
 	var has_notify_gold = content.contains("func notify_draft_gold_updated")
 
-	if has_draft_char_signal and has_draft_gold_signal and has_notify_char and has_notify_gold:
+	if has_char_acquired_signal and has_draft_gold_signal and has_notify_char and has_notify_gold:
 		_pass("RunManager has all draft signals and notify methods")
 	else:
 		var missing = []
-		if not has_draft_char_signal:
-			missing.append("draft_character_added signal")
+		if not has_char_acquired_signal:
+			missing.append("character_acquired signal")
 		if not has_draft_gold_signal:
 			missing.append("draft_gold_updated signal")
 		if not has_notify_char:
@@ -104,15 +104,15 @@ func _test_huds_connect_to_signals():
 	var run_content = run_file.get_as_text()
 	run_file.close()
 
-	var team_connects = team_content.contains("RunManager.draft_character_added.connect")
+	var team_connects = team_content.contains("RunManager.character_acquired.connect")
 	var run_connects = run_content.contains("RunManager.draft_gold_updated.connect")
 
 	if team_connects and run_connects:
-		_pass("Both HUDs connect to RunManager draft signals")
+		_pass("Both HUDs connect to RunManager signals")
 	else:
 		var missing = []
 		if not team_connects:
-			missing.append("TeamHUD not connected to draft_character_added")
+			missing.append("TeamHUD not connected to character_acquired")
 		if not run_connects:
 			missing.append("RunHUD not connected to draft_gold_updated")
 		_fail("Missing connections: %s" % ", ".join(missing))

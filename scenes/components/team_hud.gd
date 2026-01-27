@@ -22,7 +22,7 @@ func _ready() -> void:
 	_visibility = HudVisibilityHelper.new(self)
 	_create_grid_slots()
 	SceneManager.scene_loaded.connect(_on_scene_loaded)
-	RunManager.draft_character_added.connect(_on_draft_character_added)
+	RunManager.character_acquired.connect(_on_character_acquired)
 
 
 func _create_grid_slots() -> void:
@@ -86,9 +86,12 @@ func reset_for_draft() -> void:
 	_set_all_slots_dimmed(true)
 
 
-func _on_draft_character_added(char_instance: CharacterInstance) -> void:
-	"""Handle draft character added signal from RunManager."""
-	add_drafted_character(char_instance)
+func _on_character_acquired(char_instance: CharacterInstance) -> void:
+	"""Handle character acquired signal from RunManager (draft or run-time)."""
+	if _is_draft_mode:
+		add_drafted_character(char_instance)
+	else:
+		_update_grid_display()
 
 
 func add_drafted_character(char_instance: CharacterInstance) -> void:

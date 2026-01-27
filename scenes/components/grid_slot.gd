@@ -89,23 +89,35 @@ func set_character(char_instance: CharacterInstance) -> void:
 		_clear_display()
 		return
 
-	# Show character
-	portrait.visible = true
-	UIHelpers.set_texture_safe(portrait, char_master.get("image_path", ""))
+	# Try to load image, fall back to display_color
+	var image_path = char_master.get("image_path", "")
+	var image_loaded = false
+	if not image_path.is_empty():
+		image_loaded = UIHelpers.set_texture_safe(portrait, image_path)
+
+	portrait.visible = image_loaded
 	name_label.visible = true
 	name_label.text = char_master.get("name", "?")
 
 	# Update border to gold
 	_set_border_color(GameConstants.COLOR_BORDER_GOLD)
 
+	# Determine background color
+	var bg_color = GameConstants.COLOR_PANEL_DARK
+	if not image_loaded:
+		# Use display_color from character data if available
+		var display_color_str = char_master.get("display_color", "")
+		if not display_color_str.is_empty():
+			bg_color = Color(display_color_str)
+
 	# Update styles for occupied slot
 	var normal = StyleBoxFlat.new()
-	normal.bg_color = GameConstants.COLOR_PANEL_DARK
+	normal.bg_color = bg_color
 	normal.set_corner_radius_all(UIStyles.CORNER_RADIUS_MEDIUM)
 	var hover = normal.duplicate()
-	hover.bg_color = GameConstants.COLOR_PANEL_DARK.lightened(0.15)
+	hover.bg_color = bg_color.lightened(0.15)
 	var pressed = normal.duplicate()
-	pressed.bg_color = GameConstants.COLOR_PANEL_DARK.darkened(0.1)
+	pressed.bg_color = bg_color.darkened(0.1)
 	setup_styles({"normal": normal, "hover": hover, "pressed": pressed})
 
 

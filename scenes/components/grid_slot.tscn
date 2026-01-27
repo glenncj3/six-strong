@@ -33,7 +33,7 @@ mouse_filter = 2
 visible = false
 layout_mode = 2
 expand_mode = 1
-stretch_mode = 6
+stretch_mode = 5
 
 [node name="NameMargin" type="MarginContainer" parent="ContentMargin"]
 layout_mode = 2
@@ -44,7 +44,7 @@ theme_override_constants/margin_right = 4
 
 [node name="NameHaze" type="ColorRect" parent="ContentMargin/NameMargin"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 62)
 mouse_filter = 2
 material = SubResource("ShaderMaterial_haze")
 
@@ -52,7 +52,7 @@ material = SubResource("ShaderMaterial_haze")
 visible = false
 layout_mode = 2
 theme_type_variation = "HeaderLabel"
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "Character"
 horizontal_alignment = 1
 vertical_alignment = 1
