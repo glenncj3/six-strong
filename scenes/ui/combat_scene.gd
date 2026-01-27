@@ -147,11 +147,24 @@ func _build_slot_display(grid: CharacterGrid, row: int, col: int, is_enemy: bool
 	else:
 		slot.ready.connect(func(): slot.set_character(null), CONNECT_ONE_SHOT)
 
-	# Health bar below the slot
+	# Health bar inside the slot as an overlay at the bottom
+	var hp_container = Control.new()
+	hp_container.layout_mode = 1
+	hp_container.anchors_preset = -1
+	hp_container.anchor_left = 0.05
+	hp_container.anchor_right = 0.95
+	hp_container.anchor_top = 0.22
+	hp_container.anchor_bottom = 0.28
+	hp_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	var hp_bar_bg = ColorRect.new()
-	hp_bar_bg.custom_minimum_size = Vector2(slot_width, 8)
+	hp_bar_bg.layout_mode = 1
+	hp_bar_bg.anchors_preset = Control.PRESET_FULL_RECT
+	hp_bar_bg.anchor_right = 1.0
+	hp_bar_bg.anchor_bottom = 1.0
 	hp_bar_bg.color = Color("#222222")
 	hp_bar_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hp_container.add_child(hp_bar_bg)
 
 	var hp_bar = ColorRect.new()
 	hp_bar.layout_mode = 1
@@ -163,18 +176,25 @@ func _build_slot_display(grid: CharacterGrid, row: int, col: int, is_enemy: bool
 	hp_bar_bg.add_child(hp_bar)
 
 	var hp_label = Label.new()
+	hp_label.layout_mode = 1
+	hp_label.anchors_preset = -1
+	hp_label.anchor_left = 0.05
+	hp_label.anchor_right = 0.95
+	hp_label.anchor_top = 0.10
+	hp_label.anchor_bottom = 0.22
 	hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hp_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	hp_label.add_theme_font_size_override("font_size", 10)
 	hp_label.add_theme_color_override("font_color", Color("#CCCCCC"))
 	hp_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	# Wrap slot + hp bar + label in a VBoxContainer
-	var wrapper = VBoxContainer.new()
-	wrapper.add_theme_constant_override("separation", 1)
-	wrapper.alignment = BoxContainer.ALIGNMENT_CENTER
-	wrapper.add_child(slot)
-	wrapper.add_child(hp_bar_bg)
-	wrapper.add_child(hp_label)
+	# Add health UI inside the slot's BorderOverlay (a Panel, not PanelContainer)
+	# so anchors work correctly instead of being stretched by the PanelContainer layout.
+	# Must defer until slot is ready since border_overlay is @onready.
+	slot.ready.connect(func():
+		slot.border_overlay.add_child(hp_label)
+		slot.border_overlay.add_child(hp_container)
+	, CONNECT_ONE_SHOT)
 
 	# Store display info
 	var team_idx = GameConstants.TEAM_OPPONENT if is_enemy else GameConstants.TEAM_PLAYER
@@ -185,16 +205,15 @@ func _build_slot_display(grid: CharacterGrid, row: int, col: int, is_enemy: bool
 		"hp_bar": hp_bar,
 		"hp_label": hp_label,
 		"is_enemy": is_enemy,
-		"wrapper": wrapper,
 	}
 
 	if character:
 		_update_slot_hp(pos_key, character.current_health, character.max_health, true)
 	else:
-		hp_bar_bg.visible = false
+		hp_container.visible = false
 		hp_label.text = ""
 
-	return wrapper
+	return slot
 
 
 func _build_result_overlay() -> void:
@@ -241,19 +260,19 @@ func _update_slot_hp(pos_key: String, current_hp: float, max_hp: float, alive: b
 	var d = _slot_displays[pos_key]
 	var hp_bar: ColorRect = d["hp_bar"]
 	var hp_label: Label = d["hp_label"]
-	var wrapper = d["wrapper"]
+	var slot: GridSlot = d["slot"]
 
 	if alive and current_hp > 0:
 		var ratio = current_hp / max(1.0, max_hp)
 		hp_bar.anchor_right = ratio
 		hp_bar.visible = true
 		hp_label.text = "%d/%d" % [int(current_hp), int(max_hp)]
-		wrapper.modulate.a = 1.0
+		slot.modulate.a = 1.0
 	else:
 		hp_bar.visible = false
 		hp_label.text = "DEAD"
 		hp_label.add_theme_color_override("font_color", Color("#AA4444"))
-		wrapper.modulate.a = 0.4
+		slot.modulate.a = 0.4
 
 
 func _get_pos_key(character: CombatCharacter) -> String:
