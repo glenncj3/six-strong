@@ -199,16 +199,7 @@ static func _on_replacement_confirmed(removed: CharacterInstance, _slot: Vector2
 	RunManager.cancel_pending_character()
 
 	if new_character:
-		# Sync team manager (popup already modified the grid directly)
-		var team_manager = RunManager._team_manager
-		if removed and team_manager:
-			var idx = team_manager.get_team().find(removed)
-			if idx >= 0:
-				team_manager.remove_character(idx)
-		if team_manager:
-			team_manager.add_character(new_character)
-
-		# Emit signal, trigger effects, and save
+		# Popup already modified the grid directly, just emit signal and save
 		RunManager.character_acquired.emit(new_character)
 		RunManager.trigger_character_acquired_effects(new_character)
 		RunManager.save_run_state()

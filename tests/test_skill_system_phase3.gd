@@ -471,12 +471,12 @@ func _test_skill_context_creation() -> void:
 		_fail("test_skill_context_creation: Empty context should not be valid")
 		return
 
-	# Test with mock team manager
+	# Test with get_team Callable
 	var mock_team = MockTeamManager.new()
-	context.team_manager = mock_team
+	context.get_team = mock_team.get_team
 
 	if not context.is_valid():
-		_fail("test_skill_context_creation: Context with team_manager should be valid")
+		_fail("test_skill_context_creation: Context with get_team should be valid")
 		return
 
 	# Test convenience methods
@@ -524,10 +524,10 @@ func _test_instant_effect_execution() -> void:
 	var registry = SkillEffectRegistryScript.new()
 	SkillEffectsScript.register_all(registry)
 
-	# Create context with mock team
+	# Create context with mock team using get_team Callable
 	var context = SkillContextScript.new()
 	var mock_team = MockTeamManager.new()
-	context.team_manager = mock_team
+	context.get_team = mock_team.get_team
 
 	# Test heal_team effect
 	var heal_skill = {

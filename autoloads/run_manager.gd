@@ -55,8 +55,6 @@ var _run_state = null  # RunStateScript instance
 # Skill registry (managed here as it's a singleton-like resource)
 var _skill_registry = SkillEffectRegistryScript.new()
 
-# TeamManager kept for backwards compatibility during transition
-var _team_manager: TeamManager = TeamManager.new()
 
 
 # =============================================================================
@@ -120,13 +118,11 @@ func start_new_run_with_legacies(drafted_legacies: Array) -> void:
 	_run_state.current_gold = total_starting_gold
 
 	# Add starting characters from each legacy
-	_team_manager.clear()
 	for legacy in drafted_legacies:
 		var starting_char_id = legacy.selected_starting_character_id
 		if not starting_char_id.is_empty():
 			var char_instance = CharacterInstance.from_master_data(starting_char_id)
 			if char_instance:
-				_team_manager.add_character(char_instance)
 				_run_state.add_character(char_instance)
 
 	# Add starting items to inventory from each legacy
@@ -173,9 +169,6 @@ func start_new_run(drafted_character_ids: Array) -> void:
 	_run_state = RunStateScript.new()
 	_run_state.run_id = "run_%d" % Time.get_unix_time_from_system()
 
-	# Initialize team via TeamManager
-	_team_manager.clear()
-
 	for char_id in drafted_character_ids:
 		var char_data = PlayerAccount.get_character_data(char_id)
 		if char_data.is_empty():
@@ -183,11 +176,10 @@ func start_new_run(drafted_character_ids: Array) -> void:
 			continue
 
 		var char_instance = CharacterInstance.new(char_data)
-		_team_manager.add_character(char_instance)
 		_run_state.add_character(char_instance)
 
 	# Calculate starting gold from team income
-	var total_income = _team_manager.calculate_total_income()
+	var total_income = _run_state.calculate_total_income()
 	_run_state.starting_gold = total_income
 	_run_state.current_gold = total_income
 
@@ -238,11 +230,6 @@ func load_run_state() -> bool:
 
 	# Restore RunState from saved data
 	_run_state = RunStateScript.from_dict(save_data)
-
-	# Phase 5: Sync team manager from grid for backwards compatibility
-	_team_manager.clear()
-	for character in _run_state.get_team():
-		_team_manager.add_character(character)
 
 	# Reconnect lingering effect signals
 	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)
@@ -364,7 +351,6 @@ func clear_run_state() -> void:
 	"""Clear all run state and delete save file."""
 	is_run_active = false
 	_run_state = null
-	_team_manager.clear()
 
 	# Phase 6: Clear RunPool from EncounterFactory
 	if EncounterFactory:
@@ -378,7 +364,12 @@ func clear_run_state() -> void:
 # =============================================================================
 
 func get_team() -> Array[CharacterInstance]:
-	return _team_manager.get_team()
+	if not _run_state:
+		return []
+	var team: Array[CharacterInstance] = []
+	for char in _run_state.get_team():
+		team.append(char)
+	return team
 
 
 func get_round() -> int:
@@ -543,7 +534,6 @@ func acquire_character(char_id: String) -> Dictionary:
 	# Try to place in grid
 	if _run_state.add_character(char_instance):
 		# Placed successfully
-		_team_manager.add_character(char_instance)  # Backwards compat
 		character_acquired.emit(char_instance)
 		trigger_character_acquired_effects(char_instance)
 		save_run_state()
@@ -603,11 +593,6 @@ func replace_character_at(row: int, col: int, new_character: CharacterInstance =
 		# Clear pending if we used it
 		if char_to_place == _pending_character:
 			_pending_character = null
-
-		# Update team manager for backwards compat
-		if removed:
-			_team_manager.remove_character(_team_manager.get_team().find(removed))
-		_team_manager.add_character(char_to_place)
 
 		character_acquired.emit(char_to_place)
 		trigger_character_acquired_effects(char_to_place)
@@ -934,7 +919,7 @@ func did_player_win() -> bool:
 
 
 # =============================================================================
-# UTILITY METHODS - Delegated to TeamManager
+# UTILITY METHODS
 # =============================================================================
 
 func get_phase_name() -> String:
@@ -944,18 +929,36 @@ func get_phase_name() -> String:
 
 func get_team_summary() -> Dictionary:
 	"""Get summary stats for the team."""
-	return _team_manager.get_summary()
+	var summary = {
+		"total_health": 0,
+		"max_health": 0,
+		"total_mana": 0
+	}
+
+	var team = get_team()
+	if team.is_empty():
+		return summary
+
+	for char_instance in team:
+		summary["total_health"] += char_instance.current_health
+		summary["max_health"] += char_instance.max_health
+		summary["total_mana"] += char_instance.mana
+
+	return summary
 
 
 func get_character_by_index(index: int) -> CharacterInstance:
-	"""Get a team member by index (0-2)."""
-	return _team_manager.get_character_by_index(index)
+	"""Get a team member by index (0-based)."""
+	var team = get_team()
+	if index >= 0 and index < team.size():
+		return team[index]
+	return null
 
 
 func capture_team_data() -> Array:
 	"""Capture team member data as an Array of Dictionaries (id, name)."""
 	var team_data = []
-	for char_instance in _team_manager.get_team():
+	for char_instance in get_team():
 		team_data.append({
 			"id": char_instance.base_character_id,
 			"name": char_instance.get_character_name()

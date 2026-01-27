@@ -4,18 +4,16 @@ extends RefCounted
 ## Provides access to run state, team, inventory, and other game systems.
 ##
 ## Usage:
+##   var context = SkillContext.from_run_manager(RunManager)
+##   # or
 ##   var context = SkillContext.new()
-##   context.team_manager = run_manager._team_manager
+##   context.get_team = run_manager.get_team
 ##   context.add_gold = run_manager.add_gold
 ##   registry.execute(skill_data, context)
 
 # =============================================================================
 # TEAM ACCESS
 # =============================================================================
-
-## Reference to the team manager for accessing team members
-## Type: TeamManager
-var team_manager = null
 
 ## Callable to get all team members: func() -> Array[CharacterInstance]
 var get_team: Callable = Callable()
@@ -72,7 +70,7 @@ var gold: int = 0
 func is_valid() -> bool:
 	"""Check if the context has minimum required references set."""
 	# At minimum, we need team access for most effects
-	return team_manager != null or get_team.is_valid()
+	return get_team.is_valid()
 
 
 func has_gold_access() -> bool:
@@ -97,8 +95,6 @@ func get_all_characters() -> Array:
 	"""Get all team members."""
 	if get_team.is_valid():
 		return get_team.call()
-	if team_manager != null and team_manager.has_method("get_team"):
-		return team_manager.get_team()
 	return []
 
 
@@ -148,8 +144,6 @@ static func from_run_manager(run_manager):
 	# Team access
 	if run_manager.has_method("get_team"):
 		context.get_team = run_manager.get_team
-	if run_manager.get("_team_manager") != null:
-		context.team_manager = run_manager._team_manager
 
 	# Gold access
 	if run_manager.has_method("add_gold"):
