@@ -1,8 +1,9 @@
 extends Control
 ## CombatScene - Real-time automated combat between player and enemy teams.
 ## Uses CombatManager for cooldown-based combat and GridSlot components for display.
+## Player grid matches TeamHUD positioning; enemy grid mirrors at top.
+## Combat log output goes to console via print().
 
-const MAX_LOG_LINES := 50
 const GridSlotScene = preload("res://scenes/components/grid_slot.tscn")
 
 var combat_data: Dictionary = {}
@@ -10,20 +11,15 @@ var _manager: CombatManager
 var _player_grid: CharacterGrid
 var _enemy_grid: CharacterGrid
 
-# UI references (built in _ready)
-var _enemy_grid_container: VBoxContainer
-var _player_grid_container: VBoxContainer
-var _log_container: VBoxContainer
-var _log_scroll: ScrollContainer
+# UI references
+var _enemy_label: Label
 var _result_overlay: Control
 var _result_label: Label
 var _continue_button: Button
 
-# Slot displays: key = CombatCharacter, value = Dictionary with ui nodes
+# Slot displays: key = "team_row_col", value = Dictionary with ui nodes
 var _slot_displays: Dictionary = {}
 
-# Map CombatCharacter -> source CharacterInstance for health restoration
-var _combat_to_source: Dictionary = {}
 
 
 func _ready() -> void:
@@ -55,41 +51,153 @@ func _build_ui() -> void:
 	bg.layout_mode = 1
 	add_child(bg)
 
-	# Main layout
-	var main_vbox = VBoxContainer.new()
-	main_vbox.layout_mode = 1
-	main_vbox.anchors_preset = Control.PRESET_FULL_RECT
-	main_vbox.anchor_left = 0.02
-	main_vbox.anchor_top = 0.02
-	main_vbox.anchor_right = 0.98
-	main_vbox.anchor_bottom = 0.98
-	main_vbox.add_theme_constant_override("separation", 8)
-	add_child(main_vbox)
+	# Enemy label (between header and enemy grid)
+	_enemy_label = Label.new()
+	_enemy_label.text = combat_data.get("name", "Enemy")
+	_enemy_label.set("layout_mode", 1)
+	_enemy_label.anchors_preset = -1
+	_enemy_label.anchor_left = 0.04
+	_enemy_label.anchor_top = 0.06
+	_enemy_label.anchor_right = 0.96
+	_enemy_label.anchor_bottom = 0.10
+	_enemy_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_enemy_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_enemy_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_enemy_label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
+	_enemy_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
+	add_child(_enemy_label)
 
-	# Enemy section (top)
-	_enemy_grid_container = _build_team_section(
-		combat_data.get("name", "Enemy"),
-		true
-	)
-	main_vbox.add_child(_enemy_grid_container)
+	# Enemy grid: anchored at top, mirroring player grid position
+	# Player TeamHUD is at: left=0.04, top=0.55, right=0.96, bottom=0.90
+	# Enemy mirrors at:     left=0.04, top=0.10, right=0.96, bottom=0.45
+	var enemy_grid_control = _build_grid_control(0.04, 0.10, 0.96, 0.45, true)
+	add_child(enemy_grid_control)
 
-	# Combat log (middle)
-	_log_scroll = ScrollContainer.new()
-	_log_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_log_scroll.size_flags_stretch_ratio = 1.0
-	_log_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	main_vbox.add_child(_log_scroll)
-
-	_log_container = VBoxContainer.new()
-	_log_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_log_container.add_theme_constant_override("separation", 4)
-	_log_scroll.add_child(_log_container)
-
-	# Player section (bottom)
-	_player_grid_container = _build_team_section("Your Team", false)
-	main_vbox.add_child(_player_grid_container)
+	# Player grid: matches TeamHUD anchors exactly
+	var player_grid_control = _build_grid_control(0.04, 0.55, 0.96, 0.90, false)
+	add_child(player_grid_control)
 
 	# Result overlay (hidden)
+	_build_result_overlay()
+
+
+func _build_grid_control(a_left: float, a_top: float, a_right: float, a_bottom: float, is_enemy: bool) -> Control:
+	var container = Control.new()
+	container.layout_mode = 1
+	container.anchors_preset = -1
+	container.anchor_left = a_left
+	container.anchor_top = a_top
+	container.anchor_right = a_right
+	container.anchor_bottom = a_bottom
+	container.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	container.grow_vertical = Control.GROW_DIRECTION_BOTH
+	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var vbox = VBoxContainer.new()
+	vbox.layout_mode = 1
+	vbox.anchors_preset = Control.PRESET_FULL_RECT
+	vbox.anchor_right = 1.0
+	vbox.anchor_bottom = 1.0
+	vbox.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	vbox.grow_vertical = Control.GROW_DIRECTION_BOTH
+	vbox.add_theme_constant_override("separation", 6)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	container.add_child(vbox)
+
+	# Enemy: back row first (visually farther), then front row
+	# Player: front row first, then back row
+	if is_enemy:
+		vbox.add_child(_build_row_container(GameConstants.ROW_BACK, is_enemy))
+		vbox.add_child(_build_row_container(GameConstants.ROW_FRONT, is_enemy))
+	else:
+		vbox.add_child(_build_row_container(GameConstants.ROW_FRONT, is_enemy))
+		vbox.add_child(_build_row_container(GameConstants.ROW_BACK, is_enemy))
+
+	return container
+
+
+func _build_row_container(row: int, is_enemy: bool) -> HBoxContainer:
+	var row_container = HBoxContainer.new()
+	row_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	row_container.add_theme_constant_override("separation", 8)
+	row_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	row_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+
+	var grid = _enemy_grid if is_enemy else _player_grid
+	for col_idx in range(GameConstants.GRID_COLS):
+		var slot_wrapper = _build_slot_display(grid, row, col_idx, is_enemy)
+		row_container.add_child(slot_wrapper)
+
+	return row_container
+
+
+func _build_slot_display(grid: CharacterGrid, row: int, col: int, is_enemy: bool) -> Control:
+	# Calculate slot size the same way TeamHUD does
+	var screen_width = get_viewport().get_visible_rect().size.x
+	var grid_width = screen_width * 0.92  # 0.96 - 0.04 = 0.92 of screen
+	var slot_width = UIScaler.calculate_tile_size(grid_width, GameConstants.GRID_COLS)
+	var slot_size = Vector2(slot_width, slot_width)
+
+	var slot: GridSlot = GridSlotScene.instantiate()
+	slot.setup_slot(row, col, slot_size)
+
+	var character = grid.get_character_at(row, col) if grid else null
+	if character:
+		slot.ready.connect(func(): slot.set_character(character), CONNECT_ONE_SHOT)
+	else:
+		slot.ready.connect(func(): slot.set_character(null), CONNECT_ONE_SHOT)
+
+	# Health bar below the slot
+	var hp_bar_bg = ColorRect.new()
+	hp_bar_bg.custom_minimum_size = Vector2(slot_width, 8)
+	hp_bar_bg.color = Color("#222222")
+	hp_bar_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var hp_bar = ColorRect.new()
+	hp_bar.layout_mode = 1
+	hp_bar.anchors_preset = Control.PRESET_FULL_RECT
+	hp_bar.anchor_right = 1.0
+	hp_bar.anchor_bottom = 1.0
+	hp_bar.color = Color("#44AA44") if not is_enemy else Color("#AA4444")
+	hp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hp_bar_bg.add_child(hp_bar)
+
+	var hp_label = Label.new()
+	hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hp_label.add_theme_font_size_override("font_size", 10)
+	hp_label.add_theme_color_override("font_color", Color("#CCCCCC"))
+	hp_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	# Wrap slot + hp bar + label in a VBoxContainer
+	var wrapper = VBoxContainer.new()
+	wrapper.add_theme_constant_override("separation", 1)
+	wrapper.alignment = BoxContainer.ALIGNMENT_CENTER
+	wrapper.add_child(slot)
+	wrapper.add_child(hp_bar_bg)
+	wrapper.add_child(hp_label)
+
+	# Store display info
+	var team_idx = GameConstants.TEAM_OPPONENT if is_enemy else GameConstants.TEAM_PLAYER
+	var pos_key = "%d_%d_%d" % [team_idx, row, col]
+	_slot_displays[pos_key] = {
+		"slot": slot,
+		"hp_bar_bg": hp_bar_bg,
+		"hp_bar": hp_bar,
+		"hp_label": hp_label,
+		"is_enemy": is_enemy,
+		"wrapper": wrapper,
+	}
+
+	if character:
+		_update_slot_hp(pos_key, character.current_health, character.max_health, true)
+	else:
+		hp_bar_bg.visible = false
+		hp_label.text = ""
+
+	return wrapper
+
+
+func _build_result_overlay() -> void:
 	_result_overlay = Control.new()
 	_result_overlay.set("layout_mode", 1)
 	_result_overlay.anchors_preset = Control.PRESET_FULL_RECT
@@ -127,133 +235,16 @@ func _build_ui() -> void:
 	result_vbox.add_child(_continue_button)
 
 
-func _build_team_section(team_name: String, is_enemy: bool) -> VBoxContainer:
-	var section = VBoxContainer.new()
-	section.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	section.size_flags_stretch_ratio = 1.2
-	section.add_theme_constant_override("separation", 4)
-
-	var label = Label.new()
-	label.text = team_name
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", GameConstants.FONT_SIZE_BODY)
-	label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
-	section.add_child(label)
-
-	var grid_box = VBoxContainer.new()
-	grid_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	grid_box.add_theme_constant_override("separation", 4)
-	grid_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	section.add_child(grid_box)
-
-	if is_enemy:
-		grid_box.add_child(_build_row_container(GameConstants.ROW_BACK, is_enemy))
-		grid_box.add_child(_build_row_container(GameConstants.ROW_FRONT, is_enemy))
-	else:
-		grid_box.add_child(_build_row_container(GameConstants.ROW_FRONT, is_enemy))
-		grid_box.add_child(_build_row_container(GameConstants.ROW_BACK, is_enemy))
-
-	return section
-
-
-func _build_row_container(row: int, is_enemy: bool) -> HBoxContainer:
-	var row_container = HBoxContainer.new()
-	row_container.alignment = BoxContainer.ALIGNMENT_CENTER
-	row_container.add_theme_constant_override("separation", 8)
-	row_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
-
-	var grid = _enemy_grid if is_enemy else _player_grid
-	for col in range(GameConstants.GRID_COLS):
-		var slot_wrapper = _build_slot_display(grid, row, col, is_enemy)
-		row_container.add_child(slot_wrapper)
-
-	return row_container
-
-
-func _build_slot_display(grid: CharacterGrid, row: int, col: int, is_enemy: bool) -> Control:
-	var wrapper = Control.new()
-	wrapper.custom_minimum_size = Vector2(100, 120)
-	wrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var slot: GridSlot = GridSlotScene.instantiate()
-	slot.set("layout_mode", 1)
-	slot.anchors_preset = Control.PRESET_FULL_RECT
-	slot.anchor_bottom = 1.0
-	slot.anchor_right = 1.0
-	slot.setup_slot(row, col, Vector2(100, 120))
-	wrapper.add_child(slot)
-
-	var character = grid.get_character_at(row, col) if grid else null
-	if character:
-		slot.ready.connect(func(): slot.set_character(character), CONNECT_ONE_SHOT)
-	else:
-		slot.ready.connect(func(): slot.set_character(null), CONNECT_ONE_SHOT)
-
-	# Health bar container
-	var hp_container = VBoxContainer.new()
-	hp_container.layout_mode = 1
-	hp_container.anchors_preset = Control.PRESET_BOTTOM_WIDE
-	hp_container.anchor_top = 0.78
-	hp_container.anchor_bottom = 1.0
-	hp_container.anchor_left = 0.05
-	hp_container.anchor_right = 0.95
-	hp_container.add_theme_constant_override("separation", 1)
-	hp_container.alignment = BoxContainer.ALIGNMENT_END
-	hp_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	wrapper.add_child(hp_container)
-
-	var hp_bar_bg = ColorRect.new()
-	hp_bar_bg.custom_minimum_size = Vector2(0, 8)
-	hp_bar_bg.color = Color("#222222")
-	hp_bar_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hp_container.add_child(hp_bar_bg)
-
-	var hp_bar = ColorRect.new()
-	hp_bar.custom_minimum_size = Vector2(0, 8)
-	hp_bar.color = Color("#44AA44") if not is_enemy else Color("#AA4444")
-	hp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hp_bar_bg.add_child(hp_bar)
-
-	var hp_label = Label.new()
-	hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hp_label.add_theme_font_size_override("font_size", 10)
-	hp_label.add_theme_color_override("font_color", Color("#CCCCCC"))
-	hp_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hp_container.add_child(hp_label)
-
-	# Store display info keyed by grid position for later lookup by CombatCharacter
-	var team_idx = GameConstants.TEAM_OPPONENT if is_enemy else GameConstants.TEAM_PLAYER
-	var pos_key = "%d_%d_%d" % [team_idx, row, col]
-	_slot_displays[pos_key] = {
-		"slot": slot,
-		"hp_bar_bg": hp_bar_bg,
-		"hp_bar": hp_bar,
-		"hp_label": hp_label,
-		"is_enemy": is_enemy,
-		"wrapper": wrapper,
-	}
-
-	if character:
-		_update_slot_hp(pos_key, character.current_health, character.max_health, true)
-	else:
-		hp_bar_bg.visible = false
-		hp_label.text = ""
-
-	return wrapper
-
-
 func _update_slot_hp(pos_key: String, current_hp: float, max_hp: float, alive: bool) -> void:
 	if not _slot_displays.has(pos_key):
 		return
 	var d = _slot_displays[pos_key]
 	var hp_bar: ColorRect = d["hp_bar"]
 	var hp_label: Label = d["hp_label"]
-	var wrapper: Control = d["wrapper"]
+	var wrapper = d["wrapper"]
 
 	if alive and current_hp > 0:
 		var ratio = current_hp / max(1.0, max_hp)
-		hp_bar.set("layout_mode", 1)
-		hp_bar.anchors_preset = Control.PRESET_FULL_RECT
 		hp_bar.anchor_right = ratio
 		hp_bar.visible = true
 		hp_label.text = "%d/%d" % [int(current_hp), int(max_hp)]
@@ -287,46 +278,39 @@ func _setup_combat() -> void:
 
 
 func _start_combat() -> void:
-	# Connect signals before initializing
 	_manager.damage_dealt.connect(_on_damage_dealt)
 	_manager.damage_blocked.connect(_on_damage_blocked)
 	_manager.character_died.connect(_on_character_died)
 	_manager.combat_ended.connect(_on_combat_ended)
 
-	_add_log_line("Combat begins!", GameConstants.COLOR_TEXT_LIGHT)
+	print("[Combat] Battle begins!")
 	_manager.initialize_combat(_player_grid, _enemy_grid)
 
 
+func _get_team_label(character: CombatCharacter) -> String:
+	if character.team == GameConstants.TEAM_PLAYER:
+		return "[Player]"
+	return "[Enemy]"
+
+
 func _on_damage_dealt(source: CombatCharacter, target: CombatCharacter, amount: float, is_crit: bool) -> void:
-	var atk_name = source.character_name
-	var def_name = target.character_name
+	var src_label = _get_team_label(source)
+	var tgt_label = _get_team_label(target)
 
 	if is_crit:
-		_add_log_line(
-			"%s CRITS %s for %d damage!" % [atk_name, def_name, int(amount)],
-			Color("#FFAA00")
-		)
+		print("[Combat] %s %s CRITS %s %s for %d damage!" % [src_label, source.character_name, tgt_label, target.character_name, int(amount)])
 	else:
-		_add_log_line(
-			"%s attacks %s for %d damage." % [atk_name, def_name, int(amount)],
-			GameConstants.COLOR_TEXT_LIGHT
-		)
+		print("[Combat] %s %s attacks %s %s for %d damage." % [src_label, source.character_name, tgt_label, target.character_name, int(amount)])
 
 	_update_slot_hp(_get_pos_key(target), target.health, target.max_health, target.is_alive)
 
 
 func _on_damage_blocked(source: CombatCharacter, target: CombatCharacter) -> void:
-	_add_log_line(
-		"%s attacks %s — BLOCKED!" % [source.character_name, target.character_name],
-		Color("#8888CC")
-	)
+	print("[Combat] %s %s attacks %s %s — BLOCKED!" % [_get_team_label(source), source.character_name, _get_team_label(target), target.character_name])
 
 
 func _on_character_died(character: CombatCharacter) -> void:
-	_add_log_line(
-		"  %s has been defeated!" % character.character_name,
-		Color("#CC4444")
-	)
+	print("[Combat] %s %s has been defeated!" % [_get_team_label(character), character.character_name])
 	_update_slot_hp(_get_pos_key(character), 0, character.max_health, false)
 
 
@@ -336,44 +320,23 @@ func _on_combat_ended(winner: int, _reason: String) -> void:
 		ch.restore_full_health()
 
 	if winner == GameConstants.TEAM_PLAYER:
-		_add_log_line("VICTORY!", GameConstants.COLOR_SUCCESS)
+		print("[Combat] VICTORY!")
 		_result_label.text = "VICTORY!"
 		_result_label.add_theme_color_override("font_color", GameConstants.COLOR_SUCCESS)
 	elif winner == GameConstants.TEAM_OPPONENT:
-		_add_log_line("DEFEAT...", GameConstants.COLOR_DANGER)
+		print("[Combat] DEFEAT...")
 		_result_label.text = "DEFEAT"
 		_result_label.add_theme_color_override("font_color", GameConstants.COLOR_DANGER)
 	else:
-		_add_log_line("DRAW", GameConstants.COLOR_WARNING)
+		print("[Combat] DRAW")
 		_result_label.text = "DRAW"
 		_result_label.add_theme_color_override("font_color", GameConstants.COLOR_WARNING)
 
-	# Show result after a delay
 	var timer = get_tree().create_timer(1.0)
 	timer.timeout.connect(func():
 		if is_inside_tree():
 			_result_overlay.visible = true
 	)
-
-
-func _add_log_line(text: String, color: Color) -> void:
-	var label_node = Label.new()
-	label_node.text = text
-	label_node.add_theme_font_size_override("font_size", 13)
-	label_node.add_theme_color_override("font_color", color)
-	label_node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_log_container.add_child(label_node)
-
-	while _log_container.get_child_count() > MAX_LOG_LINES:
-		var old = _log_container.get_child(0)
-		_log_container.remove_child(old)
-		old.queue_free()
-
-	# Scroll to bottom next frame
-	get_tree().process_frame.connect(func():
-		if is_inside_tree():
-			_log_scroll.scroll_vertical = int(_log_scroll.get_v_scroll_bar().max_value)
-	, CONNECT_ONE_SHOT)
 
 
 func _on_continue_pressed() -> void:
@@ -382,7 +345,7 @@ func _on_continue_pressed() -> void:
 	RunFlowController.complete_combat(winner, combat_data)
 
 
-func _on_combat_completed(winner: int, run_over: bool) -> void:
+func _on_combat_completed(_winner: int, run_over: bool) -> void:
 	if run_over:
 		SceneManager.go_to("run_results")
 	else:

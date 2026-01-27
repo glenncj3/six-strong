@@ -59,6 +59,12 @@ func _on_scene_loaded(scene_path: String) -> void:
 			_visibility.fade_out()
 		return
 
+	if scene_path == "res://scenes/ui/combat_scene.tscn":
+		# Combat scene renders its own grid with HP bars
+		if visible:
+			_visibility.fade_out()
+		return
+
 	if scene_path == "res://scenes/ui/draft.tscn":
 		reset_for_draft()
 		if not visible:

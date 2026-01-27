@@ -8,6 +8,7 @@ const GAMEPLAY_SCENES: Array[String] = [
 	"res://scenes/ui/run_view.tscn",
 	"res://scenes/ui/encounter_active.tscn",
 	"res://scenes/ui/combat_stub.tscn",
+	"res://scenes/ui/combat_scene.tscn",
 ]
 
 const FADE_DURATION := 0.3

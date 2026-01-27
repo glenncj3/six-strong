@@ -183,7 +183,8 @@ func _build_enemy_team(strength_tier: int) -> CharacterGrid:
 			character.current_health = character.stats.get(GameConstants.STAT_HEALTH, character.current_health)
 
 		# Place in grid: first GRID_COLS in front row, next GRID_COLS in back row
-		var row = int(i / GameConstants.GRID_COLS)
+		@warning_ignore("integer_division")
+		var row: int = i / GameConstants.GRID_COLS
 		var col = i % GameConstants.GRID_COLS
 		grid.place_character(character, row, col)
 

@@ -50,7 +50,7 @@ func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid)
 	combat_started.emit(_state)
 
 
-func _apply_combat_start_effects(character: CombatCharacter) -> void:
+func _apply_combat_start_effects(_character: CombatCharacter) -> void:
 	# TODO: Apply effects from items and skills equipped on the source character.
 	# Each item/skill that grants combat effects should create CombatEffect instances
 	# and apply them here via apply_effect().
