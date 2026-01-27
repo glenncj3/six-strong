@@ -367,8 +367,8 @@ func get_team() -> Array[CharacterInstance]:
 	if not _run_state:
 		return []
 	var team: Array[CharacterInstance] = []
-	for char in _run_state.get_team():
-		team.append(char)
+	for character in _run_state.get_team():
+		team.append(character)
 	return team
 
 
