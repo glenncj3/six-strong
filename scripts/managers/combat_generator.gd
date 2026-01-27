@@ -144,7 +144,7 @@ func _generate_player_ghost_option() -> CombatOption:
 		colors.border
 	)
 	# Scale team strength loosely with prestige (0=easy templates, 9=any)
-	var strength = clampi(prestige / 3, 0, 2)
+	var strength = clampi(int(prestige / 3.0), 0, 2)
 	option.enemy_team = _build_enemy_team(strength)
 	return option
 
@@ -182,9 +182,9 @@ func _build_enemy_team(strength_tier: int) -> CharacterGrid:
 				character.stats[stat_key] = int(character.stats[stat_key] * multiplier)
 			character.current_health = character.stats.get(GameConstants.STAT_HEALTH, character.current_health)
 
-		# Place in grid: first 3 in front row, next 3 in back row
-		var row = i / 3
-		var col = i % 3
+		# Place in grid: first GRID_COLS in front row, next GRID_COLS in back row
+		var row = int(i / GameConstants.GRID_COLS)
+		var col = i % GameConstants.GRID_COLS
 		grid.place_character(character, row, col)
 
 	return grid

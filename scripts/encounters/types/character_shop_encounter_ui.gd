@@ -191,7 +191,7 @@ static func _show_replacement_popup(tile_data: Dictionary, cost: int, state: Dic
 	popup.show_replacement(pending_character, grid)
 
 
-static func _on_replacement_confirmed(removed: CharacterInstance, _slot: Vector2i, tile_data: Dictionary, state: Dictionary) -> void:
+static func _on_replacement_confirmed(_removed: CharacterInstance, _slot: Vector2i, tile_data: Dictionary, state: Dictionary) -> void:
 	"""Called when player confirms character replacement."""
 	var new_character = RunManager.get_pending_character()
 

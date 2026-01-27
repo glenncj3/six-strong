@@ -79,6 +79,17 @@ const GRID_ROWS := 2  # Front row and back row
 const GRID_COLS := 3  # 3 characters per row
 const MAX_GRID_CHARACTERS := 6  # GRID_ROWS * GRID_COLS - replaces TEAM_SIZE
 
+# Team identifiers
+const TEAM_PLAYER := 0
+const TEAM_OPPONENT := 1
+
+# Combat outcome
+const WINNER_DRAW := 2
+
+# Row identifiers
+const ROW_FRONT := 0
+const ROW_BACK := 1
+
 # =============================================================================
 # LEGACY SYSTEM CONSTANTS (Phase 4)
 # =============================================================================
@@ -285,6 +296,9 @@ const EMOJI_GOLD := "💰"
 # =============================================================================
 # COMBAT CONSTANTS
 # =============================================================================
+
+# Critical hit multiplier
+const CRIT_MULTIPLIER := 2.0
 
 # Difficulty settings
 const COMBAT_DIFFICULTIES := ["Easy", "Medium", "Hard"]

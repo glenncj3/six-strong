@@ -11,8 +11,9 @@
         "health": 100,
         "mana": 5,
         "defend_rate": 0.15,
-        "speed": 50,
-        "damage": 25
+        "speed": 3.0,
+        "damage": 15,
+        "crit_chance": 0.0
       }
     },
     {
@@ -26,8 +27,9 @@
         "health": 70,
         "mana": 5,
         "defend_rate": 0.05,
-        "speed": 40,
-        "damage": 35
+        "speed": 4.0,
+        "damage": 25,
+        "crit_chance": 0.05
       }
     },
     {
@@ -40,9 +42,10 @@
       "base_stats": {
         "health": 80,
         "mana": 5,
-        "defend_rate": 0.1,
-        "speed": 70,
-        "damage": 22
+        "defend_rate": 0.10,
+        "speed": 2.0,
+        "damage": 12,
+        "crit_chance": 0.15
       }
     },
     {
@@ -55,9 +58,10 @@
       "base_stats": {
         "health": 90,
         "mana": 5,
-        "defend_rate": 0.1,
-        "speed": 35,
-        "damage": 15
+        "defend_rate": 0.10,
+        "speed": 3.5,
+        "damage": 8,
+        "crit_chance": 0.0
       }
     },
     {
@@ -71,8 +75,9 @@
         "health": 85,
         "mana": 5,
         "defend_rate": 0.08,
-        "speed": 65,
-        "damage": 28
+        "speed": 2.5,
+        "damage": 14,
+        "crit_chance": 0.10
       }
     },
     {
@@ -86,8 +91,9 @@
         "health": 110,
         "mana": 5,
         "defend_rate": 0.05,
-        "speed": 45,
-        "damage": 40
+        "speed": 2.0,
+        "damage": 20,
+        "crit_chance": 0.10
       }
     },
     {
@@ -100,9 +106,10 @@
       "base_stats": {
         "health": 105,
         "mana": 5,
-        "defend_rate": 0.2,
-        "speed": 40,
-        "damage": 20
+        "defend_rate": 0.20,
+        "speed": 3.5,
+        "damage": 12,
+        "crit_chance": 0.0
       }
     },
     {
@@ -116,8 +123,9 @@
         "health": 75,
         "mana": 5,
         "defend_rate": 0.05,
-        "speed": 35,
-        "damage": 38
+        "speed": 4.5,
+        "damage": 22,
+        "crit_chance": 0.05
       }
     },
     {
@@ -131,8 +139,9 @@
         "health": 85,
         "mana": 5,
         "defend_rate": 0.15,
-        "speed": 60,
-        "damage": 24
+        "speed": 2.5,
+        "damage": 11,
+        "crit_chance": 0.05
       }
     },
     {
@@ -146,8 +155,9 @@
         "health": 65,
         "mana": 5,
         "defend_rate": 0.12,
-        "speed": 75,
-        "damage": 32
+        "speed": 1.5,
+        "damage": 18,
+        "crit_chance": 0.25
       }
     },
     {
@@ -161,8 +171,9 @@
         "health": 95,
         "mana": 5,
         "defend_rate": 0.12,
-        "speed": 45,
-        "damage": 20
+        "speed": 3.0,
+        "damage": 10,
+        "crit_chance": 0.0
       }
     },
     {
@@ -176,8 +187,9 @@
         "health": 80,
         "mana": 5,
         "defend_rate": 0.08,
-        "speed": 55,
-        "damage": 26
+        "speed": 2.5,
+        "damage": 16,
+        "crit_chance": 0.05
       }
     },
     {
@@ -190,9 +202,10 @@
       "base_stats": {
         "health": 105,
         "mana": 5,
-        "defend_rate": 0.1,
-        "speed": 50,
-        "damage": 22
+        "defend_rate": 0.10,
+        "speed": 3.0,
+        "damage": 14,
+        "crit_chance": 0.05
       }
     },
     {
@@ -206,8 +219,9 @@
         "health": 120,
         "mana": 5,
         "defend_rate": 0.25,
-        "speed": 30,
-        "damage": 12
+        "speed": 4.0,
+        "damage": 6,
+        "crit_chance": 0.0
       }
     },
     {
@@ -222,9 +236,10 @@
       "base_stats": {
         "health": 85,
         "mana": 5,
-        "defend_rate": 0.1,
-        "speed": 45,
-        "damage": 20
+        "defend_rate": 0.10,
+        "speed": 3.0,
+        "damage": 12,
+        "crit_chance": 0.0
       }
     },
     {
@@ -240,8 +255,9 @@
         "health": 70,
         "mana": 5,
         "defend_rate": 0.05,
-        "speed": 55,
-        "damage": 24
+        "speed": 2.5,
+        "damage": 14,
+        "crit_chance": 0.05
       }
     },
     {
@@ -257,8 +273,9 @@
         "health": 60,
         "mana": 5,
         "defend_rate": 0.05,
-        "speed": 35,
-        "damage": 30
+        "speed": 4.0,
+        "damage": 18,
+        "crit_chance": 0.0
       }
     },
     {
@@ -274,8 +291,9 @@
         "health": 75,
         "mana": 5,
         "defend_rate": 0.08,
-        "speed": 40,
-        "damage": 12
+        "speed": 3.5,
+        "damage": 6,
+        "crit_chance": 0.0
       }
     },
     {
@@ -291,8 +309,9 @@
         "health": 95,
         "mana": 5,
         "defend_rate": 0.15,
-        "speed": 35,
-        "damage": 15
+        "speed": 3.5,
+        "damage": 8,
+        "crit_chance": 0.0
       }
     },
     {
@@ -308,8 +327,9 @@
         "health": 65,
         "mana": 5,
         "defend_rate": 0.12,
-        "speed": 65,
-        "damage": 18
+        "speed": 2.0,
+        "damage": 10,
+        "crit_chance": 0.10
       }
     }
   ]

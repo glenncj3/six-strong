@@ -1044,7 +1044,7 @@ func _run_run_flow_controller():
 	var wins_before = RunManager.get_wins()
 	var combat_data = {"gold_reward": 25, "xp_reward": 10}
 
-	RunFlowController.complete_combat(true, combat_data)
+	RunFlowController.complete_combat(GameConstants.TEAM_PLAYER, combat_data)
 
 	_assert_eq(RunManager.get_wins(), wins_before + 1, "Win recorded after combat victory")
 
@@ -1052,7 +1052,7 @@ func _run_run_flow_controller():
 	var losses_before = RunManager.get_losses()
 	var rep_before = RunManager.get_reputation()
 
-	RunFlowController.complete_combat(false, combat_data)
+	RunFlowController.complete_combat(GameConstants.TEAM_OPPONENT, combat_data)
 
 	_assert_eq(RunManager.get_losses(), losses_before + 1, "Loss recorded after combat loss")
 	_assert_true(RunManager.get_reputation() <= rep_before, "Reputation decreased or unchanged on loss")

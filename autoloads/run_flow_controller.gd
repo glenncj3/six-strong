@@ -3,24 +3,25 @@ extends Node
 # Orchestrates run flow and scene transitions
 # RunManager handles state; this class handles "what happens next"
 
-signal combat_completed(won: bool, is_run_over: bool)
+signal combat_completed(winner: int, is_run_over: bool)
 
 
-func complete_combat(won: bool, combat_data: Dictionary) -> void:
+func complete_combat(winner: int, combat_data: Dictionary) -> void:
 	"""
 	Complete a combat and handle all post-combat logic.
 	Emits combat_completed signal for the scene to handle navigation.
 
 	Args:
-		won: True if player won, false if lost
+		winner: 0 = player won, 1 = opponent won, 2 = draw
 		combat_data: The combat option dictionary
 	"""
-	if won:
+	if winner == GameConstants.TEAM_PLAYER:
 		RunManager.apply_combat_rewards(true, combat_data)
 		RunManager.add_win()
-	else:
+	elif winner == GameConstants.TEAM_OPPONENT:
 		RunManager.apply_combat_rewards(false, combat_data)
 		RunManager.add_loss()
+	# winner == WINNER_DRAW: no win, no loss, no reputation change
 
 	RunManager.save_run_state()
 
@@ -32,4 +33,4 @@ func complete_combat(won: bool, combat_data: Dictionary) -> void:
 	else:
 		RunManager.advance_round()
 
-	combat_completed.emit(won, run_over)
+	combat_completed.emit(winner, run_over)
