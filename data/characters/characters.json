@@ -181,6 +181,90 @@
         "mana": 5,
         "defendRate": 25
       }
+    },
+    {
+      "id": "char_generic_soldier",
+      "name": "Hired Soldier",
+      "description": "A reliable sword for hire",
+      "image_path": "res://assets/characters/generic_soldier.png",
+      "cost": 25,
+      "level_requirement": 1,
+      "is_generic": true,
+      "base_stats": {
+        "health": 85,
+        "mana": 5,
+        "defendRate": 10
+      }
+    },
+    {
+      "id": "char_generic_archer",
+      "name": "Hired Archer",
+      "description": "A mercenary bowman",
+      "image_path": "res://assets/characters/generic_archer.png",
+      "cost": 25,
+      "level_requirement": 1,
+      "is_generic": true,
+      "base_stats": {
+        "health": 70,
+        "mana": 5,
+        "defendRate": 5
+      }
+    },
+    {
+      "id": "char_generic_mage",
+      "name": "Hedge Wizard",
+      "description": "A wandering spellcaster",
+      "image_path": "res://assets/characters/generic_mage.png",
+      "cost": 30,
+      "level_requirement": 1,
+      "is_generic": true,
+      "base_stats": {
+        "health": 60,
+        "mana": 5,
+        "defendRate": 5
+      }
+    },
+    {
+      "id": "char_generic_healer",
+      "name": "Traveling Medic",
+      "description": "A healer seeking work",
+      "image_path": "res://assets/characters/generic_healer.png",
+      "cost": 30,
+      "level_requirement": 1,
+      "is_generic": true,
+      "base_stats": {
+        "health": 75,
+        "mana": 5,
+        "defendRate": 8
+      }
+    },
+    {
+      "id": "char_generic_guard",
+      "name": "Town Guard",
+      "description": "A sturdy defender looking for adventure",
+      "image_path": "res://assets/characters/generic_guard.png",
+      "cost": 25,
+      "level_requirement": 1,
+      "is_generic": true,
+      "base_stats": {
+        "health": 95,
+        "mana": 5,
+        "defendRate": 15
+      }
+    },
+    {
+      "id": "char_generic_scout",
+      "name": "Freelance Scout",
+      "description": "A quick and nimble explorer",
+      "image_path": "res://assets/characters/generic_scout.png",
+      "cost": 25,
+      "level_requirement": 1,
+      "is_generic": true,
+      "base_stats": {
+        "health": 65,
+        "mana": 5,
+        "defendRate": 12
+      }
     }
   ]
 }

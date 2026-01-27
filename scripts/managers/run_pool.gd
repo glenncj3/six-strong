@@ -63,6 +63,9 @@ static func from_legacies(legacies: Array, game_data = null):
 	var pool = script.new()
 	var gd = game_data if game_data != null else _get_game_data_autoload()
 
+	# Always add generic characters first (available regardless of legacies)
+	pool._add_generic_characters(gd)
+
 	for legacy in legacies:
 		pool._add_legacy_content(legacy, gd)
 		pool._source_legacy_ids.append(legacy.id)
@@ -81,6 +84,19 @@ static func _get_game_data_autoload():
 # =============================================================================
 # CONTENT ADDITION
 # =============================================================================
+
+func _add_generic_characters(game_data) -> void:
+	"""Add all generic characters to the pool (always available regardless of legacies)."""
+	if game_data == null:
+		return
+
+	var all_chars = game_data.get_all_characters()
+	for char_data in all_chars:
+		if char_data.get("is_generic", false):
+			var char_id = char_data.get("id", "")
+			var level_req = char_data.get("level_requirement", 1)
+			_character_pool[char_id] = level_req
+
 
 func _add_legacy_content(legacy: LegacyData, game_data) -> void:
 	"""Add all unlocked content from a legacy to the pool."""

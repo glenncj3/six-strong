@@ -455,6 +455,7 @@ func _gen_pick_characters(params: Dictionary) -> Array:
 	"""
 	Pick characters for character shop encounter.
 	Uses RunPool for filtering if available (DRY), otherwise falls back to all characters.
+	Excludes characters the player already has in their team.
 
 	Args:
 		params: { "count": int }
@@ -470,12 +471,26 @@ func _gen_pick_characters(params: Dictionary) -> Array:
 	if available_chars.is_empty():
 		return offerings
 
-	# Shuffle and pick
-	available_chars = available_chars.duplicate()
-	available_chars.shuffle()
+	# Get IDs of characters already in the team
+	var team_char_ids: Array[String] = []
+	for character in RunManager.get_team():
+		team_char_ids.append(character.base_character_id)
 
-	for i in range(mini(count, available_chars.size())):
-		var char_data = available_chars[i]
+	# Filter out characters already in team
+	var filtered_chars: Array = []
+	for char_data in available_chars:
+		var char_id = char_data.get("id", "")
+		if char_id not in team_char_ids:
+			filtered_chars.append(char_data)
+
+	if filtered_chars.is_empty():
+		return offerings
+
+	# Shuffle and pick
+	filtered_chars.shuffle()
+
+	for i in range(mini(count, filtered_chars.size())):
+		var char_data = filtered_chars[i]
 		offerings.append({
 			"offering_type": "character",
 			"id": char_data.get("id", ""),
@@ -494,6 +509,7 @@ func pick_characters_for_encounter(count: int, max_level: int = 999) -> Array:
 	"""
 	Public method to pick characters for any encounter that can reward characters.
 	Delegates to RunPool if available for proper pool filtering.
+	Excludes characters the player already has in their team.
 
 	Args:
 		count: Number of characters to pick
@@ -502,18 +518,29 @@ func pick_characters_for_encounter(count: int, max_level: int = 999) -> Array:
 	Returns:
 		Array of character data dictionaries
 	"""
+	# Get IDs of characters already in the team
+	var team_char_ids: Array[String] = []
+	for character in RunManager.get_team():
+		team_char_ids.append(character.base_character_id)
+
+	var candidates: Array = []
+
 	if _run_pool != null:
 		# Use RunPool for proper filtering (DRY)
-		var char_ids = _run_pool.pick_random(RunPoolScript.ContentType.CHARACTER, count, max_level)
-		var result: Array = []
+		var char_ids = _run_pool.pick_random(RunPoolScript.ContentType.CHARACTER, 999, max_level)
 		for char_id in char_ids:
-			var char_data = GameData.get_character_by_id(char_id)
-			if not char_data.is_empty():
-				result.append(char_data)
-		return result
+			if char_id not in team_char_ids:
+				var char_data = GameData.get_character_by_id(char_id)
+				if not char_data.is_empty():
+					candidates.append(char_data)
 	else:
 		# Fallback: filter all characters by level
 		var all_chars = GameData.get_all_characters()
 		var filtered = _filter_pool_by_level(all_chars, max_level)
-		filtered.shuffle()
-		return filtered.slice(0, mini(count, filtered.size()))
+		for char_data in filtered:
+			var char_id = char_data.get("id", "")
+			if char_id not in team_char_ids:
+				candidates.append(char_data)
+
+	candidates.shuffle()
+	return candidates.slice(0, mini(count, candidates.size()))
