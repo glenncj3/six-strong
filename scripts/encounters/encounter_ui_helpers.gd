@@ -104,6 +104,43 @@ static func create_result_label(parent: Control) -> Label:
 
 
 # =============================================================================
+# CALLBACK EXTRACTION (Code Quality Refactor)
+# =============================================================================
+
+static func extract_encounter_callbacks(context: Dictionary) -> Dictionary:
+	"""
+	Extract standard encounter callbacks from context dictionary.
+	Centralizes the callback extraction pattern used across encounter UIs.
+
+	Args:
+		context: The encounter context dictionary
+
+	Returns:
+		Dictionary with "on_complete", "on_gold_spend", "on_gold_reward" Callables
+	"""
+	return {
+		"on_complete": context.get("on_encounter_complete", Callable()),
+		"on_gold_spend": context.get("on_gold_spend", Callable()),
+		"on_gold_reward": context.get("on_gold_reward", Callable()),
+	}
+
+
+static func try_reward_gold(amount: int, on_gold_reward: Callable) -> void:
+	"""
+	Apply gold reward through callback or directly to RunManager.
+	Centralizes the gold reward pattern used across encounter UIs.
+
+	Args:
+		amount: Amount of gold to award
+		on_gold_reward: Optional callback for gold rewards
+	"""
+	if on_gold_reward.is_valid():
+		on_gold_reward.call(amount)
+	else:
+		RunManager.add_gold(amount)
+
+
+# =============================================================================
 # BUTTON SETUP
 # =============================================================================
 
@@ -191,10 +228,10 @@ static func highlight_selected_tile(
 # ELIGIBILITY CHECKING
 # =============================================================================
 
-static func filter_heal_eligible_characters(team: Array) -> Dictionary:
+static func get_all_team_members(team: Array) -> Dictionary:
 	"""
-	Return all team members as eligible for healing.
-	Players can heal any character, even at full health (overheal or just confirmation).
+	Return all team members as a standardized result dictionary.
+	Common helper for filter functions that include all characters.
 
 	Args:
 		team: Array of character instances
@@ -210,6 +247,20 @@ static func filter_heal_eligible_characters(team: Array) -> Dictionary:
 		characters.append(team[i])
 
 	return {"indices": indices, "characters": characters}
+
+
+static func filter_heal_eligible_characters(team: Array) -> Dictionary:
+	"""
+	Return all team members as eligible for healing.
+	Players can heal any character, even at full health (overheal or just confirmation).
+
+	Args:
+		team: Array of character instances
+
+	Returns:
+		Dictionary with "indices" (Array of team indices) and "characters" (Array of char instances)
+	"""
+	return get_all_team_members(team)
 
 
 # =============================================================================
@@ -261,11 +312,4 @@ static func filter_xp_eligible_characters(team: Array) -> Dictionary:
 	Returns:
 		Dictionary with "indices" (Array of team indices) and "characters" (Array of char instances)
 	"""
-	var indices: Array = []
-	var characters: Array = []
-
-	for i in range(team.size()):
-		indices.append(i)
-		characters.append(team[i])
-
-	return {"indices": indices, "characters": characters}
+	return get_all_team_members(team)

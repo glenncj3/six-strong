@@ -24,9 +24,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var tiles: Array = []
 
 	if skill_ids.is_empty():
-		vbox.add_child(UIHelpers.create_label("No skills available...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
-		if on_complete.is_valid():
-			on_complete.call()
+		EncounterUIHelpers.handle_empty_offerings(vbox, "No skills available...", on_complete)
 		return vbox
 
 	# Add instruction label

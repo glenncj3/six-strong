@@ -28,9 +28,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var tiles: Array = []
 
 	if offerings.is_empty():
-		vbox.add_child(UIHelpers.create_label("Nothing for sale...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
-		if on_complete.is_valid():
-			on_complete.call()
+		EncounterUIHelpers.handle_empty_offerings(vbox, "Nothing for sale...", on_complete)
 		return vbox
 
 	# Create horizontal container for offering tiles

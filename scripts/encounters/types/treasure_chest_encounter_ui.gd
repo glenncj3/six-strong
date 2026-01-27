@@ -25,9 +25,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var tiles: Array = []
 
 	if mystery_options.is_empty():
-		vbox.add_child(UIHelpers.create_label("The chest is empty...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
-		if on_complete.is_valid():
-			on_complete.call()
+		EncounterUIHelpers.handle_empty_offerings(vbox, "The chest is empty...", on_complete)
 		return vbox
 
 	# Instructions label
@@ -125,10 +123,7 @@ static func _show_no_item_fallback(container: Control, gold_bonus: int, on_compl
 	# Give extra gold as compensation
 	var fallback_gold = gold_bonus * 3
 
-	if on_gold_reward.is_valid():
-		on_gold_reward.call(fallback_gold)
-	else:
-		RunManager.add_gold(fallback_gold)
+	EncounterUIHelpers.try_reward_gold(fallback_gold, on_gold_reward)
 
 	# Show message
 	var msg = UIHelpers.create_label(
@@ -149,10 +144,7 @@ static func _acquire_item_and_complete(item_id: String, container: Control, gold
 	RunManager.add_item_to_inventory(item_id)
 
 	# Award gold bonus
-	if on_gold_reward.is_valid():
-		on_gold_reward.call(gold_bonus)
-	else:
-		RunManager.add_gold(gold_bonus)
+	EncounterUIHelpers.try_reward_gold(gold_bonus, on_gold_reward)
 
 	# Show what was acquired
 	var item_data = GameData.get_item_upgrade_by_id(item_id)

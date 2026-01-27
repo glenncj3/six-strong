@@ -20,9 +20,7 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	var tiles: Array = []
 
 	if heal_options.is_empty():
-		vbox.add_child(UIHelpers.create_label("No healing options available...", GameConstants.FONT_SIZE_BODY, GameConstants.COLOR_TEXT_LIGHT, true))
-		if on_complete.is_valid():
-			on_complete.call()
+		EncounterUIHelpers.handle_empty_offerings(vbox, "No healing options available...", on_complete)
 		return vbox
 
 	# Create horizontal container for heal option tiles
