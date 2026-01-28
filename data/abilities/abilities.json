@@ -8,6 +8,56 @@
       "targeting": "enemy_single",
       "damage_multiplier": 1.0,
       "cooldown_source": "speed"
+    },
+    {
+      "id": "cleave",
+      "name": "Cleave",
+      "description": "Deals damage to all enemies",
+      "type": "active",
+      "targeting": "enemy_all",
+      "damage_multiplier": 0.6,
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "heal",
+      "name": "Heal",
+      "description": "Heals a single ally",
+      "type": "active",
+      "targeting": "ally_single",
+      "heal_multiplier": 1.0,
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "group_heal",
+      "name": "Group Heal",
+      "description": "Heals all allies",
+      "type": "active",
+      "targeting": "ally_all",
+      "heal_multiplier": 0.5,
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "battle_cry",
+      "name": "Battle Cry",
+      "description": "Increases own damage",
+      "type": "active",
+      "targeting": "self_buff",
+      "buff_stat": "damage",
+      "buff_value": 5.0,
+      "buff_modifier_type": "flat",
+      "buff_duration_type": "cooldowns",
+      "buff_duration_value": 3,
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "barrage",
+      "name": "Barrage",
+      "description": "Hits 3 random enemies",
+      "type": "active",
+      "targeting": "enemy_random_multi",
+      "damage_multiplier": 0.5,
+      "hit_count": 3,
+      "cooldown_source": "speed"
     }
   ]
 }

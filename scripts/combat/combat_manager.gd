@@ -21,6 +21,7 @@ func get_state() -> CombatState:
 
 
 func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid) -> void:
+	AbilityExecutor.register_defaults()
 	_state = CombatState.new()
 	_state.board = CombatBoard.new()
 	_state.elapsed_time = 0.0
@@ -100,37 +101,24 @@ func _execute_character_action(character: CombatCharacter) -> void:
 
 func _execute_ability(character: CombatCharacter, ability: Dictionary) -> void:
 	var targeting = ability.get("targeting", "enemy_single")
-	var multiplier = ability.get("damage_multiplier", 1.0)
-
-	if targeting == "enemy_single":
-		_execute_damage_ability(character, ability, multiplier)
-
-
-func _execute_damage_ability(character: CombatCharacter, ability: Dictionary, multiplier: float) -> void:
-	if not character.has_damage():
-		return
-	var target = CombatTargeting.select_enemy_target(character, _state.board)
-	if target != null:
-		_execute_damage(character, target, character.damage * multiplier)
+	var context = {
+		"board": _state.board,
+		"deal_damage": _execute_damage,
+		"heal": heal_character,
+		"apply_effect": apply_effect,
+	}
+	AbilityExecutor.execute(targeting, character, ability, context)
 
 
 func _execute_damage(source: CombatCharacter, target: CombatCharacter, base_damage: float) -> void:
-	# Block check
-	if target.defend_rate > 0:
-		if randf() < target.defend_rate:
-			damage_blocked.emit(source, target)
-			return
+	var result = DamageResolver.resolve(source, target, base_damage)
 
-	# Crit check
-	var final_damage = base_damage
-	var is_crit = false
-	if source.crit_chance > 0:
-		if randf() < source.crit_chance:
-			final_damage = base_damage * GameConstants.CRIT_MULTIPLIER
-			is_crit = true
+	if result.blocked:
+		damage_blocked.emit(source, target)
+		return
 
-	_apply_damage(target, final_damage, source)
-	damage_dealt.emit(source, target, final_damage, is_crit)
+	_apply_damage(target, result.damage, source)
+	damage_dealt.emit(source, target, result.damage, result.is_crit)
 
 
 func _apply_damage(target: CombatCharacter, amount: float, source: CombatCharacter) -> void:
