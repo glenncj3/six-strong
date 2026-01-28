@@ -175,10 +175,10 @@ func test_ally_single_heals():
 	var board = _make_board_3v1()
 	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
 	source.health = 50.0
-	var ability = {"targeting": "ally_single", "heal_multiplier": 1.0}
+	var ability = {"targeting": "ally_single", "heal_value": 20.0}
 	AbilityExecutor.execute("ally_single", source, ability, _make_context(board))
 	assert_eq(_heal_log.size(), 1, "one heal event")
-	assert_eq(_heal_log[0]["amount"], 10.0, "heal amount = damage * multiplier")
+	assert_eq(_heal_log[0]["amount"], 20.0, "heal amount = heal_value")
 
 
 func test_ally_all_heals_all():
@@ -190,10 +190,10 @@ func test_ally_all_heals_all():
 		var ch = board.get_character_at(GameConstants.TEAM_PLAYER, 0, i)
 		ch.health = 50.0
 	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	var ability = {"targeting": "ally_all", "heal_multiplier": 0.5}
+	var ability = {"targeting": "ally_all", "heal_value": 10.0}
 	AbilityExecutor.execute("ally_all", source, ability, _make_context(board))
 	assert_eq(_heal_log.size(), 3, "healed all 3 allies")
-	assert_eq(_heal_log[0]["amount"], 5.0, "heal amount = 10 * 0.5")
+	assert_eq(_heal_log[0]["amount"], 10.0, "heal amount = heal_value")
 
 
 func test_self_buff_applies_effect():

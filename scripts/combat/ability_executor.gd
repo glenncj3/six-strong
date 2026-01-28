@@ -3,6 +3,7 @@ extends RefCounted
 ## Strategy registry for ability execution. Maps targeting types to callable strategies.
 
 static var _strategies: Dictionary = {}
+static var _registered: bool = false
 
 
 static func register(targeting: String, strategy: Callable) -> void:
@@ -21,12 +22,24 @@ static func execute(targeting: String, source: CombatCharacter, ability: Diction
 
 
 static func register_defaults() -> void:
+	if _registered:
+		return
+	_registered = true
 	register("enemy_single", _strategy_enemy_single)
 	register("enemy_all", _strategy_enemy_all)
 	register("ally_single", _strategy_ally_single)
 	register("ally_all", _strategy_ally_all)
 	register("self_buff", _strategy_self_buff)
 	register("enemy_random_multi", _strategy_enemy_random_multi)
+
+
+static func _get_enemy_targets(source: CombatCharacter, board: CombatBoard) -> Array:
+	var enemy_team = GameConstants.TEAM_OPPONENT if source.team == GameConstants.TEAM_PLAYER else GameConstants.TEAM_PLAYER
+	return board.get_living_characters_on_team(enemy_team)
+
+
+static func _get_ally_targets(source: CombatCharacter, board: CombatBoard) -> Array:
+	return board.get_living_characters_on_team(source.team)
 
 
 static func _strategy_enemy_single(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
@@ -46,30 +59,30 @@ static func _strategy_enemy_all(source: CombatCharacter, ability: Dictionary, co
 	var multiplier = ability.get("damage_multiplier", 1.0)
 	var board: CombatBoard = context["board"]
 	var deal_damage: Callable = context["deal_damage"]
-	var enemy_team = GameConstants.TEAM_OPPONENT if source.team == GameConstants.TEAM_PLAYER else GameConstants.TEAM_PLAYER
-	var targets = board.get_living_characters_on_team(enemy_team)
+	var targets = _get_enemy_targets(source, board)
 	for target in targets:
 		deal_damage.call(source, target, source.damage * multiplier)
 
 
 static func _strategy_ally_single(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
-	var heal_multiplier = ability.get("heal_multiplier", 1.0)
+	var heal_value = ability.get("heal_value", 0.0)
 	var board: CombatBoard = context["board"]
 	var heal: Callable = context["heal"]
 	var target = CombatTargeting.select_ally_target(source, board, true)
 	if target != null:
-		heal.call(target, source.damage * heal_multiplier, source)
+		heal.call(target, heal_value, source)
 
 
 static func _strategy_ally_all(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
-	var heal_multiplier = ability.get("heal_multiplier", 1.0)
+	var heal_value = ability.get("heal_value", 0.0)
 	var board: CombatBoard = context["board"]
 	var heal: Callable = context["heal"]
-	var allies = board.get_living_characters_on_team(source.team)
+	var allies = _get_ally_targets(source, board)
 	for ally in allies:
-		heal.call(ally, source.damage * heal_multiplier, source)
+		heal.call(ally, heal_value, source)
 
 
+# Repeated casts intentionally stack, creating multiple effect instances.
 static func _strategy_self_buff(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
 	var apply_effect: Callable = context["apply_effect"]
 	var stat = ability.get("buff_stat", "damage")
@@ -88,9 +101,8 @@ static func _strategy_enemy_random_multi(source: CombatCharacter, ability: Dicti
 	var hit_count = ability.get("hit_count", 3)
 	var board: CombatBoard = context["board"]
 	var deal_damage: Callable = context["deal_damage"]
-	var enemy_team = GameConstants.TEAM_OPPONENT if source.team == GameConstants.TEAM_PLAYER else GameConstants.TEAM_PLAYER
 	for i in range(hit_count):
-		var targets = board.get_living_characters_on_team(enemy_team)
+		var targets = _get_enemy_targets(source, board)
 		if targets.is_empty():
 			break
 		var target = targets[randi() % targets.size()]

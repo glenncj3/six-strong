@@ -24,7 +24,7 @@
       "description": "Heals a single ally",
       "type": "active",
       "targeting": "ally_single",
-      "heal_multiplier": 1.0,
+      "heal_value": 20.0,
       "cooldown_source": "speed"
     },
     {
@@ -33,7 +33,7 @@
       "description": "Heals all allies",
       "type": "active",
       "targeting": "ally_all",
-      "heal_multiplier": 0.5,
+      "heal_value": 10.0,
       "cooldown_source": "speed"
     },
     {
