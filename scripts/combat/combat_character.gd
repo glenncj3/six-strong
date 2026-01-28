@@ -41,15 +41,13 @@ var cooldown_remaining: float = 0.0
 var effects: Array = []  # Array of CombatEffect
 
 
-static func create_from_character(source: CharacterInstance, p_team: int, p_row: int, p_col: int) -> CombatCharacter:
+static func create_from_character(source: CharacterInstance, p_team: int, p_row: int, p_col: int, p_ability_id: String = "basic_attack") -> CombatCharacter:
 	_next_id += 1
 	var cc = CombatCharacter.new()
 	cc.id = "cc_%d" % _next_id
 	cc.source_character_id = source.base_character_id
 	cc.character_name = source.get_character_name()
-
-	var char_data = GameData.get_character_by_id(source.base_character_id)
-	cc.ability_id = char_data.get("ability", "basic_attack")
+	cc.ability_id = p_ability_id
 
 	cc.base_max_health = float(source.max_health)
 	cc.max_health = cc.base_max_health

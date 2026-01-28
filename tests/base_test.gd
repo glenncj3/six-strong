@@ -13,10 +13,30 @@ func _init():
 
 
 func _run_all_tests():
+	_bootstrap_autoloads()
 	_print_header()
 	_run_tests()
 	_print_results()
 	quit(tests_failed)
+
+
+func _bootstrap_autoloads() -> void:
+	# In --script mode, autoloads aren't registered. Manually instantiate
+	# any autoloads that test code depends on.
+	var autoloads: Array[Dictionary] = [
+		{"name": "GameData", "path": "res://autoloads/game_data.gd"},
+	]
+	for entry in autoloads:
+		if root.has_node(entry["name"]):
+			continue
+		var script = load(entry["path"])
+		if script == null:
+			push_warning("BaseTest: Could not load autoload script: %s" % entry["path"])
+			continue
+		var node = Node.new()
+		node.set_script(script)
+		node.name = entry["name"]
+		root.add_child(node)
 
 
 func _print_header():

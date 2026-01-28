@@ -20,6 +20,33 @@ func get_state() -> CombatState:
 	return _state
 
 
+func _get_game_data() -> Node:
+	var tree = get_tree()
+	if tree == null:
+		tree = Engine.get_main_loop() as SceneTree
+	if tree and tree.root:
+		var gd_node = tree.root.get_node_or_null("GameData")
+		if gd_node:
+			return gd_node
+	push_warning("CombatManager: GameData autoload not available")
+	return null
+
+
+func _lookup_ability_id(character_id: String) -> String:
+	var gd = _get_game_data()
+	if gd == null:
+		return "basic_attack"
+	var char_data: Dictionary = gd.get_character_by_id(character_id)
+	return char_data.get("ability", "basic_attack")
+
+
+func _lookup_ability(ability_id: String) -> Dictionary:
+	var gd = _get_game_data()
+	if gd == null:
+		return {}
+	return gd.get_ability(ability_id)
+
+
 func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid) -> void:
 	AbilityExecutor.register_defaults()
 	_state = CombatState.new()
@@ -33,7 +60,8 @@ func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid)
 		for col in range(GameConstants.GRID_COLS):
 			var ch = player_grid.get_character_at(row, col)
 			if ch != null:
-				var cc = CombatCharacter.create_from_character(ch, GameConstants.TEAM_PLAYER, row, col)
+				var ability_id = _lookup_ability_id(ch.base_character_id)
+				var cc = CombatCharacter.create_from_character(ch, GameConstants.TEAM_PLAYER, row, col, ability_id)
 				_state.board.set_character_at(GameConstants.TEAM_PLAYER, row, col, cc)
 
 	# Clone opponent characters
@@ -41,7 +69,8 @@ func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid)
 		for col in range(GameConstants.GRID_COLS):
 			var ch = opponent_grid.get_character_at(row, col)
 			if ch != null:
-				var cc = CombatCharacter.create_from_character(ch, GameConstants.TEAM_OPPONENT, row, col)
+				var ability_id = _lookup_ability_id(ch.base_character_id)
+				var cc = CombatCharacter.create_from_character(ch, GameConstants.TEAM_OPPONENT, row, col, ability_id)
 				_state.board.set_character_at(GameConstants.TEAM_OPPONENT, row, col, cc)
 
 	# Apply combat-start effects from items/skills
@@ -92,7 +121,7 @@ func _execute_character_action(character: CombatCharacter) -> void:
 	# Process on_cooldown triggered effects
 	_process_triggered_effects(character, "on_cooldown", {character = character})
 
-	var ability = GameData.get_ability(character.ability_id)
+	var ability = _lookup_ability(character.ability_id)
 	if ability.is_empty():
 		return
 
