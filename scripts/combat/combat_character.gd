@@ -9,6 +9,7 @@ static var _next_id: int = 0
 var id: String = ""
 var source_character_id: String = ""
 var character_name: String = ""
+var ability_id: String = ""
 
 # Health
 var health: float = 0.0
@@ -46,6 +47,9 @@ static func create_from_character(source: CharacterInstance, p_team: int, p_row:
 	cc.id = "cc_%d" % _next_id
 	cc.source_character_id = source.base_character_id
 	cc.character_name = source.get_character_name()
+
+	var char_data = GameData.get_character_by_id(source.base_character_id)
+	cc.ability_id = char_data.get("ability", "basic_attack")
 
 	cc.base_max_health = float(source.max_health)
 	cc.max_health = cc.base_max_health

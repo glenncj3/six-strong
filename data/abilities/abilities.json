@@ -1,0 +1,13 @@
+{
+  "abilities": [
+    {
+      "id": "basic_attack",
+      "name": "Basic Attack",
+      "description": "Deals damage to a single enemy",
+      "type": "active",
+      "targeting": "enemy_single",
+      "damage_multiplier": 1.0,
+      "cooldown_source": "speed"
+    }
+  ]
+}

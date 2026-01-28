@@ -6,7 +6,7 @@ const STAT_KEYS := ["health", "mana", "defend_rate", "speed", "damage", "crit_ch
 const TOP_KEYS := ["id", "name", "description", "image_path", "cost", "level_requirement"]
 const OPTIONAL_KEYS := ["is_generic", "display_color"]
 const ALL_CSV_COLUMNS := ["id", "name", "description", "image_path", "cost", "level_requirement",
-	"health", "mana", "defend_rate", "speed", "damage", "crit_chance", "is_generic", "display_color", "tags"]
+	"health", "mana", "defend_rate", "speed", "damage", "crit_chance", "is_generic", "display_color", "tags", "ability"]
 
 var file_dialog: FileDialog
 var filepath_label: Label
@@ -173,6 +173,12 @@ func _row_to_character(row: Dictionary) -> Dictionary:
 		if key in row and not row[key].is_empty():
 			character[key] = _convert_value(key, row[key])
 
+	# Ability
+	if "ability" in row and not row["ability"].is_empty():
+		character["ability"] = row["ability"]
+	else:
+		character["ability"] = "basic_attack"
+
 	# Tags (pipe-separated in CSV, e.g. "fire|lightning")
 	if "tags" in row and not row["tags"].is_empty():
 		var raw_tags = row["tags"].split("|")
@@ -280,6 +286,8 @@ func _write_csv(path: String, characters: Array) -> void:
 			fields.append(_csv_escape("|".join(tags_val)))
 		else:
 			fields.append("")
+		# Ability
+		fields.append(_csv_escape(str(c.get("ability", "basic_attack"))))
 		file.store_line(",".join(fields))
 
 	file.close()

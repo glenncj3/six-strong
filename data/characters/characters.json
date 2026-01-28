@@ -7,6 +7,7 @@
       "image_path": "res://assets/characters/knight.png",
       "cost": 40,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["earth", "holy"],
       "base_stats": {
         "health": 100,
@@ -24,6 +25,7 @@
       "image_path": "res://assets/characters/mage.png",
       "cost": 45,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["fire", "lightning"],
       "base_stats": {
         "health": 70,
@@ -41,6 +43,7 @@
       "image_path": "res://assets/characters/rogue.png",
       "cost": 40,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["shadow"],
       "base_stats": {
         "health": 80,
@@ -58,6 +61,7 @@
       "image_path": "res://assets/characters/cleric.png",
       "cost": 50,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["holy"],
       "base_stats": {
         "health": 90,
@@ -75,6 +79,7 @@
       "image_path": "res://assets/characters/ranger.png",
       "cost": 45,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["earth"],
       "base_stats": {
         "health": 85,
@@ -92,6 +97,7 @@
       "image_path": "res://assets/characters/berserker.png",
       "cost": 55,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["fire"],
       "base_stats": {
         "health": 110,
@@ -109,6 +115,7 @@
       "image_path": "res://assets/characters/paladin.png",
       "cost": 60,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["holy", "earth"],
       "base_stats": {
         "health": 105,
@@ -126,6 +133,7 @@
       "image_path": "res://assets/characters/necromancer.png",
       "cost": 65,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["shadow"],
       "base_stats": {
         "health": 75,
@@ -143,6 +151,7 @@
       "image_path": "res://assets/characters/monk.png",
       "cost": 50,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["holy", "lightning"],
       "base_stats": {
         "health": 85,
@@ -160,6 +169,7 @@
       "image_path": "res://assets/characters/assassin.png",
       "cost": 60,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["shadow"],
       "base_stats": {
         "health": 65,
@@ -177,6 +187,7 @@
       "image_path": "res://assets/characters/warden.png",
       "cost": 50,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["earth"],
       "base_stats": {
         "health": 95,
@@ -194,6 +205,7 @@
       "image_path": "res://assets/characters/beastmaster.png",
       "cost": 55,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["earth", "fire"],
       "base_stats": {
         "health": 80,
@@ -211,6 +223,7 @@
       "image_path": "res://assets/characters/warchief.png",
       "cost": 55,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["fire", "earth"],
       "base_stats": {
         "health": 105,
@@ -228,6 +241,7 @@
       "image_path": "res://assets/characters/shieldbearer.png",
       "cost": 45,
       "level_requirement": 1,
+      "ability": "basic_attack",
       "tags": ["earth"],
       "base_stats": {
         "health": 120,
@@ -247,6 +261,7 @@
       "cost": 25,
       "level_requirement": 1,
       "is_generic": true,
+      "ability": "basic_attack",
       "tags": [],
       "base_stats": {
         "health": 85,
@@ -266,6 +281,7 @@
       "cost": 25,
       "level_requirement": 1,
       "is_generic": true,
+      "ability": "basic_attack",
       "tags": [],
       "base_stats": {
         "health": 70,
@@ -285,6 +301,7 @@
       "cost": 30,
       "level_requirement": 1,
       "is_generic": true,
+      "ability": "basic_attack",
       "tags": [],
       "base_stats": {
         "health": 60,
@@ -304,6 +321,7 @@
       "cost": 30,
       "level_requirement": 1,
       "is_generic": true,
+      "ability": "basic_attack",
       "tags": [],
       "base_stats": {
         "health": 75,
@@ -323,6 +341,7 @@
       "cost": 25,
       "level_requirement": 1,
       "is_generic": true,
+      "ability": "basic_attack",
       "tags": [],
       "base_stats": {
         "health": 95,
@@ -342,6 +361,7 @@
       "cost": 25,
       "level_requirement": 1,
       "is_generic": true,
+      "ability": "basic_attack",
       "tags": [],
       "base_stats": {
         "health": 65,

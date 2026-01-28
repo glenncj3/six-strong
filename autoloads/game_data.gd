@@ -10,6 +10,7 @@ var items: Dictionary = {}  # id -> item_data
 var item_upgrades: Dictionary = {}  # id -> item_upgrade_data
 var skills: Dictionary = {}  # id -> skill_data
 var encounter_types: Array = []  # Array of encounter type definitions
+var abilities: Dictionary = {}  # id -> ability_data
 var legacies: Dictionary = {}  # id -> legacy_data (Phase 0: Legacy System)
 
 # Data file paths
@@ -18,6 +19,7 @@ const ITEMS_PATH = "res://data/items/items.json"
 const ITEM_UPGRADES_PATH = "res://data/items/item_upgrades.json"
 const SKILLS_PATH = "res://data/skills/skills.json"
 const ENCOUNTERS_PATH = "res://data/encounters/encounter_types.json"
+const ABILITIES_PATH = "res://data/abilities/abilities.json"
 const LEGACIES_PATH = "res://data/legacies/legacies.json"
 
 
@@ -32,6 +34,7 @@ func load_all_data() -> void:
 	_load_item_upgrades()
 	_load_skills()
 	_load_encounter_types()
+	_load_abilities()
 	_load_legacies()
 
 
@@ -71,6 +74,10 @@ func _load_encounter_types() -> void:
 	var data = JsonPersistence.load_json(ENCOUNTERS_PATH)
 	if data and data.has("encounter_types"):
 		encounter_types = data["encounter_types"]
+
+
+func _load_abilities() -> void:
+	_load_data_collection(ABILITIES_PATH, "abilities", abilities)
 
 
 func _load_legacies() -> void:
@@ -129,6 +136,9 @@ func get_all_skills() -> Array:
 
 func has_skill(id: String) -> bool:
 	return skills.has(id)
+
+func get_ability(id: String) -> Dictionary:
+	return _get_from(abilities, id, "Ability")
 
 func get_encounter_types() -> Array:
 	return encounter_types

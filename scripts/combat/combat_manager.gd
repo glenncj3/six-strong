@@ -91,10 +91,27 @@ func _execute_character_action(character: CombatCharacter) -> void:
 	# Process on_cooldown triggered effects
 	_process_triggered_effects(character, "on_cooldown", {character = character})
 
-	if character.has_damage():
-		var target = CombatTargeting.select_enemy_target(character, _state.board)
-		if target != null:
-			_execute_damage(character, target, character.damage)
+	var ability = GameData.get_ability(character.ability_id)
+	if ability.is_empty():
+		return
+
+	_execute_ability(character, ability)
+
+
+func _execute_ability(character: CombatCharacter, ability: Dictionary) -> void:
+	var targeting = ability.get("targeting", "enemy_single")
+	var multiplier = ability.get("damage_multiplier", 1.0)
+
+	if targeting == "enemy_single":
+		_execute_damage_ability(character, ability, multiplier)
+
+
+func _execute_damage_ability(character: CombatCharacter, ability: Dictionary, multiplier: float) -> void:
+	if not character.has_damage():
+		return
+	var target = CombatTargeting.select_enemy_target(character, _state.board)
+	if target != null:
+		_execute_damage(character, target, character.damage * multiplier)
 
 
 func _execute_damage(source: CombatCharacter, target: CombatCharacter, base_damage: float) -> void:
