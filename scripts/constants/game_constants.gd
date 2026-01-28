@@ -409,7 +409,7 @@ const SKILL_STAT_DISPLAY_NAMES := {
 	SKILL_STAT_BONUS_MANA: "+MP"
 }
 
-# Element types (synergy flags for skills and items)
+# Element types (synergy flags for characters, skills, and items)
 const ELEMENT_TYPE_FIRE := "fire"
 const ELEMENT_TYPE_ICE := "ice"
 const ELEMENT_TYPE_LIGHTNING := "lightning"
