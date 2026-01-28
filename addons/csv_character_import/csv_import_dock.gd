@@ -2,11 +2,15 @@
 extends Control
 
 const JSON_PATH := "res://data/characters/characters.json"
-const STAT_KEYS := ["health", "mana", "defend_rate", "speed", "damage", "crit_chance"]
+const STAT_KEYS := ["health", "mana", "defend_rate", "speed", "damage", "crit_chance",
+	"heal_value", "shield_value", "burn_value", "poison_value", "haste_value", "slow_value", "stun_value",
+	"multistrike_value"]
 const TOP_KEYS := ["id", "name", "description", "image_path", "cost", "level_requirement"]
 const OPTIONAL_KEYS := ["is_generic", "display_color"]
 const ALL_CSV_COLUMNS := ["id", "name", "description", "image_path", "cost", "level_requirement",
-	"health", "mana", "defend_rate", "speed", "damage", "crit_chance", "is_generic", "display_color", "tags", "ability"]
+	"health", "mana", "defend_rate", "speed", "damage", "crit_chance",
+	"heal_value", "shield_value", "burn_value", "poison_value", "haste_value", "slow_value", "stun_value",
+	"multistrike_value", "is_generic", "display_color", "tags", "ability"]
 
 var file_dialog: FileDialog
 var filepath_label: Label
@@ -202,9 +206,10 @@ func _row_to_character(row: Dictionary) -> Dictionary:
 	return character
 
 func _convert_value(key: String, value: String):
-	if key in ["cost", "level_requirement", "health", "mana"]:
+	if key in ["cost", "level_requirement", "health", "mana", "multistrike_value"]:
 		return int(value) if not value.is_empty() else 0
-	if key in ["defend_rate", "speed", "damage", "crit_chance"]:
+	if key in ["defend_rate", "speed", "damage", "crit_chance",
+		"heal_value", "shield_value", "burn_value", "poison_value", "haste_value", "slow_value", "stun_value"]:
 		return float(value) if not value.is_empty() else 0.0
 	if key == "is_generic":
 		return value.to_lower() == "true"

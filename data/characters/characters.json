@@ -15,7 +15,15 @@
         "defend_rate": 0.15,
         "speed": 3.0,
         "damage": 15,
-        "crit_chance": 0.0
+        "crit_chance": 0.0,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -33,7 +41,15 @@
         "defend_rate": 0.05,
         "speed": 4.0,
         "damage": 25,
-        "crit_chance": 0.05
+        "crit_chance": 0.05,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -51,7 +67,15 @@
         "defend_rate": 0.10,
         "speed": 2.0,
         "damage": 12,
-        "crit_chance": 0.15
+        "crit_chance": 0.15,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -69,7 +93,15 @@
         "defend_rate": 0.10,
         "speed": 3.5,
         "damage": 8,
-        "crit_chance": 0.0
+        "crit_chance": 0.0,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -87,7 +119,15 @@
         "defend_rate": 0.08,
         "speed": 2.5,
         "damage": 14,
-        "crit_chance": 0.10
+        "crit_chance": 0.10,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -105,7 +145,15 @@
         "defend_rate": 0.05,
         "speed": 2.0,
         "damage": 20,
-        "crit_chance": 0.10
+        "crit_chance": 0.10,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -123,7 +171,15 @@
         "defend_rate": 0.20,
         "speed": 3.5,
         "damage": 12,
-        "crit_chance": 0.0
+        "crit_chance": 0.0,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -141,7 +197,15 @@
         "defend_rate": 0.05,
         "speed": 4.5,
         "damage": 22,
-        "crit_chance": 0.05
+        "crit_chance": 0.05,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -159,7 +223,15 @@
         "defend_rate": 0.15,
         "speed": 2.5,
         "damage": 11,
-        "crit_chance": 0.05
+        "crit_chance": 0.05,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -177,7 +249,15 @@
         "defend_rate": 0.12,
         "speed": 1.5,
         "damage": 18,
-        "crit_chance": 0.25
+        "crit_chance": 0.25,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -195,7 +275,15 @@
         "defend_rate": 0.12,
         "speed": 3.0,
         "damage": 10,
-        "crit_chance": 0.0
+        "crit_chance": 0.0,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -213,7 +301,15 @@
         "defend_rate": 0.08,
         "speed": 2.5,
         "damage": 16,
-        "crit_chance": 0.05
+        "crit_chance": 0.05,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -231,7 +327,15 @@
         "defend_rate": 0.10,
         "speed": 3.0,
         "damage": 14,
-        "crit_chance": 0.05
+        "crit_chance": 0.05,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -249,7 +353,15 @@
         "defend_rate": 0.25,
         "speed": 4.0,
         "damage": 6,
-        "crit_chance": 0.0
+        "crit_chance": 0.0,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -269,7 +381,15 @@
         "defend_rate": 0.10,
         "speed": 3.0,
         "damage": 12,
-        "crit_chance": 0.0
+        "crit_chance": 0.0,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -289,7 +409,15 @@
         "defend_rate": 0.05,
         "speed": 2.5,
         "damage": 14,
-        "crit_chance": 0.05
+        "crit_chance": 0.05,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -309,7 +437,15 @@
         "defend_rate": 0.05,
         "speed": 4.0,
         "damage": 18,
-        "crit_chance": 0.0
+        "crit_chance": 0.0,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -329,7 +465,15 @@
         "defend_rate": 0.08,
         "speed": 3.5,
         "damage": 6,
-        "crit_chance": 0.0
+        "crit_chance": 0.0,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -349,7 +493,15 @@
         "defend_rate": 0.15,
         "speed": 3.5,
         "damage": 8,
-        "crit_chance": 0.0
+        "crit_chance": 0.0,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     },
     {
@@ -369,7 +521,15 @@
         "defend_rate": 0.12,
         "speed": 2.0,
         "damage": 10,
-        "crit_chance": 0.10
+        "crit_chance": 0.10,
+        "heal_value": 0.0,
+        "shield_value": 0.0,
+        "burn_value": 0.0,
+        "poison_value": 0.0,
+        "haste_value": 0.0,
+        "slow_value": 0.0,
+        "stun_value": 0.0,
+        "multistrike_value": 0
       }
     }
   ]
