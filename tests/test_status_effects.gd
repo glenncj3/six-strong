@@ -13,6 +13,7 @@ func _run_tests():
 	section("Poison Template")
 	test_poison_creation_from_template()
 	test_poison_merge_adds_stacks()
+	test_poison_merge_from_multiple_sources()
 	test_poison_tick_deals_damage()
 	test_poison_tick_decrements_stacks()
 	test_poison_removed_at_zero_stacks()
@@ -36,6 +37,7 @@ func _run_tests():
 	test_shield_removed_at_zero()
 	test_shield_does_not_absorb_poison()
 	test_shield_stacks_merge()
+	test_shield_merge_from_multiple_sources()
 	test_self_shield_ability_integration()
 	test_ally_shield_ability_integration()
 
@@ -130,6 +132,30 @@ func test_poison_merge_adds_stacks():
 
 	assert_eq(target.effects.size(), 1, "merged into 1 effect")
 	assert_eq(target.get_stacks("poison"), 7, "stacks merged: 3 + 4 = 7")
+
+
+func test_poison_merge_from_multiple_sources():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	manager.initialize_combat(pg, eg)
+
+	var target = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var template = _get_poison_template()
+
+	# Two different sources apply poison
+	var e1 = StatusEffectFactory.create_from_template(template, "source_A", {"stacks": 3})
+	var e2 = StatusEffectFactory.create_from_template(template, "source_B", {"stacks": 5})
+	manager.apply_effect(target, e1)
+	manager.apply_effect(target, e2)
+
+	assert_eq(target.effects.filter(func(e): return e.effect_id == "poison").size(), 1, "merged into single poison effect")
+	assert_eq(target.get_stacks("poison"), 8, "stacks additive across sources: 3 + 5 = 8")
+
+	# Verify the merged poison ticks correctly: 8 damage on first tick
+	_simulate_time(manager, 1.5)
+	assert_true(abs(target.health - 992.0) < 0.01, "8 damage from 8 stacks on first tick")
+	assert_eq(target.get_stacks("poison"), 7, "stacks decremented to 7 after tick")
 
 
 func test_poison_tick_deals_damage():
@@ -405,6 +431,31 @@ func test_shield_stacks_merge():
 
 	assert_eq(ch.effects.size(), 1, "merged into 1 effect")
 	assert_eq(ch.get_stacks("shield"), 25, "stacks merged: 10 + 15 = 25")
+
+
+func test_shield_merge_from_multiple_sources():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	var eg = _make_grid_with_one(_make_source(1000, 1.0, 10.0))
+	manager.initialize_combat(pg, eg)
+
+	var ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var template = _get_shield_template()
+
+	# Two different sources apply shield
+	var s1 = StatusEffectFactory.create_from_template(template, "source_A", {"stacks": 8})
+	var s2 = StatusEffectFactory.create_from_template(template, "source_B", {"stacks": 12})
+	manager.apply_effect(ch, s1)
+	manager.apply_effect(ch, s2)
+
+	assert_eq(ch.effects.filter(func(e): return e.effect_id == "shield").size(), 1, "merged into single shield effect")
+	assert_eq(ch.get_stacks("shield"), 20, "stacks additive across sources: 8 + 12 = 20")
+
+	# Verify shield absorbs correctly after merging from multiple sources
+	_simulate_time(manager, 1.5)
+	# Enemy has 10 damage, attacks once. Shield absorbs 10, leaving 10 stacks.
+	assert_eq(ch.get_stacks("shield"), 10, "shield absorbed 10 damage, 10 stacks remain")
+	assert_true(abs(ch.health - 1000.0) < 0.01, "no health lost while shield holds")
 
 
 func test_self_shield_ability_integration():
