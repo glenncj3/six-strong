@@ -12,6 +12,9 @@ var all_errors: Array[String] = []
 
 
 func _ready() -> void:
+	# Reset account to ensure fresh state with current data
+	PlayerAccount.reset_account()
+
 	print("")
 	print("============================================================")
 	print("SIX STRONG - COMPREHENSIVE TEST SUITE")
@@ -1130,7 +1133,7 @@ func _run_player_account_persistence():
 	PlayerAccount.add_reroll_token()
 	_assert_eq(PlayerAccount.get_reroll_tokens(), tokens_before + 1, "Reroll token added")
 
-	var use_result = PlayerAccount.use_reroll_token()
+	var use_result = PlayerAccount.spend_reroll_token()
 	_assert_true(use_result, "Reroll token used successfully")
 	_assert_eq(PlayerAccount.get_reroll_tokens(), tokens_before, "Token count restored")
 

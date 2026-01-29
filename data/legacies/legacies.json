@@ -6,13 +6,25 @@
       "description": "The Wardens of the North, bound by honor and duty",
       "image_path": "res://assets/sprites/legacies/house_stark.png",
       "income": 15,
-      "starting_character_options": [],
+      "starting_character_options": ["ST01"],
       "starting_item_options": [],
       "character_pool": ["ST01", "ST02", "ST03", "ST04", "ST05", "ST06", "ST07", "ST08", "ST09", "ST10"],
       "item_pool": [],
       "skill_pool": [],
       "unique_encounters": [],
-      "prestige_rewards": []
+      "prestige_rewards": [
+        {
+          "prestige": 1,
+          "unlocks": {
+            "starting_characters": ["ST01"],
+            "starting_items": [],
+            "characters": ["ST01", "ST02", "ST03", "ST04", "ST05", "ST06", "ST07", "ST08", "ST09", "ST10"],
+            "items": [],
+            "skills": [],
+            "encounters": []
+          }
+        }
+      ]
     },
     {
       "id": "legacy_house_lannister",
@@ -20,13 +32,25 @@
       "description": "A Lannister always pays his debts",
       "image_path": "res://assets/sprites/legacies/house_lannister.png",
       "income": 20,
-      "starting_character_options": [],
+      "starting_character_options": ["LA01"],
       "starting_item_options": [],
       "character_pool": ["LA01", "LA02", "LA03", "LA04", "LA05", "LA06", "LA07", "LA08", "LA09", "LA10"],
       "item_pool": [],
       "skill_pool": [],
       "unique_encounters": [],
-      "prestige_rewards": []
+      "prestige_rewards": [
+        {
+          "prestige": 1,
+          "unlocks": {
+            "starting_characters": ["LA01"],
+            "starting_items": [],
+            "characters": ["LA01", "LA02", "LA03", "LA04", "LA05", "LA06", "LA07", "LA08", "LA09", "LA10"],
+            "items": [],
+            "skills": [],
+            "encounters": []
+          }
+        }
+      ]
     },
     {
       "id": "legacy_house_targaryen",
@@ -34,13 +58,25 @@
       "description": "Fire and Blood",
       "image_path": "res://assets/sprites/legacies/house_targaryen.png",
       "income": 16,
-      "starting_character_options": [],
+      "starting_character_options": ["TA01"],
       "starting_item_options": [],
       "character_pool": ["TA01", "TA02", "TA03", "TA04", "TA05", "TA06", "TA07", "TA08", "TA09", "TA10"],
       "item_pool": [],
       "skill_pool": [],
       "unique_encounters": [],
-      "prestige_rewards": []
+      "prestige_rewards": [
+        {
+          "prestige": 1,
+          "unlocks": {
+            "starting_characters": ["TA01"],
+            "starting_items": [],
+            "characters": ["TA01", "TA02", "TA03", "TA04", "TA05", "TA06", "TA07", "TA08", "TA09", "TA10"],
+            "items": [],
+            "skills": [],
+            "encounters": []
+          }
+        }
+      ]
     },
     {
       "id": "legacy_nights_watch",
@@ -48,13 +84,25 @@
       "description": "The shield that guards the realms of men",
       "image_path": "res://assets/sprites/legacies/nights_watch.png",
       "income": 12,
-      "starting_character_options": [],
+      "starting_character_options": ["NI01"],
       "starting_item_options": [],
       "character_pool": ["NI01"],
       "item_pool": [],
       "skill_pool": [],
       "unique_encounters": [],
-      "prestige_rewards": []
+      "prestige_rewards": [
+        {
+          "prestige": 1,
+          "unlocks": {
+            "starting_characters": ["NI01"],
+            "starting_items": [],
+            "characters": ["NI01"],
+            "items": [],
+            "skills": [],
+            "encounters": []
+          }
+        }
+      ]
     },
     {
       "id": "legacy_house_baratheon",
@@ -62,13 +110,25 @@
       "description": "Ours is the Fury",
       "image_path": "res://assets/sprites/legacies/house_baratheon.png",
       "income": 18,
-      "starting_character_options": [],
+      "starting_character_options": ["BA01"],
       "starting_item_options": [],
       "character_pool": ["BA01"],
       "item_pool": [],
       "skill_pool": [],
       "unique_encounters": [],
-      "prestige_rewards": []
+      "prestige_rewards": [
+        {
+          "prestige": 1,
+          "unlocks": {
+            "starting_characters": ["BA01"],
+            "starting_items": [],
+            "characters": ["BA01"],
+            "items": [],
+            "skills": [],
+            "encounters": []
+          }
+        }
+      ]
     }
   ]
 }

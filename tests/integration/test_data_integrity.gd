@@ -68,7 +68,7 @@ func _test_legacy_data_integrity():
 	var legacies = GameData.get_all_legacies()
 	_assert_true(legacies.size() > 0, "Legacies exist: %d" % legacies.size())
 
-	var required_fields = ["id", "name", "starting_characters", "income"]
+	var required_fields = ["id", "name", "starting_character_options", "income"]
 
 	for legacy_data in legacies:
 		var legacy_id = legacy_data.get("id", "UNKNOWN")
@@ -78,12 +78,18 @@ func _test_legacy_data_integrity():
 			if not legacy_data.has(field):
 				_fail("Legacy %s missing field: %s" % [legacy_id, field])
 
-		# Validate starting_characters references exist
-		if legacy_data.has("starting_characters"):
-			var starting_chars = legacy_data["starting_characters"]
+		# Validate starting_character_options references exist
+		if legacy_data.has("starting_character_options"):
+			var starting_chars = legacy_data["starting_character_options"]
 			for char_id in starting_chars:
 				if not GameData.has_character(char_id):
 					_fail("Legacy %s references non-existent character: %s" % [legacy_id, char_id])
+
+		# Validate character_pool references exist
+		if legacy_data.has("character_pool"):
+			for char_id in legacy_data["character_pool"]:
+				if not GameData.has_character(char_id):
+					_fail("Legacy %s character_pool references non-existent character: %s" % [legacy_id, char_id])
 
 		# Validate income is non-negative
 		var income = legacy_data.get("income", 0)
