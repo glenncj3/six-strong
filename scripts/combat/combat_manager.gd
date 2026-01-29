@@ -167,6 +167,17 @@ func _execute_damage(source, target: CombatCharacter, base_damage: float) -> voi
 		damage_blocked.emit(source, target)
 		return
 
+	# Shield absorption: absorb damage from attacks (source is a CombatCharacter)
+	if source is CombatCharacter and target.has_effect("shield"):
+		var shield_effect = target.get_effect("shield")
+		var absorbed = min(shield_effect.stacks, result.damage)
+		shield_effect.stacks -= absorbed
+		result.damage -= absorbed
+		if shield_effect.stacks <= 0:
+			_remove_effect(target, shield_effect)
+		if result.damage <= 0:
+			return
+
 	_apply_damage(target, result.damage, source)
 	damage_dealt.emit(source, target, result.damage, result.is_crit)
 

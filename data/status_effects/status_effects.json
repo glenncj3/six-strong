@@ -12,6 +12,16 @@
       "max_stacks": 99
     },
     {
+      "id": "shield",
+      "name": "Shield",
+      "description": "Absorbs damage from attacks. Each stack absorbs 1 point of damage.",
+      "tags": ["buff", "shield"],
+      "merge_behavior": "add_stacks",
+      "duration_type": "permanent",
+      "tick_interval": 0,
+      "max_stacks": 999
+    },
+    {
       "id": "haste",
       "name": "Haste",
       "description": "Doubles cooldown tick rate",

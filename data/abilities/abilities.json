@@ -89,6 +89,26 @@
       "applies_effect": "haste",
       "duration_from": "haste_value",
       "cooldown_source": "speed"
+    },
+    {
+      "id": "self_shield",
+      "name": "Shield Self",
+      "description": "Applies shield to self, absorbing incoming attack damage",
+      "type": "active",
+      "targeting": "self_apply_effect",
+      "applies_effect": "shield",
+      "stacks_from": "shield_value",
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "ally_shield",
+      "name": "Shield Ally",
+      "description": "Applies shield to the nearest ally, absorbing incoming attack damage",
+      "type": "active",
+      "targeting": "ally_single_apply_effect",
+      "applies_effect": "shield",
+      "stacks_from": "shield_value",
+      "cooldown_source": "speed"
     }
   ]
 }
