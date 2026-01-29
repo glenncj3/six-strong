@@ -30,6 +30,13 @@ func _run_tests():
 	test_slow_expires_restores_tick_rate()
 	test_slow_multiple_applications_additive()
 
+	section("Freeze Template")
+	test_freeze_creation_from_template()
+	test_freeze_stops_tick_rate()
+	test_freeze_expires_restores_tick_rate()
+	test_freeze_multiple_applications_additive()
+	test_freeze_resumes_cooldown_where_left_off()
+
 	section("Ability Integration")
 	test_poison_enemy_ability_integration()
 	test_haste_self_ability_integration()
@@ -37,6 +44,9 @@ func _run_tests():
 	test_slow_enemy_ability_integration()
 	test_slow_enemy_row_ability_integration()
 	test_slow_enemies_ability_integration()
+	test_freeze_enemy_ability_integration()
+	test_freeze_enemy_row_ability_integration()
+	test_freeze_enemies_ability_integration()
 	test_haste_ally_row_ability_integration()
 	test_haste_allies_ability_integration()
 	test_heal_self_ability_integration()
@@ -122,6 +132,13 @@ func _get_slow_template() -> Dictionary:
 	var gd_node = root.get_node_or_null("GameData")
 	if gd_node:
 		return gd_node.get_status_effect("slow")
+	return {}
+
+
+func _get_freeze_template() -> Dictionary:
+	var gd_node = root.get_node_or_null("GameData")
+	if gd_node:
+		return gd_node.get_status_effect("freeze")
 	return {}
 
 
@@ -429,6 +446,112 @@ func test_slow_multiple_applications_additive():
 
 
 # =============================================================================
+# FREEZE TESTS
+# =============================================================================
+
+func test_freeze_creation_from_template():
+	var template = _get_freeze_template()
+	assert_false(template.is_empty(), "freeze template loaded from GameData")
+
+	var effect = StatusEffectFactory.create_from_template(template, "src1", {"duration_value": 5.0})
+	assert_eq(effect.effect_id, "freeze", "effect_id is freeze")
+	assert_eq(effect.continuous_modifier, "cooldown_tick_rate", "continuous_modifier set")
+	assert_true(abs(effect.continuous_value - 0.0) < 0.01, "continuous_value 0.0")
+	assert_eq(effect.duration_type, "seconds", "duration_type seconds")
+	assert_true(abs(effect.duration_value - 5.0) < 0.01, "duration_value from override")
+	assert_eq(effect.merge_behavior, "extend_duration", "merge_behavior")
+
+
+func test_freeze_stops_tick_rate():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 2.0, 10.0, 0.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var template = _get_freeze_template()
+	var effect = StatusEffectFactory.create_from_template(template, "s1", {"duration_value": 10.0})
+	manager.apply_effect(player, effect)
+
+	assert_true(abs(player.tick_rate_multiplier - 0.0) < 0.01, "tick rate is zero")
+
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	# Frozen character should never act, even after a long time
+	_simulate_time(manager, 8.0)
+	assert_true(abs(enemy.health - 1000.0) < 0.01, "frozen player never attacked")
+
+
+func test_freeze_expires_restores_tick_rate():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var template = _get_freeze_template()
+	var effect = StatusEffectFactory.create_from_template(template, "s1", {"duration_value": 1.0})
+	manager.apply_effect(player, effect)
+	assert_true(abs(player.tick_rate_multiplier - 0.0) < 0.01, "tick rate is zero")
+
+	_simulate_time(manager, 2.0)
+	assert_false(player.has_effect("freeze"), "freeze expired")
+	assert_true(abs(player.tick_rate_multiplier - 1.0) < 0.01, "tick rate restored to 1.0")
+
+
+func test_freeze_multiple_applications_additive():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var template = _get_freeze_template()
+
+	var effect1 = StatusEffectFactory.create_from_template(template, "s1", {"duration_value": 3.0})
+	manager.apply_effect(player, effect1)
+	var effect2 = StatusEffectFactory.create_from_template(template, "s1", {"duration_value": 4.0})
+	manager.apply_effect(player, effect2)
+
+	var freeze_effect = player.get_effect("freeze")
+	assert_true(abs(freeze_effect.duration_value - 7.0) < 0.01, "freeze duration is additive: 3 + 4 = 7")
+
+	_simulate_time(manager, 6.5)
+	assert_true(player.has_effect("freeze"), "freeze still active at 6.5s")
+
+	_simulate_time(manager, 1.0)
+	assert_false(player.has_effect("freeze"), "freeze expired after 7s")
+
+
+func test_freeze_resumes_cooldown_where_left_off():
+	var manager = CombatManager.new()
+	# Player with speed 4.0 (acts every 4s normally)
+	var pg = _make_grid_with_one(_make_source(1000, 4.0, 10.0, 0.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+
+	# Let 2s pass: cooldown_remaining should be ~2.0 (started at 4.0, ticked 2.0)
+	_simulate_time(manager, 2.0)
+	assert_true(abs(enemy.health - 1000.0) < 0.01, "no attack yet at 2s")
+
+	# Freeze for 3 seconds
+	var template = _get_freeze_template()
+	var effect = StatusEffectFactory.create_from_template(template, "s1", {"duration_value": 3.0})
+	manager.apply_effect(player, effect)
+
+	# 3 seconds pass while frozen - no progress on cooldown
+	_simulate_time(manager, 3.0)
+	assert_true(abs(enemy.health - 1000.0) < 0.01, "no attack during freeze")
+
+	# Freeze expired at t=5s. Player resumes with ~2.0s remaining on cooldown.
+	# After 2.5 more seconds (t=7.5s total), player should have attacked.
+	_simulate_time(manager, 2.5)
+	assert_true(enemy.health < 1000.0, "player attacked after freeze expired and remaining cooldown elapsed")
+
+
+# =============================================================================
 # SHIELD TESTS
 # =============================================================================
 
@@ -724,6 +847,68 @@ func test_slow_enemies_ability_integration():
 	var eb = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 1, 0)
 	assert_true(ef.has_effect("slow"), "front row enemy has slow")
 	assert_true(eb.has_effect("slow"), "back row enemy has slow")
+
+
+func test_freeze_enemy_ability_integration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"freeze_value": 5.0}))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["freeze_enemy"]
+	player.extra_stats["freeze_value"] = 5.0
+
+	_simulate_time(manager, 1.5)
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	assert_true(enemy.has_effect("freeze"), "enemy has freeze effect")
+	assert_true(abs(enemy.tick_rate_multiplier - 0.0) < 0.01, "enemy tick rate is zero")
+
+
+func test_freeze_enemy_row_ability_integration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"freeze_value": 5.0}))
+	var eg = CharacterGrid.new()
+	var e_front1 = _make_source(1000, 100.0, 1.0)
+	var e_front2 = _make_source(1000, 100.0, 1.0)
+	var e_back = _make_source(1000, 100.0, 1.0)
+	eg.place_character(e_front1, 0, 0)
+	eg.place_character(e_front2, 0, 1)
+	eg.place_character(e_back, 1, 0)
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["freeze_enemy_row"]
+	player.extra_stats["freeze_value"] = 5.0
+
+	_simulate_time(manager, 1.5)
+	var ef1 = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var ef2 = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 1)
+	var eb = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 1, 0)
+	assert_true(ef1.has_effect("freeze"), "front row enemy 1 has freeze")
+	assert_true(ef2.has_effect("freeze"), "front row enemy 2 has freeze")
+	assert_false(eb.has_effect("freeze"), "back row enemy does not have freeze")
+
+
+func test_freeze_enemies_ability_integration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"freeze_value": 5.0}))
+	var eg = CharacterGrid.new()
+	var e_front = _make_source(1000, 100.0, 1.0)
+	var e_back = _make_source(1000, 100.0, 1.0)
+	eg.place_character(e_front, 0, 0)
+	eg.place_character(e_back, 1, 0)
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["freeze_enemies"]
+	player.extra_stats["freeze_value"] = 5.0
+
+	_simulate_time(manager, 1.5)
+	var ef = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var eb = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 1, 0)
+	assert_true(ef.has_effect("freeze"), "front row enemy has freeze")
+	assert_true(eb.has_effect("freeze"), "back row enemy has freeze")
 
 
 func test_haste_ally_row_ability_integration():

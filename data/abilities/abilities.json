@@ -149,6 +149,33 @@
       "duration_from": "slow_value"
     },
     {
+      "id": "freeze_enemy",
+      "name": "Freeze Enemy",
+      "description": "Freezes a single enemy, completely stopping their cooldown for the duration",
+      "type": "active",
+      "target_mode": "enemy_single",
+      "applies_effect": "freeze",
+      "duration_from": "freeze_value"
+    },
+    {
+      "id": "freeze_enemy_row",
+      "name": "Freeze Enemy Row",
+      "description": "Freezes all enemies in the nearest row, completely stopping their cooldown for the duration",
+      "type": "active",
+      "target_mode": "enemy_frontline",
+      "applies_effect": "freeze",
+      "duration_from": "freeze_value"
+    },
+    {
+      "id": "freeze_enemies",
+      "name": "Freeze All Enemies",
+      "description": "Freezes all enemies, completely stopping their cooldown for the duration",
+      "type": "active",
+      "target_mode": "enemy_all",
+      "applies_effect": "freeze",
+      "duration_from": "freeze_value"
+    },
+    {
       "id": "haste_ally_row",
       "name": "Haste Ally Row",
       "description": "Applies haste to all allies in the nearest row, doubling their cooldown tick rate",

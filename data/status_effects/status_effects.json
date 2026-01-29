@@ -42,6 +42,17 @@
       "tick_interval": 0,
       "continuous_modifier": "cooldown_tick_rate",
       "continuous_value": 0.5
+    },
+    {
+      "id": "freeze",
+      "name": "Freeze",
+      "description": "Completely stops cooldown tick rate for the duration",
+      "tags": ["debuff", "speed"],
+      "merge_behavior": "extend_duration",
+      "duration_type": "seconds",
+      "tick_interval": 0,
+      "continuous_modifier": "cooldown_tick_rate",
+      "continuous_value": 0.0
     }
   ]
 }
