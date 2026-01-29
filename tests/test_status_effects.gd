@@ -44,6 +44,12 @@ func _run_tests():
 	test_poison_enemies_ability_integration()
 	test_shield_ally_row_ability_integration()
 	test_shield_allies_ability_integration()
+	test_attack_enemy_ability_integration()
+	test_attack_enemy_row_ability_integration()
+	test_heal_ally_ability_integration()
+	test_heal_allies_ability_integration()
+	test_multi_ability_character()
+	test_solo_ally_single_no_target()
 
 	section("Shield Template")
 	test_shield_creation_from_template()
@@ -870,6 +876,124 @@ func test_shield_allies_ability_integration():
 	assert_true(ally_ch.has_effect("shield"), "back row ally has shield")
 	assert_eq(caster_ch.get_stacks("shield"), 15, "caster has 15 shield stacks")
 	assert_eq(ally_ch.get_stacks("shield"), 15, "ally has 15 shield stacks")
+
+
+func test_attack_enemy_ability_integration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 25.0, 0.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["attack_enemy"]
+
+	_simulate_time(manager, 1.5)
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	assert_true(abs(enemy.health - 975.0) < 0.01, "enemy took 25 damage from basic attack")
+
+
+func test_attack_enemy_row_ability_integration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 20.0, 0.0, 0.0))
+	var eg = CharacterGrid.new()
+	var e_front1 = _make_source(1000, 100.0, 0.0)
+	var e_front2 = _make_source(1000, 100.0, 0.0)
+	var e_back = _make_source(1000, 100.0, 0.0)
+	eg.place_character(e_front1, 0, 0)
+	eg.place_character(e_front2, 0, 1)
+	eg.place_character(e_back, 1, 0)
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["attack_enemy_row"]
+
+	_simulate_time(manager, 1.5)
+	var ef1 = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var ef2 = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 1)
+	var eb = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 1, 0)
+	assert_true(abs(ef1.health - 980.0) < 0.01, "front row enemy 1 took 20 damage")
+	assert_true(abs(ef2.health - 980.0) < 0.01, "front row enemy 2 took 20 damage")
+	assert_true(abs(eb.health - 1000.0) < 0.01, "back row enemy took no damage")
+
+
+func test_heal_ally_ability_integration():
+	var manager = CombatManager.new()
+	var pg = CharacterGrid.new()
+	var caster = _make_source(1000, 1.0, 1.0, 0.0, 0.0, {"heal_value": 30.0})
+	var ally = _make_source(1000, 100.0, 1.0)
+	pg.place_character(caster, 0, 0)
+	pg.place_character(ally, 0, 1)
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	manager.initialize_combat(pg, eg)
+
+	var caster_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	caster_ch.ability_ids = ["heal_ally"]
+	caster_ch.extra_stats["heal_value"] = 30.0
+
+	var ally_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 1)
+	ally_ch.health = 500.0
+
+	_simulate_time(manager, 1.5)
+	assert_true(abs(ally_ch.health - 530.0) < 0.01, "ally healed for 30")
+	# Caster should not have healed self (ally_single excludes self)
+	assert_true(abs(caster_ch.health - 1000.0) < 0.01, "caster health unchanged")
+
+
+func test_heal_allies_ability_integration():
+	var manager = CombatManager.new()
+	var pg = CharacterGrid.new()
+	var caster = _make_source(1000, 1.0, 1.0, 0.0, 0.0, {"heal_value": 20.0})
+	var ally = _make_source(1000, 100.0, 1.0)
+	pg.place_character(caster, 0, 0)
+	pg.place_character(ally, 1, 0)
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	manager.initialize_combat(pg, eg)
+
+	var caster_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	caster_ch.ability_ids = ["heal_allies"]
+	caster_ch.extra_stats["heal_value"] = 20.0
+	caster_ch.health = 800.0
+
+	var ally_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 1, 0)
+	ally_ch.health = 700.0
+
+	_simulate_time(manager, 1.5)
+	assert_true(abs(caster_ch.health - 820.0) < 0.01, "caster healed for 20 (ally_all includes self)")
+	assert_true(abs(ally_ch.health - 720.0) < 0.01, "ally healed for 20")
+
+
+func test_multi_ability_character():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 10.0, 0.0, 0.0, {"poison_value": 5}))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["attack_enemy", "poison_enemy"]
+	player.extra_stats["poison_value"] = 5
+
+	_simulate_time(manager, 1.5)
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	# Should have both attacked (10 damage) and applied poison
+	assert_true(enemy.health < 1000.0, "enemy took damage from attack")
+	assert_true(enemy.has_effect("poison"), "enemy also has poison from second ability")
+	assert_eq(enemy.get_stacks("poison"), 5, "poison stacks match poison_value")
+
+
+func test_solo_ally_single_no_target():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"heal_value": 50.0}))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["heal_ally"]
+	player.extra_stats["heal_value"] = 50.0
+	player.health = 500.0
+
+	_simulate_time(manager, 1.5)
+	# ally_single excludes self, so solo character should find no target
+	assert_true(abs(player.health - 500.0) < 0.01, "solo character cannot heal_ally (excludes self)")
 
 
 # =============================================================================

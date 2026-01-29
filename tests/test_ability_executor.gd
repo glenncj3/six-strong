@@ -26,6 +26,17 @@ func _run_tests():
 	test_enemy_frontline_hits_front_row()
 	test_enemy_frontline_falls_back_to_back_row()
 
+	section("Ally Frontline Strategy")
+	test_ally_frontline_hits_front_row()
+	test_ally_frontline_falls_back_to_back_row()
+
+	section("Edge Cases")
+	test_zero_damage_source_does_nothing()
+	test_heal_caps_at_max_health()
+	test_no_action_fields_does_nothing()
+	test_ally_single_solo_finds_no_target()
+	test_default_target_mode_is_enemy_single()
+
 
 # =============================================================================
 # HELPERS
@@ -206,3 +217,101 @@ func test_enemy_frontline_falls_back_to_back_row():
 	AbilityExecutor.execute(source, ability, _make_context(board))
 	assert_eq(_damage_log.size(), 2, "falls back to back row when no front row")
 	assert_eq(_damage_log[0]["amount"], 10.0, "damage = 10 * 1.0")
+
+
+func test_ally_frontline_hits_front_row():
+	_clear_logs()
+	var board = CombatBoard.new()
+	# 3 allies: 2 front, 1 back. Source is front row.
+	var source = _make_char(GameConstants.TEAM_PLAYER, GameConstants.ROW_FRONT, 0)
+	var a2 = _make_char(GameConstants.TEAM_PLAYER, GameConstants.ROW_FRONT, 1, 80.0)
+	var a3 = _make_char(GameConstants.TEAM_PLAYER, GameConstants.ROW_BACK, 0, 80.0)
+	board.set_character_at(GameConstants.TEAM_PLAYER, GameConstants.ROW_FRONT, 0, source)
+	board.set_character_at(GameConstants.TEAM_PLAYER, GameConstants.ROW_FRONT, 1, a2)
+	board.set_character_at(GameConstants.TEAM_PLAYER, GameConstants.ROW_BACK, 0, a3)
+	var enemy = _make_char(GameConstants.TEAM_OPPONENT, 0, 0)
+	board.set_character_at(GameConstants.TEAM_OPPONENT, 0, 0, enemy)
+	source.extra_stats["heal_value"] = 10.0
+	var ability = {"target_mode": "ally_frontline", "heal_from": "heal_value"}
+	AbilityExecutor.execute(source, ability, _make_context(board))
+	assert_eq(_heal_log.size(), 2, "only front row allies healed (includes self)")
+	# Back row ally should not be healed
+	for entry in _heal_log:
+		assert_true(entry["target"].row == GameConstants.ROW_FRONT, "healed target is front row")
+
+
+func test_ally_frontline_falls_back_to_back_row():
+	_clear_logs()
+	var board = CombatBoard.new()
+	# Source in back row, only back row allies
+	var source = _make_char(GameConstants.TEAM_PLAYER, GameConstants.ROW_BACK, 0)
+	var a2 = _make_char(GameConstants.TEAM_PLAYER, GameConstants.ROW_BACK, 1, 80.0)
+	board.set_character_at(GameConstants.TEAM_PLAYER, GameConstants.ROW_BACK, 0, source)
+	board.set_character_at(GameConstants.TEAM_PLAYER, GameConstants.ROW_BACK, 1, a2)
+	var enemy = _make_char(GameConstants.TEAM_OPPONENT, 0, 0)
+	board.set_character_at(GameConstants.TEAM_OPPONENT, 0, 0, enemy)
+	source.extra_stats["heal_value"] = 10.0
+	var ability = {"target_mode": "ally_frontline", "heal_from": "heal_value"}
+	AbilityExecutor.execute(source, ability, _make_context(board))
+	assert_eq(_heal_log.size(), 2, "falls back to back row when no front row allies")
+
+
+func test_zero_damage_source_does_nothing():
+	_clear_logs()
+	var board = _make_board_1v1()
+	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	source.damage = 0.0
+	source.base_damage = 0.0
+	var ability = {"target_mode": "enemy_single", "damage_multiplier": 1.0}
+	AbilityExecutor.execute(source, ability, _make_context(board))
+	assert_eq(_damage_log.size(), 0, "no damage dealt when source has 0 damage")
+
+
+func test_heal_caps_at_max_health():
+	_clear_logs()
+	var board = _make_board_3v1()
+	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	source.health = 95.0  # 5 below max of 100
+	source.extra_stats["heal_value"] = 50.0
+	# Use self targeting to heal self
+	var ability = {"target_mode": "self", "heal_from": "heal_value"}
+	AbilityExecutor.execute(source, ability, _make_context(board))
+	assert_eq(_heal_log.size(), 1, "one heal event")
+	# Mock heal does min(health + amount, max_health), so health should be 100
+	assert_eq(source.health, 100.0, "health capped at max_health")
+
+
+func test_no_action_fields_does_nothing():
+	_clear_logs()
+	var board = _make_board_1v1()
+	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	# Ability with target_mode but no action fields
+	var ability = {"target_mode": "enemy_single"}
+	AbilityExecutor.execute(source, ability, _make_context(board))
+	assert_eq(_damage_log.size(), 0, "no damage without damage_multiplier")
+	assert_eq(_heal_log.size(), 0, "no heal without heal fields")
+	assert_eq(_effect_log.size(), 0, "no effect without applies_effect")
+
+
+func test_ally_single_solo_finds_no_target():
+	_clear_logs()
+	var board = CombatBoard.new()
+	var source = _make_char(GameConstants.TEAM_PLAYER, 0, 0)
+	board.set_character_at(GameConstants.TEAM_PLAYER, 0, 0, source)
+	var enemy = _make_char(GameConstants.TEAM_OPPONENT, 0, 0)
+	board.set_character_at(GameConstants.TEAM_OPPONENT, 0, 0, enemy)
+	source.extra_stats["heal_value"] = 25.0
+	var ability = {"target_mode": "ally_single", "heal_from": "heal_value"}
+	AbilityExecutor.execute(source, ability, _make_context(board))
+	assert_eq(_heal_log.size(), 0, "no heal when solo (ally_single excludes self)")
+
+
+func test_default_target_mode_is_enemy_single():
+	_clear_logs()
+	var board = _make_board_1v1()
+	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	# Ability with no target_mode field at all
+	var ability = {"damage_multiplier": 2.0}
+	AbilityExecutor.execute(source, ability, _make_context(board))
+	assert_eq(_damage_log.size(), 1, "defaults to enemy_single")
+	assert_eq(_damage_log[0]["amount"], 20.0, "damage = 10 * 2.0")
