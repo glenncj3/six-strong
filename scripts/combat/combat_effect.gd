@@ -39,6 +39,7 @@ var merge_behavior: String = "none"  # "add_stacks", "refresh_duration", "extend
 var tags: Array = []                 # ["debuff", "dot"], ["buff", "speed"]
 var continuous_modifier: String = "" # "cooldown_tick_rate"
 var continuous_value: float = 0.0    # 2.0 for haste
+var on_apply: Callable               # called when effect is applied or merged
 
 
 static func _generate_id() -> String:
@@ -103,6 +104,7 @@ static func create_status_effect(config: Dictionary) -> CombatEffect:
 	e.tags = config.get("tags", [])
 	e.continuous_modifier = config.get("continuous_modifier", "")
 	e.continuous_value = config.get("continuous_value", 0.0)
+	e.on_apply = config.get("on_apply", Callable())
 	e.duration_type = config.get("duration_type", "permanent")
 	e.duration_value = config.get("duration_value", 0.0)
 	# Also support stat_modifier fields for hybrid effects

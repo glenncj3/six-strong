@@ -37,7 +37,17 @@ func _run_tests():
 	test_freeze_multiple_applications_additive()
 	test_freeze_resumes_cooldown_where_left_off()
 
+	section("Burn Template")
+	test_burn_creation_from_template()
+	test_burn_deals_damage_on_apply()
+	test_burn_stacks_accumulate_and_damage_increases()
+	test_burn_stacks_persist()
+	test_burn_merge_from_multiple_sources()
+
 	section("Ability Integration")
+	test_burn_enemy_ability_integration()
+	test_burn_enemy_row_ability_integration()
+	test_burn_enemies_ability_integration()
 	test_poison_enemy_ability_integration()
 	test_haste_self_ability_integration()
 	test_haste_ally_ability_integration()
@@ -139,6 +149,13 @@ func _get_freeze_template() -> Dictionary:
 	var gd_node = root.get_node_or_null("GameData")
 	if gd_node:
 		return gd_node.get_status_effect("freeze")
+	return {}
+
+
+func _get_burn_template() -> Dictionary:
+	var gd_node = root.get_node_or_null("GameData")
+	if gd_node:
+		return gd_node.get_status_effect("burn")
 	return {}
 
 
@@ -552,6 +569,104 @@ func test_freeze_resumes_cooldown_where_left_off():
 
 
 # =============================================================================
+# BURN TESTS
+# =============================================================================
+
+func test_burn_creation_from_template():
+	var template = _get_burn_template()
+	assert_false(template.is_empty(), "burn template loaded from GameData")
+
+	var effect = StatusEffectFactory.create_from_template(template, "src1", {"stacks": 10})
+	assert_eq(effect.effect_id, "burn", "effect_id is burn")
+	assert_eq(effect.stacks, 10, "stacks from override")
+	assert_eq(effect.max_stacks, 99, "max_stacks from template")
+	assert_eq(effect.merge_behavior, "add_stacks", "merge_behavior")
+	assert_true(effect.tags.has("debuff"), "has debuff tag")
+	assert_true(effect.tags.has("dot"), "has dot tag")
+	assert_true(effect.on_apply.is_valid(), "on_apply wired from registry")
+
+
+func test_burn_deals_damage_on_apply():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var target = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var template = _get_burn_template()
+	var effect = StatusEffectFactory.create_from_template(template, "s1", {"stacks": 10})
+	manager.apply_effect(target, effect)
+
+	# Burn for 10 should deal 10 damage immediately
+	assert_true(abs(target.health - 990.0) < 0.01, "10 damage dealt immediately on burn apply")
+	assert_eq(target.get_stacks("burn"), 10, "burn stacks remain at 10")
+
+
+func test_burn_stacks_accumulate_and_damage_increases():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var target = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var template = _get_burn_template()
+
+	# First burn: 10 stacks, deals 10 damage
+	var e1 = StatusEffectFactory.create_from_template(template, "s1", {"stacks": 10})
+	manager.apply_effect(target, e1)
+	assert_true(abs(target.health - 990.0) < 0.01, "first burn: 10 damage, hp=990")
+
+	# Second burn: 11 stacks added, total 21, deals 21 damage
+	var e2 = StatusEffectFactory.create_from_template(template, "s1", {"stacks": 11})
+	manager.apply_effect(target, e2)
+	assert_eq(target.get_stacks("burn"), 21, "stacks accumulated: 10 + 11 = 21")
+	assert_true(abs(target.health - 969.0) < 0.01, "second burn: 21 damage, hp=969")
+
+	# Third burn: 1 stack added, total 22, deals 22 damage
+	var e3 = StatusEffectFactory.create_from_template(template, "s1", {"stacks": 1})
+	manager.apply_effect(target, e3)
+	assert_eq(target.get_stacks("burn"), 22, "stacks accumulated: 21 + 1 = 22")
+	assert_true(abs(target.health - 947.0) < 0.01, "third burn: 22 damage, hp=947")
+
+
+func test_burn_stacks_persist():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var target = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var template = _get_burn_template()
+	var effect = StatusEffectFactory.create_from_template(template, "s1", {"stacks": 5})
+	manager.apply_effect(target, effect)
+
+	# Wait a while - stacks should not decay (no tick action)
+	_simulate_time(manager, 5.0)
+	assert_true(target.has_effect("burn"), "burn persists after time passes")
+	assert_eq(target.get_stacks("burn"), 5, "burn stacks unchanged after time passes")
+
+
+func test_burn_merge_from_multiple_sources():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var target = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var template = _get_burn_template()
+
+	var e1 = StatusEffectFactory.create_from_template(template, "source_A", {"stacks": 5})
+	var e2 = StatusEffectFactory.create_from_template(template, "source_B", {"stacks": 7})
+	manager.apply_effect(target, e1)
+	manager.apply_effect(target, e2)
+
+	assert_eq(target.effects.filter(func(e): return e.effect_id == "burn").size(), 1, "merged into single burn effect")
+	assert_eq(target.get_stacks("burn"), 12, "stacks additive across sources: 5 + 7 = 12")
+	# First apply: 5 damage. Second apply: 12 damage. Total: 17 damage.
+	assert_true(abs(target.health - 983.0) < 0.01, "total damage: 5 + 12 = 17")
+
+
+# =============================================================================
 # SHIELD TESTS
 # =============================================================================
 
@@ -909,6 +1024,74 @@ func test_freeze_enemies_ability_integration():
 	var eb = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 1, 0)
 	assert_true(ef.has_effect("freeze"), "front row enemy has freeze")
 	assert_true(eb.has_effect("freeze"), "back row enemy has freeze")
+
+
+func test_burn_enemy_ability_integration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"burn_value": 10}))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["burn_enemy"]
+	player.extra_stats["burn_value"] = 10
+
+	_simulate_time(manager, 1.5)
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	assert_true(enemy.has_effect("burn"), "enemy has burn effect")
+	assert_eq(enemy.get_stacks("burn"), 10, "burn stacks match burn_value")
+	assert_true(abs(enemy.health - 990.0) < 0.01, "enemy took 10 burn damage")
+
+
+func test_burn_enemy_row_ability_integration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"burn_value": 8}))
+	var eg = CharacterGrid.new()
+	var e_front1 = _make_source(1000, 100.0, 0.0)
+	var e_front2 = _make_source(1000, 100.0, 0.0)
+	var e_back = _make_source(1000, 100.0, 0.0)
+	eg.place_character(e_front1, 0, 0)
+	eg.place_character(e_front2, 0, 1)
+	eg.place_character(e_back, 1, 0)
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["burn_enemy_row"]
+	player.extra_stats["burn_value"] = 8
+
+	_simulate_time(manager, 1.5)
+	var ef1 = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var ef2 = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 1)
+	var eb = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 1, 0)
+	assert_true(ef1.has_effect("burn"), "front row enemy 1 has burn")
+	assert_true(ef2.has_effect("burn"), "front row enemy 2 has burn")
+	assert_false(eb.has_effect("burn"), "back row enemy does not have burn")
+	assert_true(abs(ef1.health - 992.0) < 0.01, "front enemy 1 took 8 burn damage")
+	assert_true(abs(ef2.health - 992.0) < 0.01, "front enemy 2 took 8 burn damage")
+	assert_true(abs(eb.health - 1000.0) < 0.01, "back row enemy took no damage")
+
+
+func test_burn_enemies_ability_integration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"burn_value": 6}))
+	var eg = CharacterGrid.new()
+	var e_front = _make_source(1000, 100.0, 0.0)
+	var e_back = _make_source(1000, 100.0, 0.0)
+	eg.place_character(e_front, 0, 0)
+	eg.place_character(e_back, 1, 0)
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["burn_enemies"]
+	player.extra_stats["burn_value"] = 6
+
+	_simulate_time(manager, 1.5)
+	var ef = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var eb = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 1, 0)
+	assert_true(ef.has_effect("burn"), "front row enemy has burn")
+	assert_true(eb.has_effect("burn"), "back row enemy has burn")
+	assert_true(abs(ef.health - 994.0) < 0.01, "front enemy took 6 burn damage")
+	assert_true(abs(eb.health - 994.0) < 0.01, "back enemy took 6 burn damage")
 
 
 func test_haste_ally_row_ability_integration():

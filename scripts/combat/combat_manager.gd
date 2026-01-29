@@ -298,11 +298,27 @@ func apply_effect(target: CombatCharacter, effect_to_apply: CombatEffect) -> voi
 	var result = _effect_manager.apply_effect(target, effect_to_apply)
 	effect_applied.emit(target, effect_to_apply)
 	if result.trigger_id != "":
+		var active_effect: CombatEffect
 		if result.merged:
-			var existing = target.get_effect(result.trigger_id)
-			_effect_manager.process_triggered_effects(target, "on_" + result.trigger_id, {target = target, effect = existing})
+			active_effect = target.get_effect(result.trigger_id)
+			_effect_manager.process_triggered_effects(target, "on_" + result.trigger_id, {target = target, effect = active_effect})
 		else:
-			_effect_manager.process_triggered_effects(target, "on_" + result.trigger_id, {target = target, effect = effect_to_apply})
+			active_effect = effect_to_apply
+			_effect_manager.process_triggered_effects(target, "on_" + result.trigger_id, {target = target, effect = active_effect})
+
+		# Invoke on_apply callback if present
+		if active_effect != null and active_effect.on_apply.is_valid():
+			var apply_context = {
+				"character": target,
+				"effect": active_effect,
+				"manager_context": {
+					"deal_damage": _execute_damage,
+					"heal": heal_character,
+					"apply_effect": apply_effect,
+					"board": _state.board,
+				}
+			}
+			active_effect.on_apply.call(apply_context)
 
 
 func _remove_effect(target: CombatCharacter, effect_to_remove: CombatEffect) -> void:

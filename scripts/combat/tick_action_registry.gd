@@ -25,6 +25,7 @@ static func register_defaults() -> void:
 		return
 	_registered = true
 	register("poison_tick", _poison_tick)
+	register("burn_apply", _burn_apply)
 
 
 static func _poison_tick(context: Dictionary) -> void:
@@ -46,3 +47,16 @@ static func _poison_tick(context: Dictionary) -> void:
 	if effect.stacks <= 0:
 		# Remove by setting to a duration type that will expire
 		character.effects.erase(effect)
+
+
+static func _burn_apply(context: Dictionary) -> void:
+	var character: CombatCharacter = context["character"]
+	var effect: CombatEffect = context["effect"]
+	var mgr_ctx: Dictionary = context["manager_context"]
+
+	if effect.stacks <= 0:
+		return
+
+	# Deal damage equal to total burn stacks (null source = no block/crit)
+	var deal_damage: Callable = mgr_ctx["deal_damage"]
+	deal_damage.call(null, character, float(effect.stacks))

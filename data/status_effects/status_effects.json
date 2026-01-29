@@ -53,6 +53,17 @@
       "tick_interval": 0,
       "continuous_modifier": "cooldown_tick_rate",
       "continuous_value": 0.0
+    },
+    {
+      "id": "burn",
+      "name": "Burn",
+      "description": "Adds to burn stack. On each application, deals damage equal to total burn stacks.",
+      "tags": ["debuff", "dot"],
+      "merge_behavior": "add_stacks",
+      "duration_type": "permanent",
+      "tick_interval": 0,
+      "apply_action": "burn_apply",
+      "max_stacks": 99
     }
   ]
 }

@@ -26,4 +26,11 @@ static func create_from_template(template: Dictionary, source_id: String, overri
 		if action.is_valid():
 			config["on_tick"] = action
 
+	# Wire on_apply from TickActionRegistry
+	var apply_action_id = template.get("apply_action", "")
+	if apply_action_id != "":
+		var apply_action = TickActionRegistry.get_action(apply_action_id)
+		if apply_action.is_valid():
+			config["on_apply"] = apply_action
+
 	return CombatEffect.create_status_effect(config)

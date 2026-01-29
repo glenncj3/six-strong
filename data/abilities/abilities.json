@@ -192,6 +192,33 @@
       "target_mode": "ally_all",
       "applies_effect": "haste",
       "duration_from": "haste_value"
+    },
+    {
+      "id": "burn_enemy",
+      "name": "Burn Enemy",
+      "description": "Burns a single enemy, adding to their burn stack and dealing damage equal to total stacks",
+      "type": "active",
+      "target_mode": "enemy_single",
+      "applies_effect": "burn",
+      "stacks_from": "burn_value"
+    },
+    {
+      "id": "burn_enemy_row",
+      "name": "Burn Enemy Row",
+      "description": "Burns all enemies in the nearest row, adding to their burn stack and dealing damage equal to total stacks",
+      "type": "active",
+      "target_mode": "enemy_frontline",
+      "applies_effect": "burn",
+      "stacks_from": "burn_value"
+    },
+    {
+      "id": "burn_enemies",
+      "name": "Burn All Enemies",
+      "description": "Burns all enemies, adding to their burn stack and dealing damage equal to total stacks",
+      "type": "active",
+      "target_mode": "enemy_all",
+      "applies_effect": "burn",
+      "stacks_from": "burn_value"
     }
   ]
 }
