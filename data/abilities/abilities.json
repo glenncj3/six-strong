@@ -5,6 +5,7 @@
       "name": "Basic Attack",
       "description": "Deals damage to a single enemy",
       "type": "active",
+      "category": "attack",
       "target_mode": "enemy_single",
       "damage_multiplier": 1.0
     },
@@ -13,6 +14,7 @@
       "name": "Cleave",
       "description": "Deals full damage to all frontline enemies. If no frontline enemies, hits all backline enemies instead",
       "type": "active",
+      "category": "attack",
       "target_mode": "enemy_frontline",
       "damage_multiplier": 1.0
     },
@@ -21,6 +23,7 @@
       "name": "Heal",
       "description": "Heals a single ally based on heal_value",
       "type": "active",
+      "category": "heal",
       "target_mode": "ally_single",
       "heal_from": "heal_value"
     },
@@ -29,6 +32,7 @@
       "name": "Group Heal",
       "description": "Heals all allies based on heal_value",
       "type": "active",
+      "category": "heal",
       "target_mode": "ally_all",
       "heal_from": "heal_value"
     },
@@ -37,6 +41,7 @@
       "name": "Heal Self",
       "description": "Heals self based on heal_value",
       "type": "active",
+      "category": "heal",
       "target_mode": "self",
       "heal_from": "heal_value"
     },
@@ -45,6 +50,7 @@
       "name": "Poison Strike",
       "description": "Applies poison stacks to a single enemy",
       "type": "active",
+      "category": "poison",
       "target_mode": "enemy_single",
       "applies_effect": "poison",
       "stacks_from": "poison_value"
@@ -54,6 +60,7 @@
       "name": "Poison Enemy Row",
       "description": "Applies poison stacks to all enemies in the nearest row",
       "type": "active",
+      "category": "poison",
       "target_mode": "enemy_frontline",
       "applies_effect": "poison",
       "stacks_from": "poison_value"
@@ -63,6 +70,7 @@
       "name": "Poison All Enemies",
       "description": "Applies poison stacks to all enemies",
       "type": "active",
+      "category": "poison",
       "target_mode": "enemy_all",
       "applies_effect": "poison",
       "stacks_from": "poison_value"
@@ -72,6 +80,7 @@
       "name": "Quicken",
       "description": "Applies haste to self, doubling cooldown tick rate",
       "type": "active",
+      "category": "haste",
       "target_mode": "self",
       "applies_effect": "haste",
       "duration_from": "haste_value"
@@ -81,6 +90,7 @@
       "name": "Quicken Ally",
       "description": "Applies haste to the nearest ally, doubling their cooldown tick rate",
       "type": "active",
+      "category": "haste",
       "target_mode": "ally_single",
       "applies_effect": "haste",
       "duration_from": "haste_value"
@@ -90,6 +100,7 @@
       "name": "Shield Self",
       "description": "Applies shield to self, absorbing incoming attack damage",
       "type": "active",
+      "category": "shield",
       "target_mode": "self",
       "applies_effect": "shield",
       "stacks_from": "shield_value"
@@ -99,6 +110,7 @@
       "name": "Shield Ally",
       "description": "Applies shield to the nearest ally, absorbing incoming attack damage",
       "type": "active",
+      "category": "shield",
       "target_mode": "ally_single",
       "applies_effect": "shield",
       "stacks_from": "shield_value"
@@ -108,6 +120,7 @@
       "name": "Shield Ally Row",
       "description": "Applies shield to all allies in the nearest row, absorbing incoming attack damage",
       "type": "active",
+      "category": "shield",
       "target_mode": "ally_frontline",
       "applies_effect": "shield",
       "stacks_from": "shield_value"
@@ -117,6 +130,7 @@
       "name": "Shield All Allies",
       "description": "Applies shield to all allies, absorbing incoming attack damage",
       "type": "active",
+      "category": "shield",
       "target_mode": "ally_all",
       "applies_effect": "shield",
       "stacks_from": "shield_value"
@@ -126,6 +140,7 @@
       "name": "Slow Enemy",
       "description": "Applies slow to a single enemy, halving their cooldown tick rate",
       "type": "active",
+      "category": "slow",
       "target_mode": "enemy_single",
       "applies_effect": "slow",
       "duration_from": "slow_value"
@@ -135,6 +150,7 @@
       "name": "Slow Enemy Row",
       "description": "Applies slow to all enemies in the nearest row, halving their cooldown tick rate",
       "type": "active",
+      "category": "slow",
       "target_mode": "enemy_frontline",
       "applies_effect": "slow",
       "duration_from": "slow_value"
@@ -144,6 +160,7 @@
       "name": "Slow All Enemies",
       "description": "Applies slow to all enemies, halving their cooldown tick rate",
       "type": "active",
+      "category": "slow",
       "target_mode": "enemy_all",
       "applies_effect": "slow",
       "duration_from": "slow_value"
@@ -153,6 +170,7 @@
       "name": "Freeze Enemy",
       "description": "Freezes a single enemy, completely stopping their cooldown for the duration",
       "type": "active",
+      "category": "freeze",
       "target_mode": "enemy_single",
       "applies_effect": "freeze",
       "duration_from": "freeze_value"
@@ -162,6 +180,7 @@
       "name": "Freeze Enemy Row",
       "description": "Freezes all enemies in the nearest row, completely stopping their cooldown for the duration",
       "type": "active",
+      "category": "freeze",
       "target_mode": "enemy_frontline",
       "applies_effect": "freeze",
       "duration_from": "freeze_value"
@@ -171,6 +190,7 @@
       "name": "Freeze All Enemies",
       "description": "Freezes all enemies, completely stopping their cooldown for the duration",
       "type": "active",
+      "category": "freeze",
       "target_mode": "enemy_all",
       "applies_effect": "freeze",
       "duration_from": "freeze_value"
@@ -180,6 +200,7 @@
       "name": "Haste Ally Row",
       "description": "Applies haste to all allies in the nearest row, doubling their cooldown tick rate",
       "type": "active",
+      "category": "haste",
       "target_mode": "ally_frontline",
       "applies_effect": "haste",
       "duration_from": "haste_value"
@@ -189,6 +210,7 @@
       "name": "Haste All Allies",
       "description": "Applies haste to all allies, doubling their cooldown tick rate",
       "type": "active",
+      "category": "haste",
       "target_mode": "ally_all",
       "applies_effect": "haste",
       "duration_from": "haste_value"
@@ -198,6 +220,7 @@
       "name": "Burn Enemy",
       "description": "Burns a single enemy, adding to their burn stack and dealing damage equal to total stacks",
       "type": "active",
+      "category": "burn",
       "target_mode": "enemy_single",
       "applies_effect": "burn",
       "stacks_from": "burn_value"
@@ -207,6 +230,7 @@
       "name": "Burn Enemy Row",
       "description": "Burns all enemies in the nearest row, adding to their burn stack and dealing damage equal to total stacks",
       "type": "active",
+      "category": "burn",
       "target_mode": "enemy_frontline",
       "applies_effect": "burn",
       "stacks_from": "burn_value"
@@ -216,6 +240,7 @@
       "name": "Burn All Enemies",
       "description": "Burns all enemies, adding to their burn stack and dealing damage equal to total stacks",
       "type": "active",
+      "category": "burn",
       "target_mode": "enemy_all",
       "applies_effect": "burn",
       "stacks_from": "burn_value"
