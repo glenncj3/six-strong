@@ -318,18 +318,21 @@ func _get_team_label(character: CombatCharacter) -> String:
 
 
 func _on_damage_dealt(source: CombatCharacter, target: CombatCharacter, amount: float, is_crit: bool) -> void:
-	var src_label = _get_team_label(source)
 	var tgt_label = _get_team_label(target)
 
-	if is_crit:
-		print("[Combat] %s %s CRITS %s %s for %d damage!" % [src_label, source.character_name, tgt_label, target.character_name, int(amount)])
+	if source == null:
+		print("[Combat] %s %s takes %d damage." % [tgt_label, target.character_name, int(amount)])
+	elif is_crit:
+		print("[Combat] %s %s CRITS %s %s for %d damage!" % [_get_team_label(source), source.character_name, tgt_label, target.character_name, int(amount)])
 	else:
-		print("[Combat] %s %s attacks %s %s for %d damage." % [src_label, source.character_name, tgt_label, target.character_name, int(amount)])
+		print("[Combat] %s %s attacks %s %s for %d damage." % [_get_team_label(source), source.character_name, tgt_label, target.character_name, int(amount)])
 
 	_update_slot_hp(_get_pos_key(target), target.health, target.max_health, target.is_alive)
 
 
 func _on_damage_blocked(source: CombatCharacter, target: CombatCharacter) -> void:
+	if source == null:
+		return
 	print("[Combat] %s %s attacks %s %s — DODGED!" % [_get_team_label(source), source.character_name, _get_team_label(target), target.character_name])
 
 

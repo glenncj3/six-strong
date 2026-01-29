@@ -42,6 +42,9 @@ func remove_effects_from_source(source_id: String, characters: Array) -> Array:
 		var to_remove: Array = []
 		for effect in character.effects:
 			if effect.source_id == source_id:
+				# Permanent DoT effects persist after source death
+				if effect.duration_type == "permanent" and effect.tags.has("dot"):
+					continue
 				to_remove.append(effect)
 		for effect in to_remove:
 			remove_effect(character, effect)

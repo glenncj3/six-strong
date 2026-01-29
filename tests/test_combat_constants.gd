@@ -216,7 +216,7 @@ func test_manager_draw():
 	var eg = _make_grid_with_one(_make_source(100, 0.0, 0.0))
 	manager.initialize_combat(pg, eg)
 
-	_simulate_time(manager, 0.1)
+	_simulate_time(manager, 10.1)
 	assert_eq(manager.get_state().winner, GameConstants.WINNER_DRAW, "winner is WINNER_DRAW constant")
 
 

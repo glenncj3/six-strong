@@ -260,6 +260,7 @@ func _apply_damage(target: CombatCharacter, amount: float, source: CombatCharact
 		return
 
 	target.health -= amount
+	_state.last_damage_time = _state.elapsed_time
 	damage_taken.emit(target, amount, source)
 
 	# Process on_damage_taken triggered effects
@@ -300,9 +301,9 @@ func _check_win_condition() -> void:
 	var player_alive = _state.board.has_living_characters(GameConstants.TEAM_PLAYER)
 	var opponent_alive = _state.board.has_living_characters(GameConstants.TEAM_OPPONENT)
 
-	# Check stalemate
+	# Check stalemate: draw if no damage dealt for 10 seconds
 	if player_alive and opponent_alive:
-		if _is_stalemate():
+		if _state.elapsed_time - _state.last_damage_time >= 10.0:
 			_state.combat_active = false
 			_state.winner = GameConstants.WINNER_DRAW
 			combat_ended.emit(GameConstants.WINNER_DRAW, "stalemate")
@@ -321,23 +322,6 @@ func _check_win_condition() -> void:
 		_state.winner = GameConstants.WINNER_DRAW
 		combat_ended.emit(GameConstants.WINNER_DRAW, "mutual_kill")
 
-
-func _is_stalemate() -> bool:
-	for character in _state.board.get_all_living_characters():
-		if character.has_damage() and character.has_speed() and character.has_charges():
-			return false
-		if _has_damage_dealing_effects(character):
-			return false
-	return true
-
-
-func _has_damage_dealing_effects(character: CombatCharacter) -> bool:
-	for effect in character.effects:
-		if effect.effect_type == "triggered" and effect.trigger == "on_cooldown":
-			return true
-		if effect.tick_interval > 0 and effect.tags.has("dot"):
-			return true
-	return false
 
 
 # =============================================================================

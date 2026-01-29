@@ -56,7 +56,6 @@ func _run_tests():
 
 	section("Stalemate Edge Cases")
 	test_stalemate_speed_no_damage()
-	test_no_stalemate_with_damage_effect()
 
 	section("Signals")
 	test_combat_started_signal()
@@ -259,14 +258,16 @@ func test_opponent_wins():
 
 
 func test_stalemate_draw():
-	# Both characters have no damage and no speed — stalemate
+	# Both characters have no damage and no speed — no damage for 10s = draw
 	var manager = CombatManager.new()
 	var pg = _make_grid_with_one(_make_source(100, 0.0, 0.0))
 	var eg = _make_grid_with_one(_make_source(100, 0.0, 0.0))
 	manager.initialize_combat(pg, eg)
 
-	_simulate_time(manager, 0.1)
-	assert_false(manager.get_state().combat_active, "stalemate detected")
+	_simulate_time(manager, 9.9)
+	assert_true(manager.get_state().combat_active, "still active before 10s")
+	_simulate_time(manager, 0.2)
+	assert_false(manager.get_state().combat_active, "stalemate detected after 10s")
 	assert_eq(manager.get_state().winner, GameConstants.WINNER_DRAW, "draw from stalemate")
 
 
@@ -736,44 +737,17 @@ func test_front_back_row_targeting_in_combat():
 # =============================================================================
 
 func test_stalemate_speed_no_damage():
-	# Characters have speed but no damage = stalemate
+	# Characters have speed but no damage — no damage for 10s = draw
 	var manager = CombatManager.new()
 	var pg = _make_grid_with_one(_make_source(100, 2.0, 0.0))
 	var eg = _make_grid_with_one(_make_source(100, 2.0, 0.0))
 	manager.initialize_combat(pg, eg)
 
-	_simulate_time(manager, 0.1)
-	assert_false(manager.get_state().combat_active, "stalemate detected")
+	_simulate_time(manager, 9.9)
+	assert_true(manager.get_state().combat_active, "still active before 10s")
+	_simulate_time(manager, 0.2)
+	assert_false(manager.get_state().combat_active, "stalemate detected after 10s")
 	assert_eq(manager.get_state().winner, GameConstants.WINNER_DRAW, "draw from stalemate")
-
-
-func test_no_stalemate_with_damage_effect():
-	# Character has no damage stat but has on_cooldown triggered effect = not stalemate
-	var manager = CombatManager.new()
-	var pg = _make_grid_with_one(_make_source(100, 2.0, 0.0))
-	var eg = _make_grid_with_one(_make_source(100, 2.0, 0.0))
-	manager.initialize_combat(pg, eg)
-
-	var ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	var effect = CombatEffect.create_triggered("test", "t1", "on_cooldown",
-		func(_data): pass, "combat")
-	manager.apply_effect(ch, effect)
-
-	# Need to manually re-check since stalemate may have already fired
-	# Re-initialize to test properly
-	var manager2 = CombatManager.new()
-	var pg2 = _make_grid_with_one(_make_source(100, 2.0, 0.0))
-	var eg2 = _make_grid_with_one(_make_source(100, 2.0, 0.0))
-	manager2.initialize_combat(pg2, eg2)
-
-	# Apply effect before first update
-	var ch2 = manager2.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	var effect2 = CombatEffect.create_triggered("test", "t1", "on_cooldown",
-		func(_data): pass, "combat")
-	ch2.effects.append(effect2)
-
-	_simulate_time(manager2, 0.1)
-	assert_true(manager2.get_state().combat_active, "combat still active with damage-dealing effect")
 
 
 # =============================================================================

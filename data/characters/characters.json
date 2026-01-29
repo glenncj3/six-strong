@@ -37,7 +37,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 0,
@@ -68,7 +68,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 5.0,
         "freeze_value": 0,
@@ -128,7 +128,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 5.0,
         "freeze_value": 0,
@@ -158,7 +158,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 0,
@@ -189,7 +189,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 0,
@@ -220,7 +220,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 20.0,
         "freeze_value": 0,
@@ -251,7 +251,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 0,
@@ -282,7 +282,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 30.0,
         "freeze_value": 0,
@@ -312,7 +312,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 0,
@@ -342,7 +342,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 5.0,
         "freeze_value": 0,
@@ -373,7 +373,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 0,
@@ -404,7 +404,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 0,
@@ -435,7 +435,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 20.0,
         "freeze_value": 0,
@@ -466,7 +466,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 1.0,
@@ -496,7 +496,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 15.0,
         "freeze_value": 0,
@@ -531,7 +531,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 20.0,
         "freeze_value": 0,
@@ -562,7 +562,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 10.0,
         "freeze_value": 1.0,
@@ -592,7 +592,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 20.0,
         "freeze_value": 0,
@@ -622,7 +622,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 1.0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 0,
@@ -682,7 +682,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 2.0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 0,
@@ -743,7 +743,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0.33,
         "damage": 10.0,
         "freeze_value": 0,
@@ -773,7 +773,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 3.0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 0,
@@ -804,7 +804,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 2.0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 5.0,
         "freeze_value": 0,
@@ -864,7 +864,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 10.0,
         "freeze_value": 0,
@@ -895,7 +895,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 0,
         "freeze_value": 0,
@@ -925,7 +925,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 5.0,
         "freeze_value": 0,
@@ -955,7 +955,7 @@
       "base_stats": {
         "agility": 0.05,
         "burn_value": 0,
-        "charges": 0,
+        "charges": -1,
         "crit_chance": 0,
         "damage": 5.0,
         "freeze_value": 0,

@@ -81,17 +81,10 @@ static func apply_stat_modifiers(stats: Dictionary, modifiers: Dictionary) -> vo
 static func _get_base_stats(char_master: Dictionary) -> Dictionary:
 	"""
 	Extract base stats from master data.
-	Returns health, charges, agility, speed, damage, crit_chance.
+	Returns all stats defined in base_stats (health, charges, speed, damage, etc.).
 	"""
 	var base = char_master.get("base_stats", {})
-	return {
-		GameConstants.STAT_HEALTH: base.get(GameConstants.STAT_HEALTH, 0),
-		GameConstants.STAT_CHARGES: base.get(GameConstants.STAT_CHARGES, 0),
-		GameConstants.STAT_agility: base.get(GameConstants.STAT_agility, 0),
-		GameConstants.STAT_SPEED: base.get(GameConstants.STAT_SPEED, 0),
-		GameConstants.STAT_DAMAGE: base.get(GameConstants.STAT_DAMAGE, 0),
-		GameConstants.STAT_CRIT_CHANCE: base.get(GameConstants.STAT_CRIT_CHANCE, 0)
-	}
+	return base.duplicate(true)
 
 
 static func clone_stats(stats: Dictionary) -> Dictionary:
