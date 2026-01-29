@@ -71,11 +71,21 @@
       "cooldown_source": "speed"
     },
     {
-      "id": "basic_haste",
+      "id": "self_haste",
       "name": "Quicken",
       "description": "Applies haste to self, doubling cooldown tick rate",
       "type": "active",
       "targeting": "self_apply_effect",
+      "applies_effect": "haste",
+      "duration_from": "haste_value",
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "ally_haste",
+      "name": "Quicken Ally",
+      "description": "Applies haste to the nearest ally, doubling their cooldown tick rate",
+      "type": "active",
+      "targeting": "ally_single_apply_effect",
       "applies_effect": "haste",
       "duration_from": "haste_value",
       "cooldown_source": "speed"

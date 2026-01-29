@@ -24,7 +24,8 @@ func _run_tests():
 
 	section("Ability Integration")
 	test_basic_poison_ability_integration()
-	test_basic_haste_ability_integration()
+	test_self_haste_ability_integration()
+	test_ally_haste_ability_integration()
 
 	section("Interactions")
 	test_cleanse_removes_poison_not_haste()
@@ -241,19 +242,41 @@ func test_basic_poison_ability_integration():
 	assert_eq(enemy.get_stacks("poison"), 3, "3 stacks of poison applied")
 
 
-func test_basic_haste_ability_integration():
+func test_self_haste_ability_integration():
 	var manager = CombatManager.new()
 	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"haste_value": 5.0}))
 	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0, 0.0, 0.0))
 	manager.initialize_combat(pg, eg)
 
 	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	player.ability_ids = ["basic_haste"]
+	player.ability_ids = ["self_haste"]
 	player.extra_stats["haste_value"] = 5.0
 
 	_simulate_time(manager, 1.5)
 	assert_true(player.has_effect("haste"), "player has haste effect")
 	assert_true(abs(player.tick_rate_multiplier - 2.0) < 0.01, "tick rate doubled")
+
+
+func test_ally_haste_ability_integration():
+	var manager = CombatManager.new()
+	var pg = CharacterGrid.new()
+	var caster = _make_source(1000, 1.0, 1.0, 0.0, 0.0, {"haste_value": 5.0})
+	var ally = _make_source(1000, 100.0, 1.0)
+	pg.place_character(caster, 0, 0)
+	pg.place_character(ally, 0, 1)
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	manager.initialize_combat(pg, eg)
+
+	var caster_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	caster_ch.ability_ids = ["ally_haste"]
+	caster_ch.extra_stats["haste_value"] = 5.0
+
+	var ally_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 1)
+
+	_simulate_time(manager, 1.5)
+	assert_false(caster_ch.has_effect("haste"), "caster does not have haste (excludes self)")
+	assert_true(ally_ch.has_effect("haste"), "ally has haste effect")
+	assert_true(abs(ally_ch.tick_rate_multiplier - 2.0) < 0.01, "ally tick rate doubled")
 
 
 # =============================================================================
