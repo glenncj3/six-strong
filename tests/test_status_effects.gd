@@ -80,7 +80,7 @@ func _make_source(hp: int, spd: float, dmg: float, def_rate: float = 0.0, crit: 
 		GameConstants.STAT_DAMAGE: dmg,
 		GameConstants.STAT_agility: def_rate,
 		GameConstants.STAT_CRIT_CHANCE: crit,
-		GameConstants.STAT_CHARGES: 0,
+		GameConstants.STAT_CHARGES: -1,
 	}
 	for key in extras:
 		ch.stats[key] = extras[key]

@@ -36,6 +36,8 @@ var column: int = 0
 # State
 var is_alive: bool = true
 var cooldown_remaining: float = 0.0
+var charges: int = -1  # -1 = unlimited, 0 = waiting for charge, >0 = charges remaining
+var waiting_for_charge: bool = false  # True when cooldown finished but no charges available
 
 # Timing
 var tick_rate_multiplier: float = 1.0
@@ -74,6 +76,10 @@ static func create_from_character(source: CharacterInstance, p_team: int, p_row:
 	cc.column = p_col
 	cc.is_alive = cc.health > 0
 	cc.cooldown_remaining = cc.speed
+
+	# Set charges from source stats (-1 means unlimited)
+	var source_charges = source.stats.get(GameConstants.STAT_CHARGES, -1)
+	cc.charges = source_charges if source_charges >= 0 else -1
 
 	# Copy extra stats not mapped to base fields
 	var mapped_stats = [GameConstants.STAT_HEALTH, GameConstants.STAT_SPEED,
@@ -129,6 +135,16 @@ func recalculate_stats() -> void:
 		if effect.continuous_modifier == "cooldown_tick_rate":
 			new_tick_rate *= effect.continuous_value
 	tick_rate_multiplier = new_tick_rate
+
+
+func has_charges() -> bool:
+	return charges != 0
+
+
+func add_charges(amount: int) -> void:
+	if charges == -1:
+		return  # Unlimited, nothing to do
+	charges += amount
 
 
 func has_speed() -> bool:
@@ -204,8 +220,15 @@ func update(delta: float) -> Dictionary:
 
 	cooldown_remaining -= effective_delta
 	if cooldown_remaining <= 0:
-		result["action_ready"] = true
-		cooldown_remaining = speed
+		if charges == 0:
+			# No charges available - stop cooldown and wait
+			cooldown_remaining = 0.0
+			waiting_for_charge = true
+		else:
+			result["action_ready"] = true
+			cooldown_remaining = speed
+			if charges > 0:
+				charges -= 1
 
 		# Decrement cooldown-type effect durations
 		var to_expire: Array = []

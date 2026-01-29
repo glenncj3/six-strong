@@ -148,6 +148,15 @@ func _update_combat(delta: float) -> void:
 				}
 				effect.on_tick.call(tick_context)
 
+	# Check if any characters waiting for charges now have charges
+	for character in all_living:
+		if character.waiting_for_charge and character.charges != 0:
+			character.waiting_for_charge = false
+			character.cooldown_remaining = character.speed
+			if character.charges > 0:
+				character.charges -= 1
+			_execute_character_action(character)
+
 	_check_win_condition()
 
 
@@ -265,7 +274,7 @@ func _check_win_condition() -> void:
 
 func _is_stalemate() -> bool:
 	for character in _state.board.get_all_living_characters():
-		if character.has_damage() and character.has_speed():
+		if character.has_damage() and character.has_speed() and character.has_charges():
 			return false
 		if _has_damage_dealing_effects(character):
 			return false

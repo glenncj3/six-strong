@@ -11,7 +11,7 @@
       "tags": ["earth", "holy"],
       "base_stats": {
         "health": 100,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.15,
         "speed": 3.0,
         "damage": 15,
@@ -37,7 +37,7 @@
       "tags": ["fire", "lightning"],
       "base_stats": {
         "health": 70,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.05,
         "speed": 4.0,
         "damage": 25,
@@ -63,7 +63,7 @@
       "tags": ["shadow"],
       "base_stats": {
         "health": 80,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.10,
         "speed": 2.0,
         "damage": 12,
@@ -89,7 +89,7 @@
       "tags": ["holy"],
       "base_stats": {
         "health": 90,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.10,
         "speed": 3.5,
         "damage": 8,
@@ -115,7 +115,7 @@
       "tags": ["earth"],
       "base_stats": {
         "health": 85,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.08,
         "speed": 2.5,
         "damage": 14,
@@ -141,7 +141,7 @@
       "tags": ["fire"],
       "base_stats": {
         "health": 110,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.05,
         "speed": 2.0,
         "damage": 20,
@@ -167,7 +167,7 @@
       "tags": ["holy", "earth"],
       "base_stats": {
         "health": 105,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.20,
         "speed": 3.5,
         "damage": 12,
@@ -193,7 +193,7 @@
       "tags": ["shadow"],
       "base_stats": {
         "health": 75,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.05,
         "speed": 4.5,
         "damage": 22,
@@ -219,7 +219,7 @@
       "tags": ["holy", "lightning"],
       "base_stats": {
         "health": 85,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.15,
         "speed": 2.5,
         "damage": 11,
@@ -245,7 +245,7 @@
       "tags": ["shadow"],
       "base_stats": {
         "health": 65,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.12,
         "speed": 1.5,
         "damage": 18,
@@ -271,7 +271,7 @@
       "tags": ["earth"],
       "base_stats": {
         "health": 95,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.12,
         "speed": 3.0,
         "damage": 10,
@@ -297,7 +297,7 @@
       "tags": ["earth", "fire"],
       "base_stats": {
         "health": 80,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.08,
         "speed": 2.5,
         "damage": 16,
@@ -323,7 +323,7 @@
       "tags": ["fire", "earth"],
       "base_stats": {
         "health": 105,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.10,
         "speed": 3.0,
         "damage": 14,
@@ -349,7 +349,7 @@
       "tags": ["earth"],
       "base_stats": {
         "health": 120,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.25,
         "speed": 4.0,
         "damage": 6,
@@ -377,7 +377,7 @@
       "tags": [],
       "base_stats": {
         "health": 85,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.10,
         "speed": 3.0,
         "damage": 12,
@@ -405,7 +405,7 @@
       "tags": [],
       "base_stats": {
         "health": 70,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.05,
         "speed": 2.5,
         "damage": 14,
@@ -433,7 +433,7 @@
       "tags": [],
       "base_stats": {
         "health": 60,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.05,
         "speed": 4.0,
         "damage": 18,
@@ -461,7 +461,7 @@
       "tags": [],
       "base_stats": {
         "health": 75,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.08,
         "speed": 3.5,
         "damage": 6,
@@ -489,7 +489,7 @@
       "tags": [],
       "base_stats": {
         "health": 95,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.15,
         "speed": 3.5,
         "damage": 8,
@@ -517,7 +517,7 @@
       "tags": [],
       "base_stats": {
         "health": 65,
-        "charges": 5,
+        "charges": 1,
         "agility": 0.12,
         "speed": 2.0,
         "damage": 10,
