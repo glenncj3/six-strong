@@ -20,7 +20,6 @@ var draft_manager: LegacyDraftManager = null
 var options_tiles_container: HBoxContainer = null
 var legacy_tiles: Array = []  # References to option tiles
 var select_buttons: Array = []  # SELECT buttons for each option
-var buttons_container: HBoxContainer = null  # Container for SELECT/UNLOCK buttons below tiles
 
 
 func _ready() -> void:
@@ -53,19 +52,10 @@ func _apply_visual_styling() -> void:
 
 
 func _setup_options_display() -> void:
-	var vbox = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 8)
-	options_display_container.add_child(vbox)
-
 	options_tiles_container = HBoxContainer.new()
 	options_tiles_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	options_tiles_container.add_theme_constant_override("separation", 8)
-	vbox.add_child(options_tiles_container)
-
-	buttons_container = HBoxContainer.new()
-	buttons_container.alignment = BoxContainer.ALIGNMENT_CENTER
-	buttons_container.add_theme_constant_override("separation", 8)
-	vbox.add_child(buttons_container)
+	options_display_container.add_child(options_tiles_container)
 
 
 # =============================================================================
@@ -121,46 +111,36 @@ func _update_options_display(options: Array) -> void:
 
 	var tile_size = _get_tile_size()
 
-	for option in options:
+	var current_options = draft_manager.current_options
+
+	for i in range(options.size()):
+		var option = options[i]
 		var legacy: LegacyData = option["legacy"]
+
+		var column = VBoxContainer.new()
+		column.add_theme_constant_override("separation", 8)
+		options_tiles_container.add_child(column)
+
 		var tile = LegacyTileScene.instantiate()
-		options_tiles_container.add_child(tile)
+		column.add_child(tile)
 		tile.setup(legacy, tile_size)
 		legacy_tiles.append(tile)
 
-	_create_select_buttons()
-
-
-func _create_select_buttons() -> void:
-	select_buttons.clear()
-
-	for child in buttons_container.get_children():
-		child.queue_free()
-
-	if legacy_tiles.is_empty():
-		return
-
-	var current_options = draft_manager.current_options
-
-	for i in range(min(legacy_tiles.size(), current_options.size())):
-		var tile = legacy_tiles[i]
-		var option = current_options[i]
-
+		# Create select button directly under the tile
 		var button = Button.new()
-		var tile_width = tile.custom_minimum_size.x
-		button.custom_minimum_size = Vector2(tile_width, 44)
-		button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		button.custom_minimum_size = Vector2(0, 44)
+		button.size_flags_horizontal = Control.SIZE_FILL
 
-		if option["is_owned"]:
+		if i < current_options.size() and current_options[i]["is_owned"]:
 			button.text = "SELECT"
-		else:
-			button.text = "UNLOCK (%d)" % option["unlock_cost"]
+		elif i < current_options.size():
+			button.text = "UNLOCK (%d)" % current_options[i]["unlock_cost"]
 
 		UIStyles.setup_button(button, GameConstants.FONT_SIZE_BUTTON_LARGE)
 		button.pressed.connect(_on_option_button_pressed.bind(i))
-
-		buttons_container.add_child(button)
+		column.add_child(button)
 		select_buttons.append(button)
+
 
 
 func _on_option_button_pressed(option_index: int) -> void:
