@@ -153,14 +153,22 @@ func _parse_csv_line(line: String) -> Array:
 	var fields: Array = []
 	var current := ""
 	var in_quotes := false
-	for ch in line:
+	var i := 0
+	while i < line.length():
+		var ch = line[i]
 		if ch == '"':
-			in_quotes = not in_quotes
+			if in_quotes and i + 1 < line.length() and line[i + 1] == '"':
+				current += '"'
+				i += 2
+				continue
+			else:
+				in_quotes = not in_quotes
 		elif ch == ',' and not in_quotes:
 			fields.append(current.strip_edges())
 			current = ""
 		else:
 			current += ch
+		i += 1
 	fields.append(current.strip_edges())
 	return fields
 

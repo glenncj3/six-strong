@@ -1,536 +1,982 @@
 {
   "characters": [
     {
-      "id": "char_warrior_001",
-      "name": "Brave Knight",
-      "description": "A stalwart defender who leads the charge into battle",
-      "image_path": "res://assets/characters/knight.png",
-      "cost": 40,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["earth", "holy"],
+      "abilities": [
+        "attack_enemy"
+      ],
       "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 6,
+        "crit_chance": 0.05,
+        "damage": 10.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
         "health": 100,
-        "charges": 1,
-        "agility": 0.15,
-        "speed": 3.0,
-        "damage": 15,
-        "crit_chance": 0.0,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 3.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "LA01",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Lannister.png",
+      "level_requirement": 1,
+      "name": " Lannisport Guard",
+      "tags": [
+        "Lannister"
+      ]
     },
     {
-      "id": "char_mage_001",
-      "name": "Mystic Sage",
-      "description": "A powerful spellcaster who wields arcane forces",
-      "image_path": "res://assets/characters/mage.png",
-      "cost": 45,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["fire", "lightning"],
+      "abilities": [
+        "poison_enemy"
+      ],
       "base_stats": {
-        "health": 70,
-        "charges": 1,
         "agility": 0.05,
-        "speed": 4.0,
-        "damage": 25,
-        "crit_chance": 0.05,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 2.0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 3.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "LA02",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Lannister.png",
+      "level_requirement": 1,
+      "name": " Alchemist Apprentice",
+      "tags": [
+        "Lannister"
+      ]
     },
     {
-      "id": "char_rogue_001",
-      "name": "Shadow Thief",
-      "description": "A nimble rogue who strikes from the shadows",
-      "image_path": "res://assets/characters/rogue.png",
-      "cost": 40,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["shadow"],
+      "abilities": [
+        "attack_enemy",
+        "slow_enemy"
+      ],
       "base_stats": {
-        "health": 80,
-        "charges": 1,
-        "agility": 0.10,
-        "speed": 2.0,
-        "damage": 12,
-        "crit_chance": 0.15,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
-    },
-    {
-      "id": "char_cleric_001",
-      "name": "Holy Priest",
-      "description": "A divine healer who supports allies with holy magic",
-      "image_path": "res://assets/characters/cleric.png",
-      "cost": 50,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["holy"],
-      "base_stats": {
-        "health": 90,
-        "charges": 1,
-        "agility": 0.10,
-        "speed": 3.5,
-        "damage": 8,
-        "crit_chance": 0.0,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
-    },
-    {
-      "id": "char_ranger_001",
-      "name": "Forest Scout",
-      "description": "A skilled archer who strikes from afar",
-      "image_path": "res://assets/characters/ranger.png",
-      "cost": 45,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["earth"],
-      "base_stats": {
-        "health": 85,
-        "charges": 1,
-        "agility": 0.08,
-        "speed": 2.5,
-        "damage": 14,
-        "crit_chance": 0.10,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
-    },
-    {
-      "id": "char_berserker_001",
-      "name": "Raging Berserker",
-      "description": "A ferocious warrior who deals massive damage",
-      "image_path": "res://assets/characters/berserker.png",
-      "cost": 55,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["fire"],
-      "base_stats": {
-        "health": 110,
-        "charges": 1,
         "agility": 0.05,
-        "speed": 2.0,
-        "damage": 20,
-        "crit_chance": 0.10,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 5.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 2.0,
+        "speed": 5.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "LA03",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Lannister.png",
+      "level_requirement": 1,
+      "name": " Red Keep Spy",
+      "tags": [
+        "Lannister"
+      ]
     },
     {
-      "id": "char_paladin_001",
-      "name": "Divine Paladin",
-      "description": "A holy knight who combines martial prowess with divine magic",
-      "image_path": "res://assets/characters/paladin.png",
-      "cost": 60,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["holy", "earth"],
+      "abilities": [
+        "poison_enemy"
+      ],
       "base_stats": {
-        "health": 105,
-        "charges": 1,
-        "agility": 0.20,
-        "speed": 3.5,
-        "damage": 12,
-        "crit_chance": 0.0,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
-    },
-    {
-      "id": "char_necromancer_001",
-      "name": "Dark Necromancer",
-      "description": "A master of dark magic who draws power from death",
-      "image_path": "res://assets/characters/necromancer.png",
-      "cost": 65,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["shadow"],
-      "base_stats": {
-        "health": 75,
-        "charges": 1,
         "agility": 0.05,
-        "speed": 4.5,
-        "damage": 22,
-        "crit_chance": 0.05,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
+        "burn_value": 0,
+        "charges": 1,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 5.0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 4.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "LA04",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Lannister.png",
+      "level_requirement": 1,
+      "name": " Brothel Madame",
+      "tags": [
+        "Lannister"
+      ]
     },
     {
-      "id": "char_monk_001",
-      "name": "Zen Monk",
-      "description": "A disciplined fighter who channels inner energy",
-      "image_path": "res://assets/characters/monk.png",
-      "cost": 50,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["holy", "lightning"],
+      "abilities": [
+        "attack_enemy"
+      ],
       "base_stats": {
-        "health": 85,
-        "charges": 1,
-        "agility": 0.15,
-        "speed": 2.5,
-        "damage": 11,
-        "crit_chance": 0.05,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
-    },
-    {
-      "id": "char_assassin_001",
-      "name": "Silent Assassin",
-      "description": "A deadly killer who eliminates targets with precision",
-      "image_path": "res://assets/characters/assassin.png",
-      "cost": 60,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["shadow"],
-      "base_stats": {
-        "health": 65,
-        "charges": 1,
-        "agility": 0.12,
-        "speed": 1.5,
-        "damage": 18,
-        "crit_chance": 0.25,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
-    },
-    {
-      "id": "char_warden_001",
-      "name": "Forest Warden",
-      "description": "A guardian of nature who protects the wild lands",
-      "image_path": "res://assets/characters/warden.png",
-      "cost": 50,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["earth"],
-      "base_stats": {
-        "health": 95,
-        "charges": 1,
-        "agility": 0.12,
-        "speed": 3.0,
-        "damage": 10,
-        "crit_chance": 0.0,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
-    },
-    {
-      "id": "char_beastmaster_001",
-      "name": "Beast Master",
-      "description": "Commands wild creatures in battle",
-      "image_path": "res://assets/characters/beastmaster.png",
-      "cost": 55,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["earth", "fire"],
-      "base_stats": {
-        "health": 80,
-        "charges": 1,
-        "agility": 0.08,
-        "speed": 2.5,
-        "damage": 16,
-        "crit_chance": 0.05,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
-    },
-    {
-      "id": "char_warchief_001",
-      "name": "War Chief",
-      "description": "A battle-hardened commander who inspires troops",
-      "image_path": "res://assets/characters/warchief.png",
-      "cost": 55,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["fire", "earth"],
-      "base_stats": {
-        "health": 105,
-        "charges": 1,
-        "agility": 0.10,
-        "speed": 3.0,
-        "damage": 14,
-        "crit_chance": 0.05,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
-    },
-    {
-      "id": "char_shieldbearer_001",
-      "name": "Shield Bearer",
-      "description": "An immovable defender who protects allies",
-      "image_path": "res://assets/characters/shieldbearer.png",
-      "cost": 45,
-      "level_requirement": 1,
-      "abilities": ["attack_enemy"],
-      "tags": ["earth"],
-      "base_stats": {
-        "health": 120,
-        "charges": 1,
-        "agility": 0.25,
-        "speed": 4.0,
-        "damage": 6,
-        "crit_chance": 0.0,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
-    },
-    {
-      "id": "char_generic_soldier",
-      "name": "Hired Soldier",
-      "description": "A reliable sword for hire",
-      "image_path": "",
-      "display_color": "#5A6A4A",
-      "cost": 25,
-      "level_requirement": 1,
-      "is_generic": true,
-      "abilities": ["attack_enemy"],
-      "tags": [],
-      "base_stats": {
-        "health": 85,
-        "charges": 1,
-        "agility": 0.10,
-        "speed": 3.0,
-        "damage": 12,
-        "crit_chance": 0.0,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
-    },
-    {
-      "id": "char_generic_archer",
-      "name": "Hired Archer",
-      "description": "A mercenary bowman",
-      "image_path": "",
-      "display_color": "#4A5A3A",
-      "cost": 25,
-      "level_requirement": 1,
-      "is_generic": true,
-      "abilities": ["attack_enemy"],
-      "tags": [],
-      "base_stats": {
-        "health": 70,
-        "charges": 1,
         "agility": 0.05,
-        "speed": 2.5,
-        "damage": 14,
-        "crit_chance": 0.05,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 5.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 2,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 5.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "LA05",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Lannister.png",
+      "level_requirement": 1,
+      "name": " Gold Cloaks",
+      "tags": [
+        "Lannister"
+      ]
     },
     {
-      "id": "char_generic_mage",
-      "name": "Hedge Wizard",
-      "description": "A wandering spellcaster",
-      "image_path": "",
-      "display_color": "#3A4A5A",
-      "cost": 30,
-      "level_requirement": 1,
-      "is_generic": true,
-      "abilities": ["attack_enemy"],
-      "tags": [],
+      "abilities": [
+        "poison_enemy"
+      ],
       "base_stats": {
-        "health": 60,
-        "charges": 1,
         "agility": 0.05,
-        "speed": 4.0,
-        "damage": 18,
-        "crit_chance": 0.0,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 4.0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 5.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "LA06",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Lannister.png",
+      "level_requirement": 1,
+      "name": " Cersei's Informer",
+      "tags": [
+        "Lannister"
+      ]
     },
     {
-      "id": "char_generic_healer",
-      "name": "Traveling Medic",
-      "description": "A healer seeking work",
-      "image_path": "",
-      "display_color": "#5A4A5A",
-      "cost": 30,
-      "level_requirement": 1,
-      "is_generic": true,
-      "abilities": ["attack_enemy"],
-      "tags": [],
+      "abilities": [
+        "heal_ally",
+        "poison_enemy"
+      ],
       "base_stats": {
-        "health": 75,
-        "charges": 1,
-        "agility": 0.08,
-        "speed": 3.5,
-        "damage": 6,
-        "crit_chance": 0.0,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 30.0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 2.0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 6.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "LA07",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Lannister.png",
+      "level_requirement": 1,
+      "name": " Maester at the Rock",
+      "tags": [
+        "Lannister"
+      ]
     },
     {
-      "id": "char_generic_guard",
-      "name": "Town Guard",
-      "description": "A sturdy defender looking for adventure",
-      "image_path": "",
-      "display_color": "#5A5A4A",
-      "cost": 25,
-      "level_requirement": 1,
-      "is_generic": true,
-      "abilities": ["attack_enemy"],
-      "tags": [],
+      "abilities": [
+        "attack_enemy",
+        "slow_enemy_row"
+      ],
       "base_stats": {
-        "health": 95,
-        "charges": 1,
-        "agility": 0.15,
-        "speed": 3.5,
-        "damage": 8,
-        "crit_chance": 0.0,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 20.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 1.0,
+        "speed": 7.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "LA08",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Lannister.png",
+      "level_requirement": 1,
+      "name": "Imp's Agent",
+      "tags": [
+        "Lannister"
+      ]
     },
     {
-      "id": "char_generic_scout",
-      "name": "Freelance Scout",
-      "description": "A quick and nimble explorer",
-      "image_path": "",
-      "display_color": "#4A5A4A",
-      "cost": 25,
-      "level_requirement": 1,
-      "is_generic": true,
-      "abilities": ["attack_enemy"],
-      "tags": [],
+      "abilities": [
+        "shield_self",
+        "poison_enemy"
+      ],
       "base_stats": {
-        "health": 65,
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 4.0,
+        "shield_value": 20.0,
+        "slow_value": 0,
+        "speed": 7.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "LA09",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Lannister.png",
+      "level_requirement": 1,
+      "name": " Spider's Whisperer",
+      "tags": [
+        "Lannister"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy",
+        "haste_ally_row"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 30.0,
+        "freeze_value": 0,
+        "haste_value": 1.0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 7.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "LA10",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Lannister.png",
+      "level_requirement": 1,
+      "name": " Red Cloaks",
+      "tags": [
+        "Lannister"
+      ]
+    },
+    {
+      "abilities": [
+        "shield_ally"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 20.0,
+        "slow_value": 0,
+        "speed": 3.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "ST01",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Stark.png",
+      "level_requirement": 1,
+      "name": " Northern Patriarch",
+      "tags": [
+        "Stark"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 5.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 3.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "ST02",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Stark.png",
+      "level_requirement": 1,
+      "name": " Bear Island Scout",
+      "tags": [
+        "Stark"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy",
+        "haste_ally"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 1.0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 4.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "ST03",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Stark.png",
+      "level_requirement": 1,
+      "name": " Direwolf Pup",
+      "tags": [
+        "Stark"
+      ]
+    },
+    {
+      "abilities": [
+        "heal_ally",
+        "shield_ally"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 10.0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 10.0,
+        "slow_value": 0,
+        "speed": 5.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "ST04",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Stark.png",
+      "level_requirement": 1,
+      "name": " Dreadfort Maester",
+      "tags": [
+        "Stark"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy",
+        "heal_self"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 20.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 20.0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 6.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "ST05",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Stark.png",
+      "level_requirement": 1,
+      "name": " Last Hearth Scouts",
+      "tags": [
+        "Stark"
+      ]
+    },
+    {
+      "abilities": [
+        "shield_ally",
+        "freeze_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 1.0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 40.0,
+        "slow_value": 0,
+        "speed": 6.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "ST06",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Stark.png",
+      "level_requirement": 1,
+      "name": " Woods Witch",
+      "tags": [
+        "Stark"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 15.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 6.0
+      },
+      "abilities": [
+        "attack_enemy",
+        {"id": "buff_adjacent_attack", "buff_value": 5}
+      ],
+      "cost": 2,
+      "description": "",
+      "id": "ST07",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Stark.png",
+      "level_requirement": 1,
+      "name": " Tumblestone Knight",
+      "tags": [
+        "Stark"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy",
+        "shield_self"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 20.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 20.0,
+        "slow_value": 0,
+        "speed": 7.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "ST08",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Stark.png",
+      "level_requirement": 1,
+      "name": " Raventree Elite",
+      "tags": [
+        "Stark"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy",
+        "freeze_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 10.0,
+        "freeze_value": 1.0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 7.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "ST09",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Stark.png",
+      "level_requirement": 1,
+      "name": " Umber Loyalist",
+      "tags": [
+        "Stark"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 20.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 8.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "ST10",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Stark.png",
+      "level_requirement": 1,
+      "name": " Karstark Lancer",
+      "tags": [
+        "Stark"
+      ]
+    },
+    {
+      "abilities": [
+        "burn_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 1.0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 1.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "TA01",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Targaryen.png",
+      "level_requirement": 1,
+      "name": " Dothraki Handmaiden",
+      "tags": [
+        "Targaryen"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 3,
+        "crit_chance": 0,
+        "damage": 15.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 2.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "TA02",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Targaryen.png",
+      "level_requirement": 1,
+      "name": " Second Sons",
+      "tags": [
+        "Targaryen"
+      ]
+    },
+    {
+      "abilities": [
+        "burn_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 2.0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 3.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "TA03",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Targaryen.png",
+      "level_requirement": 1,
+      "name": " Covert Loyalist",
+      "tags": [
+        "Targaryen"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy",
+        "slow_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 2,
+        "crit_chance": 0,
+        "damage": 20.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 2.0,
+        "speed": 4.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "TA04",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Targaryen.png",
+      "level_requirement": 1,
+      "name": " Merchant Prince",
+      "tags": [
+        "Targaryen"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0.33,
+        "damage": 10.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 4.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "TA05",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Targaryen.png",
+      "level_requirement": 1,
+      "name": " Unsullied",
+      "tags": [
+        "Targaryen"
+      ]
+    },
+    {
+      "abilities": [
+        "burn_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 3.0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 5.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "TA06",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Targaryen.png",
+      "level_requirement": 1,
+      "name": " Freedmen",
+      "tags": [
+        "Targaryen"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy",
+        "burn_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 2.0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 5.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 5.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "TA07",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Targaryen.png",
+      "level_requirement": 1,
+      "name": " Dothraki Outriders",
+      "tags": [
+        "Targaryen"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
         "charges": 1,
-        "agility": 0.12,
-        "speed": 2.0,
-        "damage": 10,
-        "crit_chance": 0.10,
-        "heal_value": 0.0,
-        "shield_value": 0.0,
-        "burn_value": 0.0,
-        "poison_value": 0.0,
-        "haste_value": 0.0,
-        "slow_value": 0.0,
-        "freeze_value": 0.0,
-        "multistrike_value": 0
-      }
+        "crit_chance": 0,
+        "damage": 60.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 5.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "TA08",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Targaryen.png",
+      "level_requirement": 1,
+      "name": " Devoted Bloodrider",
+      "tags": [
+        "Targaryen"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 10.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 5.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "TA09",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Targaryen.png",
+      "level_requirement": 1,
+      "name": " Braided Warrior",
+      "tags": [
+        "Targaryen"
+      ]
+    },
+    {
+      "abilities": [
+        "heal_ally",
+        "haste_ally"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 0,
+        "freeze_value": 0,
+        "haste_value": 1.0,
+        "heal_value": 30.0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 6.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "TA10",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Targaryen.png",
+      "level_requirement": 1,
+      "name": " Horselord",
+      "tags": [
+        "Targaryen"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 5.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 3.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "NI01",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\NightsWatch.png",
+      "level_requirement": 1,
+      "name": "Night's Watch Placeholder",
+      "tags": [
+        "NightsWatch"
+      ]
+    },
+    {
+      "abilities": [
+        "attack_enemy"
+      ],
+      "base_stats": {
+        "agility": 0.05,
+        "burn_value": 0,
+        "charges": 0,
+        "crit_chance": 0,
+        "damage": 5.0,
+        "freeze_value": 0,
+        "haste_value": 0,
+        "heal_value": 0,
+        "health": 100,
+        "multistrike_value": 0,
+        "poison_value": 0,
+        "shield_value": 0,
+        "slow_value": 0,
+        "speed": 3.0
+      },
+      "cost": 2,
+      "description": "",
+      "id": "BA01",
+      "image_path": "C:\\Users\\glenn\\Dev\\six-strong\\assets\\characters\\Baratheon.png",
+      "level_requirement": 1,
+      "name": "Baratheon Placeholder",
+      "tags": [
+        "Baratheon"
+      ]
     }
   ]
 }

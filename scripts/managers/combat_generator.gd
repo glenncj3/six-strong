@@ -6,68 +6,8 @@ extends RefCounted
 
 # Predefined enemy team templates: arrays of 6 character IDs
 # Each template fills the 2x3 grid (front row [0-2], back row [3-5])
-const ENEMY_TEAMS = [
-	# Balanced - knight front, mage back
-	{
-		"name": "Iron Vanguard",
-		"chars": ["char_warrior_001", "char_paladin_001", "char_shieldbearer_001",
-				  "char_mage_001", "char_ranger_001", "char_cleric_001"]
-	},
-	# Aggressive - berserkers and assassins
-	{
-		"name": "Blood Reavers",
-		"chars": ["char_berserker_001", "char_warchief_001", "char_monk_001",
-				  "char_assassin_001", "char_necromancer_001", "char_rogue_001"]
-	},
-	# Defensive - tanks front, support back
-	{
-		"name": "Stone Wall",
-		"chars": ["char_shieldbearer_001", "char_paladin_001", "char_warden_001",
-				  "char_cleric_001", "char_generic_healer", "char_generic_guard"]
-	},
-	# Speed - fast strikers
-	{
-		"name": "Shadow Fangs",
-		"chars": ["char_rogue_001", "char_assassin_001", "char_monk_001",
-				  "char_ranger_001", "char_generic_scout", "char_beastmaster_001"]
-	},
-	# Magic heavy
-	{
-		"name": "Arcane Circle",
-		"chars": ["char_warden_001", "char_monk_001", "char_paladin_001",
-				  "char_mage_001", "char_necromancer_001", "char_generic_mage"]
-	},
-	# Mercenary rabble - all generics
-	{
-		"name": "Hired Blades",
-		"chars": ["char_generic_soldier", "char_generic_guard", "char_generic_scout",
-				  "char_generic_archer", "char_generic_mage", "char_generic_healer"]
-	},
-	# Warlord's army
-	{
-		"name": "Warlord's Host",
-		"chars": ["char_warchief_001", "char_berserker_001", "char_warrior_001",
-				  "char_generic_soldier", "char_generic_archer", "char_beastmaster_001"]
-	},
-	# Nature's wrath
-	{
-		"name": "Wild Hunt",
-		"chars": ["char_beastmaster_001", "char_warden_001", "char_ranger_001",
-				  "char_monk_001", "char_generic_scout", "char_rogue_001"]
-	},
-	# Dark forces
-	{
-		"name": "Cult of Shadows",
-		"chars": ["char_necromancer_001", "char_assassin_001", "char_rogue_001",
-				  "char_generic_mage", "char_generic_scout", "char_monk_001"]
-	},
-	# Holy crusade
-	{
-		"name": "Sacred Order",
-		"chars": ["char_paladin_001", "char_warrior_001", "char_shieldbearer_001",
-				  "char_cleric_001", "char_warden_001", "char_generic_healer"]
-	},
-]
+# TODO: Populate with real character data
+const ENEMY_TEAMS = []
 
 
 func generate_options(count: int) -> Array[CombatOption]:
@@ -163,6 +103,9 @@ func _build_enemy_team(strength_tier: int) -> CharacterGrid:
 	Returns:
 		A populated CharacterGrid with 6 characters
 	"""
+	if ENEMY_TEAMS.is_empty():
+		push_warning("CombatGenerator: No enemy team templates defined")
+		return CharacterGrid.new()
 	var template = ENEMY_TEAMS[randi() % ENEMY_TEAMS.size()]
 	var grid = CharacterGrid.new()
 

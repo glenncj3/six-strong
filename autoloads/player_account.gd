@@ -33,7 +33,7 @@ const SAVE_PATH = "user://player_account.json"
 const SAVE_FORMAT_VERSION = 3
 
 # Default starting legacies to unlock
-const STARTING_LEGACY_IDS = ["legacy_knight_order", "legacy_shadow_guild", "legacy_arcane_academy", "legacy_wild_hunt", "legacy_iron_legion"]
+const STARTING_LEGACY_IDS = ["legacy_house_stark", "legacy_house_lannister", "legacy_house_targaryen", "legacy_nights_watch", "legacy_house_baratheon"]
 
 
 # =============================================================================
@@ -167,12 +167,7 @@ func _create_default_account() -> void:
 	# Wire up managers
 	_setup_manager_connections()
 
-	# Unlock starting characters (for backwards compatibility during transition)
-	var starting_chars = ["char_warrior_001", "char_mage_001", "char_rogue_001", "char_cleric_001", "char_ranger_001", "char_berserker_001", "char_warden_001", "char_warchief_001"]
-	for char_id in starting_chars:
-		_collection.unlock_character(char_id)
-
-	# Unlock starting legacies (Phase 0)
+	# Unlock starting legacies
 	for legacy_id in STARTING_LEGACY_IDS:
 		_legacy_collection.unlock_legacy(legacy_id)
 
