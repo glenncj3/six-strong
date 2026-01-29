@@ -85,6 +85,16 @@
       "applies_effect": "shield",
       "stacks_from": "shield_value",
       "cooldown_source": "speed"
+    },
+    {
+      "id": "slow_enemy",
+      "name": "Slow Enemy",
+      "description": "Applies slow to a single enemy, halving their cooldown tick rate",
+      "type": "active",
+      "targeting": "enemy_single_apply_effect",
+      "applies_effect": "slow",
+      "duration_from": "slow_value",
+      "cooldown_source": "speed"
     }
   ]
 }

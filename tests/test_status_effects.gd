@@ -25,10 +25,17 @@ func _run_tests():
 	test_haste_expires_restores_tick_rate()
 	test_haste_multiple_applications_additive()
 
+	section("Slow Template")
+	test_slow_creation_from_template()
+	test_slow_halves_tick_rate()
+	test_slow_expires_restores_tick_rate()
+	test_slow_multiple_applications_additive()
+
 	section("Ability Integration")
 	test_basic_poison_ability_integration()
 	test_self_haste_ability_integration()
 	test_ally_haste_ability_integration()
+	test_slow_enemy_ability_integration()
 
 	section("Shield Template")
 	test_shield_creation_from_template()
@@ -94,6 +101,13 @@ func _get_haste_template() -> Dictionary:
 	var gd_node = root.get_node_or_null("GameData")
 	if gd_node:
 		return gd_node.get_status_effect("haste")
+	return {}
+
+
+func _get_slow_template() -> Dictionary:
+	var gd_node = root.get_node_or_null("GameData")
+	if gd_node:
+		return gd_node.get_status_effect("slow")
 	return {}
 
 
@@ -316,6 +330,88 @@ func test_haste_multiple_applications_additive():
 
 	_simulate_time(manager, 1.0)
 	assert_false(player.has_effect("haste"), "haste expired after 7s")
+
+
+# =============================================================================
+# SLOW TESTS
+# =============================================================================
+
+func test_slow_creation_from_template():
+	var template = _get_slow_template()
+	assert_false(template.is_empty(), "slow template loaded from GameData")
+
+	var effect = StatusEffectFactory.create_from_template(template, "src1", {"duration_value": 5.0})
+	assert_eq(effect.effect_id, "slow", "effect_id is slow")
+	assert_eq(effect.continuous_modifier, "cooldown_tick_rate", "continuous_modifier set")
+	assert_true(abs(effect.continuous_value - 0.5) < 0.01, "continuous_value 0.5")
+	assert_eq(effect.duration_type, "seconds", "duration_type seconds")
+	assert_true(abs(effect.duration_value - 5.0) < 0.01, "duration_value from override")
+	assert_eq(effect.merge_behavior, "extend_duration", "merge_behavior")
+
+
+func test_slow_halves_tick_rate():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 2.0, 10.0, 0.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var template = _get_slow_template()
+	var effect = StatusEffectFactory.create_from_template(template, "s1", {"duration_value": 10.0})
+	manager.apply_effect(player, effect)
+
+	assert_true(abs(player.tick_rate_multiplier - 0.5) < 0.01, "tick rate halved")
+
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	# With slow (0.5x), speed 2.0 = effective cooldown 4.0s. After 3.5s should NOT have acted.
+	_simulate_time(manager, 3.5)
+	assert_true(abs(enemy.health - 1000.0) < 0.01, "player has not attacked yet due to slow")
+
+	# After 4.5s total, should have acted once
+	_simulate_time(manager, 1.0)
+	assert_true(enemy.health < 1000.0, "player attacked after slow cooldown elapsed")
+
+
+func test_slow_expires_restores_tick_rate():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var template = _get_slow_template()
+	var effect = StatusEffectFactory.create_from_template(template, "s1", {"duration_value": 1.0})
+	manager.apply_effect(player, effect)
+	assert_true(abs(player.tick_rate_multiplier - 0.5) < 0.01, "tick rate halved")
+
+	_simulate_time(manager, 2.0)
+	assert_false(player.has_effect("slow"), "slow expired")
+	assert_true(abs(player.tick_rate_multiplier - 1.0) < 0.01, "tick rate restored to 1.0")
+
+
+func test_slow_multiple_applications_additive():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var template = _get_slow_template()
+
+	var effect1 = StatusEffectFactory.create_from_template(template, "s1", {"duration_value": 3.0})
+	manager.apply_effect(player, effect1)
+	var effect2 = StatusEffectFactory.create_from_template(template, "s1", {"duration_value": 4.0})
+	manager.apply_effect(player, effect2)
+
+	var slow_effect = player.get_effect("slow")
+	assert_true(abs(slow_effect.duration_value - 7.0) < 0.01, "slow duration is additive: 3 + 4 = 7")
+	assert_true(player.has_effect("slow"), "slow still active")
+
+	_simulate_time(manager, 6.5)
+	assert_true(player.has_effect("slow"), "slow still active at 6.5s")
+
+	_simulate_time(manager, 1.0)
+	assert_false(player.has_effect("slow"), "slow expired after 7s")
 
 
 # =============================================================================
@@ -552,6 +648,22 @@ func test_ally_haste_ability_integration():
 	assert_false(caster_ch.has_effect("haste"), "caster does not have haste (excludes self)")
 	assert_true(ally_ch.has_effect("haste"), "ally has haste effect")
 	assert_true(abs(ally_ch.tick_rate_multiplier - 2.0) < 0.01, "ally tick rate doubled")
+
+
+func test_slow_enemy_ability_integration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"slow_value": 5.0}))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["slow_enemy"]
+	player.extra_stats["slow_value"] = 5.0
+
+	_simulate_time(manager, 1.5)
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	assert_true(enemy.has_effect("slow"), "enemy has slow effect")
+	assert_true(abs(enemy.tick_rate_multiplier - 0.5) < 0.01, "enemy tick rate halved")
 
 
 # =============================================================================

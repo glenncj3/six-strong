@@ -31,6 +31,17 @@
       "tick_interval": 0,
       "continuous_modifier": "cooldown_tick_rate",
       "continuous_value": 2.0
+    },
+    {
+      "id": "slow",
+      "name": "Slow",
+      "description": "Halves cooldown tick rate",
+      "tags": ["debuff", "speed"],
+      "merge_behavior": "extend_duration",
+      "duration_type": "seconds",
+      "tick_interval": 0,
+      "continuous_modifier": "cooldown_tick_rate",
+      "continuous_value": 0.5
     }
   ]
 }
