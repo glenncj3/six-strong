@@ -100,23 +100,20 @@ func recalculate_stats() -> void:
 		elif effect.modifier_type == "percent":
 			pct_mods[s] = pct_mods.get(s, 0.0) + effect.value
 
-	# Apply: base + flat, then * (1 + sum_of_percents)
-	var base_plus_flat_speed = base_speed + flat_mods.get("speed", 0.0)
-	speed = base_plus_flat_speed * (1.0 + pct_mods.get("speed", 0.0))
+	# Apply: (base + flat) * (1 + sum_of_percents) for each stat
+	var stat_map := {
+		"speed": "base_speed",
+		"damage": "base_damage",
+		"crit_chance": "base_crit_chance",
+		"agility": "base_agility",
+	}
+	for stat_name in stat_map:
+		var base_val: float = get(stat_map[stat_name])
+		var new_val = (base_val + flat_mods.get(stat_name, 0.0)) * (1.0 + pct_mods.get(stat_name, 0.0))
+		set(stat_name, new_val)
 
-	var base_plus_flat_damage = base_damage + flat_mods.get("damage", 0.0)
-	damage = base_plus_flat_damage * (1.0 + pct_mods.get("damage", 0.0))
-
-	var base_plus_flat_crit = base_crit_chance + flat_mods.get("crit_chance", 0.0)
-	crit_chance = base_plus_flat_crit * (1.0 + pct_mods.get("crit_chance", 0.0))
-
-	var base_plus_flat_def = base_agility + flat_mods.get("agility", 0.0)
-	agility = base_plus_flat_def * (1.0 + pct_mods.get("agility", 0.0))
-
-	# Recalculate max_health from stable base
-	var flat_hp = flat_mods.get("health", 0.0)
-	var pct_hp = pct_mods.get("health", 0.0)
-	var new_max = (base_max_health + flat_hp) * (1.0 + pct_hp)
+	# Recalculate max_health (special: adjusts current health)
+	var new_max = (base_max_health + flat_mods.get("health", 0.0)) * (1.0 + pct_mods.get("health", 0.0))
 	if new_max != max_health:
 		var diff = new_max - max_health
 		max_health = new_max

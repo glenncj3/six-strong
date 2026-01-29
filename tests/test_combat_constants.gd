@@ -30,6 +30,9 @@ func _run_tests():
 	test_manager_draw()
 	test_manager_clones_both_teams()
 
+	section("Utility Functions")
+	test_get_enemy_team()
+
 	section("CombatTargeting Uses Constants")
 	test_targeting_enemy_team_flip()
 	test_targeting_front_row_priority()
@@ -172,6 +175,15 @@ func test_character_board_index():
 	cc.column = 2
 	assert_eq(cc.get_board_index(), GameConstants.ROW_BACK * GameConstants.GRID_COLS + 2, "board index uses GRID_COLS")
 	assert_eq(cc.get_board_index(), 5, "back row col 2 = index 5")
+
+
+# =============================================================================
+# TESTS: Utility Functions
+# =============================================================================
+
+func test_get_enemy_team():
+	assert_eq(GameConstants.get_enemy_team(GameConstants.TEAM_PLAYER), GameConstants.TEAM_OPPONENT, "player's enemy is opponent")
+	assert_eq(GameConstants.get_enemy_team(GameConstants.TEAM_OPPONENT), GameConstants.TEAM_PLAYER, "opponent's enemy is player")
 
 
 # =============================================================================

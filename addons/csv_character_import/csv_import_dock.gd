@@ -177,11 +177,17 @@ func _row_to_character(row: Dictionary) -> Dictionary:
 		if key in row and not row[key].is_empty():
 			character[key] = _convert_value(key, row[key])
 
-	# Ability
+	# Abilities (pipe-separated for multiple, e.g. "attack_enemy|shield_self")
 	if "ability" in row and not row["ability"].is_empty():
-		character["ability"] = row["ability"]
+		var parts = row["ability"].split("|")
+		var abilities: Array = []
+		for p in parts:
+			var trimmed = p.strip_edges()
+			if not trimmed.is_empty():
+				abilities.append(trimmed)
+		character["abilities"] = abilities if abilities.size() > 0 else ["attack_enemy"]
 	else:
-		character["ability"] = "attack_enemy"
+		character["abilities"] = ["attack_enemy"]
 
 	# Tags (pipe-separated in CSV, e.g. "fire|lightning")
 	if "tags" in row and not row["tags"].is_empty():
@@ -291,8 +297,12 @@ func _write_csv(path: String, characters: Array) -> void:
 			fields.append(_csv_escape("|".join(tags_val)))
 		else:
 			fields.append("")
-		# Ability
-		fields.append(_csv_escape(str(c.get("ability", "attack_enemy"))))
+		# Abilities (pipe-separated)
+		var abilities_val = c.get("abilities", ["attack_enemy"])
+		if abilities_val is Array:
+			fields.append(_csv_escape("|".join(abilities_val)))
+		else:
+			fields.append(_csv_escape(str(abilities_val)))
 		file.store_line(",".join(fields))
 
 	file.close()

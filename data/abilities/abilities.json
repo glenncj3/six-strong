@@ -6,8 +6,7 @@
       "description": "Deals damage to a single enemy",
       "type": "active",
       "target_mode": "enemy_single",
-      "damage_multiplier": 1.0,
-      "cooldown_source": "speed"
+      "damage_multiplier": 1.0
     },
     {
       "id": "attack_enemy_row",
@@ -15,8 +14,7 @@
       "description": "Deals full damage to all frontline enemies. If no frontline enemies, hits all backline enemies instead",
       "type": "active",
       "target_mode": "enemy_frontline",
-      "damage_multiplier": 1.0,
-      "cooldown_source": "speed"
+      "damage_multiplier": 1.0
     },
     {
       "id": "heal_ally",
@@ -24,8 +22,7 @@
       "description": "Heals a single ally based on heal_value",
       "type": "active",
       "target_mode": "ally_single",
-      "heal_from": "heal_value",
-      "cooldown_source": "speed"
+      "heal_from": "heal_value"
     },
     {
       "id": "heal_allies",
@@ -33,8 +30,7 @@
       "description": "Heals all allies based on heal_value",
       "type": "active",
       "target_mode": "ally_all",
-      "heal_from": "heal_value",
-      "cooldown_source": "speed"
+      "heal_from": "heal_value"
     },
     {
       "id": "heal_self",
@@ -42,8 +38,7 @@
       "description": "Heals self based on heal_value",
       "type": "active",
       "target_mode": "self",
-      "heal_from": "heal_value",
-      "cooldown_source": "speed"
+      "heal_from": "heal_value"
     },
     {
       "id": "poison_enemy",
@@ -52,8 +47,7 @@
       "type": "active",
       "target_mode": "enemy_single",
       "applies_effect": "poison",
-      "stacks_from": "poison_value",
-      "cooldown_source": "speed"
+      "stacks_from": "poison_value"
     },
     {
       "id": "poison_enemy_row",
@@ -62,8 +56,7 @@
       "type": "active",
       "target_mode": "enemy_frontline",
       "applies_effect": "poison",
-      "stacks_from": "poison_value",
-      "cooldown_source": "speed"
+      "stacks_from": "poison_value"
     },
     {
       "id": "poison_enemies",
@@ -72,8 +65,7 @@
       "type": "active",
       "target_mode": "enemy_all",
       "applies_effect": "poison",
-      "stacks_from": "poison_value",
-      "cooldown_source": "speed"
+      "stacks_from": "poison_value"
     },
     {
       "id": "haste_self",
@@ -82,8 +74,7 @@
       "type": "active",
       "target_mode": "self",
       "applies_effect": "haste",
-      "duration_from": "haste_value",
-      "cooldown_source": "speed"
+      "duration_from": "haste_value"
     },
     {
       "id": "haste_ally",
@@ -92,8 +83,7 @@
       "type": "active",
       "target_mode": "ally_single",
       "applies_effect": "haste",
-      "duration_from": "haste_value",
-      "cooldown_source": "speed"
+      "duration_from": "haste_value"
     },
     {
       "id": "shield_self",
@@ -102,8 +92,7 @@
       "type": "active",
       "target_mode": "self",
       "applies_effect": "shield",
-      "stacks_from": "shield_value",
-      "cooldown_source": "speed"
+      "stacks_from": "shield_value"
     },
     {
       "id": "shield_ally",
@@ -112,8 +101,7 @@
       "type": "active",
       "target_mode": "ally_single",
       "applies_effect": "shield",
-      "stacks_from": "shield_value",
-      "cooldown_source": "speed"
+      "stacks_from": "shield_value"
     },
     {
       "id": "shield_ally_row",
@@ -122,8 +110,7 @@
       "type": "active",
       "target_mode": "ally_frontline",
       "applies_effect": "shield",
-      "stacks_from": "shield_value",
-      "cooldown_source": "speed"
+      "stacks_from": "shield_value"
     },
     {
       "id": "shield_allies",
@@ -132,8 +119,7 @@
       "type": "active",
       "target_mode": "ally_all",
       "applies_effect": "shield",
-      "stacks_from": "shield_value",
-      "cooldown_source": "speed"
+      "stacks_from": "shield_value"
     },
     {
       "id": "slow_enemy",
@@ -142,8 +128,7 @@
       "type": "active",
       "target_mode": "enemy_single",
       "applies_effect": "slow",
-      "duration_from": "slow_value",
-      "cooldown_source": "speed"
+      "duration_from": "slow_value"
     },
     {
       "id": "slow_enemy_row",
@@ -152,8 +137,7 @@
       "type": "active",
       "target_mode": "enemy_frontline",
       "applies_effect": "slow",
-      "duration_from": "slow_value",
-      "cooldown_source": "speed"
+      "duration_from": "slow_value"
     },
     {
       "id": "slow_enemies",
@@ -162,8 +146,7 @@
       "type": "active",
       "target_mode": "enemy_all",
       "applies_effect": "slow",
-      "duration_from": "slow_value",
-      "cooldown_source": "speed"
+      "duration_from": "slow_value"
     },
     {
       "id": "haste_ally_row",
@@ -172,8 +155,7 @@
       "type": "active",
       "target_mode": "ally_frontline",
       "applies_effect": "haste",
-      "duration_from": "haste_value",
-      "cooldown_source": "speed"
+      "duration_from": "haste_value"
     },
     {
       "id": "haste_allies",
@@ -182,8 +164,7 @@
       "type": "active",
       "target_mode": "ally_all",
       "applies_effect": "haste",
-      "duration_from": "haste_value",
-      "cooldown_source": "speed"
+      "duration_from": "haste_value"
     }
   ]
 }

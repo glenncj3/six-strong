@@ -50,7 +50,7 @@ id,name,description,image_path,cost,level_requirement,health,charges,agility,spe
 | `is_generic` | bool | No | `true` or `false` (default: false) |
 | `display_color` | string | No | Hex color, e.g. `#ff4444` |
 | `tags` | string | No | Pipe-separated tags, e.g. `fire\|lightning` |
-| `ability` | string | No | Ability ID (default: `attack_enemy`) |
+| `ability` | string | No | Ability ID(s), pipe-separated for multiple (default: `attack_enemy`) |
 
 ### Value Types
 
@@ -60,43 +60,12 @@ id,name,description,image_path,cost,level_requirement,health,charges,agility,spe
 
 ## Abilities
 
-### Single Ability (Current CSV Support)
+The `ability` column in the CSV accepts one or more ability IDs separated by pipes (`|`). The importer converts this into an `"abilities"` array in JSON.
 
-The `ability` column accepts one ability ID. The importer writes this to the JSON `"ability"` field.
+- Single ability: `attack_enemy` becomes `"abilities": ["attack_enemy"]`
+- Multiple abilities: `attack_enemy|shield_self` becomes `"abilities": ["attack_enemy", "shield_self"]`
 
-### Multiple Abilities
-
-The combat system supports characters with multiple abilities via an `"abilities"` array in JSON. However, the CSV importer currently only writes a single `"ability"` string field.
-
-**To assign multiple abilities to a character**, use one of these approaches:
-
-#### Option A: Pipe-separated abilities in CSV
-
-Use a pipe `|` to separate multiple ability IDs in the `ability` column:
-
-```
-attack_enemy|shield_self
-```
-
-> **Note:** This requires a small update to the import script to split on `|` and write an `"abilities"` array instead. See [Modifying the Importer for Multiple Abilities](#modifying-the-importer-for-multiple-abilities) below.
-
-#### Option B: Edit the JSON directly after import
-
-1. Import your CSV normally (abilities will use the first/primary ability)
-2. Open `data/characters/characters.json`
-3. Replace the `"ability"` field with an `"abilities"` array:
-
-```json
-{
-  "id": "char_paladin_001",
-  "name": "Holy Paladin",
-  "ability": "attack_enemy",          // <-- remove this
-  "abilities": ["attack_enemy", "heal_ally", "shield_self"],  // <-- add this
-  ...
-}
-```
-
-The combat system checks for `"abilities"` (array) first, then falls back to `"ability"` (string) for backward compatibility.
+Exporting from JSON back to CSV preserves multiple abilities using the same pipe format, so you won't lose data when round-tripping.
 
 ### Available Ability IDs
 
@@ -124,39 +93,6 @@ The combat system checks for `"abilities"` (array) first, then falls back to `"a
 
 Ability definitions are in `data/abilities/abilities.json`.
 
-## Modifying the Importer for Multiple Abilities
-
-To make the CSV importer natively support multiple abilities via pipe separation, update the `_row_to_character` function in `addons/csv_character_import/csv_import_dock.gd`.
-
-Change the ability section (around line 181) from:
-
-```gdscript
-# Ability
-if "ability" in row and not row["ability"].is_empty():
-    character["ability"] = row["ability"]
-else:
-    character["ability"] = "attack_enemy"
-```
-
-To:
-
-```gdscript
-# Abilities (pipe-separated for multiple, e.g. "attack_enemy|shield_self")
-if "ability" in row and not row["ability"].is_empty():
-    var parts = row["ability"].split("|")
-    var abilities: Array = []
-    for p in parts:
-        var trimmed = p.strip_edges()
-        if not trimmed.is_empty():
-            abilities.append(trimmed)
-    if abilities.size() == 1:
-        character["ability"] = abilities[0]
-    else:
-        character["abilities"] = abilities
-else:
-    character["ability"] = "attack_enemy"
-```
-
 ## Example CSV
 
 ```csv
@@ -167,7 +103,7 @@ char_healer_001,"Forest Druid","Heals and protects allies",res://assets/characte
 
 Notes on the example:
 - The Brave Knight has a single ability (`attack_enemy`)
-- The Forest Druid has two abilities (`heal_allies|shield_ally`) -- requires the importer modification above
+- The Forest Druid has two abilities (`heal_allies|shield_ally`)
 - Tags use pipes: `earth|holy`
 - Quoted fields handle commas in descriptions
 - Empty optional fields can be left blank

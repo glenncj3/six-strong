@@ -90,6 +90,10 @@ const WINNER_DRAW := 2
 const ROW_FRONT := 0
 const ROW_BACK := 1
 
+
+static func get_enemy_team(team: int) -> int:
+	return TEAM_OPPONENT if team == TEAM_PLAYER else TEAM_PLAYER
+
 # =============================================================================
 # LEGACY SYSTEM CONSTANTS (Phase 4)
 # =============================================================================
