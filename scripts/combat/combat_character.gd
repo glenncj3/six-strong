@@ -47,7 +47,7 @@ var extra_stats: Dictionary = {}
 var effects: Array = []  # Array of CombatEffect
 
 
-static func create_from_character(source: CharacterInstance, p_team: int, p_row: int, p_col: int, p_ability_ids: Array = ["basic_attack"]) -> CombatCharacter:
+static func create_from_character(source: CharacterInstance, p_team: int, p_row: int, p_col: int, p_ability_ids: Array = ["attack_enemy"]) -> CombatCharacter:
 	_next_id += 1
 	var cc = CombatCharacter.new()
 	cc.id = "cc_%d" % _next_id

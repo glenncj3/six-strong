@@ -35,7 +35,7 @@ func _get_game_data() -> Node:
 func _lookup_ability_ids(character_id: String) -> Array:
 	var gd = _get_game_data()
 	if gd == null:
-		return ["basic_attack"]
+		return ["attack_enemy"]
 	var char_data: Dictionary = gd.get_character_by_id(character_id)
 	# Support both "abilities" (array) and "ability" (single string, backward-compat)
 	if char_data.has("abilities"):
@@ -43,7 +43,7 @@ func _lookup_ability_ids(character_id: String) -> Array:
 		for a in char_data["abilities"]:
 			result.append(a)
 		return result
-	var single = char_data.get("ability", "basic_attack")
+	var single = char_data.get("ability", "attack_enemy")
 	return [single]
 
 

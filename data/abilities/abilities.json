@@ -1,7 +1,7 @@
 {
   "abilities": [
     {
-      "id": "basic_attack",
+      "id": "attack_enemy",
       "name": "Basic Attack",
       "description": "Deals damage to a single enemy",
       "type": "active",
@@ -10,7 +10,7 @@
       "cooldown_source": "speed"
     },
     {
-      "id": "cleave",
+      "id": "attack_enemy_row",
       "name": "Cleave",
       "description": "Deals full damage to all frontline enemies. If no frontline enemies, hits all backline enemies instead",
       "type": "active",
@@ -19,7 +19,7 @@
       "cooldown_source": "speed"
     },
     {
-      "id": "heal",
+      "id": "heal_ally",
       "name": "Heal",
       "description": "Heals a single ally based on heal_value",
       "type": "active",
@@ -28,7 +28,7 @@
       "cooldown_source": "speed"
     },
     {
-      "id": "group_heal",
+      "id": "heal_allies",
       "name": "Group Heal",
       "description": "Heals all allies based on heal_value",
       "type": "active",
@@ -37,7 +37,7 @@
       "cooldown_source": "speed"
     },
     {
-      "id": "basic_poison",
+      "id": "poison_enemy",
       "name": "Poison Strike",
       "description": "Applies poison stacks to a single enemy",
       "type": "active",
@@ -47,7 +47,7 @@
       "cooldown_source": "speed"
     },
     {
-      "id": "self_haste",
+      "id": "haste_self",
       "name": "Quicken",
       "description": "Applies haste to self, doubling cooldown tick rate",
       "type": "active",
@@ -57,7 +57,7 @@
       "cooldown_source": "speed"
     },
     {
-      "id": "ally_haste",
+      "id": "haste_ally",
       "name": "Quicken Ally",
       "description": "Applies haste to the nearest ally, doubling their cooldown tick rate",
       "type": "active",
@@ -67,7 +67,7 @@
       "cooldown_source": "speed"
     },
     {
-      "id": "self_shield",
+      "id": "shield_self",
       "name": "Shield Self",
       "description": "Applies shield to self, absorbing incoming attack damage",
       "type": "active",
@@ -77,7 +77,7 @@
       "cooldown_source": "speed"
     },
     {
-      "id": "ally_shield",
+      "id": "shield_ally",
       "name": "Shield Ally",
       "description": "Applies shield to the nearest ally, absorbing incoming attack damage",
       "type": "active",

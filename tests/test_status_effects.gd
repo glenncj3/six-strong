@@ -31,9 +31,9 @@ func _run_tests():
 	test_slow_multiple_applications_additive()
 
 	section("Ability Integration")
-	test_basic_poison_ability_integration()
-	test_self_haste_ability_integration()
-	test_ally_haste_ability_integration()
+	test_poison_enemy_ability_integration()
+	test_haste_self_ability_integration()
+	test_haste_ally_ability_integration()
 	test_slow_enemy_ability_integration()
 	test_slow_enemy_row_ability_integration()
 	test_slow_enemies_ability_integration()
@@ -48,8 +48,8 @@ func _run_tests():
 	test_shield_does_not_absorb_poison()
 	test_shield_stacks_merge()
 	test_shield_merge_from_multiple_sources()
-	test_self_shield_ability_integration()
-	test_ally_shield_ability_integration()
+	test_shield_self_ability_integration()
+	test_shield_ally_ability_integration()
 
 	section("Interactions")
 	test_cleanse_removes_poison_not_haste()
@@ -557,14 +557,14 @@ func test_shield_merge_from_multiple_sources():
 	assert_true(abs(ch.health - 1000.0) < 0.01, "no health lost while shield holds")
 
 
-func test_self_shield_ability_integration():
+func test_shield_self_ability_integration():
 	var manager = CombatManager.new()
 	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"shield_value": 15}))
 	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0, 0.0, 0.0))
 	manager.initialize_combat(pg, eg)
 
 	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	player.ability_ids = ["self_shield"]
+	player.ability_ids = ["shield_self"]
 	player.extra_stats["shield_value"] = 15
 
 	_simulate_time(manager, 1.5)
@@ -572,7 +572,7 @@ func test_self_shield_ability_integration():
 	assert_eq(player.get_stacks("shield"), 15, "15 stacks of shield applied")
 
 
-func test_ally_shield_ability_integration():
+func test_shield_ally_ability_integration():
 	var manager = CombatManager.new()
 	var pg = CharacterGrid.new()
 	var caster = _make_source(1000, 1.0, 1.0, 0.0, 0.0, {"shield_value": 20})
@@ -583,7 +583,7 @@ func test_ally_shield_ability_integration():
 	manager.initialize_combat(pg, eg)
 
 	var caster_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	caster_ch.ability_ids = ["ally_shield"]
+	caster_ch.ability_ids = ["shield_ally"]
 	caster_ch.extra_stats["shield_value"] = 20
 
 	var ally_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 1)
@@ -598,7 +598,7 @@ func test_ally_shield_ability_integration():
 # ABILITY INTEGRATION
 # =============================================================================
 
-func test_basic_poison_ability_integration():
+func test_poison_enemy_ability_integration():
 	var manager = CombatManager.new()
 	var pg = _make_grid_with_one(_make_source(1000, 1.0, 10.0, 0.0, 0.0, {"poison_value": 3}))
 	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
@@ -606,7 +606,7 @@ func test_basic_poison_ability_integration():
 
 	# Override player's ability to basic_poison
 	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	player.ability_ids = ["basic_poison"]
+	player.ability_ids = ["poison_enemy"]
 	player.extra_stats["poison_value"] = 3
 
 	# Poison no longer deals direct damage; wait long enough for poison to tick
@@ -616,14 +616,14 @@ func test_basic_poison_ability_integration():
 	assert_true(enemy.health < 1000.0, "enemy took damage from poison tick")
 
 
-func test_self_haste_ability_integration():
+func test_haste_self_ability_integration():
 	var manager = CombatManager.new()
 	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"haste_value": 5.0}))
 	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0, 0.0, 0.0))
 	manager.initialize_combat(pg, eg)
 
 	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	player.ability_ids = ["self_haste"]
+	player.ability_ids = ["haste_self"]
 	player.extra_stats["haste_value"] = 5.0
 
 	_simulate_time(manager, 1.5)
@@ -631,7 +631,7 @@ func test_self_haste_ability_integration():
 	assert_true(abs(player.tick_rate_multiplier - 2.0) < 0.01, "tick rate doubled")
 
 
-func test_ally_haste_ability_integration():
+func test_haste_ally_ability_integration():
 	var manager = CombatManager.new()
 	var pg = CharacterGrid.new()
 	var caster = _make_source(1000, 1.0, 1.0, 0.0, 0.0, {"haste_value": 5.0})
@@ -642,7 +642,7 @@ func test_ally_haste_ability_integration():
 	manager.initialize_combat(pg, eg)
 
 	var caster_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	caster_ch.ability_ids = ["ally_haste"]
+	caster_ch.ability_ids = ["haste_ally"]
 	caster_ch.extra_stats["haste_value"] = 5.0
 
 	var ally_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 1)

@@ -181,7 +181,7 @@ func _row_to_character(row: Dictionary) -> Dictionary:
 	if "ability" in row and not row["ability"].is_empty():
 		character["ability"] = row["ability"]
 	else:
-		character["ability"] = "basic_attack"
+		character["ability"] = "attack_enemy"
 
 	# Tags (pipe-separated in CSV, e.g. "fire|lightning")
 	if "tags" in row and not row["tags"].is_empty():
@@ -292,7 +292,7 @@ func _write_csv(path: String, characters: Array) -> void:
 		else:
 			fields.append("")
 		# Ability
-		fields.append(_csv_escape(str(c.get("ability", "basic_attack"))))
+		fields.append(_csv_escape(str(c.get("ability", "attack_enemy"))))
 		file.store_line(",".join(fields))
 
 	file.close()
