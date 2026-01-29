@@ -27,10 +27,9 @@ static func register_defaults() -> void:
 	_registered = true
 	register("enemy_single", _strategy_enemy_single)
 	register("enemy_all", _strategy_enemy_all)
+	register("enemy_frontline", _strategy_enemy_frontline)
 	register("ally_single", _strategy_ally_single)
 	register("ally_all", _strategy_ally_all)
-	register("self_buff", _strategy_self_buff)
-	register("enemy_random_multi", _strategy_enemy_random_multi)
 	register("enemy_single_apply_effect", _strategy_enemy_single_apply_effect)
 	register("self_apply_effect", _strategy_self_apply_effect)
 	register("ally_single_apply_effect", _strategy_ally_single_apply_effect)
@@ -67,8 +66,22 @@ static func _strategy_enemy_all(source: CombatCharacter, ability: Dictionary, co
 		deal_damage.call(source, target, source.damage * multiplier)
 
 
+static func _strategy_enemy_frontline(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
+	if not source.has_damage():
+		return
+	var multiplier = ability.get("damage_multiplier", 1.0)
+	var board: CombatBoard = context["board"]
+	var deal_damage: Callable = context["deal_damage"]
+	var enemy_team = GameConstants.TEAM_OPPONENT if source.team == GameConstants.TEAM_PLAYER else GameConstants.TEAM_PLAYER
+	var front = board.get_living_characters(enemy_team, GameConstants.ROW_FRONT)
+	var targets = front if front.size() > 0 else board.get_living_characters(enemy_team, GameConstants.ROW_BACK)
+	for target in targets:
+		deal_damage.call(source, target, source.damage * multiplier)
+
+
 static func _strategy_ally_single(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
-	var heal_value = ability.get("heal_value", 0.0)
+	var heal_from = ability.get("heal_from", "")
+	var heal_value = source.get_stat_value(heal_from) if heal_from != "" else ability.get("heal_value", 0.0)
 	var board: CombatBoard = context["board"]
 	var heal: Callable = context["heal"]
 	var target = CombatTargeting.select_ally_target(source, board, true)
@@ -77,7 +90,8 @@ static func _strategy_ally_single(source: CombatCharacter, ability: Dictionary, 
 
 
 static func _strategy_ally_all(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
-	var heal_value = ability.get("heal_value", 0.0)
+	var heal_from = ability.get("heal_from", "")
+	var heal_value = source.get_stat_value(heal_from) if heal_from != "" else ability.get("heal_value", 0.0)
 	var board: CombatBoard = context["board"]
 	var heal: Callable = context["heal"]
 	var allies = _get_ally_targets(source, board)
@@ -85,47 +99,14 @@ static func _strategy_ally_all(source: CombatCharacter, ability: Dictionary, con
 		heal.call(ally, heal_value, source)
 
 
-# Repeated casts intentionally stack, creating multiple effect instances.
-static func _strategy_self_buff(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
-	var apply_effect: Callable = context["apply_effect"]
-	var stat = ability.get("buff_stat", "damage")
-	var value = ability.get("buff_value", 0.0)
-	var modifier_type = ability.get("buff_modifier_type", "flat")
-	var duration_type = ability.get("buff_duration_type", "combat")
-	var duration_value = ability.get("buff_duration_value", 0.0)
-	var effect = CombatEffect.create_stat_modifier("ability", source.id, stat, value, modifier_type, duration_type, duration_value)
-	apply_effect.call(source, effect)
-
-
-static func _strategy_enemy_random_multi(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
-	if not source.has_damage():
-		return
-	var multiplier = ability.get("damage_multiplier", 1.0)
-	var hit_count = ability.get("hit_count", 3)
-	var board: CombatBoard = context["board"]
-	var deal_damage: Callable = context["deal_damage"]
-	for i in range(hit_count):
-		var targets = _get_enemy_targets(source, board)
-		if targets.is_empty():
-			break
-		var target = targets[randi() % targets.size()]
-		deal_damage.call(source, target, source.damage * multiplier)
-
-
 static func _strategy_enemy_single_apply_effect(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
 	var board: CombatBoard = context["board"]
-	var deal_damage: Callable = context["deal_damage"]
 	var apply_effect: Callable = context["apply_effect"]
 	var get_status_effect: Callable = context["get_status_effect"]
 
 	var target = CombatTargeting.select_enemy_target(source, board)
 	if target == null:
 		return
-
-	# Deal damage if multiplier > 0 and source has damage
-	var multiplier = ability.get("damage_multiplier", 0.0)
-	if multiplier > 0 and source.has_damage():
-		deal_damage.call(source, target, source.damage * multiplier)
 
 	# Apply status effect
 	var effect_id = ability.get("applies_effect", "")

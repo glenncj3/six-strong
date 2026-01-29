@@ -24,11 +24,9 @@ func _run_tests():
 	section("Ally All Strategy")
 	test_ally_all_heals_all()
 
-	section("Self Buff Strategy")
-	test_self_buff_applies_effect()
-
-	section("Enemy Random Multi Strategy")
-	test_enemy_random_multi_hits()
+	section("Enemy Frontline Strategy")
+	test_enemy_frontline_hits_front_row()
+	test_enemy_frontline_falls_back_to_back_row()
 
 
 # =============================================================================
@@ -129,8 +127,7 @@ func test_register_defaults():
 	assert_true(AbilityExecutor.has_strategy("enemy_all"), "enemy_all registered")
 	assert_true(AbilityExecutor.has_strategy("ally_single"), "ally_single registered")
 	assert_true(AbilityExecutor.has_strategy("ally_all"), "ally_all registered")
-	assert_true(AbilityExecutor.has_strategy("self_buff"), "self_buff registered")
-	assert_true(AbilityExecutor.has_strategy("enemy_random_multi"), "enemy_random_multi registered")
+	assert_true(AbilityExecutor.has_strategy("enemy_frontline"), "enemy_frontline registered")
 
 
 func test_has_strategy():
@@ -175,10 +172,11 @@ func test_ally_single_heals():
 	var board = _make_board_3v1()
 	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
 	source.health = 50.0
-	var ability = {"targeting": "ally_single", "heal_value": 20.0}
+	source.extra_stats["heal_value"] = 25.0
+	var ability = {"targeting": "ally_single", "heal_from": "heal_value"}
 	AbilityExecutor.execute("ally_single", source, ability, _make_context(board))
 	assert_eq(_heal_log.size(), 1, "one heal event")
-	assert_eq(_heal_log[0]["amount"], 20.0, "heal amount = heal_value")
+	assert_eq(_heal_log[0]["amount"], 25.0, "heal amount = character heal_value stat")
 
 
 func test_ally_all_heals_all():
@@ -190,37 +188,44 @@ func test_ally_all_heals_all():
 		var ch = board.get_character_at(GameConstants.TEAM_PLAYER, 0, i)
 		ch.health = 50.0
 	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	var ability = {"targeting": "ally_all", "heal_value": 10.0}
+	source.extra_stats["heal_value"] = 15.0
+	var ability = {"targeting": "ally_all", "heal_from": "heal_value"}
 	AbilityExecutor.execute("ally_all", source, ability, _make_context(board))
 	assert_eq(_heal_log.size(), 3, "healed all 3 allies")
-	assert_eq(_heal_log[0]["amount"], 10.0, "heal amount = heal_value")
+	assert_eq(_heal_log[0]["amount"], 15.0, "heal amount = character heal_value stat")
 
 
-func test_self_buff_applies_effect():
+func test_enemy_frontline_hits_front_row():
 	AbilityExecutor.register_defaults()
 	_clear_logs()
-	var board = _make_board_1v1()
-	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	var ability = {
-		"targeting": "self_buff",
-		"buff_stat": "damage",
-		"buff_value": 5.0,
-		"buff_modifier_type": "flat",
-		"buff_duration_type": "cooldowns",
-		"buff_duration_value": 3,
-	}
-	AbilityExecutor.execute("self_buff", source, ability, _make_context(board))
-	assert_eq(_effect_log.size(), 1, "one effect applied")
-	assert_eq(_effect_log[0]["target"], source, "effect applied to self")
-	assert_eq(source.damage, 15.0, "damage buffed: 10 + 5 = 15")
+	var board = CombatBoard.new()
+	var source = _make_char(GameConstants.TEAM_PLAYER, 0, 0)
+	board.set_character_at(GameConstants.TEAM_PLAYER, 0, 0, source)
+	# 2 front row enemies, 1 back row enemy
+	var e1 = _make_char(GameConstants.TEAM_OPPONENT, GameConstants.ROW_FRONT, 0)
+	var e2 = _make_char(GameConstants.TEAM_OPPONENT, GameConstants.ROW_FRONT, 1)
+	var e3 = _make_char(GameConstants.TEAM_OPPONENT, GameConstants.ROW_BACK, 0)
+	board.set_character_at(GameConstants.TEAM_OPPONENT, GameConstants.ROW_FRONT, 0, e1)
+	board.set_character_at(GameConstants.TEAM_OPPONENT, GameConstants.ROW_FRONT, 1, e2)
+	board.set_character_at(GameConstants.TEAM_OPPONENT, GameConstants.ROW_BACK, 0, e3)
+	var ability = {"targeting": "enemy_frontline", "damage_multiplier": 1.0}
+	AbilityExecutor.execute("enemy_frontline", source, ability, _make_context(board))
+	assert_eq(_damage_log.size(), 2, "only front row enemies hit")
+	assert_eq(_damage_log[0]["amount"], 10.0, "damage = 10 * 1.0")
 
 
-func test_enemy_random_multi_hits():
+func test_enemy_frontline_falls_back_to_back_row():
 	AbilityExecutor.register_defaults()
 	_clear_logs()
-	var board = _make_board_1v3()
-	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	var ability = {"targeting": "enemy_random_multi", "damage_multiplier": 0.5, "hit_count": 3}
-	AbilityExecutor.execute("enemy_random_multi", source, ability, _make_context(board))
-	assert_eq(_damage_log.size(), 3, "3 hits dealt")
-	assert_eq(_damage_log[0]["amount"], 5.0, "damage = 10 * 0.5 per hit")
+	var board = CombatBoard.new()
+	var source = _make_char(GameConstants.TEAM_PLAYER, 0, 0)
+	board.set_character_at(GameConstants.TEAM_PLAYER, 0, 0, source)
+	# Only back row enemies
+	var e1 = _make_char(GameConstants.TEAM_OPPONENT, GameConstants.ROW_BACK, 0)
+	var e2 = _make_char(GameConstants.TEAM_OPPONENT, GameConstants.ROW_BACK, 1)
+	board.set_character_at(GameConstants.TEAM_OPPONENT, GameConstants.ROW_BACK, 0, e1)
+	board.set_character_at(GameConstants.TEAM_OPPONENT, GameConstants.ROW_BACK, 1, e2)
+	var ability = {"targeting": "enemy_frontline", "damage_multiplier": 1.0}
+	AbilityExecutor.execute("enemy_frontline", source, ability, _make_context(board))
+	assert_eq(_damage_log.size(), 2, "falls back to back row when no front row")
+	assert_eq(_damage_log[0]["amount"], 10.0, "damage = 10 * 1.0")

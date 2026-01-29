@@ -26,7 +26,7 @@
       "name": "Haste",
       "description": "Doubles cooldown tick rate",
       "tags": ["buff", "speed"],
-      "merge_behavior": "refresh_duration",
+      "merge_behavior": "extend_duration",
       "duration_type": "seconds",
       "tick_interval": 0,
       "continuous_modifier": "cooldown_tick_rate",

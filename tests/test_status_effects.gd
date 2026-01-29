@@ -16,11 +16,13 @@ func _run_tests():
 	test_poison_tick_deals_damage()
 	test_poison_tick_decrements_stacks()
 	test_poison_removed_at_zero_stacks()
+	test_poison_multi_tick_decay()
 
 	section("Haste Template")
 	test_haste_creation_from_template()
 	test_haste_doubles_tick_rate()
 	test_haste_expires_restores_tick_rate()
+	test_haste_multiple_applications_additive()
 
 	section("Ability Integration")
 	test_basic_poison_ability_integration()
@@ -177,6 +179,38 @@ func test_poison_removed_at_zero_stacks():
 	assert_false(target.has_effect("poison"), "poison removed at 0 stacks")
 
 
+func test_poison_multi_tick_decay():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var target = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var template = _get_poison_template()
+	var effect = StatusEffectFactory.create_from_template(template, "s1", {"stacks": 4})
+	manager.apply_effect(target, effect)
+
+	# Tick 1 (t=1): 4 damage, stacks -> 3, total damage = 4
+	_simulate_time(manager, 1.5)
+	assert_true(abs(target.health - 996.0) < 0.01, "after tick 1: 4 damage dealt")
+	assert_eq(target.get_stacks("poison"), 3, "after tick 1: 3 stacks remain")
+
+	# Tick 2 (t=2): 3 damage, stacks -> 2, total damage = 7
+	_simulate_time(manager, 1.0)
+	assert_true(abs(target.health - 993.0) < 0.01, "after tick 2: 7 total damage")
+	assert_eq(target.get_stacks("poison"), 2, "after tick 2: 2 stacks remain")
+
+	# Tick 3 (t=3): 2 damage, stacks -> 1, total damage = 9
+	_simulate_time(manager, 1.0)
+	assert_true(abs(target.health - 991.0) < 0.01, "after tick 3: 9 total damage")
+	assert_eq(target.get_stacks("poison"), 1, "after tick 3: 1 stack remains")
+
+	# Tick 4 (t=4): 1 damage, stacks -> 0, total damage = 10, poison removed
+	_simulate_time(manager, 1.0)
+	assert_true(abs(target.health - 990.0) < 0.01, "after tick 4: 10 total damage (4+3+2+1)")
+	assert_false(target.has_effect("poison"), "poison removed after all stacks consumed")
+
+
 # =============================================================================
 # HASTE TESTS
 # =============================================================================
@@ -191,7 +225,7 @@ func test_haste_creation_from_template():
 	assert_true(abs(effect.continuous_value - 2.0) < 0.01, "continuous_value 2.0")
 	assert_eq(effect.duration_type, "seconds", "duration_type seconds")
 	assert_true(abs(effect.duration_value - 5.0) < 0.01, "duration_value from override")
-	assert_eq(effect.merge_behavior, "refresh_duration", "merge_behavior")
+	assert_eq(effect.merge_behavior, "extend_duration", "merge_behavior")
 
 
 func test_haste_doubles_tick_rate():
@@ -228,6 +262,34 @@ func test_haste_expires_restores_tick_rate():
 	_simulate_time(manager, 2.0)
 	assert_false(player.has_effect("haste"), "haste expired")
 	assert_true(abs(player.tick_rate_multiplier - 1.0) < 0.01, "tick rate restored to 1.0")
+
+
+func test_haste_multiple_applications_additive():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var template = _get_haste_template()
+
+	# Apply haste for 3 seconds, then again for 4 seconds
+	var effect1 = StatusEffectFactory.create_from_template(template, "s1", {"duration_value": 3.0})
+	manager.apply_effect(player, effect1)
+	var effect2 = StatusEffectFactory.create_from_template(template, "s1", {"duration_value": 4.0})
+	manager.apply_effect(player, effect2)
+
+	# Duration should be additive: 3 + 4 = 7 seconds
+	var haste_effect = player.get_effect("haste")
+	assert_true(abs(haste_effect.duration_value - 7.0) < 0.01, "haste duration is additive: 3 + 4 = 7")
+	assert_true(player.has_effect("haste"), "haste still active")
+
+	# Duration drains at real time (not affected by tick rate), so 7s means 7 real seconds
+	_simulate_time(manager, 6.5)
+	assert_true(player.has_effect("haste"), "haste still active at 6.5s")
+
+	_simulate_time(manager, 1.0)
+	assert_false(player.has_effect("haste"), "haste expired after 7s")
 
 
 # =============================================================================
@@ -397,11 +459,11 @@ func test_basic_poison_ability_integration():
 	player.ability_ids = ["basic_poison"]
 	player.extra_stats["poison_value"] = 3
 
-	_simulate_time(manager, 1.5)
+	# Poison no longer deals direct damage; wait long enough for poison to tick
+	_simulate_time(manager, 2.5)
 	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
-	assert_true(enemy.health < 1000.0, "enemy took damage from poison strike")
 	assert_true(enemy.has_effect("poison"), "enemy has poison effect")
-	assert_eq(enemy.get_stacks("poison"), 3, "3 stacks of poison applied")
+	assert_true(enemy.health < 1000.0, "enemy took damage from poison tick")
 
 
 func test_self_haste_ability_integration():

@@ -73,7 +73,6 @@ func _run() -> void:
 		"life_drain": Color.DARK_RED,
 		"inner_peace": Color.LIGHT_BLUE,
 		"backstab": Color.BLACK,
-		"battle_cry": Color.GOLD,
 		"swiftness": Color.CYAN,
 		"healing_surge": Color.LAWN_GREEN,
 		"gold_rush": Color.GOLDENROD,

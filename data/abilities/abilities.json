@@ -12,60 +12,36 @@
     {
       "id": "cleave",
       "name": "Cleave",
-      "description": "Deals damage to all enemies",
+      "description": "Deals full damage to all frontline enemies. If no frontline enemies, hits all backline enemies instead",
       "type": "active",
-      "targeting": "enemy_all",
-      "damage_multiplier": 0.6,
+      "targeting": "enemy_frontline",
+      "damage_multiplier": 1.0,
       "cooldown_source": "speed"
     },
     {
       "id": "heal",
       "name": "Heal",
-      "description": "Heals a single ally",
+      "description": "Heals a single ally based on heal_value",
       "type": "active",
       "targeting": "ally_single",
-      "heal_value": 20.0,
+      "heal_from": "heal_value",
       "cooldown_source": "speed"
     },
     {
       "id": "group_heal",
       "name": "Group Heal",
-      "description": "Heals all allies",
+      "description": "Heals all allies based on heal_value",
       "type": "active",
       "targeting": "ally_all",
-      "heal_value": 10.0,
-      "cooldown_source": "speed"
-    },
-    {
-      "id": "battle_cry",
-      "name": "Battle Cry",
-      "description": "Increases own damage",
-      "type": "active",
-      "targeting": "self_buff",
-      "buff_stat": "damage",
-      "buff_value": 5.0,
-      "buff_modifier_type": "flat",
-      "buff_duration_type": "cooldowns",
-      "buff_duration_value": 3,
-      "cooldown_source": "speed"
-    },
-    {
-      "id": "barrage",
-      "name": "Barrage",
-      "description": "Hits 3 random enemies",
-      "type": "active",
-      "targeting": "enemy_random_multi",
-      "damage_multiplier": 0.5,
-      "hit_count": 3,
+      "heal_from": "heal_value",
       "cooldown_source": "speed"
     },
     {
       "id": "basic_poison",
       "name": "Poison Strike",
-      "description": "Deals reduced damage and applies poison stacks",
+      "description": "Applies poison stacks to a single enemy",
       "type": "active",
       "targeting": "enemy_single_apply_effect",
-      "damage_multiplier": 0.8,
       "applies_effect": "poison",
       "stacks_from": "poison_value",
       "cooldown_source": "speed"

@@ -219,11 +219,11 @@ func update(delta: float) -> Dictionary:
 					to_expire.append(effect)
 		result["expired_effects"].append_array(to_expire)
 
-	# Decrement seconds-type effect durations
+	# Decrement seconds-type effect durations (use raw delta, not affected by tick rate)
 	var seconds_expired: Array = []
 	for effect in effects:
 		if effect.duration_type == "seconds":
-			effect.duration_value -= effective_delta
+			effect.duration_value -= delta
 			if effect.duration_value <= 0:
 				seconds_expired.append(effect)
 	result["expired_effects"].append_array(seconds_expired)
