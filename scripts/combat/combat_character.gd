@@ -93,27 +93,10 @@ static func create_from_character(source: CharacterInstance, p_team: int, p_row:
 
 
 func recalculate_stats() -> void:
-	# TODO: Extract this modifier math into a shared StatResolver utility.
-	# CharacterInstance also needs to apply effects and display modified stats
-	# (e.g. for ability description popups outside combat). Currently only
-	# CombatCharacter has this logic, so CharacterInstance can only show raw
-	# base stats. Once we have more effect types in the game, extract the
-	# (base + flat) * (1 + percent) formula so both classes can use it.
-	#
-	# Collect flat and percent modifiers per stat
-	var flat_mods := {}
-	var pct_mods := {}
+	# Collect modifiers from combat effects
+	var mods := StatResolver.collect_modifiers_from_effects(effects)
 
-	for effect in effects:
-		if effect.effect_type != "stat_modifier":
-			continue
-		var s = effect.stat
-		if effect.modifier_type == "flat":
-			flat_mods[s] = flat_mods.get(s, 0.0) + effect.value
-		elif effect.modifier_type == "percent":
-			pct_mods[s] = pct_mods.get(s, 0.0) + effect.value
-
-	# Apply: (base + flat) * (1 + sum_of_percents) for each stat
+	# Apply to each stat
 	var stat_map := {
 		"speed": "base_speed",
 		"damage": "base_damage",
@@ -122,11 +105,10 @@ func recalculate_stats() -> void:
 	}
 	for stat_name in stat_map:
 		var base_val: float = get(stat_map[stat_name])
-		var new_val = (base_val + flat_mods.get(stat_name, 0.0)) * (1.0 + pct_mods.get(stat_name, 0.0))
-		set(stat_name, new_val)
+		set(stat_name, StatResolver.resolve_stat(base_val, mods, stat_name))
 
 	# Recalculate max_health (special: adjusts current health)
-	var new_max = (base_max_health + flat_mods.get("health", 0.0)) * (1.0 + pct_mods.get("health", 0.0))
+	var new_max = StatResolver.resolve_stat(base_max_health, mods, "health")
 	if new_max != max_health:
 		var diff = new_max - max_health
 		max_health = new_max

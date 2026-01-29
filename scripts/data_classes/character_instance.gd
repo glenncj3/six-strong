@@ -244,10 +244,7 @@ func get_stat(stat_name: String) -> int:
 func get_effective_stat(stat_name: String) -> float:
 	"""Get stat value including grid-position bonuses from passive abilities."""
 	var base = float(stats.get(stat_name, 0))
-	if stat_bonuses.has(stat_name):
-		var bonus = stat_bonuses[stat_name]
-		base = (base + bonus.get("flat", 0.0)) * (1.0 + bonus.get("percent", 0.0))
-	return base
+	return StatResolver.resolve_stat(base, stat_bonuses, stat_name)
 
 
 func recalculate_stats() -> void:
