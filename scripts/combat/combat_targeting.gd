@@ -3,6 +3,33 @@ extends RefCounted
 ## Static targeting utilities for combat.
 
 
+static func resolve_targets(source: CombatCharacter, board: CombatBoard, target_mode: String) -> Array:
+	match target_mode:
+		"self":
+			return [source]
+		"enemy_single":
+			var t = select_enemy_target(source, board)
+			return [t] if t != null else []
+		"enemy_frontline":
+			var enemy_team = GameConstants.TEAM_OPPONENT if source.team == GameConstants.TEAM_PLAYER else GameConstants.TEAM_PLAYER
+			var front = board.get_living_characters(enemy_team, GameConstants.ROW_FRONT)
+			return front if front.size() > 0 else board.get_living_characters(enemy_team, GameConstants.ROW_BACK)
+		"enemy_all":
+			var enemy_team = GameConstants.TEAM_OPPONENT if source.team == GameConstants.TEAM_PLAYER else GameConstants.TEAM_PLAYER
+			return board.get_living_characters_on_team(enemy_team)
+		"ally_single":
+			var t = select_ally_target(source, board, false)
+			return [t] if t != null else []
+		"ally_frontline":
+			var front = board.get_living_characters(source.team, GameConstants.ROW_FRONT)
+			return front if front.size() > 0 else board.get_living_characters(source.team, GameConstants.ROW_BACK)
+		"ally_all":
+			return board.get_living_characters_on_team(source.team)
+		_:
+			push_warning("CombatTargeting: Unknown target_mode '%s'" % target_mode)
+			return []
+
+
 static func get_valid_enemy_targets(actor: CombatCharacter, board: CombatBoard) -> Array:
 	var enemy_team = GameConstants.TEAM_OPPONENT if actor.team == GameConstants.TEAM_PLAYER else GameConstants.TEAM_PLAYER
 

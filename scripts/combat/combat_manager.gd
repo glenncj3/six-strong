@@ -62,7 +62,6 @@ func _lookup_ability(ability_id: String) -> Dictionary:
 
 
 func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid) -> void:
-	AbilityExecutor.register_defaults()
 	TickActionRegistry.register_defaults()
 	_state = CombatState.new()
 	_state.board = CombatBoard.new()
@@ -149,7 +148,6 @@ func _execute_character_action(character: CombatCharacter) -> void:
 
 
 func _execute_ability(character: CombatCharacter, ability: Dictionary) -> void:
-	var targeting = ability.get("targeting", "enemy_single")
 	var context = {
 		"board": _state.board,
 		"deal_damage": _execute_damage,
@@ -157,7 +155,7 @@ func _execute_ability(character: CombatCharacter, ability: Dictionary) -> void:
 		"apply_effect": apply_effect,
 		"get_status_effect": _get_status_effect_data,
 	}
-	AbilityExecutor.execute(targeting, character, ability, context)
+	AbilityExecutor.execute(character, ability, context)
 
 
 func _execute_damage(source, target: CombatCharacter, base_damage: float) -> void:

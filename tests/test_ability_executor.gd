@@ -1,5 +1,5 @@
 extends "res://tests/base_test.gd"
-# Tests for AbilityExecutor - strategy registry for ability execution
+# Tests for AbilityExecutor - target resolution + action inference
 
 func _init():
 	test_name = "AbilityExecutor Tests"
@@ -7,10 +7,8 @@ func _init():
 
 
 func _run_tests():
-	section("Registry")
-	test_register_defaults()
-	test_has_strategy()
-	test_unknown_strategy_warns()
+	section("Unknown Target Mode")
+	test_unknown_target_mode_warns()
 
 	section("Enemy Single Strategy")
 	test_enemy_single_deals_damage()
@@ -121,66 +119,47 @@ func _clear_logs() -> void:
 # TESTS
 # =============================================================================
 
-func test_register_defaults():
-	AbilityExecutor.register_defaults()
-	assert_true(AbilityExecutor.has_strategy("enemy_single"), "enemy_single registered")
-	assert_true(AbilityExecutor.has_strategy("enemy_all"), "enemy_all registered")
-	assert_true(AbilityExecutor.has_strategy("ally_single"), "ally_single registered")
-	assert_true(AbilityExecutor.has_strategy("ally_all"), "ally_all registered")
-	assert_true(AbilityExecutor.has_strategy("enemy_frontline"), "enemy_frontline registered")
-
-
-func test_has_strategy():
-	AbilityExecutor.register_defaults()
-	assert_false(AbilityExecutor.has_strategy("nonexistent"), "nonexistent strategy not found")
-
-
-func test_unknown_strategy_warns():
-	AbilityExecutor.register_defaults()
+func test_unknown_target_mode_warns():
 	# Should not crash, just warn
 	var board = _make_board_1v1()
 	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	AbilityExecutor.execute("nonexistent", source, {}, _make_context(board))
-	assert_true(true, "no crash on unknown strategy")
+	AbilityExecutor.execute(source, {"target_mode": "nonexistent", "damage_multiplier": 1.0}, _make_context(board))
+	assert_true(true, "no crash on unknown target_mode")
 
 
 func test_enemy_single_deals_damage():
-	AbilityExecutor.register_defaults()
 	_clear_logs()
 	var board = _make_board_1v1()
 	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	var ability = {"targeting": "enemy_single", "damage_multiplier": 1.5}
-	AbilityExecutor.execute("enemy_single", source, ability, _make_context(board))
+	var ability = {"target_mode": "enemy_single", "damage_multiplier": 1.5}
+	AbilityExecutor.execute(source, ability, _make_context(board))
 	assert_eq(_damage_log.size(), 1, "one damage event")
 	assert_eq(_damage_log[0]["amount"], 15.0, "damage = 10 * 1.5")
 
 
 func test_enemy_all_hits_all_enemies():
-	AbilityExecutor.register_defaults()
 	_clear_logs()
 	var board = _make_board_1v3()
 	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
-	var ability = {"targeting": "enemy_all", "damage_multiplier": 0.6}
-	AbilityExecutor.execute("enemy_all", source, ability, _make_context(board))
+	var ability = {"target_mode": "enemy_all", "damage_multiplier": 0.6}
+	AbilityExecutor.execute(source, ability, _make_context(board))
 	assert_eq(_damage_log.size(), 3, "hit all 3 enemies")
 	assert_eq(_damage_log[0]["amount"], 6.0, "damage = 10 * 0.6")
 
 
 func test_ally_single_heals():
-	AbilityExecutor.register_defaults()
 	_clear_logs()
 	var board = _make_board_3v1()
 	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
 	source.health = 50.0
 	source.extra_stats["heal_value"] = 25.0
-	var ability = {"targeting": "ally_single", "heal_from": "heal_value"}
-	AbilityExecutor.execute("ally_single", source, ability, _make_context(board))
+	var ability = {"target_mode": "ally_single", "heal_from": "heal_value"}
+	AbilityExecutor.execute(source, ability, _make_context(board))
 	assert_eq(_heal_log.size(), 1, "one heal event")
 	assert_eq(_heal_log[0]["amount"], 25.0, "heal amount = character heal_value stat")
 
 
 func test_ally_all_heals_all():
-	AbilityExecutor.register_defaults()
 	_clear_logs()
 	var board = _make_board_3v1()
 	# Damage all allies
@@ -189,14 +168,13 @@ func test_ally_all_heals_all():
 		ch.health = 50.0
 	var source = board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
 	source.extra_stats["heal_value"] = 15.0
-	var ability = {"targeting": "ally_all", "heal_from": "heal_value"}
-	AbilityExecutor.execute("ally_all", source, ability, _make_context(board))
+	var ability = {"target_mode": "ally_all", "heal_from": "heal_value"}
+	AbilityExecutor.execute(source, ability, _make_context(board))
 	assert_eq(_heal_log.size(), 3, "healed all 3 allies")
 	assert_eq(_heal_log[0]["amount"], 15.0, "heal amount = character heal_value stat")
 
 
 func test_enemy_frontline_hits_front_row():
-	AbilityExecutor.register_defaults()
 	_clear_logs()
 	var board = CombatBoard.new()
 	var source = _make_char(GameConstants.TEAM_PLAYER, 0, 0)
@@ -208,14 +186,13 @@ func test_enemy_frontline_hits_front_row():
 	board.set_character_at(GameConstants.TEAM_OPPONENT, GameConstants.ROW_FRONT, 0, e1)
 	board.set_character_at(GameConstants.TEAM_OPPONENT, GameConstants.ROW_FRONT, 1, e2)
 	board.set_character_at(GameConstants.TEAM_OPPONENT, GameConstants.ROW_BACK, 0, e3)
-	var ability = {"targeting": "enemy_frontline", "damage_multiplier": 1.0}
-	AbilityExecutor.execute("enemy_frontline", source, ability, _make_context(board))
+	var ability = {"target_mode": "enemy_frontline", "damage_multiplier": 1.0}
+	AbilityExecutor.execute(source, ability, _make_context(board))
 	assert_eq(_damage_log.size(), 2, "only front row enemies hit")
 	assert_eq(_damage_log[0]["amount"], 10.0, "damage = 10 * 1.0")
 
 
 func test_enemy_frontline_falls_back_to_back_row():
-	AbilityExecutor.register_defaults()
 	_clear_logs()
 	var board = CombatBoard.new()
 	var source = _make_char(GameConstants.TEAM_PLAYER, 0, 0)
@@ -225,7 +202,7 @@ func test_enemy_frontline_falls_back_to_back_row():
 	var e2 = _make_char(GameConstants.TEAM_OPPONENT, GameConstants.ROW_BACK, 1)
 	board.set_character_at(GameConstants.TEAM_OPPONENT, GameConstants.ROW_BACK, 0, e1)
 	board.set_character_at(GameConstants.TEAM_OPPONENT, GameConstants.ROW_BACK, 1, e2)
-	var ability = {"targeting": "enemy_frontline", "damage_multiplier": 1.0}
-	AbilityExecutor.execute("enemy_frontline", source, ability, _make_context(board))
+	var ability = {"target_mode": "enemy_frontline", "damage_multiplier": 1.0}
+	AbilityExecutor.execute(source, ability, _make_context(board))
 	assert_eq(_damage_log.size(), 2, "falls back to back row when no front row")
 	assert_eq(_damage_log[0]["amount"], 10.0, "damage = 10 * 1.0")

@@ -8,7 +8,6 @@ func _init():
 
 func _run_tests():
 	TickActionRegistry.register_defaults()
-	AbilityExecutor.register_defaults()
 
 	section("Poison Template")
 	test_poison_creation_from_template()
