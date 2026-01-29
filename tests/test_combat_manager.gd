@@ -200,15 +200,16 @@ func test_damage_dealt_no_block_no_crit():
 
 
 func test_block_negates_damage():
-	# 100% defend rate should always block
+	# 100% agility always dodges, reducing damage by 90%
 	var manager = CombatManager.new()
 	var pg = _make_grid_with_one(_make_source(1000, 1.0, 25.0, 0.0, 0.0))
-	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 1.0, 0.0))  # 100% def
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 1.0, 0.0))  # 100% agility
 	manager.initialize_combat(pg, eg)
 
 	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
 	_simulate_time(manager, 1.1)
-	assert_eq(enemy.health, 1000.0, "100% defend blocks all damage")
+	var expected = 1000.0 - (25.0 * (1.0 - GameConstants.DODGE_DAMAGE_REDUCTION))
+	assert_eq(enemy.health, expected, "100% dodge reduces damage by 90%%")
 
 
 func test_crit_doubles_damage():
