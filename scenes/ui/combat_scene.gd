@@ -301,6 +301,11 @@ func _start_combat() -> void:
 	_manager.damage_blocked.connect(_on_damage_blocked)
 	_manager.character_died.connect(_on_character_died)
 	_manager.combat_ended.connect(_on_combat_ended)
+	_manager.ability_used.connect(_on_ability_used)
+	_manager.effect_applied.connect(_on_effect_applied)
+	_manager.effect_removed.connect(_on_effect_removed)
+	_manager.character_healed.connect(_on_character_healed)
+	_manager.shield_absorbed.connect(_on_shield_absorbed)
 
 	print("[Combat] Battle begins!")
 	_manager.initialize_combat(_player_grid, _enemy_grid)
@@ -325,7 +330,45 @@ func _on_damage_dealt(source: CombatCharacter, target: CombatCharacter, amount: 
 
 
 func _on_damage_blocked(source: CombatCharacter, target: CombatCharacter) -> void:
-	print("[Combat] %s %s attacks %s %s — BLOCKED!" % [_get_team_label(source), source.character_name, _get_team_label(target), target.character_name])
+	print("[Combat] %s %s attacks %s %s — DODGED!" % [_get_team_label(source), source.character_name, _get_team_label(target), target.character_name])
+
+
+func _on_ability_used(source: CombatCharacter, ability: Dictionary, targets: Array) -> void:
+	var ability_name = ability.get("id", "unknown")
+	var target_names = []
+	for t in targets:
+		target_names.append(t.character_name)
+	print("[Combat] %s %s uses [%s] → %s" % [_get_team_label(source), source.character_name, ability_name, ", ".join(target_names)])
+
+
+func _on_effect_applied(target: CombatCharacter, effect: CombatEffect) -> void:
+	var effect_name = effect.effect_id if effect.effect_id != "" else effect.stat
+	var detail = ""
+	if effect.effect_type == "status" and effect.stacks > 0:
+		detail = " (%d stacks)" % effect.stacks
+	elif effect.effect_type == "stat_modifier":
+		var sign_str = "+" if effect.value >= 0 else ""
+		if effect.modifier_type == "percent":
+			detail = " (%s%d%% %s)" % [sign_str, int(effect.value * 100), effect.stat]
+		else:
+			detail = " (%s%d %s)" % [sign_str, int(effect.value), effect.stat]
+	print("[Combat] %s %s gains effect [%s]%s" % [_get_team_label(target), target.character_name, effect_name, detail])
+
+
+func _on_effect_removed(target: CombatCharacter, effect: CombatEffect) -> void:
+	var effect_name = effect.effect_id if effect.effect_id != "" else effect.stat
+	print("[Combat] %s %s loses effect [%s]" % [_get_team_label(target), target.character_name, effect_name])
+
+
+func _on_character_healed(target: CombatCharacter, amount: float, source: CombatCharacter) -> void:
+	if source:
+		print("[Combat] %s %s heals %s %s for %d HP" % [_get_team_label(source), source.character_name, _get_team_label(target), target.character_name, int(amount)])
+	else:
+		print("[Combat] %s %s heals for %d HP" % [_get_team_label(target), target.character_name, int(amount)])
+
+
+func _on_shield_absorbed(target: CombatCharacter, amount: float, shield_remaining: float) -> void:
+	print("[Combat] %s %s SHIELD absorbs %d damage (%d shield remaining)" % [_get_team_label(target), target.character_name, int(amount), int(shield_remaining)])
 
 
 func _on_character_died(character: CombatCharacter) -> void:

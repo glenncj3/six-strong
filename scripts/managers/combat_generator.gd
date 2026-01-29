@@ -137,15 +137,6 @@ func _build_enemy_team(strength_tier: int) -> CharacterGrid:
 			push_warning("CombatGenerator: Failed to create character %s" % char_id)
 			continue
 
-		# Scale stats by strength tier
-		if strength_tier > 0:
-			var multiplier = 1.0 + (strength_tier * 0.15)
-			for stat_key in character.stats:
-				if stat_key == GameConstants.STAT_agility or stat_key == GameConstants.STAT_CRIT_CHANCE:
-					continue  # Don't scale rate-based stats
-				character.stats[stat_key] = int(character.stats[stat_key] * multiplier)
-			character.current_health = character.stats.get(GameConstants.STAT_HEALTH, character.current_health)
-
 		# Place in grid: first GRID_COLS in front row, next GRID_COLS in back row
 		@warning_ignore("integer_division")
 		var row: int = i / GameConstants.GRID_COLS

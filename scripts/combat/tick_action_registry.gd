@@ -36,16 +36,19 @@ static func _poison_tick(context: Dictionary) -> void:
 	if effect.stacks <= 0:
 		return
 
+	var tick_damage = float(effect.stacks)
+	print("[Combat] POISON ticks on %s for %d damage (%d stacks remaining)" % [character.character_name, int(tick_damage), effect.stacks - 1])
+
 	# Deal damage equal to stacks (null source = no block/crit)
 	var deal_damage: Callable = mgr_ctx["deal_damage"]
-	deal_damage.call(null, character, float(effect.stacks))
+	deal_damage.call(null, character, tick_damage)
 
 	# Decrement stacks
 	effect.stacks -= 1
 
 	# Mark for removal at 0 stacks by setting duration to expire
 	if effect.stacks <= 0:
-		# Remove by setting to a duration type that will expire
+		print("[Combat] POISON expired on %s" % character.character_name)
 		character.effects.erase(effect)
 
 
@@ -56,6 +59,8 @@ static func _burn_apply(context: Dictionary) -> void:
 
 	if effect.stacks <= 0:
 		return
+
+	print("[Combat] BURN procs on %s for %d damage (%d stacks)" % [character.character_name, int(effect.stacks), effect.stacks])
 
 	# Deal damage equal to total burn stacks (null source = no block/crit)
 	var deal_damage: Callable = mgr_ctx["deal_damage"]

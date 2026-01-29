@@ -12,6 +12,8 @@ signal character_died(character: CombatCharacter)
 signal effect_applied(target: CombatCharacter, effect: CombatEffect)
 signal effect_removed(target: CombatCharacter, effect: CombatEffect)
 signal character_healed(target: CombatCharacter, amount: float, source: CombatCharacter)
+signal ability_used(source: CombatCharacter, ability: Dictionary, targets: Array)
+signal shield_absorbed(target: CombatCharacter, amount: float, shield_remaining: float)
 
 var _state: CombatState = null
 var _game_data: Node = null
@@ -224,6 +226,10 @@ func _execute_ability(character: CombatCharacter, ability: Dictionary) -> void:
 		"apply_effect": apply_effect,
 		"get_status_effect": _get_status_effect_data,
 	}
+	var target_mode = ability.get("target_mode", "enemy_single")
+	var targets = CombatTargeting.resolve_targets(character, _state.board, target_mode)
+	if not targets.is_empty():
+		ability_used.emit(character, ability, targets)
 	AbilityExecutor.execute(character, ability, context)
 
 
@@ -239,6 +245,7 @@ func _execute_damage(source, target: CombatCharacter, base_damage: float) -> voi
 		var absorbed = min(shield_effect.stacks, result.damage)
 		shield_effect.stacks -= absorbed
 		result.damage -= absorbed
+		shield_absorbed.emit(target, absorbed, shield_effect.stacks)
 		if shield_effect.stacks <= 0:
 			_remove_effect(target, shield_effect)
 		if result.damage <= 0:
