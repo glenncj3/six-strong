@@ -9,7 +9,7 @@ static var _next_id: int = 0
 var id: String = ""
 var source_character_id: String = ""
 var character_name: String = ""
-var ability_id: String = ""
+var ability_ids: Array = []  # Array of String
 
 # Health
 var health: float = 0.0
@@ -37,17 +37,23 @@ var column: int = 0
 var is_alive: bool = true
 var cooldown_remaining: float = 0.0
 
+# Timing
+var tick_rate_multiplier: float = 1.0
+
+# Extra stats (poison_value, haste_value, etc.)
+var extra_stats: Dictionary = {}
+
 # Effects
 var effects: Array = []  # Array of CombatEffect
 
 
-static func create_from_character(source: CharacterInstance, p_team: int, p_row: int, p_col: int, p_ability_id: String = "basic_attack") -> CombatCharacter:
+static func create_from_character(source: CharacterInstance, p_team: int, p_row: int, p_col: int, p_ability_ids: Array = ["basic_attack"]) -> CombatCharacter:
 	_next_id += 1
 	var cc = CombatCharacter.new()
 	cc.id = "cc_%d" % _next_id
 	cc.source_character_id = source.base_character_id
 	cc.character_name = source.get_character_name()
-	cc.ability_id = p_ability_id
+	cc.ability_ids = p_ability_ids
 
 	cc.base_max_health = float(source.max_health)
 	cc.max_health = cc.base_max_health
@@ -68,6 +74,14 @@ static func create_from_character(source: CharacterInstance, p_team: int, p_row:
 	cc.column = p_col
 	cc.is_alive = cc.health > 0
 	cc.cooldown_remaining = cc.speed
+
+	# Copy extra stats not mapped to base fields
+	var mapped_stats = [GameConstants.STAT_HEALTH, GameConstants.STAT_SPEED,
+		GameConstants.STAT_DAMAGE, GameConstants.STAT_CRIT_CHANCE,
+		GameConstants.STAT_DEFEND_RATE]
+	for key in source.stats:
+		if key not in mapped_stats:
+			cc.extra_stats[key] = source.stats[key]
 
 	return cc
 
@@ -107,12 +121,17 @@ func recalculate_stats() -> void:
 		var diff = new_max - max_health
 		max_health = new_max
 		if diff > 0:
-			# Buff: increase current health by the same amount
 			health += diff
 		else:
-			# Debuff: cap current health at new max
 			if health > max_health:
 				health = max_health
+
+	# Recalculate tick_rate_multiplier from continuous_modifier effects
+	var new_tick_rate = 1.0
+	for effect in effects:
+		if effect.continuous_modifier == "cooldown_tick_rate":
+			new_tick_rate *= effect.continuous_value
+	tick_rate_multiplier = new_tick_rate
 
 
 func has_speed() -> bool:
@@ -123,5 +142,98 @@ func has_damage() -> bool:
 	return damage > 0.0
 
 
+func get_stat_value(stat_name: String) -> float:
+	match stat_name:
+		"health": return health
+		"max_health": return max_health
+		"speed": return speed
+		"damage": return damage
+		"crit_chance": return crit_chance
+		"defend_rate": return defend_rate
+	return float(extra_stats.get(stat_name, 0.0))
+
+
 func get_board_index() -> int:
 	return row * GameConstants.GRID_COLS + column
+
+
+func has_effect(p_effect_id: String) -> bool:
+	for effect in effects:
+		if effect.effect_id == p_effect_id:
+			return true
+	return false
+
+
+func get_effect(p_effect_id: String) -> CombatEffect:
+	for effect in effects:
+		if effect.effect_id == p_effect_id:
+			return effect
+	return null
+
+
+func get_effects_by_tag(tag: String) -> Array:
+	var result: Array = []
+	for effect in effects:
+		if effect.tags.has(tag):
+			result.append(effect)
+	return result
+
+
+func get_stacks(p_effect_id: String) -> int:
+	var effect = get_effect(p_effect_id)
+	if effect != null:
+		return effect.stacks
+	return 0
+
+
+func cleanse_by_tag(tag: String) -> Array:
+	var removed: Array = []
+	var remaining: Array = []
+	for effect in effects:
+		if effect.tags.has(tag):
+			removed.append(effect)
+		else:
+			remaining.append(effect)
+	effects = remaining
+	return removed
+
+
+func update(delta: float) -> Dictionary:
+	var result = {"action_ready": false, "expired_effects": [], "tick_events": []}
+	if not has_speed():
+		return result
+
+	var effective_delta = delta * tick_rate_multiplier
+
+	cooldown_remaining -= effective_delta
+	if cooldown_remaining <= 0:
+		result["action_ready"] = true
+		cooldown_remaining = speed
+
+		# Decrement cooldown-type effect durations
+		var to_expire: Array = []
+		for effect in effects:
+			if effect.duration_type == "cooldowns":
+				effect.duration_value -= 1
+				if effect.duration_value <= 0:
+					to_expire.append(effect)
+		result["expired_effects"].append_array(to_expire)
+
+	# Decrement seconds-type effect durations
+	var seconds_expired: Array = []
+	for effect in effects:
+		if effect.duration_type == "seconds":
+			effect.duration_value -= effective_delta
+			if effect.duration_value <= 0:
+				seconds_expired.append(effect)
+	result["expired_effects"].append_array(seconds_expired)
+
+	# Process tick events for effects with tick_interval > 0
+	for effect in effects:
+		if effect.tick_interval > 0:
+			effect.tick_elapsed += effective_delta
+			while effect.tick_elapsed >= effect.tick_interval:
+				effect.tick_elapsed -= effect.tick_interval
+				result["tick_events"].append(effect)
+
+	return result

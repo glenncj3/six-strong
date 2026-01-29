@@ -23,6 +23,22 @@ func _run_tests():
 	test_max_health_debuff_caps_current()
 	test_max_health_debuff_no_cap_when_below()
 
+	section("Update Timing")
+	test_update_decrements_cooldown()
+	test_update_returns_action_ready()
+	test_update_expires_seconds_effect()
+	test_update_expires_cooldown_effect()
+	test_update_tick_rate_multiplier()
+	test_update_dead_character_noop()
+
+	section("Effect Queries")
+	test_has_effect_by_id()
+	test_get_effects_by_tag()
+	test_get_stacks()
+	test_cleanse_by_tag()
+	test_tick_rate_from_continuous_modifier()
+	test_update_tick_events()
+
 
 # =============================================================================
 # HELPERS
@@ -177,3 +193,168 @@ func test_max_health_debuff_no_cap_when_below():
 
 	assert_eq(cc.max_health, 50.0, "max_health reduced to 50")
 	assert_eq(cc.health, 30.0, "current health unchanged (already below new max)")
+
+
+# =============================================================================
+# UPDATE TIMING TESTS
+# =============================================================================
+
+func test_update_decrements_cooldown():
+	var source = _make_source(100, 3.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+	assert_eq(cc.cooldown_remaining, 3.0, "starts at speed")
+
+	cc.update(1.0)
+	assert_true(abs(cc.cooldown_remaining - 2.0) < 0.01, "cooldown decremented by delta")
+
+
+func test_update_returns_action_ready():
+	var source = _make_source(100, 2.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+
+	var result = cc.update(1.0)
+	assert_false(result["action_ready"], "not ready after 1s with 2s cooldown")
+
+	result = cc.update(1.5)
+	assert_true(result["action_ready"], "ready after cooldown expires")
+
+
+func test_update_expires_seconds_effect():
+	var source = _make_source(100, 5.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+
+	var effect = CombatEffect.create_stat_modifier("test", "t1", "damage", 5.0, "flat", "seconds", 1.0)
+	cc.effects.append(effect)
+
+	var result = cc.update(1.5)
+	assert_true(result["expired_effects"].has(effect), "seconds effect expired")
+
+
+func test_update_expires_cooldown_effect():
+	var source = _make_source(100, 1.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+
+	var effect = CombatEffect.create_stat_modifier("test", "t1", "damage", 5.0, "flat", "cooldowns", 1.0)
+	cc.effects.append(effect)
+
+	var result = cc.update(1.5)  # Triggers cooldown
+	assert_true(result["action_ready"], "action triggered")
+	assert_true(result["expired_effects"].has(effect), "cooldown effect expired after 1 cooldown")
+
+
+func test_update_tick_rate_multiplier():
+	var source = _make_source(100, 2.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+	cc.tick_rate_multiplier = 2.0
+
+	# With 2x tick rate, 1s of real time = 2s of effective time
+	var result = cc.update(1.0)
+	assert_true(result["action_ready"], "action ready with 2x tick rate after 1s (effective 2s)")
+
+
+func test_update_dead_character_noop():
+	# Dead characters still update (manager checks is_alive before executing actions)
+	# but a character with no speed returns immediately
+	var source = _make_source(100, 0.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+	cc.is_alive = false
+
+	var result = cc.update(5.0)
+	assert_false(result["action_ready"], "no-speed character never ready")
+	assert_eq(result["expired_effects"].size(), 0, "no expired effects on no-speed character")
+
+
+# =============================================================================
+# EFFECT QUERY TESTS
+# =============================================================================
+
+func test_has_effect_by_id():
+	var source = _make_source(100, 2.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+
+	assert_false(cc.has_effect("poison"), "no poison initially")
+
+	var effect = CombatEffect.create_status_effect({"effect_id": "poison", "stacks": 3})
+	cc.effects.append(effect)
+	assert_true(cc.has_effect("poison"), "has poison after adding")
+	assert_false(cc.has_effect("haste"), "does not have haste")
+
+
+func test_get_effects_by_tag():
+	var source = _make_source(100, 2.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+
+	var poison = CombatEffect.create_status_effect({"effect_id": "poison", "tags": ["debuff", "dot"]})
+	var haste = CombatEffect.create_status_effect({"effect_id": "haste", "tags": ["buff", "speed"]})
+	cc.effects.append(poison)
+	cc.effects.append(haste)
+
+	var debuffs = cc.get_effects_by_tag("debuff")
+	assert_eq(debuffs.size(), 1, "one debuff")
+	assert_eq(debuffs[0].effect_id, "poison", "poison is the debuff")
+
+	var buffs = cc.get_effects_by_tag("buff")
+	assert_eq(buffs.size(), 1, "one buff")
+	assert_eq(buffs[0].effect_id, "haste", "haste is the buff")
+
+
+func test_get_stacks():
+	var source = _make_source(100, 2.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+
+	assert_eq(cc.get_stacks("poison"), 0, "no stacks when no effect")
+
+	var effect = CombatEffect.create_status_effect({"effect_id": "poison", "stacks": 5})
+	cc.effects.append(effect)
+	assert_eq(cc.get_stacks("poison"), 5, "5 stacks of poison")
+
+
+func test_cleanse_by_tag():
+	var source = _make_source(100, 2.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+
+	var poison = CombatEffect.create_status_effect({"effect_id": "poison", "tags": ["debuff", "dot"]})
+	var haste = CombatEffect.create_status_effect({"effect_id": "haste", "tags": ["buff", "speed"]})
+	cc.effects.append(poison)
+	cc.effects.append(haste)
+
+	var removed = cc.cleanse_by_tag("debuff")
+	assert_eq(removed.size(), 1, "removed 1 debuff")
+	assert_eq(cc.effects.size(), 1, "1 effect remaining")
+	assert_true(cc.has_effect("haste"), "haste still present")
+	assert_false(cc.has_effect("poison"), "poison removed")
+
+
+func test_tick_rate_from_continuous_modifier():
+	var source = _make_source(100, 2.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+
+	var haste = CombatEffect.create_status_effect({
+		"effect_id": "haste",
+		"continuous_modifier": "cooldown_tick_rate",
+		"continuous_value": 2.0,
+	})
+	cc.effects.append(haste)
+	cc.recalculate_stats()
+
+	assert_true(abs(cc.tick_rate_multiplier - 2.0) < 0.01, "tick_rate_multiplier is 2.0 with haste")
+
+
+func test_update_tick_events():
+	var source = _make_source(100, 5.0, 10.0, 0.0, 0.0)
+	var cc = CombatCharacter.create_from_character(source, 0, 0, 0)
+
+	var tick_fn = func(_ctx): pass
+	var effect = CombatEffect.create_status_effect({
+		"effect_id": "poison",
+		"tick_interval": 1.0,
+		"on_tick": tick_fn,
+	})
+	cc.effects.append(effect)
+
+	var result = cc.update(0.5)
+	assert_eq(result["tick_events"].size(), 0, "no tick at 0.5s")
+
+	result = cc.update(0.6)
+	assert_eq(result["tick_events"].size(), 1, "tick fires at 1.1s total")
+	assert_eq(result["tick_events"][0], effect, "correct effect ticked")

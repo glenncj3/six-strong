@@ -12,6 +12,7 @@ var skills: Dictionary = {}  # id -> skill_data
 var encounter_types: Array = []  # Array of encounter type definitions
 var abilities: Dictionary = {}  # id -> ability_data
 var legacies: Dictionary = {}  # id -> legacy_data (Phase 0: Legacy System)
+var status_effects: Dictionary = {}  # id -> status_effect_data
 
 # Data file paths
 const CHARACTERS_PATH = "res://data/characters/characters.json"
@@ -21,6 +22,7 @@ const SKILLS_PATH = "res://data/skills/skills.json"
 const ENCOUNTERS_PATH = "res://data/encounters/encounter_types.json"
 const ABILITIES_PATH = "res://data/abilities/abilities.json"
 const LEGACIES_PATH = "res://data/legacies/legacies.json"
+const STATUS_EFFECTS_PATH = "res://data/status_effects/status_effects.json"
 
 
 func _ready() -> void:
@@ -36,6 +38,7 @@ func load_all_data() -> void:
 	_load_encounter_types()
 	_load_abilities()
 	_load_legacies()
+	_load_status_effects()
 
 
 func _load_data_collection(path: String, container_key: String, target_dict: Dictionary) -> void:
@@ -81,8 +84,11 @@ func _load_abilities() -> void:
 
 
 func _load_legacies() -> void:
-	"""Load legacy master data from JSON file."""
 	_load_data_collection(LEGACIES_PATH, "legacies", legacies)
+
+
+func _load_status_effects() -> void:
+	_load_data_collection(STATUS_EFFECTS_PATH, "status_effects", status_effects)
 
 
 # =============================================================================
@@ -142,6 +148,9 @@ func get_ability(id: String) -> Dictionary:
 
 func get_encounter_types() -> Array:
 	return encounter_types
+
+func get_status_effect(id: String) -> Dictionary:
+	return _get_from(status_effects, id, "Status effect")
 
 
 # =============================================================================

@@ -1,0 +1,26 @@
+{
+  "status_effects": [
+    {
+      "id": "poison",
+      "name": "Poison",
+      "description": "Deals damage equal to stacks each second, loses 1 stack per tick",
+      "tags": ["debuff", "dot"],
+      "merge_behavior": "add_stacks",
+      "duration_type": "permanent",
+      "tick_interval": 1.0,
+      "tick_action": "poison_tick",
+      "max_stacks": 99
+    },
+    {
+      "id": "haste",
+      "name": "Haste",
+      "description": "Doubles cooldown tick rate",
+      "tags": ["buff", "speed"],
+      "merge_behavior": "refresh_duration",
+      "duration_type": "seconds",
+      "tick_interval": 0,
+      "continuous_modifier": "cooldown_tick_rate",
+      "continuous_value": 2.0
+    }
+  ]
+}

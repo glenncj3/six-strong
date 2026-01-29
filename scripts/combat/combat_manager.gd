@@ -32,12 +32,26 @@ func _get_game_data() -> Node:
 	return null
 
 
-func _lookup_ability_id(character_id: String) -> String:
+func _lookup_ability_ids(character_id: String) -> Array:
 	var gd = _get_game_data()
 	if gd == null:
-		return "basic_attack"
+		return ["basic_attack"]
 	var char_data: Dictionary = gd.get_character_by_id(character_id)
-	return char_data.get("ability", "basic_attack")
+	# Support both "abilities" (array) and "ability" (single string, backward-compat)
+	if char_data.has("abilities"):
+		var result: Array = []
+		for a in char_data["abilities"]:
+			result.append(a)
+		return result
+	var single = char_data.get("ability", "basic_attack")
+	return [single]
+
+
+func _get_status_effect_data(effect_id: String) -> Dictionary:
+	var gd = _get_game_data()
+	if gd == null:
+		return {}
+	return gd.get_status_effect(effect_id)
 
 
 func _lookup_ability(ability_id: String) -> Dictionary:
@@ -49,6 +63,7 @@ func _lookup_ability(ability_id: String) -> Dictionary:
 
 func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid) -> void:
 	AbilityExecutor.register_defaults()
+	TickActionRegistry.register_defaults()
 	_state = CombatState.new()
 	_state.board = CombatBoard.new()
 	_state.elapsed_time = 0.0
@@ -60,8 +75,8 @@ func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid)
 		for col in range(GameConstants.GRID_COLS):
 			var ch = player_grid.get_character_at(row, col)
 			if ch != null:
-				var ability_id = _lookup_ability_id(ch.base_character_id)
-				var cc = CombatCharacter.create_from_character(ch, GameConstants.TEAM_PLAYER, row, col, ability_id)
+				var aids = _lookup_ability_ids(ch.base_character_id)
+				var cc = CombatCharacter.create_from_character(ch, GameConstants.TEAM_PLAYER, row, col, aids)
 				_state.board.set_character_at(GameConstants.TEAM_PLAYER, row, col, cc)
 
 	# Clone opponent characters
@@ -69,8 +84,8 @@ func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid)
 		for col in range(GameConstants.GRID_COLS):
 			var ch = opponent_grid.get_character_at(row, col)
 			if ch != null:
-				var ability_id = _lookup_ability_id(ch.base_character_id)
-				var cc = CombatCharacter.create_from_character(ch, GameConstants.TEAM_OPPONENT, row, col, ability_id)
+				var aids = _lookup_ability_ids(ch.base_character_id)
+				var cc = CombatCharacter.create_from_character(ch, GameConstants.TEAM_OPPONENT, row, col, aids)
 				_state.board.set_character_at(GameConstants.TEAM_OPPONENT, row, col, cc)
 
 	# Apply combat-start effects from items/skills
@@ -98,21 +113,27 @@ func _update_combat(delta: float) -> void:
 
 	var all_living = _state.board.get_all_living_characters()
 	for character in all_living:
-		_update_character(character, delta)
+		var result = character.update(delta)
+		if result["action_ready"]:
+			_execute_character_action(character)
+		for effect in result["expired_effects"]:
+			if character.effects.has(effect):
+				_remove_effect(character, effect)
+		for effect in result["tick_events"]:
+			if character.is_alive and character.effects.has(effect) and effect.on_tick.is_valid():
+				var tick_context = {
+					"character": character,
+					"effect": effect,
+					"manager_context": {
+						"deal_damage": _execute_damage,
+						"heal": heal_character,
+						"apply_effect": apply_effect,
+						"board": _state.board,
+					}
+				}
+				effect.on_tick.call(tick_context)
 
-	_update_effects(delta)
 	_check_win_condition()
-
-
-func _update_character(character: CombatCharacter, delta: float) -> void:
-	if not character.has_speed():
-		return
-
-	character.cooldown_remaining -= delta
-	if character.cooldown_remaining <= 0:
-		_execute_character_action(character)
-		character.cooldown_remaining = character.speed
-		_decrement_cooldown_effects(character)
 
 
 func _execute_character_action(character: CombatCharacter) -> void:
@@ -121,11 +142,10 @@ func _execute_character_action(character: CombatCharacter) -> void:
 	# Process on_cooldown triggered effects
 	_process_triggered_effects(character, "on_cooldown", {character = character})
 
-	var ability = _lookup_ability(character.ability_id)
-	if ability.is_empty():
-		return
-
-	_execute_ability(character, ability)
+	for aid in character.ability_ids:
+		var ability = _lookup_ability(aid)
+		if not ability.is_empty():
+			_execute_ability(character, ability)
 
 
 func _execute_ability(character: CombatCharacter, ability: Dictionary) -> void:
@@ -135,11 +155,12 @@ func _execute_ability(character: CombatCharacter, ability: Dictionary) -> void:
 		"deal_damage": _execute_damage,
 		"heal": heal_character,
 		"apply_effect": apply_effect,
+		"get_status_effect": _get_status_effect_data,
 	}
 	AbilityExecutor.execute(targeting, character, ability, context)
 
 
-func _execute_damage(source: CombatCharacter, target: CombatCharacter, base_damage: float) -> void:
+func _execute_damage(source, target: CombatCharacter, base_damage: float) -> void:
 	var result = DamageResolver.resolve(source, target, base_damage)
 
 	if result.blocked:
@@ -230,6 +251,8 @@ func _has_damage_dealing_effects(character: CombatCharacter) -> bool:
 	for effect in character.effects:
 		if effect.effect_type == "triggered" and effect.trigger == "on_cooldown":
 			return true
+		if effect.tick_interval > 0 and effect.tags.has("dot"):
+			return true
 	return false
 
 
@@ -237,39 +260,44 @@ func _has_damage_dealing_effects(character: CombatCharacter) -> bool:
 # EFFECT MANAGEMENT
 # =============================================================================
 
-func _update_effects(delta: float) -> void:
-	for character in _get_all_characters():
-		var to_remove: Array = []
-		for effect in character.effects:
-			if effect.duration_type == "seconds":
-				effect.duration_value -= delta
-				if effect.duration_value <= 0:
-					to_remove.append(effect)
-		for effect in to_remove:
-			_remove_effect(character, effect)
-
-
-func _decrement_cooldown_effects(character: CombatCharacter) -> void:
-	var to_remove: Array = []
-	for effect in character.effects:
-		if effect.duration_type == "cooldowns":
-			effect.duration_value -= 1
-			if effect.duration_value <= 0:
-				to_remove.append(effect)
-	for effect in to_remove:
-		_remove_effect(character, effect)
-
 
 func apply_effect(target: CombatCharacter, effect_to_apply: CombatEffect) -> void:
+	# Merge logic for status effects with effect_id
+	if effect_to_apply.effect_id != "" and effect_to_apply.merge_behavior != "none":
+		var existing = target.get_effect(effect_to_apply.effect_id)
+		if existing != null:
+			match effect_to_apply.merge_behavior:
+				"add_stacks":
+					existing.stacks += effect_to_apply.stacks
+					if existing.max_stacks > 0:
+						existing.stacks = min(existing.stacks, existing.max_stacks)
+					effect_applied.emit(target, effect_to_apply)
+					_process_triggered_effects(target, "on_" + effect_to_apply.effect_id, {target = target, effect = existing})
+					return
+				"refresh_duration":
+					existing.duration_value = effect_to_apply.duration_value
+					effect_applied.emit(target, effect_to_apply)
+					_process_triggered_effects(target, "on_" + effect_to_apply.effect_id, {target = target, effect = existing})
+					return
+				"extend_duration":
+					existing.duration_value += effect_to_apply.duration_value
+					effect_applied.emit(target, effect_to_apply)
+					_process_triggered_effects(target, "on_" + effect_to_apply.effect_id, {target = target, effect = existing})
+					return
+
 	target.effects.append(effect_to_apply)
-	if effect_to_apply.effect_type == "stat_modifier":
+	if effect_to_apply.effect_type == "stat_modifier" or effect_to_apply.continuous_modifier != "":
 		target.recalculate_stats()
 	effect_applied.emit(target, effect_to_apply)
+
+	# Fire on_<effect_id> trigger if applicable
+	if effect_to_apply.effect_id != "":
+		_process_triggered_effects(target, "on_" + effect_to_apply.effect_id, {target = target, effect = effect_to_apply})
 
 
 func _remove_effect(target: CombatCharacter, effect_to_remove: CombatEffect) -> void:
 	target.effects.erase(effect_to_remove)
-	if effect_to_remove.effect_type == "stat_modifier":
+	if effect_to_remove.effect_type == "stat_modifier" or effect_to_remove.continuous_modifier != "":
 		target.recalculate_stats()
 	effect_removed.emit(target, effect_to_remove)
 
@@ -291,6 +319,18 @@ func _remove_effects_from_source(source_id: String) -> void:
 				to_remove.append(effect)
 		for effect in to_remove:
 			_remove_effect(character, effect)
+
+
+func cleanse_effects_by_tag(target: CombatCharacter, tag: String) -> Array:
+	var removed = target.cleanse_by_tag(tag)
+	var needs_recalc = false
+	for effect in removed:
+		if effect.effect_type == "stat_modifier" or effect.continuous_modifier != "":
+			needs_recalc = true
+		effect_removed.emit(target, effect)
+	if needs_recalc:
+		target.recalculate_stats()
+	return removed
 
 
 func _get_all_characters() -> Array:

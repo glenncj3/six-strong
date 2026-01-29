@@ -72,6 +72,20 @@ func _run_tests():
 	section("Cooldown Reset")
 	test_cooldown_resets_to_speed()
 
+	section("Status Effect Merging")
+	test_merge_add_stacks()
+	test_merge_refresh_duration()
+	test_merge_extend_duration()
+
+	section("Tick Events")
+	test_tick_event_calls_on_tick()
+
+	section("Cleanse")
+	test_cleanse_removes_debuffs_not_buffs()
+
+	section("Status Triggers")
+	test_on_status_trigger_fires()
+
 
 # =============================================================================
 # HELPERS
@@ -772,3 +786,153 @@ func test_cooldown_resets_to_speed():
 	# With discrete steps, cooldown won't be exactly 3.0 but should be close
 	# (it resets to speed, then decrements by remaining delta in that tick)
 	assert_true(ch.cooldown_remaining > 2.5 and ch.cooldown_remaining <= 3.0, "cooldown resets near speed value")
+
+
+# =============================================================================
+# STATUS EFFECT MERGING
+# =============================================================================
+
+func test_merge_add_stacks():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	var eg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	manager.initialize_combat(pg, eg)
+
+	var ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var e1 = CombatEffect.create_status_effect({
+		"effect_id": "poison", "stacks": 3, "max_stacks": 10,
+		"merge_behavior": "add_stacks", "tags": ["debuff"],
+	})
+	var e2 = CombatEffect.create_status_effect({
+		"effect_id": "poison", "stacks": 4, "max_stacks": 10,
+		"merge_behavior": "add_stacks", "tags": ["debuff"],
+	})
+	manager.apply_effect(ch, e1)
+	manager.apply_effect(ch, e2)
+
+	assert_eq(ch.effects.size(), 1, "only 1 effect (merged)")
+	assert_eq(ch.get_stacks("poison"), 7, "stacks merged: 3 + 4 = 7")
+
+
+func test_merge_refresh_duration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	var eg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	manager.initialize_combat(pg, eg)
+
+	var ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var e1 = CombatEffect.create_status_effect({
+		"effect_id": "haste", "merge_behavior": "refresh_duration",
+		"duration_type": "seconds", "duration_value": 5.0,
+	})
+	manager.apply_effect(ch, e1)
+
+	# Simulate some time passing
+	_simulate_time(manager, 2.0)
+
+	var e2 = CombatEffect.create_status_effect({
+		"effect_id": "haste", "merge_behavior": "refresh_duration",
+		"duration_type": "seconds", "duration_value": 5.0,
+	})
+	manager.apply_effect(ch, e2)
+
+	assert_eq(ch.effects.size(), 1, "still 1 effect")
+	assert_true(ch.get_effect("haste").duration_value > 4.5, "duration refreshed to 5.0")
+
+
+func test_merge_extend_duration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	var eg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	manager.initialize_combat(pg, eg)
+
+	var ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var e1 = CombatEffect.create_status_effect({
+		"effect_id": "shield", "merge_behavior": "extend_duration",
+		"duration_type": "seconds", "duration_value": 5.0,
+	})
+	manager.apply_effect(ch, e1)
+
+	var e2 = CombatEffect.create_status_effect({
+		"effect_id": "shield", "merge_behavior": "extend_duration",
+		"duration_type": "seconds", "duration_value": 3.0,
+	})
+	manager.apply_effect(ch, e2)
+
+	assert_eq(ch.effects.size(), 1, "still 1 effect")
+	assert_true(abs(ch.get_effect("shield").duration_value - 8.0) < 0.01, "duration extended: 5 + 3 = 8")
+
+
+# =============================================================================
+# TICK EVENTS
+# =============================================================================
+
+func test_tick_event_calls_on_tick():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var tick_count = [0]
+	var tick_fn = func(_ctx): tick_count[0] += 1
+	var effect = CombatEffect.create_status_effect({
+		"effect_id": "dot", "tick_interval": 1.0, "on_tick": tick_fn,
+		"tags": ["debuff", "dot"],
+	})
+	manager.apply_effect(ch, effect)
+
+	_simulate_time(manager, 2.5)
+	assert_true(tick_count[0] >= 2, "on_tick called at least twice in 2.5s")
+
+
+# =============================================================================
+# CLEANSE
+# =============================================================================
+
+func test_cleanse_removes_debuffs_not_buffs():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	var eg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	manager.initialize_combat(pg, eg)
+
+	var ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var poison = CombatEffect.create_status_effect({
+		"effect_id": "poison", "tags": ["debuff", "dot"], "stacks": 3,
+	})
+	var haste = CombatEffect.create_status_effect({
+		"effect_id": "haste", "tags": ["buff", "speed"],
+		"continuous_modifier": "cooldown_tick_rate", "continuous_value": 2.0,
+	})
+	manager.apply_effect(ch, poison)
+	manager.apply_effect(ch, haste)
+	assert_eq(ch.effects.size(), 2, "2 effects before cleanse")
+
+	var removed = manager.cleanse_effects_by_tag(ch, "debuff")
+	assert_eq(removed.size(), 1, "removed 1 debuff")
+	assert_eq(ch.effects.size(), 1, "1 effect remaining")
+	assert_true(ch.has_effect("haste"), "haste still present")
+	assert_false(ch.has_effect("poison"), "poison removed")
+
+
+# =============================================================================
+# STATUS TRIGGERS
+# =============================================================================
+
+func test_on_status_trigger_fires():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	var eg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	manager.initialize_combat(pg, eg)
+
+	var ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var triggered = [false]
+	var trigger_effect = CombatEffect.create_triggered("test", "t1", "on_poison",
+		func(_data): triggered[0] = true, "combat")
+	manager.apply_effect(ch, trigger_effect)
+
+	var poison = CombatEffect.create_status_effect({
+		"effect_id": "poison", "tags": ["debuff"], "stacks": 3,
+	})
+	manager.apply_effect(ch, poison)
+	assert_true(triggered[0], "on_poison trigger fired when poison applied")

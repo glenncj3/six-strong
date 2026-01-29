@@ -3,7 +3,11 @@ extends RefCounted
 ## Static utility for resolving damage: block check, crit check, final damage calc.
 
 
-static func resolve(source: CombatCharacter, target: CombatCharacter, base_damage: float) -> Dictionary:
+static func resolve(source, target: CombatCharacter, base_damage: float) -> Dictionary:
+	# Null source (e.g. poison tick): skip block/crit, return raw damage
+	if source == null:
+		return {blocked = false, damage = base_damage, is_crit = false}
+
 	# Block check
 	if target.defend_rate > 0:
 		if randf() < target.defend_rate:

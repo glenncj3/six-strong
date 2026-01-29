@@ -58,6 +58,27 @@
       "damage_multiplier": 0.5,
       "hit_count": 3,
       "cooldown_source": "speed"
+    },
+    {
+      "id": "basic_poison",
+      "name": "Poison Strike",
+      "description": "Deals reduced damage and applies poison stacks",
+      "type": "active",
+      "targeting": "enemy_single_apply_effect",
+      "damage_multiplier": 0.8,
+      "applies_effect": "poison",
+      "stacks_from": "poison_value",
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "basic_haste",
+      "name": "Quicken",
+      "description": "Applies haste to self, doubling cooldown tick rate",
+      "type": "active",
+      "targeting": "self_apply_effect",
+      "applies_effect": "haste",
+      "duration_from": "haste_value",
+      "cooldown_source": "speed"
     }
   ]
 }
