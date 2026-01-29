@@ -88,10 +88,10 @@ func setup_from_instance(char_instance: CharacterInstance) -> void:
 	# Set name
 	name_label.text = char_instance.get_character_name()
 
-	# Display instance stats (includes level bonuses)
-	health_label.text = UIHelpers.format_stat(GameConstants.STAT_HEALTH, char_instance.stats.get(GameConstants.STAT_HEALTH, 0))
-	charges_label.text = UIHelpers.format_stat(GameConstants.STAT_CHARGES, char_instance.stats.get(GameConstants.STAT_CHARGES, 0))
-	agility_label.text = UIHelpers.format_stat(GameConstants.STAT_agility, char_instance.stats.get(GameConstants.STAT_agility, 0))
+	# Display instance stats (includes level bonuses and grid passive bonuses)
+	health_label.text = UIHelpers.format_stat(GameConstants.STAT_HEALTH, int(char_instance.get_effective_stat(GameConstants.STAT_HEALTH)))
+	charges_label.text = UIHelpers.format_stat(GameConstants.STAT_CHARGES, int(char_instance.get_effective_stat(GameConstants.STAT_CHARGES)))
+	agility_label.text = UIHelpers.format_stat(GameConstants.STAT_agility, int(char_instance.get_effective_stat(GameConstants.STAT_agility)))
 
 
 const SIZE_CONFIG := {

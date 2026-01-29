@@ -244,6 +244,17 @@
       "target_mode": "enemy_all",
       "applies_effect": "burn",
       "stacks_from": "burn_value"
+    },
+    {
+      "id": "buff_adjacent_attack",
+      "name": "Battle Aura",
+      "description": "Passively increases attack damage of adjacent allies",
+      "type": "passive",
+      "category": "ongoing",
+      "passive_effect": "buff_adjacent_attack",
+      "buff_stat": "attack_damage_bonus",
+      "buff_modifier_type": "percent",
+      "buff_value_from": "buff_adjacent_attack_value"
     }
   ]
 }

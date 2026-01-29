@@ -110,11 +110,32 @@ func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid)
 	combat_started.emit(_state)
 
 
-func _apply_combat_start_effects(_character: CombatCharacter) -> void:
-	# TODO: Apply effects from items and skills equipped on the source character.
-	# Each item/skill that grants combat effects should create CombatEffect instances
-	# and apply them here via apply_effect().
-	pass
+func _apply_combat_start_effects(character: CombatCharacter) -> void:
+	# Apply passive ability effects
+	for aid in character.ability_ids:
+		var ability = _lookup_ability(aid)
+		if ability.is_empty() or ability.get("type", "") != "passive":
+			continue
+		var passive_id = ability.get("passive_effect", "")
+		match passive_id:
+			"buff_adjacent_attack":
+				_apply_buff_adjacent_attack(character, ability)
+
+
+func _apply_buff_adjacent_attack(source: CombatCharacter, ability: Dictionary) -> void:
+	var buff_stat = ability.get("buff_stat", "attack_damage_bonus")
+	var mod_type = ability.get("buff_modifier_type", "percent")
+	var value_from = ability.get("buff_value_from", "buff_adjacent_attack_value")
+	var buff_value = source.get_stat_value(value_from)
+	if buff_value == 0.0:
+		return
+	var allies = _state.board.get_adjacent_allies(source)
+	for ally in allies:
+		var effect = CombatEffect.create_stat_modifier(
+			"character", source.id, buff_stat, buff_value, mod_type, "combat"
+		)
+		effect.tags = ["buff"]
+		apply_effect(ally, effect)
 
 
 func _process(delta: float) -> void:
@@ -182,6 +203,8 @@ func _execute_character_action(character: CombatCharacter) -> void:
 
 
 func _execute_ability(character: CombatCharacter, ability: Dictionary) -> void:
+	if ability.get("type", "") == "passive":
+		return
 	var context = {
 		"board": _state.board,
 		"deal_damage": _execute_damage,

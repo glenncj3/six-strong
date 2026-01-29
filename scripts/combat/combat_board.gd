@@ -62,6 +62,27 @@ func get_living_characters(p_team: int, p_row: int) -> Array:
 	return result
 
 
+func get_adjacent_allies(character: CombatCharacter) -> Array:
+	## Returns living allies orthogonally adjacent (same column different row, or same row ±1 column).
+	## Excludes the character itself.
+	var result: Array = []
+	var adj_positions = [
+		[character.row - 1, character.column],  # same column, other row
+		[character.row + 1, character.column],
+		[character.row, character.column - 1],  # same row, adjacent column
+		[character.row, character.column + 1],
+	]
+	for pos in adj_positions:
+		var r = pos[0]
+		var c = pos[1]
+		if r < 0 or r >= GameConstants.GRID_ROWS or c < 0 or c >= GameConstants.GRID_COLS:
+			continue
+		var ch = get_character_at(character.team, r, c)
+		if ch != null and ch.is_alive and ch.id != character.id:
+			result.append(ch)
+	return result
+
+
 func has_living_characters(p_team: int) -> bool:
 	var arr = player_characters if p_team == GameConstants.TEAM_PLAYER else opponent_characters
 	for ch in arr:

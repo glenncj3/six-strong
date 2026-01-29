@@ -23,6 +23,13 @@ static func _damage_targets(source: CombatCharacter, ability: Dictionary, contex
 	if not source.has_damage():
 		return
 	var multiplier = ability.get("damage_multiplier", 1.0)
+	var category = ability.get("category", "")
+
+	# Apply category-specific damage bonuses from effects
+	if category == "attack":
+		var bonus = _get_effect_stat_bonus(source, "attack_damage_bonus")
+		multiplier *= (1.0 + bonus)
+
 	var deal_damage: Callable = context["deal_damage"]
 	for target in targets:
 		deal_damage.call(source, target, source.damage * multiplier)
@@ -34,6 +41,16 @@ static func _heal_targets(source: CombatCharacter, ability: Dictionary, context:
 	var heal: Callable = context["heal"]
 	for target in targets:
 		heal.call(target, heal_value, source)
+
+
+static func _get_effect_stat_bonus(character: CombatCharacter, stat_name: String) -> float:
+	## Sums percent modifier values for a custom stat from the character's effects.
+	var total := 0.0
+	for effect in character.effects:
+		if effect.effect_type == "stat_modifier" and effect.stat == stat_name:
+			if effect.modifier_type == "percent":
+				total += effect.value
+	return total
 
 
 static func _build_effect_overrides(source: CombatCharacter, ability: Dictionary) -> Dictionary:

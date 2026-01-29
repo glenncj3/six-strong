@@ -32,12 +32,16 @@ const MAX_CHARACTERS := GameConstants.MAX_GRID_CHARACTERS  # 6
 # 2D array: _grid[row][col] = CharacterInstance or null
 var _grid: Array = []
 
+# Bonus calculator (handles stat_bonuses from passive abilities, items, etc.)
+var bonus_calculator: GridBonusCalculator = null
+
 
 # =============================================================================
 # INITIALIZATION
 # =============================================================================
 
 func _init() -> void:
+	bonus_calculator = GridBonusCalculator.new(self)
 	_initialize_empty_grid()
 
 
@@ -59,6 +63,7 @@ func clear() -> void:
 			if character:
 				character.clear_grid_position()
 			_grid[row][col] = null
+	bonus_calculator.recalculate()
 	grid_changed.emit()
 
 
@@ -97,6 +102,7 @@ func place_character(character: CharacterInstance, row: int, col: int) -> bool:
 	character.set_grid_position(row, col)
 
 	character_placed.emit(character, row, col)
+	bonus_calculator.recalculate()
 	grid_changed.emit()
 	return true
 
@@ -137,6 +143,7 @@ func remove_character(row: int, col: int) -> CharacterInstance:
 	character.clear_grid_position()
 
 	character_removed.emit(character, row, col)
+	bonus_calculator.recalculate()
 	grid_changed.emit()
 	return character
 
@@ -198,6 +205,7 @@ func swap_positions(from_row: int, from_col: int, to_row: int, to_col: int) -> b
 		char_b.set_grid_position(from_row, from_col)
 
 	characters_swapped.emit(char_a, Vector2i(from_row, from_col), char_b, Vector2i(to_row, to_col))
+	bonus_calculator.recalculate()
 	grid_changed.emit()
 	return true
 
@@ -225,6 +233,7 @@ func move_character(from_row: int, from_col: int, to_row: int, to_col: int) -> b
 	character.set_grid_position(to_row, to_col)
 
 	character_placed.emit(character, to_row, to_col)
+	bonus_calculator.recalculate()
 	grid_changed.emit()
 	return true
 
@@ -378,6 +387,7 @@ static func from_dict(data: Dictionary, game_data = null):
 					grid._grid[row][col] = character
 					character.set_grid_position(row, col)
 
+	grid.bonus_calculator.recalculate()
 	return grid
 
 
@@ -388,6 +398,7 @@ static func from_dict(data: Dictionary, game_data = null):
 func _is_valid_position(row: int, col: int) -> bool:
 	"""Check if a position is within grid bounds."""
 	return row >= 0 and row < ROWS and col >= 0 and col < COLS
+
 
 
 func get_grid_dimensions() -> Vector2i:

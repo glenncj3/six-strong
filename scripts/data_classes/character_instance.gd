@@ -14,6 +14,10 @@ var current_health: int = 0
 # Stats dictionary (data-driven, supports any stat)
 var stats: Dictionary = {}
 
+# Grid-position-dependent bonuses from passive abilities (recalculated by CharacterGrid)
+# Keys are stat names, values are {flat: float, percent: float}
+var stat_bonuses: Dictionary = {}
+
 # Grid position for 2x3 character grid
 # Vector2i(row, column) where row 0 = front, row 1 = back
 # Value of Vector2i(-1, -1) indicates not placed in grid
@@ -233,8 +237,17 @@ func get_character_description() -> String:
 
 
 func get_stat(stat_name: String) -> int:
-	"""Get a stat value by name."""
+	"""Get a base stat value by name (without grid bonuses)."""
 	return stats.get(stat_name, 0)
+
+
+func get_effective_stat(stat_name: String) -> float:
+	"""Get stat value including grid-position bonuses from passive abilities."""
+	var base = float(stats.get(stat_name, 0))
+	if stat_bonuses.has(stat_name):
+		var bonus = stat_bonuses[stat_name]
+		base = (base + bonus.get("flat", 0.0)) * (1.0 + bonus.get("percent", 0.0))
+	return base
 
 
 func recalculate_stats() -> void:
