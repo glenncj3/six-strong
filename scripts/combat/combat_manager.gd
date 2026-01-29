@@ -171,6 +171,15 @@ func _execute_character_action(character: CombatCharacter) -> void:
 		if not ability.is_empty():
 			_execute_ability(character, ability)
 
+	var multistrike_count = int(character.get_stat_value("multistrike_value"))
+	for _strike in range(multistrike_count):
+		if not character.is_alive:
+			break
+		for aid in character.ability_ids:
+			var ability = _lookup_ability(aid)
+			if not ability.is_empty():
+				_execute_ability(character, ability)
+
 
 func _execute_ability(character: CombatCharacter, ability: Dictionary) -> void:
 	var context = {

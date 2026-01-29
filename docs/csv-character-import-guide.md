@@ -87,9 +87,15 @@ Exporting from JSON back to CSV preserves multiple abilities using the same pipe
 | `shield_ally` | Shields a single ally |
 | `shield_ally_row` | Shields an ally row |
 | `shield_allies` | Shields all allies |
+| `burn_enemy` | Burns a single enemy |
+| `burn_enemy_row` | Burns an enemy row |
+| `burn_enemies` | Burns all enemies |
 | `slow_enemy` | Slows a single enemy |
 | `slow_enemy_row` | Slows an enemy row |
 | `slow_enemies` | Slows all enemies |
+| `freeze_enemy` | Freezes a single enemy |
+| `freeze_enemy_row` | Freezes an enemy row |
+| `freeze_enemies` | Freezes all enemies |
 
 Ability definitions are in `data/abilities/abilities.json`.
 

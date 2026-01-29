@@ -134,3 +134,9 @@ Freezes all enemies in the nearest row.
 
 ### Freeze All Enemies (`freeze_enemies`)
 Freezes all enemies.
+
+---
+
+## Multistrike
+
+Multistrike is a character stat (`multistrike_value`), not an ability. When a character with multistrike finishes their cooldown, they execute their full ability list once as normal, then repeat it a number of additional times equal to their `multistrike_value`. A character with `multistrike_value` of 3 and an `attack_enemy` ability would strike 4 total times per cooldown. Targets are re-resolved between each strike, so if a target dies, the next strike picks a new valid target. Extra strikes stop if the attacking character dies mid-sequence.

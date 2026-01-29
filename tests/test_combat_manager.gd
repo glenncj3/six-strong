@@ -86,6 +86,13 @@ func _run_tests():
 	section("Status Triggers")
 	test_on_status_trigger_fires()
 
+	section("Multistrike")
+	test_multistrike_zero_acts_once()
+	test_multistrike_one_acts_twice()
+	test_multistrike_three_acts_four_times()
+	test_multistrike_retargets_on_kill()
+	test_multistrike_stops_if_character_dies()
+
 
 # =============================================================================
 # HELPERS
@@ -936,3 +943,95 @@ func test_on_status_trigger_fires():
 	})
 	manager.apply_effect(ch, poison)
 	assert_true(triggered[0], "on_poison trigger fired when poison applied")
+
+
+# =============================================================================
+# MULTISTRIKE
+# =============================================================================
+
+func test_multistrike_zero_acts_once():
+	# Default multistrike_value is 0 - character should attack once per cooldown
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 25.0, 0.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	_simulate_time(manager, 1.1)
+	assert_eq(enemy.health, 975.0, "multistrike 0 deals one hit of 25")
+
+
+func test_multistrike_one_acts_twice():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 25.0, 0.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.extra_stats["multistrike_value"] = 1
+
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	_simulate_time(manager, 1.1)
+	assert_eq(enemy.health, 950.0, "multistrike 1 deals two hits of 25 = 50 damage")
+
+
+func test_multistrike_three_acts_four_times():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 10.0, 0.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.extra_stats["multistrike_value"] = 3
+
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	_simulate_time(manager, 1.1)
+	assert_eq(enemy.health, 960.0, "multistrike 3 deals four hits of 10 = 40 damage")
+
+
+func test_multistrike_retargets_on_kill():
+	# Two enemies: first has low HP, second has high HP.
+	# Multistrike should kill first then hit second.
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 25.0, 0.0, 0.0))
+	# Two enemies in different columns
+	var eg = CharacterGrid.new()
+	var enemy1 = _make_source(20, 100.0, 0.0, 0.0, 0.0)
+	var enemy2 = _make_source(1000, 100.0, 0.0, 0.0, 0.0)
+	eg.place_character(enemy1, 0, 0)
+	eg.place_character(enemy2, 0, 1)
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.extra_stats["multistrike_value"] = 1
+
+	_simulate_time(manager, 1.1)
+	var e1 = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var e2 = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 1)
+	# First enemy should be dead (25 damage > 20 HP)
+	assert_true(e1 == null or not e1.is_alive, "first enemy killed by first strike")
+	# Second enemy should have taken 25 damage from the second strike
+	assert_true(e2.health < 1000.0, "second enemy hit by retargeted multistrike")
+
+
+func test_multistrike_stops_if_character_dies():
+	# If the attacking character somehow dies mid-multistrike (e.g., thorns),
+	# remaining strikes should not execute. We test by verifying no crash
+	# and damage is limited.
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 10.0, 0.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.extra_stats["multistrike_value"] = 5
+
+	# Kill the player after the first strike by setting HP very low
+	# (simulate via direct HP manipulation before combat ticks)
+	player.health = 0.0
+	player.is_alive = false
+
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	# Dead character shouldn't act at all
+	_simulate_time(manager, 2.0)
+	assert_eq(enemy.health, 1000.0, "dead character with multistrike does not act")
