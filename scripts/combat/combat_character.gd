@@ -93,6 +93,13 @@ static func create_from_character(source: CharacterInstance, p_team: int, p_row:
 
 
 func recalculate_stats() -> void:
+	# TODO: Extract this modifier math into a shared StatResolver utility.
+	# CharacterInstance also needs to apply effects and display modified stats
+	# (e.g. for ability description popups outside combat). Currently only
+	# CombatCharacter has this logic, so CharacterInstance can only show raw
+	# base stats. Once we have more effect types in the game, extract the
+	# (base + flat) * (1 + percent) formula so both classes can use it.
+	#
 	# Collect flat and percent modifiers per stat
 	var flat_mods := {}
 	var pct_mods := {}
