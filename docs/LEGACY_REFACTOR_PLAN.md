@@ -312,7 +312,7 @@ signal starting_item_changed(legacy_id: String, item_id: String)
   "level_requirement": 1,
   "base_stats": {
     "health": 100,
-    "mana": 30,
+    "charges": 30,
     "defendRate": 15
   }
   // No income, no prestige_rewards, no itemSlots
@@ -360,7 +360,7 @@ signal starting_item_changed(legacy_id: String, item_id: String)
 - Remove skill display
 - Remove income display
 - Remove prestige/fame display
-- Simplify to: portrait, name, level, health/mana/defendRate
+- Simplify to: portrait, name, level, health/charges/defendRate
 
 **Acceptance Criteria**:
 - [ ] Characters no longer have income, prestige, fame

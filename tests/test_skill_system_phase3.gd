@@ -580,8 +580,8 @@ func _load_skills_json() -> Dictionary:
 class MockCharacter:
 	var max_health: int = 100
 	var current_health: int = 100
-	var mana: int = 50
-	var defend_rate: int = 10
+	var charges: int = 50
+	var agility: int = 10
 
 	func heal(amount: int) -> void:
 		current_health = min(current_health + amount, max_health)

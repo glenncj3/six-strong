@@ -195,7 +195,7 @@ static func _test_stat_aggregation(results: Dictionary) -> void:
 	# Create items with stat modifiers
 	var item1 = ItemInstance.new("", false)
 	item1.item_id = "stat_item_1"
-	item1.stat_modifiers = {"health": 10, "mana": 5}
+	item1.stat_modifiers = {"health": 10, "charges": 5}
 
 	var item2 = ItemInstance.new("", false)
 	item2.item_id = "stat_item_2"
@@ -211,10 +211,10 @@ static func _test_stat_aggregation(results: Dictionary) -> void:
 		results.errors.append("Health total should be 25, got %d" % health_total)
 		return
 
-	var mana_total = inventory.get_total_stat_modifier("mana")
-	if mana_total != 5:
+	var charges_total = inventory.get_total_stat_modifier("charges")
+	if charges_total != 5:
 		results.failed += 1
-		results.errors.append("Mana total should be 5, got %d" % mana_total)
+		results.errors.append("Charges total should be 5, got %d" % charges_total)
 		return
 
 	var income_total = inventory.get_total_stat_modifier("income")

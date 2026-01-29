@@ -107,8 +107,8 @@ func _test_character_offering_structure():
 		"level_requirement": 1,
 		"base_stats": {
 			"health": 100,
-			"mana": 20,
-			"defend_rate": 10
+			"charges": 20,
+			"agility": 10
 		}
 	}
 
@@ -229,22 +229,22 @@ func _test_stat_preview_format():
 
 	var base_stats = {
 		"health": 100,
-		"mana": 30,
-		"defend_rate": 15
+		"charges": 30,
+		"agility": 15
 	}
 
 	# Format: "HP:100 MP:30 DEF:15%"
 	var parts = []
 	if base_stats.get("health", 0) > 0:
 		parts.append("HP:%d" % base_stats["health"])
-	if base_stats.get("mana", 0) > 0:
-		parts.append("MP:%d" % base_stats["mana"])
-	if base_stats.get("defend_rate", 0) > 0:
-		parts.append("DEF:%d%%" % base_stats["defend_rate"])
+	if base_stats.get("charges", 0) > 0:
+		parts.append("MP:%d" % base_stats["charges"])
+	if base_stats.get("agility", 0) > 0:
+		parts.append("DEF:%d%%" % base_stats["agility"])
 
 	var preview = " ".join(parts)
 	_assert_true("HP:100" in preview, "Health in preview")
-	_assert_true("MP:30" in preview, "Mana in preview")
+	_assert_true("MP:30" in preview, "Charges in preview")
 	_assert_true("DEF:15%" in preview, "Defend in preview")
 
 	_collect_results()

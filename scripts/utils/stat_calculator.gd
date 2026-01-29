@@ -81,13 +81,13 @@ static func apply_stat_modifiers(stats: Dictionary, modifiers: Dictionary) -> vo
 static func _get_base_stats(char_master: Dictionary) -> Dictionary:
 	"""
 	Extract base stats from master data.
-	Returns health, mana, defend_rate, speed, damage, crit_chance.
+	Returns health, charges, agility, speed, damage, crit_chance.
 	"""
 	var base = char_master.get("base_stats", {})
 	return {
 		GameConstants.STAT_HEALTH: base.get(GameConstants.STAT_HEALTH, 0),
-		GameConstants.STAT_MANA: base.get(GameConstants.STAT_MANA, 0),
-		GameConstants.STAT_DEFEND_RATE: base.get(GameConstants.STAT_DEFEND_RATE, 0),
+		GameConstants.STAT_CHARGES: base.get(GameConstants.STAT_CHARGES, 0),
+		GameConstants.STAT_agility: base.get(GameConstants.STAT_agility, 0),
 		GameConstants.STAT_SPEED: base.get(GameConstants.STAT_SPEED, 0),
 		GameConstants.STAT_DAMAGE: base.get(GameConstants.STAT_DAMAGE, 0),
 		GameConstants.STAT_CRIT_CHANCE: base.get(GameConstants.STAT_CRIT_CHANCE, 0)
@@ -103,8 +103,8 @@ static func stats_to_string(stats: Dictionary) -> String:
 	"""Format stats for display/debugging."""
 	return "HP:%d MP:%d DEF%%:%d SPD:%d DMG:%d CRIT%%:%d" % [
 		stats.get(GameConstants.STAT_HEALTH, 0),
-		stats.get(GameConstants.STAT_MANA, 0),
-		stats.get(GameConstants.STAT_DEFEND_RATE, 0),
+		stats.get(GameConstants.STAT_CHARGES, 0),
+		stats.get(GameConstants.STAT_agility, 0),
 		stats.get(GameConstants.STAT_SPEED, 0),
 		stats.get(GameConstants.STAT_DAMAGE, 0),
 		stats.get(GameConstants.STAT_CRIT_CHANCE, 0)

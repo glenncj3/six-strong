@@ -5,7 +5,7 @@ extends RefCounted
 ## Replaces hardcoded stat constants in GameConstants.
 ##
 ## Usage:
-##   StatRegistry.get_all_stat_ids()  # Returns ["health", "mana", ...]
+##   StatRegistry.get_all_stat_ids()  # Returns ["health", "charges", ...]
 ##   StatRegistry.get_display_name("health")  # Returns "HP"
 ##   StatRegistry.get_default_value("health")  # Returns 100
 

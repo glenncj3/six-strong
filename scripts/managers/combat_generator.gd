@@ -177,7 +177,7 @@ func _build_enemy_team(strength_tier: int) -> CharacterGrid:
 		if strength_tier > 0:
 			var multiplier = 1.0 + (strength_tier * 0.15)
 			for stat_key in character.stats:
-				if stat_key == GameConstants.STAT_DEFEND_RATE or stat_key == GameConstants.STAT_CRIT_CHANCE:
+				if stat_key == GameConstants.STAT_agility or stat_key == GameConstants.STAT_CRIT_CHANCE:
 					continue  # Don't scale rate-based stats
 				character.stats[stat_key] = int(character.stats[stat_key] * multiplier)
 			character.current_health = character.stats.get(GameConstants.STAT_HEALTH, character.current_health)

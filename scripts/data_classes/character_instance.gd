@@ -79,13 +79,13 @@ var max_health: int:
 	get: return stats.get(GameConstants.STAT_HEALTH, 0)
 	set(value): stats[GameConstants.STAT_HEALTH] = value
 
-var mana: int:
-	get: return stats.get(GameConstants.STAT_MANA, 0)
-	set(value): stats[GameConstants.STAT_MANA] = value
+var charges: int:
+	get: return stats.get(GameConstants.STAT_CHARGES, 0)
+	set(value): stats[GameConstants.STAT_CHARGES] = value
 
-var defend_rate: int:
-	get: return stats.get(GameConstants.STAT_DEFEND_RATE, 0)
-	set(value): stats[GameConstants.STAT_DEFEND_RATE] = value
+var agility: int:
+	get: return stats.get(GameConstants.STAT_agility, 0)
+	set(value): stats[GameConstants.STAT_agility] = value
 
 var speed: int:
 	get: return stats.get(GameConstants.STAT_SPEED, 0)

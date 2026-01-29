@@ -105,8 +105,8 @@ const LEGACY_UNLOCK_COST := 500  # Gems to unlock a legacy during draft
 
 # Canonical stat names used throughout the system
 const STAT_HEALTH := "health"
-const STAT_MANA := "mana"
-const STAT_DEFEND_RATE := "defend_rate"
+const STAT_CHARGES := "charges"
+const STAT_agility := "agility"
 const STAT_SPEED := "speed"
 const STAT_DAMAGE := "damage"
 const STAT_CRIT_CHANCE := "crit_chance"
@@ -115,8 +115,8 @@ const STAT_CRIT_CHANCE := "crit_chance"
 # DEPRECATED: Use StatRegistry.get_all_stat_ids() instead
 const ALL_STATS := [
 	STAT_HEALTH,
-	STAT_MANA,
-	STAT_DEFEND_RATE,
+	STAT_CHARGES,
+	STAT_agility,
 	STAT_SPEED,
 	STAT_DAMAGE,
 	STAT_CRIT_CHANCE
@@ -126,8 +126,8 @@ const ALL_STATS := [
 # DEPRECATED: Use StatRegistry.get_display_name(stat_id) instead
 const STAT_DISPLAY_NAMES := {
 	STAT_HEALTH: "HP",
-	STAT_MANA: "MP",
-	STAT_DEFEND_RATE: "DEF%",
+	STAT_CHARGES: "MP",
+	STAT_agility: "DEF%",
 	STAT_SPEED: "SPD",
 	STAT_DAMAGE: "DMG",
 	STAT_CRIT_CHANCE: "CRIT%"
@@ -138,8 +138,8 @@ const STAT_DISPLAY_NAMES := {
 static func get_default_stats() -> Dictionary:
 	return {
 		STAT_HEALTH: 0,
-		STAT_MANA: 0,
-		STAT_DEFEND_RATE: 0,
+		STAT_CHARGES: 0,
+		STAT_agility: 0,
 		STAT_SPEED: 0,
 		STAT_DAMAGE: 0,
 		STAT_CRIT_CHANCE: 0

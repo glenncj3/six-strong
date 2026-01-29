@@ -240,9 +240,9 @@ func _format_stat_name(stat_name: String) -> String:
 	match stat_name:
 		"health":
 			return "Health"
-		"mana":
-			return "Mana"
-		"defend_rate":
+		"charges":
+			return "Charges"
+		"agility":
 			return "Defend Rate"
 		"speed":
 			return "Speed"

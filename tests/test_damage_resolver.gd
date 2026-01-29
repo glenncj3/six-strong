@@ -29,8 +29,8 @@ func _make_combat_char(dmg: float, crit: float, defend: float) -> CombatCharacte
 	cc.damage = dmg
 	cc.base_crit_chance = crit
 	cc.crit_chance = crit
-	cc.base_defend_rate = defend
-	cc.defend_rate = defend
+	cc.base_agility = defend
+	cc.agility = defend
 	cc.health = 100.0
 	cc.max_health = 100.0
 	cc.is_alive = true

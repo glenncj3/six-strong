@@ -252,8 +252,8 @@ func _get_stat_display_name(stat: String) -> String:
 	# Fallback mappings for common stats
 	var stat_names = {
 		"health": "Health",
-		"mana": "Mana",
-		"defend_rate": "Defend Rate",
+		"charges": "Charges",
+		"agility": "Defend Rate",
 		"speed": "Speed",
 		"damage": "Damage",
 		"crit_chance": "Crit Chance"

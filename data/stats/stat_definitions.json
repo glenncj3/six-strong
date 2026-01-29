@@ -6,13 +6,13 @@
 		"description": "Character's maximum health points"
 	},
 	{
-		"id": "mana",
+		"id": "charges",
 		"display_name": "MP",
 		"default": 5,
-		"description": "Character's maximum mana points"
+		"description": "Character's maximum charges points"
 	},
 	{
-		"id": "defend_rate",
+		"id": "agility",
 		"display_name": "DEF",
 		"default": 0,
 		"description": "Percentage chance to block damage"

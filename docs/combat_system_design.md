@@ -55,7 +55,7 @@ CombatCharacter {
     speed: float or null            # Seconds between actions (cooldown duration)
     damage: float or null           # Base damage dealt on cooldown
     crit_chance: float              # 0.0 to 1.0, percentage chance to crit
-    defend_rate: float              # 0.0 to 1.0, percentage chance to block
+    agility: float              # 0.0 to 1.0, percentage chance to block
 
     # Positioning
     team: int                       # 0 = player, 1 = opponent
@@ -85,7 +85,7 @@ Effect {
     effect_type: String             # "stat_modifier", "triggered", "on_tick"
 
     # For stat_modifier effects
-    stat: String                    # e.g., "damage", "crit_chance", "defend_rate"
+    stat: String                    # e.g., "damage", "crit_chance", "agility"
     value: float                    # The modifier value
     modifier_type: String           # "flat" or "percent"
 
@@ -373,7 +373,7 @@ create_combat_character(source: CharacterInstance, team: int, row: int, col: int
     combat_char.speed = stats.speed             # May be null
     combat_char.damage = stats.damage           # May be null
     combat_char.crit_chance = stats.crit_chance # Default 0
-    combat_char.defend_rate = stats.defend_rate # Default 0
+    combat_char.agility = stats.agility # Default 0
 
     combat_char.team = team
     combat_char.row = row
@@ -457,9 +457,9 @@ execute_character_action(character: CombatCharacter, state: CombatState):
 ```
 execute_damage(source: CombatCharacter, target: CombatCharacter, base_damage: float, state: CombatState):
     # Step 1: Check for block (defend)
-    if target.defend_rate > 0:
+    if target.agility > 0:
         roll = random_float(0.0, 1.0)
-        if roll < target.defend_rate:
+        if roll < target.agility:
             # Damage blocked
             emit_event("damage_blocked", {source: source, target: target})
             return
@@ -755,13 +755,13 @@ The following stats must exist in `stat_definitions.json`:
 | `speed` | SPD | null | Seconds between cooldown triggers (null = passive) |
 | `damage` | DMG | null | Base damage dealt on cooldown (null = no damage) |
 | `crit_chance` | CRIT | 0 | Percentage chance to deal critical damage (0.0-1.0) |
-| `defend_rate` | DEF | 0 | Percentage chance to block incoming damage (0.0-1.0) |
+| `agility` | DEF | 0 | Percentage chance to block incoming damage (0.0-1.0) |
 
-**Note:** `mana` may be used for future ability costs but is not part of the core combat loop.
+**Note:** `charges` may be used for future ability costs but is not part of the core combat loop.
 
 **Removed from characters:** `income`, `itemSlots`, `startingItemSlots` (these belong on Legacies).
 
-**Renamed:** `defendRate` → `defend_rate` (GDScript snake_case convention).
+**Renamed:** `defendRate` → `agility` (GDScript snake_case convention).
 
 ---
 

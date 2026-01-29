@@ -931,7 +931,7 @@ func get_team_summary() -> Dictionary:
 	var summary = {
 		"total_health": 0,
 		"max_health": 0,
-		"total_mana": 0
+		"total_charges": 0
 	}
 
 	var team = get_team()
@@ -941,7 +941,7 @@ func get_team_summary() -> Dictionary:
 	for char_instance in team:
 		summary["total_health"] += char_instance.current_health
 		summary["max_health"] += char_instance.max_health
-		summary["total_mana"] += char_instance.mana
+		summary["total_charges"] += char_instance.charges
 
 	return summary
 

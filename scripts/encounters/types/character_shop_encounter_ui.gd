@@ -92,11 +92,11 @@ static func _format_stat_preview(base_stats: Dictionary) -> String:
 	if health > 0:
 		parts.append("HP:%d" % health)
 
-	var mana = base_stats.get(GameConstants.STAT_MANA, 0)
-	if mana > 0:
-		parts.append("MP:%d" % mana)
+	var charges = base_stats.get(GameConstants.STAT_CHARGES, 0)
+	if charges > 0:
+		parts.append("MP:%d" % charges)
 
-	var defend = base_stats.get(GameConstants.STAT_DEFEND_RATE, 0)
+	var defend = base_stats.get(GameConstants.STAT_agility, 0)
 	if defend > 0:
 		parts.append("DEF:%d%%" % defend)
 

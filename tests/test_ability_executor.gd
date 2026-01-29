@@ -56,9 +56,9 @@ func _make_char(team: int, row: int, col: int, hp: float = 100.0, dmg: float = 1
 	cc.speed = spd
 	cc.is_alive = true
 	cc.crit_chance = 0.0
-	cc.defend_rate = 0.0
+	cc.agility = 0.0
 	cc.base_crit_chance = 0.0
-	cc.base_defend_rate = 0.0
+	cc.base_agility = 0.0
 	return cc
 
 

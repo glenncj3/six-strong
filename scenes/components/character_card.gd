@@ -12,8 +12,8 @@ signal card_clicked(character_data: Dictionary)
 @onready var name_label: Label = $MarginContainer/VBoxContainer/NameLabel
 @onready var stats_container: VBoxContainer = $MarginContainer/VBoxContainer/StatsContainer
 @onready var health_label: Label = $MarginContainer/VBoxContainer/StatsContainer/HealthLabel
-@onready var mana_label: Label = $MarginContainer/VBoxContainer/StatsContainer/ManaLabel
-@onready var defend_rate_label: Label = $MarginContainer/VBoxContainer/StatsContainer/DefendRateLabel
+@onready var charges_label: Label = $MarginContainer/VBoxContainer/StatsContainer/ChargesLabel
+@onready var agility_label: Label = $MarginContainer/VBoxContainer/StatsContainer/DefendRateLabel
 
 # Note: income_label removed in Phase 1 - characters no longer have income
 # If scene still has IncomeLabel node, hide it
@@ -63,8 +63,8 @@ func setup(char_data: Dictionary, _with_equipped_items: bool = false) -> void:
 
 	# Display stats (no income in Phase 1)
 	health_label.text = UIHelpers.format_stat(GameConstants.STAT_HEALTH, stats.get(GameConstants.STAT_HEALTH, 0))
-	mana_label.text = UIHelpers.format_stat(GameConstants.STAT_MANA, stats.get(GameConstants.STAT_MANA, 0))
-	defend_rate_label.text = UIHelpers.format_stat(GameConstants.STAT_DEFEND_RATE, stats.get(GameConstants.STAT_DEFEND_RATE, 0))
+	charges_label.text = UIHelpers.format_stat(GameConstants.STAT_CHARGES, stats.get(GameConstants.STAT_CHARGES, 0))
+	agility_label.text = UIHelpers.format_stat(GameConstants.STAT_agility, stats.get(GameConstants.STAT_agility, 0))
 
 
 func setup_from_instance(char_instance: CharacterInstance) -> void:
@@ -90,8 +90,8 @@ func setup_from_instance(char_instance: CharacterInstance) -> void:
 
 	# Display instance stats (includes level bonuses)
 	health_label.text = UIHelpers.format_stat(GameConstants.STAT_HEALTH, char_instance.stats.get(GameConstants.STAT_HEALTH, 0))
-	mana_label.text = UIHelpers.format_stat(GameConstants.STAT_MANA, char_instance.stats.get(GameConstants.STAT_MANA, 0))
-	defend_rate_label.text = UIHelpers.format_stat(GameConstants.STAT_DEFEND_RATE, char_instance.stats.get(GameConstants.STAT_DEFEND_RATE, 0))
+	charges_label.text = UIHelpers.format_stat(GameConstants.STAT_CHARGES, char_instance.stats.get(GameConstants.STAT_CHARGES, 0))
+	agility_label.text = UIHelpers.format_stat(GameConstants.STAT_agility, char_instance.stats.get(GameConstants.STAT_agility, 0))
 
 
 const SIZE_CONFIG := {

@@ -108,7 +108,7 @@ static func _effect_next_character_stat_boost(effect_data: Dictionary, context) 
 	executing immediately.
 
 	Effect data:
-		- stat: String - The stat to boost (health, mana, defend_rate, speed, damage, crit_chance)
+		- stat: String - The stat to boost (health, charges, agility, speed, damage, crit_chance)
 		- value: int - Amount to boost
 
 	Note: This is typically called when the skill is acquired, registering
@@ -190,9 +190,9 @@ static func _get_stat_display_name(stat: String) -> String:
 	match stat:
 		"health":
 			return "Health"
-		"mana":
-			return "Mana"
-		"defend_rate":
+		"charges":
+			return "Charges"
+		"agility":
 			return "Defend Rate"
 		"speed":
 			return "Speed"

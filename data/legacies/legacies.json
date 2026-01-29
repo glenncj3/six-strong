@@ -116,8 +116,8 @@
       "starting_item_options": ["item_wooden_staff"],
       "character_pool": ["char_mage_001", "char_necromancer_001"],
       "item_pool": ["item_wooden_staff", "item_skull_staff", "item_lucky_charm"],
-      "skill_pool": ["skill_arcane_blast", "skill_life_drain", "skill_future_mana", "skill_fortune_blessing"],
-      "unique_encounters": ["enc_spell_library", "enc_mana_font"],
+      "skill_pool": ["skill_arcane_blast", "skill_life_drain", "skill_future_charges", "skill_fortune_blessing"],
+      "unique_encounters": ["enc_spell_library", "enc_charges_font"],
       "prestige_rewards": [
         {
           "prestige": 1,
@@ -139,7 +139,7 @@
             "characters": ["char_necromancer_001"],
             "items": ["item_skull_staff"],
             "item_upgrades": ["itemup_arcane_staff"],
-            "skills": ["skill_future_mana", "skill_fortune_blessing"],
+            "skills": ["skill_future_charges", "skill_fortune_blessing"],
             "encounters": ["enc_spell_library"],
             "encounter_weight_bonus": 10
           }
@@ -153,7 +153,7 @@
             "items": ["item_lucky_charm"],
             "item_upgrades": [],
             "skills": ["skill_life_drain"],
-            "encounters": ["enc_mana_font"],
+            "encounters": ["enc_charges_font"],
             "encounter_weight_bonus": 15
           }
         }

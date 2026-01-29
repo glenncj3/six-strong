@@ -136,9 +136,9 @@ func _format_stat_name(stat_name: String) -> String:
 	match stat_name:
 		GameConstants.STAT_HEALTH:
 			return "Health"
-		GameConstants.STAT_MANA:
-			return "Mana"
-		GameConstants.STAT_DEFEND_RATE:
+		GameConstants.STAT_CHARGES:
+			return "Charges"
+		GameConstants.STAT_agility:
 			return "Defend Rate"
 		GameConstants.STAT_SPEED:
 			return "Speed"

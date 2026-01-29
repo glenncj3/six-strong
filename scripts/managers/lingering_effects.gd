@@ -177,10 +177,10 @@ func _apply_character_effect(effect: Dictionary, character) -> void:
 		if stat == "health":
 			character.max_health += value
 			character.current_health += value
-		elif stat == "mana":
-			character.mana += value
-		elif stat == "defend_rate":
-			character.defend_rate += value
+		elif stat == "charges":
+			character.charges += value
+		elif stat == "agility":
+			character.agility += value
 		elif stat == "speed":
 			character.speed += value
 		elif stat == "damage":

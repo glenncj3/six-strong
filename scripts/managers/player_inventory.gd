@@ -154,7 +154,7 @@ func get_total_stat_modifier(stat_name: String) -> int:
 	Items provide bonuses to all characters via this aggregation.
 
 	Args:
-		stat_name: The stat name to aggregate (e.g., "health", "mana")
+		stat_name: The stat name to aggregate (e.g., "health", "charges")
 
 	Returns:
 		Total modifier value from all items

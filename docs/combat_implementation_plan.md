@@ -11,15 +11,15 @@ This document describes the phased implementation of the combat system defined i
 ### 1.1 Update stat_definitions.json
 
 - Remove: `income`, `itemSlots`, `startingItemSlots`
-- Rename: `defendRate` → `defend_rate`
+- Rename: `defendRate` → `agility`
 - Add: `speed`, `damage`, `crit_chance`
 
 Final stat_definitions.json:
 ```json
 [
   {"id": "health", "display_name": "HP", "default": 100, "description": "Character's maximum health points"},
-  {"id": "mana", "display_name": "MP", "default": 5, "description": "Character's maximum mana points"},
-  {"id": "defend_rate", "display_name": "DEF", "default": 0, "description": "Percentage chance to block incoming damage (0.0-1.0)"},
+  {"id": "charges", "display_name": "MP", "default": 5, "description": "Character's maximum charges points"},
+  {"id": "agility", "display_name": "DEF", "default": 0, "description": "Percentage chance to block incoming damage (0.0-1.0)"},
   {"id": "speed", "display_name": "SPD", "default": null, "description": "Seconds between cooldown triggers (null = passive)"},
   {"id": "damage", "display_name": "DMG", "default": null, "description": "Base damage dealt on cooldown (null = no damage)"},
   {"id": "crit_chance", "display_name": "CRIT", "default": 0, "description": "Percentage chance to deal critical damage (0.0-1.0)"}
@@ -29,18 +29,18 @@ Final stat_definitions.json:
 ### 1.2 Update GameConstants stat constants
 
 - Remove: `STAT_INCOME`, `STAT_ITEM_SLOTS`, `STAT_STARTING_ITEM_SLOTS` and all their references in `ALL_STATS`, `STAT_DISPLAY_NAMES`, `get_default_stats()`
-- Rename: `STAT_DEFEND_RATE` value from `"defendRate"` to `"defend_rate"`
+- Rename: `STAT_agility` value from `"defendRate"` to `"agility"`
 - Add: `STAT_SPEED := "speed"`, `STAT_DAMAGE := "damage"`, `STAT_CRIT_CHANCE := "crit_chance"`
 - Update `ALL_STATS`, `STAT_DISPLAY_NAMES`, and `get_default_stats()` accordingly
 
 ### 1.3 Update characters.json
 
-- Rename `defendRate` → `defend_rate` in all character `base_stats`
+- Rename `defendRate` → `agility` in all character `base_stats`
 - Add `speed` and `damage` values to all characters (design each character for combat identity)
 
 Proposed character stat designs:
 
-| Character | HP | Mana | DEF | SPD | DMG | CRIT | Identity |
+| Character | HP | Charges | DEF | SPD | DMG | CRIT | Identity |
 |---|---|---|---|---|---|---|---|
 | Brave Knight | 100 | 5 | 0.15 | 3.0 | 15 | 0.0 | Tanky, steady damage |
 | Mystic Sage | 70 | 5 | 0.05 | 4.0 | 25 | 0.05 | Glass cannon, slow |
@@ -69,17 +69,17 @@ Proposed character stat designs:
 - High-crit characters have lower base damage to compensate
 - High-defense characters have lower damage/speed
 - Support characters (Priest, Medic) have low damage now; will gain healing/buff effects later
-- `defend_rate` is now a float (0.0-1.0) instead of an integer percentage
+- `agility` is now a float (0.0-1.0) instead of an integer percentage
 
 ### 1.4 Update StatCalculator
 
-- Update `_get_base_stats()` to extract all combat stats: `health`, `mana`, `defend_rate`, `speed`, `damage`, `crit_chance`
+- Update `_get_base_stats()` to extract all combat stats: `health`, `charges`, `agility`, `speed`, `damage`, `crit_chance`
 - Handle null defaults for `speed` and `damage` (character may not define them)
 - Update `stats_to_string()` to include new stats
 
 ### 1.5 Update CharacterInstance
 
-- Rename `defend_rate` accessor to use new constant value `"defend_rate"`
+- Rename `agility` accessor to use new constant value `"agility"`
 - Add accessors for `speed`, `damage`, `crit_chance`
 - Handle null/absent stats gracefully (return null for speed/damage if not defined)
 
@@ -116,10 +116,10 @@ Properties:
 - `health: float`, `max_health: float`
 - `base_speed: float` (original speed, before modifiers)
 - `base_damage: float` (original damage, before modifiers)
-- `base_crit_chance: float`, `base_defend_rate: float`
+- `base_crit_chance: float`, `base_agility: float`
 - `speed: float` (effective, recalculated from base + effects)
 - `damage: float` (effective, recalculated from base + effects)
-- `crit_chance: float`, `defend_rate: float` (effective)
+- `crit_chance: float`, `agility: float` (effective)
 - `team: int`, `row: int`, `column: int`
 - `is_alive: bool`, `cooldown_remaining: float`
 - `effects: Array[CombatEffect]`

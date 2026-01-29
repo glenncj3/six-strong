@@ -8,8 +8,8 @@ extends Panel
 @onready var description_label: Label = $MarginContainer/VBoxContainer/TopBar/InfoContainer/DescriptionLabel
 
 @onready var health_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/HealthValue
-@onready var mana_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/ManaValue
-@onready var defend_rate_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/DefendRateValue
+@onready var charges_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/ChargesValue
+@onready var agility_value: Label = $MarginContainer/VBoxContainer/StatsSection/StatsGrid/DefendRateValue
 
 # Deprecated nodes - will be hidden if they exist
 @onready var _rank_label = get_node_or_null("MarginContainer/VBoxContainer/TopBar/InfoContainer/RankLabel")
@@ -119,20 +119,20 @@ func _update_stats_display(char_master: Dictionary) -> void:
 	var stats = StatCalculator.calculate_character_stats(char_master)
 
 	health_value.text = str(stats.get(GameConstants.STAT_HEALTH, 0))
-	mana_value.text = str(stats.get(GameConstants.STAT_MANA, 0))
-	defend_rate_value.text = "%d%%" % stats.get(GameConstants.STAT_DEFEND_RATE, 0)
+	charges_value.text = str(stats.get(GameConstants.STAT_CHARGES, 0))
+	agility_value.text = "%d%%" % stats.get(GameConstants.STAT_agility, 0)
 
 	# Apply gold color to stat values
-	for label in [health_value, mana_value, defend_rate_value]:
+	for label in [health_value, charges_value, agility_value]:
 		label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
 
 
 func _update_stats_from_instance(char_instance: CharacterInstance) -> void:
 	"""Display stats from a CharacterInstance."""
 	health_value.text = "%d/%d" % [char_instance.current_health, char_instance.max_health]
-	mana_value.text = str(char_instance.mana)
-	defend_rate_value.text = "%d%%" % char_instance.defend_rate
+	charges_value.text = str(char_instance.charges)
+	agility_value.text = "%d%%" % char_instance.agility
 
 	# Apply gold color to stat values
-	for label in [health_value, mana_value, defend_rate_value]:
+	for label in [health_value, charges_value, agility_value]:
 		label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)

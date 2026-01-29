@@ -58,7 +58,7 @@ A Legacy is a new entity that bundles content and owns meta-progression.
 
 ### Characters Keep:
 - `health`
-- `mana`
+- `charges`
 - `defendRate`
 - `level` (per-run progression; gates when content appears)
 - Base stats and combat identity

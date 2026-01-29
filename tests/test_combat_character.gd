@@ -51,9 +51,9 @@ func _make_source(hp: int, spd: float, dmg: float, def_rate: float, crit: float)
 		GameConstants.STAT_HEALTH: hp,
 		GameConstants.STAT_SPEED: spd,
 		GameConstants.STAT_DAMAGE: dmg,
-		GameConstants.STAT_DEFEND_RATE: def_rate,
+		GameConstants.STAT_agility: def_rate,
 		GameConstants.STAT_CRIT_CHANCE: crit,
-		GameConstants.STAT_MANA: 0,
+		GameConstants.STAT_CHARGES: 0,
 	}
 	ch.current_health = hp
 	return ch
@@ -72,7 +72,7 @@ func test_create_from_character_instance():
 	assert_eq(cc.base_speed, 2.5, "base_speed from source")
 	assert_eq(cc.base_damage, 15.0, "base_damage from source")
 	assert_eq(cc.base_crit_chance, 0.05, "base_crit_chance from source")
-	assert_eq(cc.base_defend_rate, 0.1, "base_defend_rate from source")
+	assert_eq(cc.base_agility, 0.1, "base_agility from source")
 	assert_eq(cc.team, 0, "team set")
 	assert_eq(cc.row, 1, "row set")
 	assert_eq(cc.column, 2, "column set")
@@ -149,7 +149,7 @@ func test_no_effects_keeps_base():
 
 	assert_eq(cc.damage, 20.0, "no effects: damage unchanged")
 	assert_eq(cc.speed, 3.0, "no effects: speed unchanged")
-	assert_eq(cc.defend_rate, 0.15, "no effects: defend_rate unchanged")
+	assert_eq(cc.agility, 0.15, "no effects: agility unchanged")
 	assert_eq(cc.crit_chance, 0.1, "no effects: crit_chance unchanged")
 
 

@@ -109,7 +109,7 @@ static func _test_initialize_loads_stats() -> bool:
 static func _test_get_all_stat_ids() -> bool:
 	var stat_ids = Registry.get_all_stat_ids()
 	# Should have at least the core stats
-	var expected = ["health", "mana", "defend_rate", "speed", "damage", "crit_chance"]
+	var expected = ["health", "charges", "agility", "speed", "damage", "crit_chance"]
 	for id in expected:
 		if id not in stat_ids:
 			return false
@@ -120,9 +120,9 @@ static func _test_get_display_name() -> bool:
 	# Test known stat
 	if Registry.get_display_name("health") != "HP":
 		return false
-	if Registry.get_display_name("mana") != "MP":
+	if Registry.get_display_name("charges") != "MP":
 		return false
-	if Registry.get_display_name("defend_rate") != "DEF":
+	if Registry.get_display_name("agility") != "DEF":
 		return false
 	return true
 
@@ -131,9 +131,9 @@ static func _test_get_default_value() -> bool:
 	# Test known defaults
 	if Registry.get_default_value("health") != 100:
 		return false
-	if Registry.get_default_value("mana") != 5:
+	if Registry.get_default_value("charges") != 5:
 		return false
-	if Registry.get_default_value("defend_rate") != 0:
+	if Registry.get_default_value("agility") != 0:
 		return false
 	if Registry.get_default_value("speed") != 0:
 		return false
@@ -144,7 +144,7 @@ static func _test_is_valid_stat() -> bool:
 	# Valid stats should return true
 	if not Registry.is_valid_stat("health"):
 		return false
-	if not Registry.is_valid_stat("mana"):
+	if not Registry.is_valid_stat("charges"):
 		return false
 	# Invalid stat should return false
 	if Registry.is_valid_stat("nonexistent_stat"):
@@ -157,7 +157,7 @@ static func _test_get_default_stats() -> bool:
 	# Should have all stats
 	if not defaults.has("health") or defaults["health"] != 100:
 		return false
-	if not defaults.has("mana") or defaults["mana"] != 5:
+	if not defaults.has("charges") or defaults["charges"] != 5:
 		return false
 	return true
 

@@ -9,8 +9,8 @@ static func resolve(source, target: CombatCharacter, base_damage: float) -> Dict
 		return {blocked = false, damage = base_damage, is_crit = false}
 
 	# Block check
-	if target.defend_rate > 0:
-		if randf() < target.defend_rate:
+	if target.agility > 0:
+		if randf() < target.agility:
 			return {blocked = true, damage = 0.0, is_crit = false}
 
 	# Crit check

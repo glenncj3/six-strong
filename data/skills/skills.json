@@ -88,7 +88,7 @@
       "effect_type": "lingering",
       "effect": {
         "type": "next_character_stat_boost",
-        "stat": "defend_rate",
+        "stat": "agility",
         "value": 10
       },
       "trigger": "next_character_acquired",
@@ -135,14 +135,14 @@
       "level_requirement": 1
     },
     {
-      "id": "skill_future_mana",
-      "name": "Future Mana",
-      "description": "The next character you acquire gains +15 mana.",
+      "id": "skill_future_charges",
+      "name": "Future Charges",
+      "description": "The next character you acquire gains +15 charges.",
       "image_path": "res://assets/skills/future_mana.png",
       "effect_type": "lingering",
       "effect": {
         "type": "next_character_stat_boost",
-        "stat": "mana",
+        "stat": "charges",
         "value": 15
       },
       "trigger": "next_character_acquired",
@@ -184,7 +184,7 @@
       "effect_type": "lingering",
       "effect": {
         "type": "next_character_stat_boost",
-        "stat": "defend_rate",
+        "stat": "agility",
         "value": 8
       },
       "trigger": "next_character_acquired",
@@ -212,7 +212,7 @@
       "effect_type": "lingering",
       "effect": {
         "type": "next_character_stat_boost",
-        "stat": "defend_rate",
+        "stat": "agility",
         "value": 12
       },
       "trigger": "next_character_acquired",
@@ -279,7 +279,7 @@
       "effect_type": "lingering",
       "effect": {
         "type": "next_character_stat_boost",
-        "stat": "defend_rate",
+        "stat": "agility",
         "value": 5
       },
       "trigger": "next_character_acquired",

@@ -20,13 +20,13 @@ var base_max_health: float = 0.0
 var base_speed: float = 0.0
 var base_damage: float = 0.0
 var base_crit_chance: float = 0.0
-var base_defend_rate: float = 0.0
+var base_agility: float = 0.0
 
 # Effective stats (recalculated from base + effects)
 var speed: float = 0.0
 var damage: float = 0.0
 var crit_chance: float = 0.0
-var defend_rate: float = 0.0
+var agility: float = 0.0
 
 # Positioning
 var team: int = GameConstants.TEAM_PLAYER
@@ -62,12 +62,12 @@ static func create_from_character(source: CharacterInstance, p_team: int, p_row:
 	cc.base_speed = float(source.stats.get(GameConstants.STAT_SPEED, 0))
 	cc.base_damage = float(source.stats.get(GameConstants.STAT_DAMAGE, 0))
 	cc.base_crit_chance = float(source.stats.get(GameConstants.STAT_CRIT_CHANCE, 0))
-	cc.base_defend_rate = float(source.stats.get(GameConstants.STAT_DEFEND_RATE, 0))
+	cc.base_agility = float(source.stats.get(GameConstants.STAT_agility, 0))
 
 	cc.speed = cc.base_speed
 	cc.damage = cc.base_damage
 	cc.crit_chance = cc.base_crit_chance
-	cc.defend_rate = cc.base_defend_rate
+	cc.agility = cc.base_agility
 
 	cc.team = p_team
 	cc.row = p_row
@@ -78,7 +78,7 @@ static func create_from_character(source: CharacterInstance, p_team: int, p_row:
 	# Copy extra stats not mapped to base fields
 	var mapped_stats = [GameConstants.STAT_HEALTH, GameConstants.STAT_SPEED,
 		GameConstants.STAT_DAMAGE, GameConstants.STAT_CRIT_CHANCE,
-		GameConstants.STAT_DEFEND_RATE]
+		GameConstants.STAT_agility]
 	for key in source.stats:
 		if key not in mapped_stats:
 			cc.extra_stats[key] = source.stats[key]
@@ -110,8 +110,8 @@ func recalculate_stats() -> void:
 	var base_plus_flat_crit = base_crit_chance + flat_mods.get("crit_chance", 0.0)
 	crit_chance = base_plus_flat_crit * (1.0 + pct_mods.get("crit_chance", 0.0))
 
-	var base_plus_flat_def = base_defend_rate + flat_mods.get("defend_rate", 0.0)
-	defend_rate = base_plus_flat_def * (1.0 + pct_mods.get("defend_rate", 0.0))
+	var base_plus_flat_def = base_agility + flat_mods.get("agility", 0.0)
+	agility = base_plus_flat_def * (1.0 + pct_mods.get("agility", 0.0))
 
 	# Recalculate max_health from stable base
 	var flat_hp = flat_mods.get("health", 0.0)
@@ -149,7 +149,7 @@ func get_stat_value(stat_name: String) -> float:
 		"speed": return speed
 		"damage": return damage
 		"crit_chance": return crit_chance
-		"defend_rate": return defend_rate
+		"agility": return agility
 	return float(extra_stats.get(stat_name, 0.0))
 
 

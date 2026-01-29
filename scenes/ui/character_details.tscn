@@ -85,12 +85,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "100"
 
-[node name="ManaLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
+[node name="ChargesLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "MP:"
 
-[node name="ManaValue" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
+[node name="ChargesValue" type="Label" parent="MarginContainer/VBoxContainer/StatsSection/StatsGrid"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "5"

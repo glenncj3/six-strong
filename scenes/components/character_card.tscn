@@ -37,7 +37,7 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "HP 100"
 
-[node name="ManaLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsContainer"]
+[node name="ChargesLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "MP 5"

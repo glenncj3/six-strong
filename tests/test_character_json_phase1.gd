@@ -193,7 +193,7 @@ static func _test_has_description(results: Dictionary) -> void:
 
 
 static func _test_base_stats_structure(results: Dictionary) -> void:
-	"""Test that base_stats has required fields: health, mana, defend_rate."""
+	"""Test that base_stats has required fields: health, charges, agility."""
 	var data = _load_characters_json()
 	if data.is_empty():
 		results.failed += 1
@@ -208,14 +208,14 @@ static func _test_base_stats_structure(results: Dictionary) -> void:
 			results.errors.append("Character '%s' base_stats should have health" % char_data.get("id", "unknown"))
 			return
 
-		if not base_stats.has("mana"):
+		if not base_stats.has("charges"):
 			results.failed += 1
-			results.errors.append("Character '%s' base_stats should have mana" % char_data.get("id", "unknown"))
+			results.errors.append("Character '%s' base_stats should have charges" % char_data.get("id", "unknown"))
 			return
 
-		if not base_stats.has("defend_rate"):
+		if not base_stats.has("agility"):
 			results.failed += 1
-			results.errors.append("Character '%s' base_stats should have defend_rate" % char_data.get("id", "unknown"))
+			results.errors.append("Character '%s' base_stats should have agility" % char_data.get("id", "unknown"))
 			return
 
 	results.passed += 1
