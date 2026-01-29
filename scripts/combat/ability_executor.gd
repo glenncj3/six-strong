@@ -31,8 +31,12 @@ static func register_defaults() -> void:
 	register("ally_single", _strategy_ally_single)
 	register("ally_all", _strategy_ally_all)
 	register("enemy_single_apply_effect", _strategy_enemy_single_apply_effect)
+	register("enemy_frontline_apply_effect", _strategy_enemy_frontline_apply_effect)
+	register("enemy_all_apply_effect", _strategy_enemy_all_apply_effect)
 	register("self_apply_effect", _strategy_self_apply_effect)
 	register("ally_single_apply_effect", _strategy_ally_single_apply_effect)
+	register("ally_frontline_apply_effect", _strategy_ally_frontline_apply_effect)
+	register("ally_all_apply_effect", _strategy_ally_all_apply_effect)
 
 
 static func _get_enemy_targets(source: CombatCharacter, board: CombatBoard) -> Array:
@@ -177,3 +181,58 @@ static func _strategy_ally_single_apply_effect(source: CombatCharacter, ability:
 
 	var effect = StatusEffectFactory.create_from_template(template, source.id, overrides)
 	apply_effect.call(target, effect)
+
+
+static func _build_effect_overrides(source: CombatCharacter, ability: Dictionary) -> Dictionary:
+	var overrides = {}
+	var stacks_from = ability.get("stacks_from", "")
+	if stacks_from != "":
+		overrides["stacks"] = int(source.get_stat_value(stacks_from))
+	var duration_from = ability.get("duration_from", "")
+	if duration_from != "":
+		overrides["duration_value"] = source.get_stat_value(duration_from)
+	return overrides
+
+
+static func _apply_effect_to_targets(source: CombatCharacter, ability: Dictionary, context: Dictionary, targets: Array) -> void:
+	var apply_effect: Callable = context["apply_effect"]
+	var get_status_effect: Callable = context["get_status_effect"]
+
+	var effect_id = ability.get("applies_effect", "")
+	if effect_id == "":
+		return
+	var template = get_status_effect.call(effect_id)
+	if template.is_empty():
+		return
+
+	var overrides = _build_effect_overrides(source, ability)
+	for target in targets:
+		var effect = StatusEffectFactory.create_from_template(template, source.id, overrides)
+		apply_effect.call(target, effect)
+
+
+static func _strategy_enemy_frontline_apply_effect(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
+	var board: CombatBoard = context["board"]
+	var enemy_team = GameConstants.TEAM_OPPONENT if source.team == GameConstants.TEAM_PLAYER else GameConstants.TEAM_PLAYER
+	var front = board.get_living_characters(enemy_team, GameConstants.ROW_FRONT)
+	var targets = front if front.size() > 0 else board.get_living_characters(enemy_team, GameConstants.ROW_BACK)
+	_apply_effect_to_targets(source, ability, context, targets)
+
+
+static func _strategy_enemy_all_apply_effect(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
+	var board: CombatBoard = context["board"]
+	var targets = _get_enemy_targets(source, board)
+	_apply_effect_to_targets(source, ability, context, targets)
+
+
+static func _strategy_ally_frontline_apply_effect(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
+	var board: CombatBoard = context["board"]
+	var front = board.get_living_characters(source.team, GameConstants.ROW_FRONT)
+	var targets = front if front.size() > 0 else board.get_living_characters(source.team, GameConstants.ROW_BACK)
+	_apply_effect_to_targets(source, ability, context, targets)
+
+
+static func _strategy_ally_all_apply_effect(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
+	var board: CombatBoard = context["board"]
+	var targets = _get_ally_targets(source, board)
+	_apply_effect_to_targets(source, ability, context, targets)

@@ -95,6 +95,46 @@
       "applies_effect": "slow",
       "duration_from": "slow_value",
       "cooldown_source": "speed"
+    },
+    {
+      "id": "slow_enemy_row",
+      "name": "Slow Enemy Row",
+      "description": "Applies slow to all enemies in the nearest row, halving their cooldown tick rate",
+      "type": "active",
+      "targeting": "enemy_frontline_apply_effect",
+      "applies_effect": "slow",
+      "duration_from": "slow_value",
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "slow_enemies",
+      "name": "Slow All Enemies",
+      "description": "Applies slow to all enemies, halving their cooldown tick rate",
+      "type": "active",
+      "targeting": "enemy_all_apply_effect",
+      "applies_effect": "slow",
+      "duration_from": "slow_value",
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "haste_ally_row",
+      "name": "Haste Ally Row",
+      "description": "Applies haste to all allies in the nearest row, doubling their cooldown tick rate",
+      "type": "active",
+      "targeting": "ally_frontline_apply_effect",
+      "applies_effect": "haste",
+      "duration_from": "haste_value",
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "haste_allies",
+      "name": "Haste All Allies",
+      "description": "Applies haste to all allies, doubling their cooldown tick rate",
+      "type": "active",
+      "targeting": "ally_all_apply_effect",
+      "applies_effect": "haste",
+      "duration_from": "haste_value",
+      "cooldown_source": "speed"
     }
   ]
 }

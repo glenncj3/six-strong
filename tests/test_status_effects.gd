@@ -36,6 +36,10 @@ func _run_tests():
 	test_self_haste_ability_integration()
 	test_ally_haste_ability_integration()
 	test_slow_enemy_ability_integration()
+	test_slow_enemy_row_ability_integration()
+	test_slow_enemies_ability_integration()
+	test_haste_ally_row_ability_integration()
+	test_haste_allies_ability_integration()
 
 	section("Shield Template")
 	test_shield_creation_from_template()
@@ -664,6 +668,96 @@ func test_slow_enemy_ability_integration():
 	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
 	assert_true(enemy.has_effect("slow"), "enemy has slow effect")
 	assert_true(abs(enemy.tick_rate_multiplier - 0.5) < 0.01, "enemy tick rate halved")
+
+
+func test_slow_enemy_row_ability_integration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"slow_value": 5.0}))
+	var eg = CharacterGrid.new()
+	var e_front1 = _make_source(1000, 100.0, 1.0)
+	var e_front2 = _make_source(1000, 100.0, 1.0)
+	var e_back = _make_source(1000, 100.0, 1.0)
+	eg.place_character(e_front1, 0, 0)
+	eg.place_character(e_front2, 0, 1)
+	eg.place_character(e_back, 1, 0)
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["slow_enemy_row"]
+	player.extra_stats["slow_value"] = 5.0
+
+	_simulate_time(manager, 1.5)
+	var ef1 = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var ef2 = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 1)
+	var eb = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 1, 0)
+	assert_true(ef1.has_effect("slow"), "front row enemy 1 has slow")
+	assert_true(ef2.has_effect("slow"), "front row enemy 2 has slow")
+	assert_false(eb.has_effect("slow"), "back row enemy does not have slow")
+
+
+func test_slow_enemies_ability_integration():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 1.0, 0.0, 0.0, {"slow_value": 5.0}))
+	var eg = CharacterGrid.new()
+	var e_front = _make_source(1000, 100.0, 1.0)
+	var e_back = _make_source(1000, 100.0, 1.0)
+	eg.place_character(e_front, 0, 0)
+	eg.place_character(e_back, 1, 0)
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	player.ability_ids = ["slow_enemies"]
+	player.extra_stats["slow_value"] = 5.0
+
+	_simulate_time(manager, 1.5)
+	var ef = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var eb = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 1, 0)
+	assert_true(ef.has_effect("slow"), "front row enemy has slow")
+	assert_true(eb.has_effect("slow"), "back row enemy has slow")
+
+
+func test_haste_ally_row_ability_integration():
+	var manager = CombatManager.new()
+	var pg = CharacterGrid.new()
+	var caster = _make_source(1000, 1.0, 1.0, 0.0, 0.0, {"haste_value": 5.0})
+	var ally_front = _make_source(1000, 100.0, 1.0)
+	var ally_back = _make_source(1000, 100.0, 1.0)
+	pg.place_character(caster, 0, 0)
+	pg.place_character(ally_front, 0, 1)
+	pg.place_character(ally_back, 1, 0)
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	manager.initialize_combat(pg, eg)
+
+	var caster_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	caster_ch.ability_ids = ["haste_ally_row"]
+	caster_ch.extra_stats["haste_value"] = 5.0
+
+	_simulate_time(manager, 1.5)
+	var af = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 1)
+	var ab = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 1, 0)
+	assert_true(caster_ch.has_effect("haste"), "caster in front row gets haste")
+	assert_true(af.has_effect("haste"), "front row ally has haste")
+	assert_false(ab.has_effect("haste"), "back row ally does not have haste")
+
+
+func test_haste_allies_ability_integration():
+	var manager = CombatManager.new()
+	var pg = CharacterGrid.new()
+	var caster = _make_source(1000, 1.0, 1.0, 0.0, 0.0, {"haste_value": 5.0})
+	var ally = _make_source(1000, 100.0, 1.0)
+	pg.place_character(caster, 0, 0)
+	pg.place_character(ally, 1, 0)
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 1.0))
+	manager.initialize_combat(pg, eg)
+
+	var caster_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	caster_ch.ability_ids = ["haste_allies"]
+	caster_ch.extra_stats["haste_value"] = 5.0
+
+	_simulate_time(manager, 1.5)
+	var ally_ch = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 1, 0)
+	assert_true(caster_ch.has_effect("haste"), "caster has haste")
+	assert_true(ally_ch.has_effect("haste"), "back row ally has haste")
 
 
 # =============================================================================
