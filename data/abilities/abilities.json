@@ -37,11 +37,40 @@
       "cooldown_source": "speed"
     },
     {
+      "id": "heal_self",
+      "name": "Heal Self",
+      "description": "Heals self based on heal_value",
+      "type": "active",
+      "target_mode": "self",
+      "heal_from": "heal_value",
+      "cooldown_source": "speed"
+    },
+    {
       "id": "poison_enemy",
       "name": "Poison Strike",
       "description": "Applies poison stacks to a single enemy",
       "type": "active",
       "target_mode": "enemy_single",
+      "applies_effect": "poison",
+      "stacks_from": "poison_value",
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "poison_enemy_row",
+      "name": "Poison Enemy Row",
+      "description": "Applies poison stacks to all enemies in the nearest row",
+      "type": "active",
+      "target_mode": "enemy_frontline",
+      "applies_effect": "poison",
+      "stacks_from": "poison_value",
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "poison_enemies",
+      "name": "Poison All Enemies",
+      "description": "Applies poison stacks to all enemies",
+      "type": "active",
+      "target_mode": "enemy_all",
       "applies_effect": "poison",
       "stacks_from": "poison_value",
       "cooldown_source": "speed"
@@ -82,6 +111,26 @@
       "description": "Applies shield to the nearest ally, absorbing incoming attack damage",
       "type": "active",
       "target_mode": "ally_single",
+      "applies_effect": "shield",
+      "stacks_from": "shield_value",
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "shield_ally_row",
+      "name": "Shield Ally Row",
+      "description": "Applies shield to all allies in the nearest row, absorbing incoming attack damage",
+      "type": "active",
+      "target_mode": "ally_frontline",
+      "applies_effect": "shield",
+      "stacks_from": "shield_value",
+      "cooldown_source": "speed"
+    },
+    {
+      "id": "shield_allies",
+      "name": "Shield All Allies",
+      "description": "Applies shield to all allies, absorbing incoming attack damage",
+      "type": "active",
+      "target_mode": "ally_all",
       "applies_effect": "shield",
       "stacks_from": "shield_value",
       "cooldown_source": "speed"
