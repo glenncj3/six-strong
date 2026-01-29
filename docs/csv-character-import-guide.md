@@ -96,8 +96,27 @@ Exporting from JSON back to CSV preserves multiple abilities using the same pipe
 | `freeze_enemy` | Freezes a single enemy |
 | `freeze_enemy_row` | Freezes an enemy row |
 | `freeze_enemies` | Freezes all enemies |
+| `buff_adjacent_attack` | Passively increases attack damage of adjacent allies |
 
 Ability definitions are in `data/abilities/abilities.json`.
+
+### Parameterized Abilities
+
+Some abilities (especially passives like `buff_adjacent_attack`) require a per-character configuration value. These are stored as JSON objects instead of plain strings in the ability column:
+
+```
+attack_enemy|{"id":"buff_adjacent_attack","buff_value":5}
+```
+
+This imports as:
+
+```json
+"abilities": ["attack_enemy", {"id": "buff_adjacent_attack", "buff_value": 5}]
+```
+
+The CSV importer parses any ability entry starting with `{` as JSON. Exporting back to CSV preserves the full JSON, so parameterized abilities round-trip without data loss.
+
+If a parameterized ability is entered as a plain string (e.g. just `buff_adjacent_attack`), it will fall back to the `default_buff_value` defined in `data/abilities/abilities.json`.
 
 ## Example CSV
 

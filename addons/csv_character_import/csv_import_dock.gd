@@ -177,13 +177,21 @@ func _row_to_character(row: Dictionary) -> Dictionary:
 		if key in row and not row[key].is_empty():
 			character[key] = _convert_value(key, row[key])
 
-	# Abilities (pipe-separated for multiple, e.g. "attack_enemy|shield_self")
+	# Abilities (pipe-separated, e.g. "attack_enemy|{"id":"buff_adjacent_attack","buff_value":5}")
 	if "ability" in row and not row["ability"].is_empty():
 		var parts = row["ability"].split("|")
 		var abilities: Array = []
 		for p in parts:
 			var trimmed = p.strip_edges()
-			if not trimmed.is_empty():
+			if trimmed.is_empty():
+				continue
+			if trimmed.begins_with("{"):
+				var json = JSON.new()
+				if json.parse(trimmed) == OK and json.data is Dictionary:
+					abilities.append(json.data)
+				else:
+					push_warning("CSV Import: invalid JSON ability entry: " + trimmed)
+			else:
 				abilities.append(trimmed)
 		character["abilities"] = abilities if abilities.size() > 0 else ["attack_enemy"]
 	else:
@@ -297,10 +305,16 @@ func _write_csv(path: String, characters: Array) -> void:
 			fields.append(_csv_escape("|".join(tags_val)))
 		else:
 			fields.append("")
-		# Abilities (pipe-separated)
+		# Abilities (pipe-separated, dict entries serialized as JSON)
 		var abilities_val = c.get("abilities", ["attack_enemy"])
 		if abilities_val is Array:
-			fields.append(_csv_escape("|".join(abilities_val)))
+			var aid_strings: Array = []
+			for a in abilities_val:
+				if a is String:
+					aid_strings.append(a)
+				elif a is Dictionary:
+					aid_strings.append(JSON.stringify(a))
+			fields.append(_csv_escape("|".join(aid_strings)))
 		else:
 			fields.append(_csv_escape(str(abilities_val)))
 		file.store_line(",".join(fields))

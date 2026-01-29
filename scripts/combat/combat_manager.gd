@@ -16,6 +16,7 @@ signal character_healed(target: CombatCharacter, amount: float, source: CombatCh
 var _state: CombatState = null
 var _game_data: Node = null
 var _ability_cache: Dictionary = {}
+var _ability_overrides: Dictionary = {}  # character_id -> {ability_id -> {params}}
 var _effect_manager: EffectManager = EffectManager.new()
 
 
@@ -46,8 +47,17 @@ func _lookup_ability_ids(character_id: String) -> Array:
 	var char_data: Dictionary = gd.get_character_by_id(character_id)
 	if char_data.has("abilities"):
 		var result: Array = []
-		for a in char_data["abilities"]:
-			result.append(a)
+		var overrides: Dictionary = {}
+		for entry in char_data["abilities"]:
+			var parsed = GridBonusCalculator.parse_ability_entry(entry)
+			var aid = parsed.get("id", "")
+			if aid.is_empty():
+				continue
+			result.append(aid)
+			if parsed.size() > 1:
+				overrides[aid] = parsed
+		if not overrides.is_empty():
+			_ability_overrides[character_id] = overrides
 		return result
 	return ["attack_enemy"]
 
@@ -79,6 +89,7 @@ func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid)
 	TickActionRegistry.register_defaults()
 	_game_data = _get_game_data()
 	_ability_cache.clear()
+	_ability_overrides.clear()
 	_state = CombatState.new()
 	_state.board = CombatBoard.new()
 	_state.elapsed_time = 0.0
@@ -112,21 +123,22 @@ func initialize_combat(player_grid: CharacterGrid, opponent_grid: CharacterGrid)
 
 func _apply_combat_start_effects(character: CombatCharacter) -> void:
 	# Apply passive ability effects
+	var char_overrides = _ability_overrides.get(character.source_character_id, {})
 	for aid in character.ability_ids:
 		var ability = _lookup_ability(aid)
 		if ability.is_empty() or ability.get("type", "") != "passive":
 			continue
+		var params = char_overrides.get(aid, {})
 		var passive_id = ability.get("passive_effect", "")
 		match passive_id:
 			"buff_adjacent_attack":
-				_apply_buff_adjacent_attack(character, ability)
+				_apply_buff_adjacent_attack(character, ability, params)
 
 
-func _apply_buff_adjacent_attack(source: CombatCharacter, ability: Dictionary) -> void:
+func _apply_buff_adjacent_attack(source: CombatCharacter, ability: Dictionary, params: Dictionary = {}) -> void:
 	var buff_stat = ability.get("buff_stat", "attack_damage_bonus")
 	var mod_type = ability.get("buff_modifier_type", "percent")
-	var value_from = ability.get("buff_value_from", "buff_adjacent_attack_value")
-	var buff_value = source.get_stat_value(value_from)
+	var buff_value = float(params.get("buff_value", ability.get("default_buff_value", 0)))
 	if buff_value == 0.0:
 		return
 	var allies = _state.board.get_adjacent_allies(source)

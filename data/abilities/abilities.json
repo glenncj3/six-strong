@@ -254,7 +254,7 @@
       "passive_effect": "buff_adjacent_attack",
       "buff_stat": "attack_damage_bonus",
       "buff_modifier_type": "percent",
-      "buff_value_from": "buff_adjacent_attack_value"
+      "default_buff_value": 5
     }
   ]
 }

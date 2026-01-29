@@ -40,22 +40,25 @@ func _apply_passive_ability_bonuses(gd) -> void:
 			var char_master = gd.get_character_by_id(ch.base_character_id)
 			if char_master.is_empty():
 				continue
-			var ability_ids = char_master.get("abilities", [])
-			for aid in ability_ids:
+			var ability_entries = char_master.get("abilities", [])
+			for entry in ability_entries:
+				var parsed = parse_ability_entry(entry)
+				var aid = parsed.get("id", "")
+				if aid.is_empty():
+					continue
 				var ability = gd.get_ability(aid)
 				if ability.is_empty() or ability.get("type", "") != "passive":
 					continue
 				var passive_id = ability.get("passive_effect", "")
 				match passive_id:
 					"buff_adjacent_attack":
-						_apply_buff_adjacent(ch, ability, row, col)
+						_apply_buff_adjacent(ch, ability, row, col, parsed)
 
 
-func _apply_buff_adjacent(source: CharacterInstance, ability: Dictionary, src_row: int, src_col: int) -> void:
-	var value_from = ability.get("buff_value_from", "buff_adjacent_attack_value")
+func _apply_buff_adjacent(source: CharacterInstance, ability: Dictionary, src_row: int, src_col: int, params: Dictionary = {}) -> void:
 	var buff_stat = ability.get("buff_stat", "attack_damage_bonus")
 	var mod_type = ability.get("buff_modifier_type", "percent")
-	var buff_value = float(source.stats.get(value_from, 0))
+	var buff_value = float(params.get("buff_value", ability.get("default_buff_value", 0)))
 	if buff_value == 0.0:
 		return
 
@@ -74,6 +77,23 @@ func _apply_buff_adjacent(source: CharacterInstance, ability: Dictionary, src_ro
 		if ally == null or ally == source:
 			continue
 		_add_bonus(ally, buff_stat, mod_type, buff_value)
+
+
+# =============================================================================
+# ABILITY ENTRY PARSING
+# =============================================================================
+
+# Normalizes an ability entry from a character's abilities array.
+# Entries can be plain strings ("attack_enemy") or dicts with params
+# ({"id": "buff_adjacent_attack", "buff_value": 5}). This is the expected
+# pattern for configuring passive buff values per-character — the buff_value
+# lives on the ability entry rather than as a character stat.
+static func parse_ability_entry(entry) -> Dictionary:
+	if entry is String:
+		return {"id": entry}
+	if entry is Dictionary:
+		return entry
+	return {}
 
 
 # =============================================================================

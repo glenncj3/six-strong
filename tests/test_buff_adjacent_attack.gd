@@ -153,11 +153,10 @@ func test_adjacent_buff_applied_to_neighbors():
 	ally.stat_bonuses.clear()
 	source.stat_bonuses.clear()
 	var ability = {
-		"buff_value_from": "buff_adjacent_attack_value",
 		"buff_stat": "attack_damage_bonus",
 		"buff_modifier_type": "percent",
 	}
-	calc._apply_buff_adjacent(source, ability, 0, 1)
+	calc._apply_buff_adjacent(source, ability, 0, 1, {"id": "buff_adjacent_attack", "buff_value": 0.25})
 
 	assert_true(ally.stat_bonuses.has("attack_damage_bonus"), "adjacent ally has attack_damage_bonus")
 	assert_eq(ally.stat_bonuses["attack_damage_bonus"]["percent"], 0.25, "bonus value is 0.25")
@@ -171,11 +170,10 @@ func test_adjacent_buff_excludes_source():
 	var calc = grid.bonus_calculator
 	source.stat_bonuses.clear()
 	var ability = {
-		"buff_value_from": "buff_adjacent_attack_value",
 		"buff_stat": "attack_damage_bonus",
 		"buff_modifier_type": "percent",
 	}
-	calc._apply_buff_adjacent(source, ability, 0, 1)
+	calc._apply_buff_adjacent(source, ability, 0, 1, {"id": "buff_adjacent_attack", "buff_value": 0.25})
 
 	assert_false(source.stat_bonuses.has("attack_damage_bonus"), "source does not buff itself")
 
@@ -191,11 +189,10 @@ func test_adjacent_buff_not_applied_diagonally():
 	source.stat_bonuses.clear()
 	diagonal.stat_bonuses.clear()
 	var ability = {
-		"buff_value_from": "buff_adjacent_attack_value",
 		"buff_stat": "attack_damage_bonus",
 		"buff_modifier_type": "percent",
 	}
-	calc._apply_buff_adjacent(source, ability, 0, 0)
+	calc._apply_buff_adjacent(source, ability, 0, 0, {"id": "buff_adjacent_attack", "buff_value": 0.25})
 
 	assert_false(diagonal.stat_bonuses.has("attack_damage_bonus"), "diagonal ally not buffed")
 
@@ -214,11 +211,10 @@ func test_adjacent_buff_corner_position():
 	for ch in grid.get_all_characters():
 		ch.stat_bonuses.clear()
 	var ability = {
-		"buff_value_from": "buff_adjacent_attack_value",
 		"buff_stat": "attack_damage_bonus",
 		"buff_modifier_type": "percent",
 	}
-	calc._apply_buff_adjacent(source, ability, 0, 0)
+	calc._apply_buff_adjacent(source, ability, 0, 0, {"id": "buff_adjacent_attack", "buff_value": 0.3})
 
 	assert_true(right.stat_bonuses.has("attack_damage_bonus"), "right neighbor buffed")
 	assert_true(below.stat_bonuses.has("attack_damage_bonus"), "below neighbor buffed")
@@ -242,11 +238,10 @@ func test_adjacent_buff_center_position():
 	for ch in grid.get_all_characters():
 		ch.stat_bonuses.clear()
 	var ability = {
-		"buff_value_from": "buff_adjacent_attack_value",
 		"buff_stat": "attack_damage_bonus",
 		"buff_modifier_type": "percent",
 	}
-	calc._apply_buff_adjacent(source, ability, 0, 1)
+	calc._apply_buff_adjacent(source, ability, 0, 1, {"id": "buff_adjacent_attack", "buff_value": 0.2})
 
 	assert_true(left.stat_bonuses.has("attack_damage_bonus"), "left buffed")
 	assert_true(right.stat_bonuses.has("attack_damage_bonus"), "right buffed")
@@ -266,11 +261,10 @@ func test_adjacent_buff_removed_on_source_removal():
 	for ch in grid.get_all_characters():
 		ch.stat_bonuses.clear()
 	var ability = {
-		"buff_value_from": "buff_adjacent_attack_value",
 		"buff_stat": "attack_damage_bonus",
 		"buff_modifier_type": "percent",
 	}
-	calc._apply_buff_adjacent(source, ability, 0, 0)
+	calc._apply_buff_adjacent(source, ability, 0, 0, {"id": "buff_adjacent_attack", "buff_value": 0.25})
 	assert_true(ally.stat_bonuses.has("attack_damage_bonus"), "ally buffed before removal")
 
 	# Remove source - recalculate triggers automatically
@@ -297,11 +291,10 @@ func test_adjacent_buff_recalculated_on_swap():
 	for ch in grid.get_all_characters():
 		ch.stat_bonuses.clear()
 	var ability = {
-		"buff_value_from": "buff_adjacent_attack_value",
 		"buff_stat": "attack_damage_bonus",
 		"buff_modifier_type": "percent",
 	}
-	calc._apply_buff_adjacent(source, ability, 0, 0)
+	calc._apply_buff_adjacent(source, ability, 0, 0, {"id": "buff_adjacent_attack", "buff_value": 0.25})
 	assert_true(ally1.stat_bonuses.has("attack_damage_bonus"), "ally1 buffed before swap")
 	assert_false(ally2.stat_bonuses.has("attack_damage_bonus"), "ally2 not buffed before swap")
 
@@ -327,12 +320,11 @@ func test_adjacent_buff_multiple_sources_stack():
 	for ch in grid.get_all_characters():
 		ch.stat_bonuses.clear()
 	var ability1 = {
-		"buff_value_from": "buff_adjacent_attack_value",
 		"buff_stat": "attack_damage_bonus",
 		"buff_modifier_type": "percent",
 	}
-	calc._apply_buff_adjacent(src1, ability1, 0, 0)
-	calc._apply_buff_adjacent(src2, ability1, 0, 2)
+	calc._apply_buff_adjacent(src1, ability1, 0, 0, {"id": "buff_adjacent_attack", "buff_value": 0.2})
+	calc._apply_buff_adjacent(src2, ability1, 0, 2, {"id": "buff_adjacent_attack", "buff_value": 0.3})
 
 	assert_true(target.stat_bonuses.has("attack_damage_bonus"), "target has stacked bonus")
 	assert_eq(target.stat_bonuses["attack_damage_bonus"]["percent"], 0.5, "0.2 + 0.3 = 0.5 stacked")
@@ -349,11 +341,11 @@ func test_adjacent_buff_no_value_no_bonus():
 	for ch in grid.get_all_characters():
 		ch.stat_bonuses.clear()
 	var ability = {
-		"buff_value_from": "buff_adjacent_attack_value",
 		"buff_stat": "attack_damage_bonus",
 		"buff_modifier_type": "percent",
 	}
-	calc._apply_buff_adjacent(source, ability, 0, 0)
+	# No buff_value in params, no default_buff_value in ability -> 0
+	calc._apply_buff_adjacent(source, ability, 0, 0, {})
 
 	assert_true(ally.stat_bonuses.is_empty(), "no bonus when source has 0 buff value")
 
