@@ -6,8 +6,25 @@ extends RefCounted
 
 # Predefined enemy team templates: arrays of 6 character IDs
 # Each template fills the 2x3 grid (front row [0-2], back row [3-5])
-# TODO: Populate with real character data
-const ENEMY_TEAMS = []
+const ENEMY_TEAMS = [
+	# --- Easy teams (3 characters, front row only) ---
+	{"chars": ["ST01", "ST02", "ST03"]},
+	{"chars": ["LA01", "LA02", "LA03"]},
+	{"chars": ["TA01", "TA02", "TA03"]},
+	{"chars": ["ST02", "LA01", "TA01"]},
+
+	# --- Medium teams (4 characters, front row + 1 back) ---
+	{"chars": ["ST05", "ST06", "ST07", "ST04"]},
+	{"chars": ["LA05", "LA06", "LA07", "LA04"]},
+	{"chars": ["TA05", "TA06", "TA07", "TA04"]},
+	{"chars": ["ST05", "LA05", "TA05", "ST04"]},
+
+	# --- Hard teams (6 characters, full grid) ---
+	{"chars": ["ST08", "ST09", "ST10", "ST05", "ST06", "ST07"]},
+	{"chars": ["LA08", "LA09", "LA10", "LA05", "LA06", "LA07"]},
+	{"chars": ["TA08", "TA09", "TA10", "TA05", "TA06", "TA07"]},
+	{"chars": ["ST10", "LA10", "TA10", "ST08", "LA08", "TA08"]},
+]
 
 
 func generate_options(count: int) -> Array[CombatOption]:
@@ -106,7 +123,11 @@ func _build_enemy_team(strength_tier: int) -> CharacterGrid:
 	if ENEMY_TEAMS.is_empty():
 		push_warning("CombatGenerator: No enemy team templates defined")
 		return CharacterGrid.new()
-	var template = ENEMY_TEAMS[randi() % ENEMY_TEAMS.size()]
+
+	# Pick template from appropriate tier (4 templates per tier)
+	var templates_per_tier = 4
+	var tier_start = clampi(strength_tier * templates_per_tier, 0, ENEMY_TEAMS.size() - templates_per_tier)
+	var template = ENEMY_TEAMS[tier_start + (randi() % templates_per_tier)]
 	var grid = CharacterGrid.new()
 
 	for i in range(template["chars"].size()):
