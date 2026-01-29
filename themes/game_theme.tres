@@ -3,12 +3,10 @@
 [ext_resource type="FontFile" path="res://fonts/ProtestStrike-Regular.ttf" id="1_font"]
 
 [resource]
-Button/colors/font_shadow_color = Color(0, 0, 0, 0.8)
-Button/constants/shadow_offset_x = 2
-Button/constants/shadow_offset_y = 2
+Button/colors/font_outline_color = Color(0, 0, 0, 1)
+Button/constants/outline_size = 4
 Button/fonts/font = ExtResource("1_font")
 HeaderLabel/base_type = "Label"
-HeaderLabel/colors/font_shadow_color = Color(0, 0, 0, 0.8)
-HeaderLabel/constants/shadow_offset_x = 2
-HeaderLabel/constants/shadow_offset_y = 2
+HeaderLabel/colors/font_outline_color = Color(0, 0, 0, 1)
+HeaderLabel/constants/outline_size = 4
 HeaderLabel/fonts/font = ExtResource("1_font")

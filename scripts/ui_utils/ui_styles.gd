@@ -313,11 +313,10 @@ static func style_label(label: Label, font_size: int, color: Color = GameConstan
 	label.add_theme_color_override("font_color", color)
 
 
-static func apply_text_shadow(label: Label, shadow_color: Color = GameConstants.COLOR_SHADOW_DARK, offset: Vector2 = Vector2(1, 2)) -> void:
-	"""Apply text shadow to a label."""
-	label.add_theme_color_override("font_shadow_color", shadow_color)
-	label.add_theme_constant_override("shadow_offset_x", int(offset.x))
-	label.add_theme_constant_override("shadow_offset_y", int(offset.y))
+static func apply_text_outline(label: Label, outline_color: Color = Color.BLACK, outline_size: int = 4) -> void:
+	"""Apply text outline (stroke) to a label."""
+	label.add_theme_color_override("font_outline_color", outline_color)
+	label.add_theme_constant_override("outline_size", outline_size)
 
 
 static func set_margin_all(container: MarginContainer, margin: int) -> void:
