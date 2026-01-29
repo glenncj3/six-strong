@@ -303,6 +303,7 @@ const EMOJI_GOLD := "💰"
 
 # Critical hit multiplier
 const CRIT_MULTIPLIER := 2.0
+const DODGE_DAMAGE_REDUCTION := 0.9
 
 # Difficulty settings
 const COMBAT_DIFFICULTIES := ["Easy", "Medium", "Hard"]

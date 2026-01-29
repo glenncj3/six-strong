@@ -188,7 +188,6 @@ func _execute_damage(source, target: CombatCharacter, base_damage: float) -> voi
 
 	if result.blocked:
 		damage_blocked.emit(source, target)
-		return
 
 	# Shield absorption: absorb damage from attacks (source is a CombatCharacter)
 	if source is CombatCharacter and target.has_effect("shield"):

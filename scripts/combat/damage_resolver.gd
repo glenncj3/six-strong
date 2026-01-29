@@ -8,11 +8,6 @@ static func resolve(source, target: CombatCharacter, base_damage: float) -> Dict
 	if source == null:
 		return {blocked = false, damage = base_damage, is_crit = false}
 
-	# Block check
-	if target.agility > 0:
-		if randf() < target.agility:
-			return {blocked = true, damage = 0.0, is_crit = false}
-
 	# Crit check
 	var final_damage = base_damage
 	var is_crit = false
@@ -21,4 +16,11 @@ static func resolve(source, target: CombatCharacter, base_damage: float) -> Dict
 			final_damage = base_damage * GameConstants.CRIT_MULTIPLIER
 			is_crit = true
 
-	return {blocked = false, damage = final_damage, is_crit = is_crit}
+	# Dodge check — reduces damage by 90%, but crits cannot be dodged
+	var dodged = false
+	if not is_crit and target.agility > 0:
+		if randf() < target.agility:
+			dodged = true
+			final_damage *= (1.0 - GameConstants.DODGE_DAMAGE_REDUCTION)
+
+	return {blocked = dodged, damage = final_damage, is_crit = is_crit}

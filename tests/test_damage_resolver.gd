@@ -9,10 +9,11 @@ func _init():
 func _run_tests():
 	section("Basic Resolution")
 	test_no_block_no_crit()
-	test_block_with_100_percent_defend()
+	test_dodge_with_100_percent_agility()
 	test_crit_with_100_percent_crit()
 	test_no_block_zero_defend()
 	test_no_crit_zero_crit()
+	test_crit_prevents_dodge()
 
 	section("Return Structure")
 	test_result_has_required_keys()
@@ -50,12 +51,13 @@ func test_no_block_no_crit():
 	assert_false(result.is_crit, "not a crit with 0 crit chance")
 
 
-func test_block_with_100_percent_defend():
+func test_dodge_with_100_percent_agility():
 	var source = _make_combat_char(10.0, 0.0, 0.0)
 	var target = _make_combat_char(0.0, 0.0, 1.0)
 	var result = DamageResolver.resolve(source, target, 25.0)
-	assert_true(result.blocked, "blocked with 100% defend")
-	assert_eq(result.damage, 0.0, "no damage when blocked")
+	assert_true(result.blocked, "dodged with 100% agility")
+	var expected = 25.0 * (1.0 - GameConstants.DODGE_DAMAGE_REDUCTION)
+	assert_eq(result.damage, expected, "dodge reduces damage by 90%")
 
 
 func test_crit_with_100_percent_crit():
@@ -88,6 +90,16 @@ func test_no_crit_zero_crit():
 		if result.is_crit:
 			crit_count += 1
 	assert_eq(crit_count, 0, "never crits with 0 crit chance")
+
+
+func test_crit_prevents_dodge():
+	# Both 100% crit and 100% agility — crit should win, no dodge
+	var source = _make_combat_char(10.0, 1.0, 0.0)
+	var target = _make_combat_char(0.0, 0.0, 1.0)
+	var result = DamageResolver.resolve(source, target, 25.0)
+	assert_false(result.blocked, "crit prevents dodge")
+	assert_true(result.is_crit, "is a crit")
+	assert_eq(result.damage, 25.0 * GameConstants.CRIT_MULTIPLIER, "full crit damage, no dodge reduction")
 
 
 func test_result_has_required_keys():
