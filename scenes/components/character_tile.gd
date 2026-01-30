@@ -12,6 +12,21 @@ signal drag_started(row: int, col: int, character: CharacterInstance)
 signal drop_received(row: int, col: int, from_row: int, from_col: int)
 
 const SLOT_BORDER_WIDTH := 3
+const STAT_ICON_SIZE := 18
+const STAT_FONT_SIZE := 12
+
+const TOP_STATS := [
+	{"key": "damage", "icon": "res://assets/sprites/icons/icon_damage.Png"},
+	{"key": "heal_value", "icon": "res://assets/sprites/icons/icon_heal.Png"},
+	{"key": "shield_value", "icon": "res://assets/sprites/icons/icon_shield.Png"},
+	{"key": "burn_value", "icon": "res://assets/sprites/icons/icon_burn.Png"},
+	{"key": "poison_value", "icon": "res://assets/sprites/icons/icon_poison.Png"},
+]
+const BOTTOM_STATS := [
+	{"key": "charges", "icon": "res://assets/sprites/icons/icon_charges.Png"},
+	{"key": "multistrike_value", "icon": "res://assets/sprites/icons/icon_multistrike.Png"},
+	{"key": "speed", "icon": "res://assets/sprites/icons/icon_speed.Png"},
+]
 
 @onready var content_margin: MarginContainer = $ContentMargin
 @onready var portrait: TextureRect = $ContentMargin/Portrait
@@ -25,6 +40,9 @@ var character: CharacterInstance = null
 var char_data: Dictionary = {}  # For collection mode (dictionary-based)
 var _is_drag_target: bool = false
 var _is_valid_drop_target: bool = false
+var _stat_badges: Dictionary = {}  # key -> HBoxContainer badge
+var _top_stats_container: HBoxContainer
+var _bottom_stats_container: HBoxContainer
 
 
 func _init_default_styles() -> void:
@@ -44,6 +62,7 @@ func _on_ready() -> void:
 	UIStyles.set_margin_all(content_margin, SLOT_BORDER_WIDTH)
 	_setup_border_overlay()
 	_setup_highlight()
+	_build_stat_containers()
 	_clear_display()
 
 
@@ -145,6 +164,10 @@ func _apply_character_display(char_master: Dictionary) -> void:
 	portrait.visible = image_loaded
 	name_label.visible = true
 
+	# Update stat icons
+	var base_stats = char_master.get("base_stats", {})
+	_update_stat_icons(base_stats)
+
 	# Update border to gold
 	_set_border_color(GameConstants.COLOR_BORDER_GOLD)
 
@@ -166,11 +189,75 @@ func _apply_character_display(char_master: Dictionary) -> void:
 	setup_styles({"normal": normal, "hover": hover, "pressed": pressed})
 
 
+func _build_stat_containers() -> void:
+	_top_stats_container = _create_stat_row(TOP_STATS)
+	_top_stats_container.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_bottom_stats_container = _create_stat_row(BOTTOM_STATS)
+	_bottom_stats_container.size_flags_vertical = Control.SIZE_SHRINK_END
+	content_margin.add_child(_top_stats_container)
+	content_margin.add_child(_bottom_stats_container)
+
+
+func _create_stat_row(stat_defs: Array) -> HBoxContainer:
+	var row = HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 4)
+	row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+
+	for stat_def in stat_defs:
+		var badge = _create_stat_badge(stat_def.key, stat_def.icon)
+		row.add_child(badge)
+	return row
+
+
+func _create_stat_badge(stat_key: String, icon_path: String) -> HBoxContainer:
+	var badge = HBoxContainer.new()
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge.add_theme_constant_override("separation", 1)
+	badge.visible = false
+
+	var icon = TextureRect.new()
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.custom_minimum_size = Vector2(STAT_ICON_SIZE, STAT_ICON_SIZE)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var tex = load(icon_path)
+	if tex:
+		icon.texture = tex
+	badge.add_child(icon)
+
+	var label = Label.new()
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_font_size_override("font_size", STAT_FONT_SIZE)
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	badge.add_child(label)
+
+	_stat_badges[stat_key] = {"container": badge, "label": label}
+	return badge
+
+
+func _update_stat_icons(stats: Dictionary) -> void:
+	for stat_key in _stat_badges:
+		var val = stats.get(stat_key, 0)
+		var badge_data = _stat_badges[stat_key]
+		if val is float:
+			val = int(val)
+		badge_data.container.visible = val > 0
+		badge_data.label.text = str(val)
+
+
+func _hide_all_stat_icons() -> void:
+	for stat_key in _stat_badges:
+		_stat_badges[stat_key].container.visible = false
+
+
 func _clear_display() -> void:
 	"""Show empty placeholder state."""
 	character = null
 	portrait.visible = false
 	name_label.visible = false
+	_hide_all_stat_icons()
 
 	# Update border to dim
 	_set_border_color(GameConstants.COLOR_BORDER_GOLD.darkened(0.5))
