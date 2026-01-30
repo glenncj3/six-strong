@@ -3,7 +3,6 @@ extends Control
 # Lives on a CanvasLayer above the transition layer so it persists through scene changes
 
 const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
-const GridSlotScene = preload("res://scenes/components/grid_slot.tscn")
 
 @onready var grid_container: VBoxContainer = $GridContainer
 @onready var front_row: HBoxContainer = $GridContainer/FrontRow
@@ -33,7 +32,7 @@ func _create_grid_slots() -> void:
 	# Create front row (row 0)
 	var front_row_slots: Array = []
 	for col in range(GameConstants.GRID_COLS):
-		var slot = GridSlotScene.instantiate()
+		var slot = CharacterTileScene.instantiate()
 		front_row.add_child(slot)
 		slot.setup_slot(0, col, slot_size)
 		front_row_slots.append(slot)
@@ -42,7 +41,7 @@ func _create_grid_slots() -> void:
 	# Create back row (row 1)
 	var back_row_slots: Array = []
 	for col in range(GameConstants.GRID_COLS):
-		var slot = GridSlotScene.instantiate()
+		var slot = CharacterTileScene.instantiate()
 		back_row.add_child(slot)
 		slot.setup_slot(1, col, slot_size)
 		back_row_slots.append(slot)

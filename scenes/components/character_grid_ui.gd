@@ -12,7 +12,7 @@ signal character_moved(from_pos: Vector2i, to_pos: Vector2i)
 signal character_swapped(pos_a: Vector2i, pos_b: Vector2i)
 signal layout_changed
 
-const GridSlotScene = preload("res://scenes/components/grid_slot.tscn")
+const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
 
 # Grid containers
 @onready var grid_container: VBoxContainer = $GridContainer
@@ -23,7 +23,7 @@ const GridSlotScene = preload("res://scenes/components/grid_slot.tscn")
 var _slots: Array = []
 
 # Drag state
-var _drag_source_slot: GridSlot = null
+var _drag_source_slot: CharacterTile = null
 var _is_dragging: bool = false
 
 # Grid data reference
@@ -44,7 +44,7 @@ func _create_slot_grid() -> void:
 	# Create front row (row 0)
 	var front_row_slots: Array = []
 	for col in range(GameConstants.GRID_COLS):
-		var slot = GridSlotScene.instantiate() as GridSlot
+		var slot = CharacterTileScene.instantiate() as CharacterTile
 		front_row.add_child(slot)
 		slot.setup_slot(0, col, slot_size)
 		slot.slot_clicked.connect(_on_slot_clicked)
@@ -54,7 +54,7 @@ func _create_slot_grid() -> void:
 	# Create back row (row 1)
 	var back_row_slots: Array = []
 	for col in range(GameConstants.GRID_COLS):
-		var slot = GridSlotScene.instantiate() as GridSlot
+		var slot = CharacterTileScene.instantiate() as CharacterTile
 		back_row.add_child(slot)
 		slot.setup_slot(1, col, slot_size)
 		slot.slot_clicked.connect(_on_slot_clicked)
@@ -213,7 +213,7 @@ func _highlight_drop_targets(from_row: int, from_col: int) -> void:
 # UTILITY
 # =============================================================================
 
-func _get_slot(row: int, col: int) -> GridSlot:
+func _get_slot(row: int, col: int) -> CharacterTile:
 	"""Get slot at position."""
 	if row < 0 or row >= _slots.size():
 		return null
@@ -222,7 +222,7 @@ func _get_slot(row: int, col: int) -> GridSlot:
 	return _slots[row][col]
 
 
-func get_slot_at(row: int, col: int) -> GridSlot:
+func get_slot_at(row: int, col: int) -> CharacterTile:
 	"""Public accessor for slot at position."""
 	return _get_slot(row, col)
 

@@ -30,6 +30,7 @@ layout_mode = 2
 mouse_filter = 2
 
 [node name="Portrait" type="TextureRect" parent="ContentMargin"]
+visible = false
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 6
@@ -48,6 +49,7 @@ mouse_filter = 2
 material = SubResource("ShaderMaterial_haze")
 
 [node name="NameLabel" type="Label" parent="ContentMargin/NameMargin"]
+visible = false
 layout_mode = 2
 theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 20
@@ -59,3 +61,9 @@ text_overrun_behavior = 3
 [node name="BorderOverlay" type="Panel" parent="."]
 layout_mode = 2
 mouse_filter = 2
+
+[node name="HighlightRect" type="ColorRect" parent="."]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.3, 0.8, 0.3, 0.3)

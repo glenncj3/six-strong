@@ -1,10 +1,10 @@
 extends Control
 ## CombatScene - Real-time automated combat between player and enemy teams.
-## Uses CombatManager for cooldown-based combat and GridSlot components for display.
+## Uses CombatManager for cooldown-based combat and CharacterTile components for display.
 ## Player grid matches TeamHUD positioning; enemy grid mirrors at top.
 ## Combat log output goes to console via print().
 
-const GridSlotScene = preload("res://scenes/components/grid_slot.tscn")
+const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
 
 var combat_data: Dictionary = {}
 var _manager: CombatManager
@@ -138,7 +138,7 @@ func _build_slot_display(grid: CharacterGrid, row: int, col: int, is_enemy: bool
 	var slot_width = UIScaler.calculate_tile_size(grid_width, GameConstants.GRID_COLS)
 	var slot_size = Vector2(slot_width, slot_width)
 
-	var slot: GridSlot = GridSlotScene.instantiate()
+	var slot: CharacterTile = CharacterTileScene.instantiate()
 	slot.setup_slot(row, col, slot_size)
 
 	var character = grid.get_character_at(row, col) if grid else null
@@ -260,7 +260,7 @@ func _update_slot_hp(pos_key: String, current_hp: float, max_hp: float, alive: b
 	var d = _slot_displays[pos_key]
 	var hp_bar: ColorRect = d["hp_bar"]
 	var hp_label: Label = d["hp_label"]
-	var slot: GridSlot = d["slot"]
+	var slot: CharacterTile = d["slot"]
 
 	if alive and current_hp > 0:
 		var ratio = current_hp / max(1.0, max_hp)
