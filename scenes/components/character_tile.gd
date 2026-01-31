@@ -6,9 +6,8 @@ class_name CharacterTile
 
 signal slot_clicked(row: int, col: int, character: CharacterInstance)
 signal tile_clicked_data(char_data: Dictionary)
-@warning_ignore("unused_signal")  # Reserved for future drag-and-drop
 signal drag_started(row: int, col: int, character: CharacterInstance)
-@warning_ignore("unused_signal")  # Reserved for future drag-and-drop
+@warning_ignore("unused_signal")  # Reserved for future use
 signal drop_received(row: int, col: int, from_row: int, from_col: int)
 
 const SLOT_BORDER_WIDTH := 3
@@ -45,6 +44,12 @@ var _top_stats_container: HBoxContainer
 var _bottom_stats_container: HBoxContainer
 var _stats_overlay: Control
 
+# Long-press drag detection
+const LONG_PRESS_DURATION := 0.2
+var _long_press_timer: Timer
+var _press_position: Vector2 = Vector2.ZERO
+var _long_press_triggered: bool = false
+
 
 func _init_default_styles() -> void:
 	# Empty slot style
@@ -65,6 +70,22 @@ func _on_ready() -> void:
 	_setup_highlight()
 	_build_stat_containers()
 	_clear_display()
+	_setup_long_press_timer()
+
+
+func _setup_long_press_timer() -> void:
+	_long_press_timer = Timer.new()
+	_long_press_timer.one_shot = true
+	_long_press_timer.wait_time = LONG_PRESS_DURATION
+	_long_press_timer.timeout.connect(_on_long_press_timeout)
+	add_child(_long_press_timer)
+
+
+func _on_long_press_timeout() -> void:
+	if character == null:
+		return
+	_long_press_triggered = true
+	drag_started.emit(row, col, character)
 
 
 func _setup_border_overlay() -> void:
@@ -79,6 +100,38 @@ func _setup_border_overlay() -> void:
 func _setup_highlight() -> void:
 	highlight_rect.visible = false
 	highlight_rect.color = Color(0.3, 0.8, 0.3, 0.3)
+
+
+func _on_gui_input(event: InputEvent) -> void:
+	if not clickable:
+		return
+
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_is_pressed = true
+			_long_press_triggered = false
+			_press_position = event.global_position
+			_apply_state_style()
+			if enable_scale_animation:
+				_scaler.press()
+			if character != null:
+				_long_press_timer.start()
+		else:
+			_long_press_timer.stop()
+			if _long_press_triggered:
+				# Drag was initiated — don't fire click
+				_long_press_triggered = false
+			elif _is_pressed and _is_hovered:
+				_handle_click()
+			_is_pressed = false
+			_apply_state_style()
+			if enable_scale_animation:
+				_scaler.release(_is_hovered)
+
+	elif event is InputEventMouseMotion and _is_pressed:
+		# Cancel long-press if finger moves too far
+		if _press_position.distance_to(event.global_position) > 15:
+			_long_press_timer.stop()
 
 
 func _handle_click() -> void:

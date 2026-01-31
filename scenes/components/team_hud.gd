@@ -14,6 +14,12 @@ var _visibility: HudVisibilityHelper = null
 # Grid slots: _slots[row][col]
 var _slots: Array = []
 
+# Drag-and-drop state
+var _is_dragging: bool = false
+var _drag_source_row: int = -1
+var _drag_source_col: int = -1
+var _drag_preview: Control = null
+
 
 func _ready() -> void:
 	add_to_group("team_hud")  # Keep for backwards compatibility
@@ -35,6 +41,7 @@ func _create_grid_slots() -> void:
 		var slot = CharacterTileScene.instantiate()
 		front_row.add_child(slot)
 		slot.setup_slot(0, col, slot_size)
+		slot.drag_started.connect(_on_slot_drag_started)
 		front_row_slots.append(slot)
 	_slots.append(front_row_slots)
 
@@ -44,6 +51,7 @@ func _create_grid_slots() -> void:
 		var slot = CharacterTileScene.instantiate()
 		back_row.add_child(slot)
 		slot.setup_slot(1, col, slot_size)
+		slot.drag_started.connect(_on_slot_drag_started)
 		back_row_slots.append(slot)
 	_slots.append(back_row_slots)
 
@@ -191,3 +199,112 @@ func refresh_display() -> void:
 	if _is_draft_mode:
 		return
 	_update_grid_display()
+
+
+# =============================================================================
+# DRAG AND DROP
+# =============================================================================
+
+func _on_slot_drag_started(slot_row: int, slot_col: int, _character: CharacterInstance) -> void:
+	if _is_draft_mode or _is_dragging:
+		return
+
+	_is_dragging = true
+	_drag_source_row = slot_row
+	_drag_source_col = slot_col
+
+	# Dim source slot
+	var source_slot = _get_slot(slot_row, slot_col)
+	if source_slot:
+		source_slot.modulate.a = 0.3
+
+	# Create floating preview
+	_create_drag_preview(source_slot)
+
+	# Highlight other slots as drop targets
+	_set_drop_highlights(true)
+
+
+func _create_drag_preview(source_slot: CharacterTile) -> void:
+	_drag_preview = CharacterTileScene.instantiate()
+	# Add to self (TeamHUD is on a CanvasLayer already at layer 150)
+	add_child(_drag_preview)
+	var slot_size = _get_slot_size()
+	_drag_preview.setup_slot(_drag_source_row, _drag_source_col, slot_size)
+	_drag_preview.set_character(source_slot.character)
+	_drag_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_drag_preview.modulate.a = 0.85
+	_drag_preview.scale = Vector2(1.05, 1.05)
+	# Position at current touch/mouse position
+	_drag_preview.position = get_global_mouse_position() - slot_size / 2.0
+
+
+func _input(event: InputEvent) -> void:
+	if not _is_dragging:
+		return
+
+	if event is InputEventMouseMotion or event is InputEventScreenDrag:
+		var pos = event.position if event is InputEventScreenDrag else event.global_position
+		if _drag_preview:
+			var slot_size = _get_slot_size()
+			_drag_preview.position = pos - slot_size / 2.0
+
+	elif event is InputEventMouseButton and not event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_finish_drag(event.global_position)
+
+	elif event is InputEventScreenTouch and not event.pressed:
+		_finish_drag(event.position)
+
+
+func _finish_drag(drop_position: Vector2) -> void:
+	var target_slot = _get_slot_at_position(drop_position)
+
+	if target_slot and not (target_slot.row == _drag_source_row and target_slot.col == _drag_source_col):
+		# Perform swap (works for both occupied and empty target slots)
+		var run_state = RunManager.get_run_state()
+		if run_state:
+			var grid = run_state.get_grid()
+			if grid:
+				grid.swap_positions(_drag_source_row, _drag_source_col, target_slot.row, target_slot.col)
+
+	# Clean up
+	_cancel_drag()
+	_update_grid_display()
+
+
+func _cancel_drag() -> void:
+	# Restore source slot opacity
+	var source_slot = _get_slot(_drag_source_row, _drag_source_col)
+	if source_slot:
+		source_slot.modulate.a = 1.0
+
+	# Remove preview
+	if _drag_preview:
+		_drag_preview.queue_free()
+		_drag_preview = null
+
+	# Clear highlights
+	_set_drop_highlights(false)
+
+	_is_dragging = false
+	_drag_source_row = -1
+	_drag_source_col = -1
+
+
+func _set_drop_highlights(enabled: bool) -> void:
+	for row_idx in range(GameConstants.GRID_ROWS):
+		for col_idx in range(GameConstants.GRID_COLS):
+			if enabled and row_idx == _drag_source_row and col_idx == _drag_source_col:
+				continue
+			var slot = _get_slot(row_idx, col_idx)
+			if slot:
+				slot.set_drag_highlight(enabled, true)
+
+
+func _get_slot_at_position(global_pos: Vector2) -> CharacterTile:
+	for row_idx in range(GameConstants.GRID_ROWS):
+		for col_idx in range(GameConstants.GRID_COLS):
+			var slot = _get_slot(row_idx, col_idx)
+			if slot and slot.get_global_rect().has_point(global_pos):
+				return slot
+	return null
