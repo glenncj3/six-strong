@@ -30,7 +30,7 @@ static func calculate_reputation_loss(current_round: int) -> int:
 	Returns:
 		Reputation points to lose
 	"""
-	return current_round + 1  # +1 because displayed as 1-indexed
+	return current_round
 
 
 static func calculate_gem_reward(victory: bool, wins: int, reputation: int) -> int:
