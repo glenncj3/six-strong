@@ -234,9 +234,12 @@ func _apply_setup(p_tile_data: Dictionary, tile_size: float) -> void:
 
 func _embed_character_tile(p_tile_data: Dictionary, tile_size: float) -> void:
 	"""Embed a CharacterTile to display the character visuals (portrait, name, stats)."""
-	# Hide generic display elements
+	# Hide generic display elements — CharacterTile handles portrait, name, stats
 	icon.visible = false
 	name_label.visible = false
+	$ContentMargin/NameMargin/NameHaze.visible = false
+	# Disable clip_contents so CharacterTile's stat badges can overflow the edges
+	clip_contents = false
 
 	# Remove previous embedded tile if any
 	if _embedded_character_tile and is_instance_valid(_embedded_character_tile):
@@ -257,6 +260,9 @@ func _embed_character_tile(p_tile_data: Dictionary, tile_size: float) -> void:
 
 	# Use CharacterTile's dictionary-based setup (looks up master data by id)
 	_embedded_character_tile.setup_from_data(p_tile_data, tile_size)
+
+	# Hide CharacterTile's own border — PurchasableTile's BorderOverlay handles it
+	_embedded_character_tile.border_overlay.visible = false
 
 
 func set_tile_color(bg_color: Color) -> void:
