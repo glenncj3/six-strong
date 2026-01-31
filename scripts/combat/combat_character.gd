@@ -44,6 +44,7 @@ var tick_rate_multiplier: float = 1.0
 
 # Extra stats (poison_value, haste_value, etc.)
 var extra_stats: Dictionary = {}
+var base_extra_stats: Dictionary = {}
 
 # Effects
 var effects: Array = []  # Array of CombatEffect
@@ -88,6 +89,8 @@ static func create_from_character(source: CharacterInstance, p_team: int, p_row:
 	for key in source.stats:
 		if key not in mapped_stats:
 			cc.extra_stats[key] = source.stats[key]
+			if key != GameConstants.STAT_CHARGES:
+				cc.base_extra_stats[key] = source.stats[key]
 
 	return cc
 
@@ -117,6 +120,10 @@ func recalculate_stats() -> void:
 		else:
 			if health > max_health:
 				health = max_health
+
+	# Recalculate extra stats (burn_value, heal_value, etc.) — skip charges
+	for key in base_extra_stats:
+		extra_stats[key] = StatResolver.resolve_stat(float(base_extra_stats[key]), mods, key)
 
 	# Recalculate tick_rate_multiplier from continuous_modifier effects
 	var new_tick_rate = 1.0

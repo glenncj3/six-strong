@@ -31,6 +31,7 @@ func _run_tests():
 	_test_update_stat_icons_hides_zero(tile, badges)
 	_test_update_stats_from_combat_charges(tile, badges)
 	_test_update_stats_from_combat_extra_stats(tile, badges)
+	_test_non_combat_live_stats(tile, badges)
 	_test_clear_display_hides_all(tile, badges)
 
 	tile.queue_free()
@@ -92,7 +93,8 @@ func _test_update_stats_from_combat_charges(tile: Node, badges: Dictionary):
 
 	cc.charges = 0
 	tile.call("update_stats_from_combat", cc)
-	assert_false(badges["charges"].container.visible, "charges badge hidden at 0")
+	assert_true(badges["charges"].container.visible, "charges badge visible at 0 (keep_visible)")
+	assert_eq(badges["charges"].label.text, "0", "charges label shows 0")
 
 	cc.charges = -1
 	tile.call("update_stats_from_combat", cc)
@@ -119,6 +121,24 @@ func _test_update_stats_from_combat_extra_stats(tile: Node, badges: Dictionary):
 	cc.damage = 20.0
 	tile.call("update_stats_from_combat", cc)
 	assert_eq(badges["damage"].label.text, "20", "damage updated to 20 after buff")
+
+
+func _test_non_combat_live_stats(tile: Node, badges: Dictionary):
+	section("Non-combat tile reads live character.stats")
+	# Create a CharacterInstance with custom stats (no GameData lookup needed)
+	var ci = CharacterInstance.new()
+	ci.base_character_id = "test_char"
+	ci.stats = {"damage": 20, "speed": 4, "burn_value": 8, "heal_value": 0}
+
+	# Build a stats dict the same way _apply_character_display would
+	var display_stats = ci.stats.duplicate()
+	tile.call("_update_stat_icons", display_stats)
+
+	assert_true(badges["damage"].container.visible, "damage visible from live stats")
+	assert_eq(badges["damage"].label.text, "20", "damage shows live value 20")
+	assert_true(badges["burn_value"].container.visible, "burn_value visible from live stats")
+	assert_eq(badges["burn_value"].label.text, "8", "burn_value shows live value 8")
+	assert_false(badges["heal_value"].container.visible, "heal_value hidden when 0 in live stats")
 
 
 func _test_clear_display_hides_all(tile: Node, badges: Dictionary):
