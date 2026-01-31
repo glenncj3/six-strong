@@ -44,6 +44,9 @@ var _stat_badges: Dictionary = {}  # key -> {container, label}
 var _top_stats_container: HBoxContainer
 var _bottom_stats_container: HBoxContainer
 var _stats_overlay: Control
+var _hp_container: Control
+var _hp_bar: ColorRect
+var _hp_bar_bg: ColorRect
 
 # Long-press drag detection
 const LONG_PRESS_DURATION := 0.12
@@ -70,6 +73,7 @@ func _on_ready() -> void:
 	_setup_border_overlay()
 	_setup_highlight()
 	_build_stat_containers()
+	_build_health_bar()
 	_clear_display()
 	_setup_long_press_timer()
 
@@ -239,6 +243,14 @@ func _apply_character_display(char_master: Dictionary) -> void:
 		display_stats = char_master.get("base_stats", {})
 	_update_stat_icons(display_stats)
 
+	# Update health bar
+	if character != null:
+		update_health_bar(character.current_health, character.max_health)
+	else:
+		var base_stats = char_master.get("base_stats", {})
+		var hp = int(base_stats.get("health", 0))
+		update_health_bar(hp, hp)
+
 	# Update border to gold
 	_set_border_color(GameConstants.COLOR_BORDER_GOLD)
 
@@ -280,6 +292,54 @@ func _build_stat_containers() -> void:
 	_bottom_stats_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_bottom_stats_container.position.y = -half_icon - SLOT_BORDER_WIDTH
 	_stats_overlay.add_child(_bottom_stats_container)
+
+
+func _build_health_bar() -> void:
+	const HP_BAR_HEIGHT := 6
+
+	_hp_container = Control.new()
+	_hp_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hp_container.anchor_left = 0.1
+	_hp_container.anchor_right = 0.9
+	_hp_container.anchor_top = 1.0
+	_hp_container.anchor_bottom = 1.0
+	var hp_bottom_offset = SLOT_BORDER_WIDTH + STAT_ICON_SIZE / 2.0 + 4
+	_hp_container.offset_top = -HP_BAR_HEIGHT - hp_bottom_offset
+	_hp_container.offset_bottom = -hp_bottom_offset
+	_hp_container.offset_left = 0
+	_hp_container.offset_right = 0
+	_hp_container.visible = false
+	border_overlay.add_child(_hp_container)
+
+	_hp_bar_bg = ColorRect.new()
+	_hp_bar_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hp_bar_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_hp_bar_bg.color = Color("#222222")
+	_hp_container.add_child(_hp_bar_bg)
+
+	_hp_bar = ColorRect.new()
+	_hp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_hp_bar.color = Color("#44AA44")
+	_hp_bar_bg.add_child(_hp_bar)
+
+
+func update_health_bar(current: int, maximum: int) -> void:
+	if not _hp_container:
+		return
+	if maximum <= 0:
+		_hp_container.visible = false
+		return
+	_hp_container.visible = true
+	var ratio = clampf(float(current) / float(maximum), 0.0, 1.0)
+	_hp_bar.anchor_right = ratio
+	# Color shifts from green to red as health drops
+	if ratio > 0.5:
+		_hp_bar.color = Color("#44AA44")
+	elif ratio > 0.25:
+		_hp_bar.color = Color("#AAAA44")
+	else:
+		_hp_bar.color = Color("#AA4444")
 
 
 func _create_stat_row(stat_defs: Array) -> HBoxContainer:
@@ -386,6 +446,8 @@ func _clear_display() -> void:
 	portrait.visible = false
 	name_label.visible = false
 	_hide_all_stat_icons()
+	if _hp_container:
+		_hp_container.visible = false
 
 	# Update border to dim
 	_set_border_color(GameConstants.COLOR_BORDER_GOLD.darkened(0.5))

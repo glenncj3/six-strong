@@ -23,6 +23,7 @@ mouse_filter = 2
 size_flags_vertical = 8
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 30
 
 [node name="NameLabel" type="Label" parent="ContentMargin/NameMargin"]
 visible = false
