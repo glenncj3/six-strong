@@ -8,7 +8,6 @@ const TILE_BORDER_WIDTH := 4
 
 @onready var content_margin: MarginContainer = $ContentMargin
 @onready var portrait: TextureRect = $ContentMargin/Portrait
-@onready var border_overlay: Panel = $BorderOverlay
 @onready var name_label: Label = $ContentMargin/NameMargin/NameLabel
 @onready var info_container: VBoxContainer = $ContentMargin/InfoContainer
 @onready var income_label: Label = $ContentMargin/InfoContainer/IncomeLabel
@@ -32,17 +31,7 @@ func _init_default_styles() -> void:
 func _on_ready() -> void:
 	UIHelpers.set_children_mouse_filter_ignore(self)
 	UIStyles.set_margin_all(content_margin, TILE_BORDER_WIDTH)
-	_setup_border_overlay()
 	_setup_info_labels()
-
-
-func _setup_border_overlay() -> void:
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color.TRANSPARENT
-	style.set_border_width_all(TILE_BORDER_WIDTH)
-	style.border_color = GameConstants.COLOR_BORDER_GOLD
-	style.set_corner_radius_all(UIStyles.CORNER_RADIUS_MEDIUM)
-	border_overlay.add_theme_stylebox_override("panel", style)
 
 
 func _setup_info_labels() -> void:

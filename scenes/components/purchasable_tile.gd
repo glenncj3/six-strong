@@ -17,7 +17,6 @@ static var _active_drag_canvas: CanvasLayer = null
 
 @onready var content_margin: MarginContainer = $ContentMargin
 @onready var icon: TextureRect = $ContentMargin/Icon
-@onready var border_overlay: Panel = $BorderOverlay
 @onready var name_label: Label = $ContentMargin/NameMargin/NameLabel
 @onready var gold_cost_icon: PanelContainer = $ContentMargin/CostMargin/GoldCostIcon
 
@@ -49,7 +48,6 @@ func _init_default_styles() -> void:
 func _on_ready() -> void:
 	UIHelpers.set_children_mouse_filter_ignore(self)
 	UIStyles.set_margin_all(content_margin, TILE_BORDER_WIDTH)
-	_setup_border_overlay()
 	_setup_long_press_timer()
 
 	# Apply any pending setup that was called before node was ready
@@ -64,15 +62,6 @@ func _setup_long_press_timer() -> void:
 	_long_press_timer.wait_time = LONG_PRESS_DURATION
 	_long_press_timer.timeout.connect(_on_long_press_timeout)
 	add_child(_long_press_timer)
-
-
-func _setup_border_overlay() -> void:
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color.TRANSPARENT
-	style.set_border_width_all(TILE_BORDER_WIDTH)
-	style.border_color = GameConstants.COLOR_BORDER_GOLD
-	style.set_corner_radius_all(UIStyles.CORNER_RADIUS_MEDIUM)
-	border_overlay.add_theme_stylebox_override("panel", style)
 
 
 func _on_gui_input(event: InputEvent) -> void:
@@ -237,7 +226,6 @@ func _embed_character_tile(p_tile_data: Dictionary, tile_size: float) -> void:
 	# Hide generic display elements — CharacterTile handles portrait, name, stats
 	icon.visible = false
 	name_label.visible = false
-	$ContentMargin/NameMargin/NameHaze.visible = false
 	# Disable clip_contents so CharacterTile's stat badges can overflow the edges
 	clip_contents = false
 
@@ -249,7 +237,7 @@ func _embed_character_tile(p_tile_data: Dictionary, tile_size: float) -> void:
 	_embedded_character_tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_embedded_character_tile.clickable = false
 
-	# Insert at the bottom so ContentMargin (cost badge) and BorderOverlay draw on top
+	# Insert at the bottom so ContentMargin (cost badge) draws on top
 	add_child(_embedded_character_tile)
 	move_child(_embedded_character_tile, 0)
 
@@ -260,9 +248,6 @@ func _embed_character_tile(p_tile_data: Dictionary, tile_size: float) -> void:
 
 	# Use CharacterTile's dictionary-based setup (looks up master data by id)
 	_embedded_character_tile.setup_from_data(p_tile_data, tile_size)
-
-	# Hide CharacterTile's own border — PurchasableTile's BorderOverlay handles it
-	_embedded_character_tile.border_overlay.visible = false
 
 
 func set_tile_color(bg_color: Color) -> void:

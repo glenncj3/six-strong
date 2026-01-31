@@ -1,25 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://purchasable_tile_scene"]
+[gd_scene load_steps=3 format=3 uid="uid://purchasable_tile_scene"]
 
 [ext_resource type="Script" path="res://scenes/components/purchasable_tile.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://gold_cost_icon" path="res://scenes/components/gold_cost_icon.tscn" id="2_gold_cost"]
-
-[sub_resource type="Shader" id="Shader_haze"]
-code = "shader_type canvas_item;
-
-uniform float opacity : hint_range(0.0, 1.0) = 0.85;
-uniform float vertical_squeeze : hint_range(1.0, 4.0) = 2.2;
-
-void fragment() {
-	vec2 uv = UV - vec2(0.5);
-	uv.y *= vertical_squeeze;
-	float d = length(uv);
-	float alpha = smoothstep(0.5, 0.05, d) * opacity;
-	COLOR = vec4(0.0, 0.0, 0.0, alpha);
-}
-"
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_haze"]
-shader = SubResource("Shader_haze")
 
 [node name="PurchasableTile" type="PanelContainer"]
 clip_contents = true
@@ -56,12 +38,6 @@ size_flags_vertical = 8
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_right = 4
 
-[node name="NameHaze" type="ColorRect" parent="ContentMargin/NameMargin"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 62)
-mouse_filter = 2
-material = SubResource("ShaderMaterial_haze")
-
 [node name="NameLabel" type="Label" parent="ContentMargin/NameMargin"]
 layout_mode = 2
 theme_type_variation = "HeaderLabel"
@@ -70,7 +46,3 @@ text = "Item"
 horizontal_alignment = 1
 vertical_alignment = 1
 text_overrun_behavior = 3
-
-[node name="BorderOverlay" type="Panel" parent="."]
-layout_mode = 2
-mouse_filter = 2
