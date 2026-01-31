@@ -327,7 +327,6 @@ func _animate_preview_back() -> void:
 		_cleanup_drag()
 		return
 
-	var slot_size = _get_slot_size()
 	var target_pos = source_slot.global_position
 	var tween = _drag_preview.create_tween()
 	tween.tween_property(_drag_preview, "position", target_pos, 0.15) \

@@ -270,15 +270,15 @@ func _build_stat_containers() -> void:
 
 
 func _create_stat_row(stat_defs: Array) -> HBoxContainer:
-	var row = HBoxContainer.new()
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 2)
+	var stat_row = HBoxContainer.new()
+	stat_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stat_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	stat_row.add_theme_constant_override("separation", 2)
 
 	for stat_def in stat_defs:
 		var badge = _create_stat_badge(stat_def.key, stat_def.icon)
-		row.add_child(badge)
-	return row
+		stat_row.add_child(badge)
+	return stat_row
 
 
 func _create_stat_badge(stat_key: String, icon_path: String) -> Control:
