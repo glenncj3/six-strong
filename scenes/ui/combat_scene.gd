@@ -100,7 +100,7 @@ func _build_grid_control(a_left: float, a_top: float, a_right: float, a_bottom: 
 	vbox.anchor_bottom = 1.0
 	vbox.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	vbox.grow_vertical = Control.GROW_DIRECTION_BOTH
-	vbox.add_theme_constant_override("separation", 6)
+	vbox.add_theme_constant_override("separation", 36)
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	container.add_child(vbox)
 
@@ -279,6 +279,14 @@ func _get_pos_key(character: CombatCharacter) -> String:
 	return "%d_%d_%d" % [character.team, character.row, character.column]
 
 
+func _update_slot_stats(combat_char: CombatCharacter) -> void:
+	var pos_key = _get_pos_key(combat_char)
+	if not _slot_displays.has(pos_key):
+		return
+	var slot: CharacterTile = _slot_displays[pos_key]["slot"]
+	slot.update_stats_from_combat(combat_char)
+
+
 # =============================================================================
 # COMBAT LOGIC
 # =============================================================================
@@ -328,6 +336,8 @@ func _on_damage_dealt(source: CombatCharacter, target: CombatCharacter, amount: 
 		print("[Combat] %s %s attacks %s %s for %d damage." % [_get_team_label(source), source.character_name, tgt_label, target.character_name, int(amount)])
 
 	_update_slot_hp(_get_pos_key(target), target.health, target.max_health, target.is_alive)
+	if source:
+		_update_slot_stats(source)
 
 
 func _on_damage_blocked(source: CombatCharacter, target: CombatCharacter) -> void:
@@ -342,6 +352,9 @@ func _on_ability_used(source: CombatCharacter, ability: Dictionary, targets: Arr
 	for t in targets:
 		target_names.append(t.character_name)
 	print("[Combat] %s %s uses [%s] → %s" % [_get_team_label(source), source.character_name, ability_name, ", ".join(target_names)])
+	_update_slot_stats(source)
+	for t in targets:
+		_update_slot_stats(t)
 
 
 func _on_effect_applied(target: CombatCharacter, effect: CombatEffect) -> void:
@@ -356,11 +369,13 @@ func _on_effect_applied(target: CombatCharacter, effect: CombatEffect) -> void:
 		else:
 			detail = " (%s%d %s)" % [sign_str, int(effect.value), effect.stat]
 	print("[Combat] %s %s gains effect [%s]%s" % [_get_team_label(target), target.character_name, effect_name, detail])
+	_update_slot_stats(target)
 
 
 func _on_effect_removed(target: CombatCharacter, effect: CombatEffect) -> void:
 	var effect_name = effect.effect_id if effect.effect_id != "" else effect.stat
 	print("[Combat] %s %s loses effect [%s]" % [_get_team_label(target), target.character_name, effect_name])
+	_update_slot_stats(target)
 
 
 func _on_character_healed(target: CombatCharacter, amount: float, source: CombatCharacter) -> void:

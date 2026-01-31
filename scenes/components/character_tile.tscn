@@ -21,11 +21,11 @@ void fragment() {
 shader = SubResource("Shader_haze")
 
 [node name="CharacterTile" type="PanelContainer"]
-clip_contents = true
 custom_minimum_size = Vector2(100, 100)
 script = ExtResource("1_script")
 
 [node name="ContentMargin" type="MarginContainer" parent="."]
+clip_contents = true
 layout_mode = 2
 mouse_filter = 2
 

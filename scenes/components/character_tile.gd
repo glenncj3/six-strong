@@ -12,8 +12,8 @@ signal drag_started(row: int, col: int, character: CharacterInstance)
 signal drop_received(row: int, col: int, from_row: int, from_col: int)
 
 const SLOT_BORDER_WIDTH := 3
-const STAT_ICON_SIZE := 18
-const STAT_FONT_SIZE := 12
+const STAT_ICON_SIZE := 36
+const STAT_FONT_SIZE := 20
 
 const TOP_STATS := [
 	{"key": "damage", "icon": "res://assets/sprites/icons/icon_damage.Png"},
@@ -40,9 +40,10 @@ var character: CharacterInstance = null
 var char_data: Dictionary = {}  # For collection mode (dictionary-based)
 var _is_drag_target: bool = false
 var _is_valid_drop_target: bool = false
-var _stat_badges: Dictionary = {}  # key -> HBoxContainer badge
+var _stat_badges: Dictionary = {}  # key -> {container, label}
 var _top_stats_container: HBoxContainer
 var _bottom_stats_container: HBoxContainer
+var _stats_overlay: Control
 
 
 func _init_default_styles() -> void:
@@ -190,20 +191,32 @@ func _apply_character_display(char_master: Dictionary) -> void:
 
 
 func _build_stat_containers() -> void:
+	# Use a plain Control overlay so PanelContainer doesn't manage layout
+	_stats_overlay = Control.new()
+	_stats_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_stats_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(_stats_overlay)
+
+	var half_icon = STAT_ICON_SIZE / 2.0
+
 	_top_stats_container = _create_stat_row(TOP_STATS)
-	_top_stats_container.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_top_stats_container.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_top_stats_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_top_stats_container.position.y = -half_icon + SLOT_BORDER_WIDTH
+	_stats_overlay.add_child(_top_stats_container)
+
 	_bottom_stats_container = _create_stat_row(BOTTOM_STATS)
-	_bottom_stats_container.size_flags_vertical = Control.SIZE_SHRINK_END
-	content_margin.add_child(_top_stats_container)
-	content_margin.add_child(_bottom_stats_container)
+	_bottom_stats_container.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_bottom_stats_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_bottom_stats_container.position.y = -half_icon - SLOT_BORDER_WIDTH
+	_stats_overlay.add_child(_bottom_stats_container)
 
 
 func _create_stat_row(stat_defs: Array) -> HBoxContainer:
 	var row = HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 4)
-	row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	row.add_theme_constant_override("separation", 2)
 
 	for stat_def in stat_defs:
 		var badge = _create_stat_badge(stat_def.key, stat_def.icon)
@@ -211,15 +224,17 @@ func _create_stat_row(stat_defs: Array) -> HBoxContainer:
 	return row
 
 
-func _create_stat_badge(stat_key: String, icon_path: String) -> HBoxContainer:
-	var badge = HBoxContainer.new()
+func _create_stat_badge(stat_key: String, icon_path: String) -> Control:
+	# Container sized to the icon
+	var badge = Control.new()
 	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	badge.add_theme_constant_override("separation", 1)
+	badge.custom_minimum_size = Vector2(STAT_ICON_SIZE, STAT_ICON_SIZE)
 	badge.visible = false
 
+	# Icon fills the badge
 	var icon = TextureRect.new()
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon.custom_minimum_size = Vector2(STAT_ICON_SIZE, STAT_ICON_SIZE)
+	icon.set_anchors_preset(Control.PRESET_FULL_RECT)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	var tex = load(icon_path)
@@ -227,10 +242,14 @@ func _create_stat_badge(stat_key: String, icon_path: String) -> HBoxContainer:
 		icon.texture = tex
 	badge.add_child(icon)
 
+	# Label centered on top of icon
 	var label = Label.new()
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.theme_type_variation = "HeaderLabel"
 	label.add_theme_font_size_override("font_size", STAT_FONT_SIZE)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	badge.add_child(label)
 
 	_stat_badges[stat_key] = {"container": badge, "label": label}
@@ -245,6 +264,20 @@ func _update_stat_icons(stats: Dictionary) -> void:
 			val = int(val)
 		badge_data.container.visible = val > 0
 		badge_data.label.text = str(val)
+
+
+func update_stats_from_combat(combat_char: CombatCharacter) -> void:
+	"""Update stat icons from a live CombatCharacter's current values."""
+	var stats := {}
+	stats["damage"] = int(combat_char.damage)
+	stats["speed"] = int(combat_char.speed)
+	stats["charges"] = combat_char.charges if combat_char.charges >= 0 else 0
+	# Extra stats hold heal_value, shield_value, burn_value, poison_value, multistrike_value
+	for key in combat_char.extra_stats:
+		if key == "charges":
+			continue  # Already set from combat_char.charges (live value)
+		stats[key] = int(combat_char.extra_stats[key])
+	_update_stat_icons(stats)
 
 
 func _hide_all_stat_icons() -> void:
