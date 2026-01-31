@@ -14,6 +14,8 @@ const SLOT_BORDER_WIDTH := 3
 const STAT_ICON_SIZE := 36
 const STAT_FONT_SIZE := 20
 const NAME_FONT_SIZE := 20
+const NAME_MARGIN_BOTTOM := 30
+const HP_BAR_HEIGHT := 6
 
 const TOP_STATS := [
 	{"key": "damage", "icon": "res://assets/sprites/icons/icon_damage.Png"},
@@ -31,6 +33,7 @@ const BOTTOM_STATS := [
 @onready var content_margin: MarginContainer = $ContentMargin
 @onready var portrait: TextureRect = $ContentMargin/Portrait
 @onready var border_overlay: Panel = $BorderOverlay
+@onready var name_margin: MarginContainer = $ContentMargin/NameMargin
 @onready var name_label: Label = $ContentMargin/NameMargin/NameLabel
 @onready var highlight_rect: ColorRect = $HighlightRect
 
@@ -295,8 +298,6 @@ func _build_stat_containers() -> void:
 
 
 func _build_health_bar() -> void:
-	const HP_BAR_HEIGHT := 6
-
 	_hp_container = Control.new()
 	_hp_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hp_container.anchor_left = 0.1
@@ -433,6 +434,16 @@ func set_display_scale(scale_factor: float) -> void:
 	_top_stats_container.offset_bottom = half_icon + SLOT_BORDER_WIDTH
 	_bottom_stats_container.offset_top = -half_icon - SLOT_BORDER_WIDTH
 	_bottom_stats_container.offset_bottom = half_icon - SLOT_BORDER_WIDTH
+
+	# Scale name margin bottom to keep name above bottom stats
+	name_margin.add_theme_constant_override("margin_bottom", int(NAME_MARGIN_BOTTOM * scale_factor))
+
+	# Reposition health bar above scaled bottom stats
+	if _hp_container:
+		var hp_h = int(HP_BAR_HEIGHT * scale_factor)
+		var hp_bottom_offset = SLOT_BORDER_WIDTH + half_icon + 4 * scale_factor
+		_hp_container.offset_top = -hp_h - hp_bottom_offset
+		_hp_container.offset_bottom = -hp_bottom_offset
 
 
 func _hide_all_stat_icons() -> void:
