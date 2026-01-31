@@ -13,6 +13,7 @@ signal drop_received(row: int, col: int, from_row: int, from_col: int)
 const SLOT_BORDER_WIDTH := 3
 const STAT_ICON_SIZE := 36
 const STAT_FONT_SIZE := 20
+const NAME_FONT_SIZE := 20
 
 const TOP_STATS := [
 	{"key": "damage", "icon": "res://assets/sprites/icons/icon_damage.Png"},
@@ -138,6 +139,18 @@ func _handle_click() -> void:
 	if not char_data.is_empty():
 		tile_clicked_data.emit(char_data)
 	slot_clicked.emit(row, col, character)
+	_open_inspect_popup()
+
+
+func _open_inspect_popup() -> void:
+	if character == null and char_data.is_empty():
+		return
+	var popup = load("res://scenes/components/character_inspect_popup.tscn").instantiate()
+	add_child(popup)
+	if character != null:
+		popup.show_character(character)
+	else:
+		popup.show_character_data(char_data)
 
 
 # =============================================================================
@@ -339,6 +352,27 @@ func update_stats_from_combat(combat_char: CombatCharacter) -> void:
 	if combat_char.charges >= 0:
 		keep_visible.append("charges")
 	_update_stat_icons(stats, keep_visible)
+
+
+func set_display_scale(scale_factor: float) -> void:
+	"""Scale stat icons, stat fonts, and name label relative to defaults."""
+	var scaled_icon = int(STAT_ICON_SIZE * scale_factor)
+	var scaled_stat_font = int(STAT_FONT_SIZE * scale_factor)
+	var scaled_name_font = int(NAME_FONT_SIZE * scale_factor)
+
+	name_label.add_theme_font_size_override("font_size", scaled_name_font)
+
+	for stat_key in _stat_badges:
+		var badge_data = _stat_badges[stat_key]
+		badge_data.container.custom_minimum_size = Vector2(scaled_icon, scaled_icon)
+		badge_data.label.add_theme_font_size_override("font_size", scaled_stat_font)
+
+	# Reposition stat rows using anchor offsets for new icon size
+	var half_icon = scaled_icon / 2.0
+	_top_stats_container.offset_top = -half_icon + SLOT_BORDER_WIDTH
+	_top_stats_container.offset_bottom = half_icon + SLOT_BORDER_WIDTH
+	_bottom_stats_container.offset_top = -half_icon - SLOT_BORDER_WIDTH
+	_bottom_stats_container.offset_bottom = half_icon - SLOT_BORDER_WIDTH
 
 
 func _hide_all_stat_icons() -> void:
