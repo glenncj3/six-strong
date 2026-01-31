@@ -65,7 +65,7 @@ const WINS_FOR_VICTORY := 10
 const TEAM_SIZE := 3  # DEPRECATED: Use MAX_GRID_CHARACTERS for Phase 5+
 const DRAFT_OPTIONS_PER_PICK := 3
 const DRAFT_OWNED_OPTIONS := 2  # Remaining filled by random
-const ENCOUNTERS_PER_ROUND := 1  # How many encounters occur before each combat
+const ENCOUNTERS_PER_ROUND := 2  # How many encounters occur before each combat
 
 # Per-character run limits (DEPRECATED: Skills are instant, items unlimited)
 const MAX_RUN_ITEMS := 6
