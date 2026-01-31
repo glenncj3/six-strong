@@ -165,9 +165,13 @@ func _apply_character_display(char_master: Dictionary) -> void:
 	portrait.visible = image_loaded
 	name_label.visible = true
 
-	# Update stat icons
-	var base_stats = char_master.get("base_stats", {})
-	_update_stat_icons(base_stats)
+	# Update stat icons — prefer live character stats over static master data
+	var display_stats: Dictionary
+	if character != null:
+		display_stats = character.stats.duplicate()
+	else:
+		display_stats = char_master.get("base_stats", {})
+	_update_stat_icons(display_stats)
 
 	# Update border to gold
 	_set_border_color(GameConstants.COLOR_BORDER_GOLD)
@@ -256,13 +260,13 @@ func _create_stat_badge(stat_key: String, icon_path: String) -> Control:
 	return badge
 
 
-func _update_stat_icons(stats: Dictionary) -> void:
+func _update_stat_icons(stats: Dictionary, keep_visible_keys: Array = []) -> void:
 	for stat_key in _stat_badges:
 		var val = stats.get(stat_key, 0)
 		var badge_data = _stat_badges[stat_key]
 		if val is float:
 			val = int(val)
-		badge_data.container.visible = val > 0
+		badge_data.container.visible = val > 0 or stat_key in keep_visible_keys
 		badge_data.label.text = str(val)
 
 
@@ -277,7 +281,11 @@ func update_stats_from_combat(combat_char: CombatCharacter) -> void:
 		if key == "charges":
 			continue  # Already set from combat_char.charges (live value)
 		stats[key] = int(combat_char.extra_stats[key])
-	_update_stat_icons(stats)
+	# Keep charges icon visible at 0 if the character uses charges (not unlimited)
+	var keep_visible: Array = []
+	if combat_char.charges >= 0:
+		keep_visible.append("charges")
+	_update_stat_icons(stats, keep_visible)
 
 
 func _hide_all_stat_icons() -> void:
