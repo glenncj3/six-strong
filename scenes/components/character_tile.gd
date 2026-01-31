@@ -45,7 +45,7 @@ var _bottom_stats_container: HBoxContainer
 var _stats_overlay: Control
 
 # Long-press drag detection
-const LONG_PRESS_DURATION := 0.2
+const LONG_PRESS_DURATION := 0.12
 var _long_press_timer: Timer
 var _press_position: Vector2 = Vector2.ZERO
 var _long_press_triggered: bool = false

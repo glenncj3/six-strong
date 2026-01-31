@@ -3,6 +3,7 @@ extends Control
 # Lives on a CanvasLayer above the transition layer so it persists through scene changes
 
 const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
+const PurchasableTileScript = preload("res://scenes/components/purchasable_tile.gd")
 
 @onready var grid_container: VBoxContainer = $GridContainer
 @onready var front_row: HBoxContainer = $GridContainer/FrontRow
@@ -19,6 +20,7 @@ var _is_dragging: bool = false
 var _drag_source_row: int = -1
 var _drag_source_col: int = -1
 var _drag_preview: Control = null
+var _drag_canvas_layer: CanvasLayer = null
 
 
 func _ready() -> void:
@@ -218,42 +220,84 @@ func _on_slot_drag_started(slot_row: int, slot_col: int, _character: CharacterIn
 	if source_slot:
 		source_slot.modulate.a = 0.3
 
-	# Create floating preview
-	_create_drag_preview(source_slot)
+	# Create floating preview on a high CanvasLayer so it renders above everything
+	_create_drag_preview_from_character(source_slot.character)
 
 	# Highlight other slots as drop targets
 	_set_drop_highlights(true)
 
 
-func _create_drag_preview(source_slot: CharacterTile) -> void:
+func _create_drag_preview_from_character(char_instance: CharacterInstance) -> void:
+	_ensure_drag_canvas_layer()
 	_drag_preview = CharacterTileScene.instantiate()
-	# Add to self (TeamHUD is on a CanvasLayer already at layer 150)
-	add_child(_drag_preview)
+	_drag_canvas_layer.add_child(_drag_preview)
 	var slot_size = _get_slot_size()
-	_drag_preview.setup_slot(_drag_source_row, _drag_source_col, slot_size)
-	_drag_preview.set_character(source_slot.character)
+	_drag_preview.setup_slot(0, 0, slot_size)
+	_drag_preview.set_character(char_instance)
 	_drag_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_drag_preview.modulate.a = 0.85
 	_drag_preview.scale = Vector2(1.05, 1.05)
-	# Position at current touch/mouse position
-	_drag_preview.position = get_global_mouse_position() - slot_size / 2.0
+	_drag_preview.position = get_viewport().get_mouse_position() - slot_size / 2.0
 
+
+func _ensure_drag_canvas_layer() -> void:
+	if _drag_canvas_layer and is_instance_valid(_drag_canvas_layer):
+		return
+	_drag_canvas_layer = CanvasLayer.new()
+	_drag_canvas_layer.layer = GameConstants.LAYER_TOOLTIP
+	get_tree().root.add_child(_drag_canvas_layer)
+
+
+var _showing_purchasable_highlights: bool = false
 
 func _input(event: InputEvent) -> void:
 	if not _is_dragging:
+		# Show/hide highlights while a purchasable drag is active
+		_update_purchasable_highlights()
+		# Check for active purchasable tile drag drop
+		_handle_purchasable_drop(event)
 		return
 
 	if event is InputEventMouseMotion or event is InputEventScreenDrag:
-		var pos = event.position if event is InputEventScreenDrag else event.global_position
+		var pos = _get_event_position(event)
 		if _drag_preview:
 			var slot_size = _get_slot_size()
 			_drag_preview.position = pos - slot_size / 2.0
 
-	elif event is InputEventMouseButton and not event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		_finish_drag(event.global_position)
+	elif _is_release_event(event):
+		_finish_drag(_get_event_position(event))
 
-	elif event is InputEventScreenTouch and not event.pressed:
-		_finish_drag(event.position)
+
+func _update_purchasable_highlights() -> void:
+	var drag_active = PurchasableTileScript.is_drag_active()
+	if drag_active and not _showing_purchasable_highlights:
+		_showing_purchasable_highlights = true
+		_set_all_slot_highlights(true)
+	elif not drag_active and _showing_purchasable_highlights:
+		_showing_purchasable_highlights = false
+		_set_all_slot_highlights(false)
+
+
+func _set_all_slot_highlights(enabled: bool) -> void:
+	for row_idx in range(GameConstants.GRID_ROWS):
+		for col_idx in range(GameConstants.GRID_COLS):
+			var slot = _get_slot(row_idx, col_idx)
+			if slot:
+				slot.set_drag_highlight(enabled, true)
+
+
+func _handle_purchasable_drop(event: InputEvent) -> void:
+	if not _is_release_event(event):
+		return
+	if not PurchasableTileScript.is_drag_active():
+		return
+
+	var drop_pos = _get_event_position(event)
+	var target_slot = _get_slot_at_position(drop_pos)
+	if target_slot:
+		# Drop landed on a TeamHUD slot — trigger purchase via tile_clicked
+		PurchasableTileScript.complete_drag_on_slot()
+	# If no slot hit, PurchasableTile handles its own cancel in its _input
 
 
 func _finish_drag(drop_position: Vector2) -> void:
@@ -266,13 +310,32 @@ func _finish_drag(drop_position: Vector2) -> void:
 			var grid = run_state.get_grid()
 			if grid:
 				grid.swap_positions(_drag_source_row, _drag_source_col, target_slot.row, target_slot.col)
+		_cleanup_drag()
+		_update_grid_display()
+	else:
+		# Dropped on same slot or outside — animate back
+		_animate_preview_back()
 
-	# Clean up
-	_cancel_drag()
-	_update_grid_display()
+
+func _animate_preview_back() -> void:
+	if not _drag_preview:
+		_cleanup_drag()
+		return
+
+	var source_slot = _get_slot(_drag_source_row, _drag_source_col)
+	if not source_slot:
+		_cleanup_drag()
+		return
+
+	var slot_size = _get_slot_size()
+	var target_pos = source_slot.global_position
+	var tween = _drag_preview.create_tween()
+	tween.tween_property(_drag_preview, "position", target_pos, 0.15) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tween.tween_callback(_cleanup_drag)
 
 
-func _cancel_drag() -> void:
+func _cleanup_drag() -> void:
 	# Restore source slot opacity
 	var source_slot = _get_slot(_drag_source_row, _drag_source_col)
 	if source_slot:
@@ -308,3 +371,21 @@ func _get_slot_at_position(global_pos: Vector2) -> CharacterTile:
 			if slot and slot.get_global_rect().has_point(global_pos):
 				return slot
 	return null
+
+
+func _get_event_position(event: InputEvent) -> Vector2:
+	if event is InputEventScreenDrag:
+		return event.position
+	if event is InputEventScreenTouch:
+		return event.position
+	if event is InputEventMouse:
+		return event.global_position
+	return Vector2.ZERO
+
+
+func _is_release_event(event: InputEvent) -> bool:
+	if event is InputEventMouseButton:
+		return not event.pressed and event.button_index == MOUSE_BUTTON_LEFT
+	if event is InputEventScreenTouch:
+		return not event.pressed
+	return false
