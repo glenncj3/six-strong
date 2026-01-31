@@ -8,6 +8,7 @@ signal tile_clicked(tile_data: Dictionary)
 
 const TILE_BORDER_WIDTH := 4
 const LONG_PRESS_DURATION := 0.12
+const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
 
 # Static drag state — shared across all PurchasableTile instances
 static var _active_drag_tile: PurchasableTile = null
@@ -22,6 +23,7 @@ static var _active_drag_canvas: CanvasLayer = null
 
 var tile_data: Dictionary = {}
 var cost: int = 0
+var _embedded_character_tile: CharacterTile = null
 
 # Pending setup data (for when setup() called before node is ready)
 var _pending_setup: Dictionary = {}
@@ -150,7 +152,6 @@ func _input(event: InputEvent) -> void:
 			_active_drag_preview.position = pos - preview_size / 2.0
 
 	elif _is_drag_release_event(event):
-		var drop_pos = event.position if event is InputEventScreenTouch else event.global_position
 		# Check if dropped on a TeamHUD slot — handled by TeamHUD._handle_purchasable_drop
 		# If TeamHUD consumed it, _active_drag_tile will be null already
 		# Otherwise cancel (snap back, no purchase)
@@ -219,12 +220,43 @@ func setup(p_tile_data: Dictionary, tile_size: float) -> void:
 	_apply_setup(tile_data, tile_size)
 
 
-func _apply_setup(p_tile_data: Dictionary, _tile_size: float) -> void:
+func _apply_setup(p_tile_data: Dictionary, tile_size: float) -> void:
 	"""Apply the setup to UI elements (called when node is ready)."""
-	UIHelpers.set_texture_safe(icon, p_tile_data.get("image_path", ""))
-	name_label.text = p_tile_data.get("name", "Unknown")
 	cost = p_tile_data.get("cost", 0)
 	gold_cost_icon.set_cost(cost)
+
+	if p_tile_data.get("offering_type", "") == "character":
+		_embed_character_tile(p_tile_data, tile_size)
+	else:
+		UIHelpers.set_texture_safe(icon, p_tile_data.get("image_path", ""))
+		name_label.text = p_tile_data.get("name", "Unknown")
+
+
+func _embed_character_tile(p_tile_data: Dictionary, tile_size: float) -> void:
+	"""Embed a CharacterTile to display the character visuals (portrait, name, stats)."""
+	# Hide generic display elements
+	icon.visible = false
+	name_label.visible = false
+
+	# Remove previous embedded tile if any
+	if _embedded_character_tile and is_instance_valid(_embedded_character_tile):
+		_embedded_character_tile.queue_free()
+
+	_embedded_character_tile = CharacterTileScene.instantiate()
+	_embedded_character_tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_embedded_character_tile.clickable = false
+
+	# Insert at the bottom so ContentMargin (cost badge) and BorderOverlay draw on top
+	add_child(_embedded_character_tile)
+	move_child(_embedded_character_tile, 0)
+
+	# Make it fill the PurchasableTile
+	_embedded_character_tile.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_embedded_character_tile.size_flags_horizontal = Control.SIZE_FILL
+	_embedded_character_tile.size_flags_vertical = Control.SIZE_FILL
+
+	# Use CharacterTile's dictionary-based setup (looks up master data by id)
+	_embedded_character_tile.setup_from_data(p_tile_data, tile_size)
 
 
 func set_tile_color(bg_color: Color) -> void:

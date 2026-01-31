@@ -109,15 +109,6 @@ static func _format_stat_preview(base_stats: Dictionary) -> String:
 static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float, state: Dictionary) -> void:
 	"""Setup tile after it enters the scene tree."""
 	tile.setup(tile_data, tile_size)
-
-	# Use character's display_color if available, otherwise default
-	var display_color_str = tile_data.get("display_color", "")
-	if not display_color_str.is_empty():
-		tile.set_tile_color(Color(display_color_str))
-	else:
-		# Default color for characters without display_color (they have images)
-		tile.set_tile_color(GameConstants.COLOR_PANEL_DARK)
-
 	tile.tile_clicked.connect(_on_character_selected.bind(state))
 
 
