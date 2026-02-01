@@ -10,6 +10,7 @@ extends RefCounted
 ## - Run pool (content available based on drafted legacies)
 
 const CharacterGridScript = preload("res://scripts/managers/character_grid.gd")
+const CharacterManagerScript = preload("res://scripts/managers/character_manager.gd")
 const PlayerInventoryScript = preload("res://scripts/managers/player_inventory.gd")
 const InventoryManagerScript = preload("res://scripts/managers/inventory_manager.gd")
 const LingeringEffectsScript = preload("res://scripts/managers/lingering_effects.gd")
@@ -57,18 +58,21 @@ var player_xp: int = 0
 # SUBSYSTEMS (Composition)
 # =============================================================================
 
-# Phase 5: CharacterGrid manages 2x3 character placement
-var grid = null  # CharacterGridScript instance
+# Phase 4 refactor: CharacterManager owns the grid
+var character_manager = null  # CharacterManager instance
+
+# Backward-compatible grid accessor
+var grid:
+	get: return character_manager.get_grid() if character_manager else null
 
 # Backwards compatibility: team property maps to grid.get_all_characters()
 var team: Array:
-	get: return grid.get_all_characters() if grid else []
+	get: return character_manager.get_all_characters() if character_manager else []
 	set(value):
-		# Migration support: if setting team directly, populate grid
-		if grid:
-			grid.clear()
+		if character_manager:
+			character_manager.clear()
 			for character in value:
-				grid.place_character_in_first_empty(character)
+				character_manager.add_character(character)
 
 var inventory_manager = null  # InventoryManager instance
 var inventory:  # Backward-compatible accessor to underlying PlayerInventory
@@ -89,7 +93,7 @@ var drafted_legacy_ids: Array[String] = []
 # =============================================================================
 
 func _init() -> void:
-	grid = CharacterGridScript.new()
+	character_manager = CharacterManagerScript.new()
 	inventory_manager = InventoryManagerScript.new()
 	lingering_effects = LingeringEffectsScript.new()
 	gold_manager = GoldManagerScript.new()
@@ -108,7 +112,7 @@ func reset() -> void:
 	player_xp = 0
 	gold_manager.reset()
 	reputation_manager.reset()
-	grid.clear()
+	character_manager.clear()
 	inventory_manager.clear()
 	lingering_effects.clear()
 	pool = null
@@ -255,78 +259,44 @@ func complete_encounter() -> void:
 
 
 # =============================================================================
-# GRID MANAGEMENT (Phase 5)
+# GRID MANAGEMENT (delegated to CharacterManager)
 # =============================================================================
 
 func add_character(character: CharacterInstance) -> bool:
-	"""
-	Add a character to the grid in the first available slot.
-
-	Returns:
-		True if character was added, false if grid is full
-	"""
-	return grid.place_character_in_first_empty(character)
-
+	return character_manager.add_character(character)
 
 func add_character_at(character: CharacterInstance, row: int, col: int) -> bool:
-	"""
-	Add a character to a specific grid position.
-
-	Returns:
-		True if character was placed, false if slot is occupied or invalid
-	"""
-	return grid.place_character(character, row, col)
-
+	return character_manager.add_character_at(character, row, col)
 
 func remove_character(row: int, col: int) -> CharacterInstance:
-	"""Remove a character from a specific grid position."""
-	return grid.remove_character(row, col)
-
+	return character_manager.remove_character(row, col)
 
 func remove_character_by_index(index: int) -> CharacterInstance:
-	"""
-	Remove a character by linear index (backwards compatibility).
-	Index maps row-major: 0-2 = front row, 3-5 = back row
-	"""
 	@warning_ignore("integer_division")
 	var row = index / GameConstants.GRID_COLS
 	var col = index % GameConstants.GRID_COLS
-	return grid.remove_character(row, col)
-
+	return character_manager.remove_character(row, col)
 
 func swap_characters(from_row: int, from_col: int, to_row: int, to_col: int) -> bool:
-	"""Swap characters between two grid positions."""
-	return grid.swap_positions(from_row, from_col, to_row, to_col)
-
+	return character_manager.swap_characters(from_row, from_col, to_row, to_col)
 
 func get_character_at(row: int, col: int) -> CharacterInstance:
-	"""Get character at a specific grid position."""
-	return grid.get_character_at(row, col)
-
+	return character_manager.get_character_at(row, col)
 
 func get_team() -> Array:
-	"""Get all characters in the grid (backwards compatible)."""
-	return grid.get_all_characters()
-
+	return character_manager.get_all_characters()
 
 func get_team_size() -> int:
-	"""Get current number of characters in grid."""
-	return grid.get_character_count()
-
+	return character_manager.get_character_count()
 
 func is_team_full() -> bool:
-	"""Check if grid is at maximum capacity (6 characters)."""
-	return grid.is_full()
-
+	return character_manager.is_full()
 
 func get_first_empty_slot() -> Vector2i:
-	"""Get the first empty grid slot, or Vector2i(-1, -1) if full."""
-	return grid.get_first_empty_slot()
-
+	return character_manager.get_first_empty_slot()
 
 func get_empty_slots() -> Array[Vector2i]:
-	"""Get all empty grid slot positions."""
-	return grid.get_empty_slots()
+	return character_manager.get_empty_slots()
 
 
 # =============================================================================
@@ -347,7 +317,7 @@ func to_dict() -> Dictionary:
 		"encounters_this_round": encounters_this_round,
 		"player_level": player_level,
 		"player_xp": player_xp,
-		"grid": grid.to_dict(),
+		"grid": character_manager.to_dict(),
 		"inventory": inventory_manager.to_dict(),
 		"lingering_effects": lingering_effects.to_dict(),
 		"pool": pool.to_dict() if pool else {},
@@ -371,17 +341,17 @@ static func from_dict(data: Dictionary):
 	state.player_level = data.get("player_level", 1)
 	state.player_xp = data.get("player_xp", 0)
 
-	# Restore grid (Phase 5)
+	# Restore grid via CharacterManager
 	var grid_data = data.get("grid", {})
 	if not grid_data.is_empty():
-		state.grid = CharacterGridScript.from_dict(grid_data)
+		state.character_manager.load_from_dict(grid_data)
 	else:
 		# Backwards compatibility: restore from team array
 		var team_data = data.get("team", [])
 		for char_data in team_data:
 			var character = CharacterInstance.from_dict(char_data)
 			if character:
-				state.grid.place_character_in_first_empty(character)
+				state.character_manager.add_character(character)
 
 	# Restore inventory
 	var inventory_data = data.get("inventory", {})
@@ -417,14 +387,14 @@ static func from_dict(data: Dictionary):
 
 func get_grid():
 	"""Get the character grid directly. Returns CharacterGrid instance."""
-	return grid
+	return character_manager.get_grid() if character_manager else null
 
 
 func get_front_row() -> Array[CharacterInstance]:
 	"""Get all characters in the front row."""
-	return grid.get_front_row()
+	return character_manager.get_front_row()
 
 
 func get_back_row() -> Array[CharacterInstance]:
 	"""Get all characters in the back row."""
-	return grid.get_back_row()
+	return character_manager.get_back_row()
