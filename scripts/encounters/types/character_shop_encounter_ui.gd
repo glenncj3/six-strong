@@ -88,15 +88,15 @@ static func _format_stat_preview(base_stats: Dictionary) -> String:
 	"""Format stats for display on tile."""
 	var parts: Array = []
 
-	var health = base_stats.get(GameConstants.STAT_HEALTH, 0)
+	var health = base_stats.get("health", 0)
 	if health > 0:
 		parts.append("HP:%d" % health)
 
-	var charges = base_stats.get(GameConstants.STAT_CHARGES, 0)
+	var charges = base_stats.get("charges", 0)
 	if charges > 0:
 		parts.append("MP:%d" % charges)
 
-	var defend = base_stats.get(GameConstants.STAT_agility, 0)
+	var defend = base_stats.get("agility", 0)
 	if defend > 0:
 		parts.append("DEF:%d%%" % defend)
 

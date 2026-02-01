@@ -47,12 +47,12 @@ func _make_char_instance(char_id: String, extra_stats: Dictionary = {}) -> Chara
 	var ch = CharacterInstance.new()
 	ch.base_character_id = char_id
 	ch.stats = {
-		GameConstants.STAT_HEALTH: 100,
-		GameConstants.STAT_SPEED: 10,
-		GameConstants.STAT_DAMAGE: 20,
-		GameConstants.STAT_agility: 0,
-		GameConstants.STAT_CRIT_CHANCE: 0,
-		GameConstants.STAT_CHARGES: -1,
+		"health": 100,
+		"speed": 10,
+		"damage": 20,
+		"agility": 0,
+		"crit_chance": 0,
+		"charges": -1,
 	}
 	for key in extra_stats:
 		ch.stats[key] = extra_stats[key]
@@ -111,7 +111,7 @@ func _clear_logs() -> void:
 
 func test_effective_stat_no_bonuses():
 	var ch = _make_char_instance("test")
-	assert_eq(ch.get_effective_stat(GameConstants.STAT_DAMAGE), 20.0, "effective stat equals base when no bonuses")
+	assert_eq(ch.get_effective_stat("damage"), 20.0, "effective stat equals base when no bonuses")
 
 
 func test_effective_stat_with_percent_bonus():

@@ -58,7 +58,7 @@ func _init(char_data: Dictionary = {}, game_data = null) -> void:
 	stats = StatCalculator.calculate_character_base_stats(char_master)
 
 	# Set health to max
-	current_health = stats.get(GameConstants.STAT_HEALTH, 0)
+	current_health = stats.get("health", 0)
 
 
 func _get_game_data():
@@ -80,28 +80,28 @@ func _get_game_data():
 # =============================================================================
 
 var max_health: int:
-	get: return stats.get(GameConstants.STAT_HEALTH, 0)
-	set(value): stats[GameConstants.STAT_HEALTH] = value
+	get: return stats.get("health", 0)
+	set(value): stats["health"] = value
 
 var charges: int:
-	get: return stats.get(GameConstants.STAT_CHARGES, 0)
-	set(value): stats[GameConstants.STAT_CHARGES] = value
+	get: return stats.get("charges", 0)
+	set(value): stats["charges"] = value
 
 var agility: int:
-	get: return stats.get(GameConstants.STAT_agility, 0)
-	set(value): stats[GameConstants.STAT_agility] = value
+	get: return stats.get("agility", 0)
+	set(value): stats["agility"] = value
 
 var speed: int:
-	get: return stats.get(GameConstants.STAT_SPEED, 0)
-	set(value): stats[GameConstants.STAT_SPEED] = value
+	get: return stats.get("speed", 0)
+	set(value): stats["speed"] = value
 
 var damage: int:
-	get: return stats.get(GameConstants.STAT_DAMAGE, 0)
-	set(value): stats[GameConstants.STAT_DAMAGE] = value
+	get: return stats.get("damage", 0)
+	set(value): stats["damage"] = value
 
 var crit_chance: int:
-	get: return stats.get(GameConstants.STAT_CRIT_CHANCE, 0)
-	set(value): stats[GameConstants.STAT_CRIT_CHANCE] = value
+	get: return stats.get("crit_chance", 0)
+	set(value): stats["crit_chance"] = value
 
 
 # =============================================================================

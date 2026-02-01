@@ -13,7 +13,7 @@
 	},
 	{
 		"id": "agility",
-		"display_name": "DEF",
+		"display_name": "DEF%",
 		"default": 0,
 		"description": "Percentage chance to block damage"
 	},
@@ -31,7 +31,7 @@
 	},
 	{
 		"id": "crit_chance",
-		"display_name": "CRIT",
+		"display_name": "CRIT%",
 		"default": 0,
 		"description": "Percentage chance to land a critical hit"
 	}

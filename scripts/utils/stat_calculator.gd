@@ -95,12 +95,12 @@ static func clone_stats(stats: Dictionary) -> Dictionary:
 static func stats_to_string(stats: Dictionary) -> String:
 	"""Format stats for display/debugging."""
 	return "HP:%d MP:%d DEF%%:%d SPD:%d DMG:%d CRIT%%:%d" % [
-		stats.get(GameConstants.STAT_HEALTH, 0),
-		stats.get(GameConstants.STAT_CHARGES, 0),
-		stats.get(GameConstants.STAT_agility, 0),
-		stats.get(GameConstants.STAT_SPEED, 0),
-		stats.get(GameConstants.STAT_DAMAGE, 0),
-		stats.get(GameConstants.STAT_CRIT_CHANCE, 0)
+		stats.get("health", 0),
+		stats.get("charges", 0),
+		stats.get("agility", 0),
+		stats.get("speed", 0),
+		stats.get("damage", 0),
+		stats.get("crit_chance", 0)
 	]
 
 
@@ -124,6 +124,6 @@ static func calculate_level_bonus(base_stats: Dictionary, level: int) -> Diction
 	# Apply level bonuses (simple: +5 health per level after 1)
 	if level > 1:
 		var bonus_health = (level - 1) * 5
-		stats[GameConstants.STAT_HEALTH] = stats.get(GameConstants.STAT_HEALTH, 0) + bonus_health
+		stats["health"] = stats.get("health", 0) + bonus_health
 
 	return stats

@@ -62,9 +62,9 @@ func setup(char_data: Dictionary, _with_equipped_items: bool = false) -> void:
 	var stats = StatCalculator.calculate_character_stats(char_master, char_data)
 
 	# Display stats (no income in Phase 1)
-	health_label.text = UIHelpers.format_stat(GameConstants.STAT_HEALTH, stats.get(GameConstants.STAT_HEALTH, 0))
-	charges_label.text = UIHelpers.format_stat(GameConstants.STAT_CHARGES, stats.get(GameConstants.STAT_CHARGES, 0))
-	agility_label.text = UIHelpers.format_stat(GameConstants.STAT_agility, stats.get(GameConstants.STAT_agility, 0))
+	health_label.text = UIHelpers.format_stat("health", stats.get("health", 0))
+	charges_label.text = UIHelpers.format_stat("charges", stats.get("charges", 0))
+	agility_label.text = UIHelpers.format_stat("agility", stats.get("agility", 0))
 
 
 func setup_from_instance(char_instance: CharacterInstance) -> void:
@@ -89,9 +89,9 @@ func setup_from_instance(char_instance: CharacterInstance) -> void:
 	name_label.text = char_instance.get_character_name()
 
 	# Display instance stats (includes level bonuses and grid passive bonuses)
-	health_label.text = UIHelpers.format_stat(GameConstants.STAT_HEALTH, int(char_instance.get_effective_stat(GameConstants.STAT_HEALTH)))
-	charges_label.text = UIHelpers.format_stat(GameConstants.STAT_CHARGES, int(char_instance.get_effective_stat(GameConstants.STAT_CHARGES)))
-	agility_label.text = UIHelpers.format_stat(GameConstants.STAT_agility, int(char_instance.get_effective_stat(GameConstants.STAT_agility)))
+	health_label.text = UIHelpers.format_stat("health", int(char_instance.get_effective_stat("health")))
+	charges_label.text = UIHelpers.format_stat("charges", int(char_instance.get_effective_stat("charges")))
+	agility_label.text = UIHelpers.format_stat("agility", int(char_instance.get_effective_stat("agility")))
 
 
 const SIZE_CONFIG := {

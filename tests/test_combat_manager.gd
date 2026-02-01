@@ -101,12 +101,12 @@ func _make_source(hp: int, spd: float, dmg: float, def_rate: float = 0.0, crit: 
 	var ch = CharacterInstance.new()
 	ch.base_character_id = "test"
 	ch.stats = {
-		GameConstants.STAT_HEALTH: hp,
-		GameConstants.STAT_SPEED: spd,
-		GameConstants.STAT_DAMAGE: dmg,
-		GameConstants.STAT_agility: def_rate,
-		GameConstants.STAT_CRIT_CHANCE: crit,
-		GameConstants.STAT_CHARGES: -1,
+		"health": hp,
+		"speed": spd,
+		"damage": dmg,
+		"agility": def_rate,
+		"crit_chance": crit,
+		"charges": -1,
 	}
 	ch.current_health = hp
 	return ch

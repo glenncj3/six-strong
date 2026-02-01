@@ -118,9 +118,9 @@ func _update_stats_display(char_master: Dictionary) -> void:
 	"""Display base stats from master data."""
 	var stats = StatCalculator.calculate_character_stats(char_master)
 
-	health_value.text = str(stats.get(GameConstants.STAT_HEALTH, 0))
-	charges_value.text = str(stats.get(GameConstants.STAT_CHARGES, 0))
-	agility_value.text = "%d%%" % stats.get(GameConstants.STAT_agility, 0)
+	health_value.text = str(stats.get("health", 0))
+	charges_value.text = str(stats.get("charges", 0))
+	agility_value.text = "%d%%" % stats.get("agility", 0)
 
 	# Apply gold color to stat values
 	for label in [health_value, charges_value, agility_value]:

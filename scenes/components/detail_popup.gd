@@ -134,17 +134,17 @@ func _setup_display(title: String, image_path: String, type_text: String, descri
 func _format_stat_name(stat_name: String) -> String:
 	"""Format stat name for display."""
 	match stat_name:
-		GameConstants.STAT_HEALTH:
+		"health":
 			return "Health"
-		GameConstants.STAT_CHARGES:
+		"charges":
 			return "Charges"
-		GameConstants.STAT_agility:
+		"agility":
 			return "Defend Rate"
-		GameConstants.STAT_SPEED:
+		"speed":
 			return "Speed"
-		GameConstants.STAT_DAMAGE:
+		"damage":
 			return "Damage"
-		GameConstants.STAT_CRIT_CHANCE:
+		"crit_chance":
 			return "Crit Chance"
 		_:
 			return stat_name.capitalize().replace("_", " ")

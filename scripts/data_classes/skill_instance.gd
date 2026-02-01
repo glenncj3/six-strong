@@ -42,7 +42,7 @@ func apply_to_character(char_instance: CharacterInstance) -> void:
 				StatCalculator.apply_modifier(char_instance.stats, stat, value, true)
 
 	# Sync max_health if health was modified
-	if char_instance.stats.has(GameConstants.STAT_HEALTH):
+	if char_instance.stats.has("health"):
 		char_instance.current_health = mini(char_instance.current_health, char_instance.max_health)
 
 

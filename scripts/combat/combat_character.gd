@@ -62,10 +62,10 @@ static func create_from_character(source: CharacterInstance, p_team: int, p_row:
 	cc.max_health = cc.base_max_health
 	cc.health = float(source.current_health)
 
-	cc.base_speed = float(source.stats.get(GameConstants.STAT_SPEED, 0))
-	cc.base_damage = float(source.stats.get(GameConstants.STAT_DAMAGE, 0))
-	cc.base_crit_chance = float(source.stats.get(GameConstants.STAT_CRIT_CHANCE, 0))
-	cc.base_agility = float(source.stats.get(GameConstants.STAT_agility, 0))
+	cc.base_speed = float(source.stats.get("speed", 0))
+	cc.base_damage = float(source.stats.get("damage", 0))
+	cc.base_crit_chance = float(source.stats.get("crit_chance", 0))
+	cc.base_agility = float(source.stats.get("agility", 0))
 
 	cc.speed = cc.base_speed
 	cc.damage = cc.base_damage
@@ -79,17 +79,17 @@ static func create_from_character(source: CharacterInstance, p_team: int, p_row:
 	cc.cooldown_remaining = cc.speed
 
 	# Set charges from source stats (-1 means unlimited)
-	var source_charges = source.stats.get(GameConstants.STAT_CHARGES, -1)
+	var source_charges = source.stats.get("charges", -1)
 	cc.charges = source_charges if source_charges >= 0 else -1
 
 	# Copy extra stats not mapped to base fields
-	var mapped_stats = [GameConstants.STAT_HEALTH, GameConstants.STAT_SPEED,
-		GameConstants.STAT_DAMAGE, GameConstants.STAT_CRIT_CHANCE,
-		GameConstants.STAT_agility]
+	var mapped_stats = ["health", "speed",
+		"damage", "crit_chance",
+		"agility"]
 	for key in source.stats:
 		if key not in mapped_stats:
 			cc.extra_stats[key] = source.stats[key]
-			if key != GameConstants.STAT_CHARGES:
+			if key != "charges":
 				cc.base_extra_stats[key] = source.stats[key]
 
 	return cc

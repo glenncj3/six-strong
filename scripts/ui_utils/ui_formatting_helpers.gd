@@ -30,7 +30,9 @@ static func format_stat(stat_name: String, value: int) -> String:
 	Returns:
 		Formatted string (e.g., "HP 100")
 	"""
-	var short = GameConstants.STAT_DISPLAY_NAMES.get(stat_name, stat_name.to_upper().left(3))
+	var short = StatRegistry.get_display_name(stat_name)
+	if short == stat_name:
+		short = stat_name.to_upper().left(3)
 	return "%s %d" % [short, value]
 
 

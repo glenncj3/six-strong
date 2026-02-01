@@ -122,7 +122,7 @@ static func _test_get_display_name() -> bool:
 		return false
 	if Registry.get_display_name("charges") != "MP":
 		return false
-	if Registry.get_display_name("agility") != "DEF":
+	if Registry.get_display_name("agility") != "DEF%":
 		return false
 	return true
 
