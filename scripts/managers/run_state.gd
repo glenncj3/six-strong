@@ -18,21 +18,48 @@ const SkillManagerScript = preload("res://scripts/managers/skill_manager.gd")
 const RunPoolScript = preload("res://scripts/managers/run_pool.gd")
 const GoldManagerScript = preload("res://scripts/managers/gold_manager.gd")
 const ReputationManagerScript = preload("res://scripts/managers/reputation_manager.gd")
+const ProgressionManagerScript = preload("res://scripts/managers/progression_manager.gd")
 
 # =============================================================================
 # CORE RUN DATA
 # =============================================================================
 
 var run_id: String = ""
-var current_round: int = 1  # Runs start at round 1
-var current_phase: String = "encounter"
-var wins: int = 0
-var losses: int = 0
-var encounters_this_round: int = 0
 
-# Extracted managers (Phase 2 refactor)
+# Extracted managers
+var progression_manager = null  # ProgressionManager instance
 var gold_manager = null  # GoldManager instance
 var reputation_manager = null  # ReputationManager instance
+
+# Backward-compatible accessors for progression fields
+var current_round: int:
+	get: return progression_manager.current_round if progression_manager else 1
+	set(value):
+		if progression_manager: progression_manager.current_round = value
+var current_phase: String:
+	get: return progression_manager.current_phase if progression_manager else "encounter"
+	set(value):
+		if progression_manager: progression_manager.current_phase = value
+var wins: int:
+	get: return progression_manager.wins if progression_manager else 0
+	set(value):
+		if progression_manager: progression_manager.wins = value
+var losses: int:
+	get: return progression_manager.losses if progression_manager else 0
+	set(value):
+		if progression_manager: progression_manager.losses = value
+var encounters_this_round: int:
+	get: return progression_manager.encounters_this_round if progression_manager else 0
+	set(value):
+		if progression_manager: progression_manager.encounters_this_round = value
+var player_level: int:
+	get: return progression_manager.player_level if progression_manager else 1
+	set(value):
+		if progression_manager: progression_manager.player_level = value
+var player_xp: int:
+	get: return progression_manager.player_xp if progression_manager else 0
+	set(value):
+		if progression_manager: progression_manager.player_xp = value
 
 # Backward-compatible accessors
 var reputation: int:
@@ -50,10 +77,6 @@ var starting_gold: int:
 	set(value):
 		if gold_manager:
 			gold_manager.starting_gold = value
-
-# Player level progression (gates what content is available from pools)
-var player_level: int = 1
-var player_xp: int = 0
 
 # =============================================================================
 # SUBSYSTEMS (Composition)
@@ -96,23 +119,18 @@ var drafted_legacy_ids: Array[String] = []
 # =============================================================================
 
 func _init() -> void:
+	progression_manager = ProgressionManagerScript.new()
+	gold_manager = GoldManagerScript.new()
+	reputation_manager = ReputationManagerScript.new()
 	character_manager = CharacterManagerScript.new()
 	inventory_manager = InventoryManagerScript.new()
 	skill_manager = SkillManagerScript.new()
-	gold_manager = GoldManagerScript.new()
-	reputation_manager = ReputationManagerScript.new()
 
 
 func reset() -> void:
 	"""Reset all state for a new run."""
 	run_id = ""
-	current_round = 1  # Runs start at round 1
-	current_phase = "encounter"
-	wins = 0
-	losses = 0
-	encounters_this_round = 0
-	player_level = 1
-	player_xp = 0
+	progression_manager.reset()
 	gold_manager.reset()
 	reputation_manager.reset()
 	character_manager.clear()
@@ -156,109 +174,44 @@ func is_defeated() -> bool:
 
 
 # =============================================================================
-# PLAYER LEVEL PROGRESSION
+# PROGRESSION (delegated to ProgressionManager)
 # =============================================================================
 
 func add_player_xp(amount: int) -> bool:
-	"""
-	Add XP to the player. Player level gates what content is available from pools.
-
-	Args:
-		amount: XP to add
-
-	Returns:
-		True if player leveled up, false otherwise
-	"""
-	if amount <= 0:
-		return false
-
-	# Already at max level
-	if player_level >= GameConstants.MAX_PLAYER_LEVEL:
-		return false
-
-	player_xp += amount
-	var leveled_up = false
-
-	# Process level ups (can gain multiple levels from large XP gains)
-	while player_xp >= GameConstants.XP_PER_LEVEL and player_level < GameConstants.MAX_PLAYER_LEVEL:
-		player_xp -= GameConstants.XP_PER_LEVEL
-		player_level += 1
-		leveled_up = true
-
-	# Cap XP at max level
-	if player_level >= GameConstants.MAX_PLAYER_LEVEL:
-		player_xp = 0
-
-	return leveled_up
-
+	return progression_manager.add_player_xp(amount)
 
 func get_player_level() -> int:
-	"""Get current player level (1-5)."""
-	return player_level
-
+	return progression_manager.get_player_level()
 
 func get_player_xp() -> int:
-	"""Get current XP progress toward next level."""
-	return player_xp
-
+	return progression_manager.get_player_xp()
 
 func get_xp_progress() -> float:
-	"""Get XP progress as percentage (0.0 to 1.0)."""
-	if player_level >= GameConstants.MAX_PLAYER_LEVEL:
-		return 1.0
-	return float(player_xp) / float(GameConstants.XP_PER_LEVEL)
-
+	return progression_manager.get_xp_progress()
 
 func is_max_level() -> bool:
-	"""Check if player has reached maximum level."""
-	return player_level >= GameConstants.MAX_PLAYER_LEVEL
-
-
-# =============================================================================
-# WIN/LOSS TRACKING
-# =============================================================================
+	return progression_manager.is_max_level()
 
 func add_win() -> void:
-	"""Record a combat victory."""
-	wins += 1
-
+	progression_manager.add_win()
 
 func add_loss() -> void:
-	"""Record a combat loss."""
-	losses += 1
-
+	progression_manager.add_loss()
 
 func is_victory() -> bool:
-	"""Check if player has won the run."""
-	return wins >= GameConstants.WINS_FOR_VICTORY
-
+	return progression_manager.is_victory()
 
 func is_run_over() -> bool:
-	"""Check if run is over (victory or defeat)."""
 	return is_victory() or is_defeated()
 
-
-# =============================================================================
-# PHASE AND ROUND MANAGEMENT
-# =============================================================================
-
 func advance_round() -> void:
-	"""Advance to the next round."""
-	current_round += 1
-	current_phase = "encounter"
-	encounters_this_round = 0
-
+	progression_manager.advance_round()
 
 func set_phase(phase: String) -> void:
-	"""Set the current phase."""
-	current_phase = phase
-
+	progression_manager.set_phase(phase)
 
 func complete_encounter() -> void:
-	"""Mark an encounter as complete."""
-	encounters_this_round += 1
-	if encounters_this_round >= GameConstants.ENCOUNTERS_PER_ROUND:
-		current_phase = "combat"
+	progression_manager.complete_encounter()
 
 
 # =============================================================================
@@ -308,24 +261,17 @@ func get_empty_slots() -> Array[Vector2i]:
 
 func to_dict() -> Dictionary:
 	"""Serialize run state for saving."""
-	return {
-		"run_id": run_id,
-		"current_round": current_round,
-		"current_phase": current_phase,
-		"reputation": reputation_manager.reputation,
-		"wins": wins,
-		"losses": losses,
-		"current_gold": gold_manager.current_gold,
-		"starting_gold": gold_manager.starting_gold,
-		"encounters_this_round": encounters_this_round,
-		"player_level": player_level,
-		"player_xp": player_xp,
-		"grid": character_manager.to_dict(),
-		"inventory": inventory_manager.to_dict(),
-		"lingering_effects": skill_manager.to_dict(),
-		"pool": pool.to_dict() if pool else {},
-		"drafted_legacy_ids": Array(drafted_legacy_ids)
-	}
+	var prog = progression_manager.to_dict()
+	prog["run_id"] = run_id
+	prog["reputation"] = reputation_manager.reputation
+	prog["current_gold"] = gold_manager.current_gold
+	prog["starting_gold"] = gold_manager.starting_gold
+	prog["grid"] = character_manager.to_dict()
+	prog["inventory"] = inventory_manager.to_dict()
+	prog["lingering_effects"] = skill_manager.to_dict()
+	prog["pool"] = pool.to_dict() if pool else {}
+	prog["drafted_legacy_ids"] = Array(drafted_legacy_ids)
+	return prog
 
 
 static func from_dict(data: Dictionary):
@@ -334,15 +280,9 @@ static func from_dict(data: Dictionary):
 	var state = script.new()
 
 	state.run_id = data.get("run_id", "")
-	state.current_round = data.get("current_round", 1)  # Default to round 1
-	state.current_phase = data.get("current_phase", "encounter")
+	state.progression_manager.load_from_dict(data)
 	state.gold_manager.load_from_dict(data)
 	state.reputation_manager.load_from_dict(data)
-	state.wins = data.get("wins", 0)
-	state.losses = data.get("losses", 0)
-	state.encounters_this_round = data.get("encounters_this_round", 0)
-	state.player_level = data.get("player_level", 1)
-	state.player_xp = data.get("player_xp", 0)
 
 	# Restore grid via CharacterManager
 	var grid_data = data.get("grid", {})
