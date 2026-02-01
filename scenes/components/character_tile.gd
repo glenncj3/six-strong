@@ -14,7 +14,7 @@ const SLOT_BORDER_WIDTH := 3
 const STAT_ICON_SIZE := 36
 const STAT_FONT_SIZE := 20
 const NAME_FONT_SIZE := 20
-const NAME_MARGIN_BOTTOM := 30
+const NAME_MARGIN_BOTTOM := 55
 const HP_BAR_HEIGHT := 6
 
 const TOP_STATS := [
@@ -304,7 +304,7 @@ func _build_health_bar() -> void:
 	_hp_container.anchor_right = 0.9
 	_hp_container.anchor_top = 1.0
 	_hp_container.anchor_bottom = 1.0
-	var hp_bottom_offset = SLOT_BORDER_WIDTH + STAT_ICON_SIZE / 2.0 + 4
+	var hp_bottom_offset = SLOT_BORDER_WIDTH + STAT_ICON_SIZE / 2.0 + 4 + 25
 	_hp_container.offset_top = -HP_BAR_HEIGHT - hp_bottom_offset
 	_hp_container.offset_bottom = -hp_bottom_offset
 	_hp_container.offset_left = 0
@@ -441,7 +441,7 @@ func set_display_scale(scale_factor: float) -> void:
 	# Reposition health bar above scaled bottom stats
 	if _hp_container:
 		var hp_h = int(HP_BAR_HEIGHT * scale_factor)
-		var hp_bottom_offset = SLOT_BORDER_WIDTH + half_icon + 4 * scale_factor
+		var hp_bottom_offset = SLOT_BORDER_WIDTH + half_icon + (4 + 25) * scale_factor
 		_hp_container.offset_top = -hp_h - hp_bottom_offset
 		_hp_container.offset_bottom = -hp_bottom_offset
 
