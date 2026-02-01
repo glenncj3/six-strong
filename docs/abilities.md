@@ -1,6 +1,10 @@
 # Character Abilities
 
-All abilities are **active** and trigger automatically when a character's cooldown completes. The target is determined by the ability's **target mode**.
+Abilities come in three types:
+
+- **Active**: Trigger automatically when a character's cooldown completes.
+- **Passive**: Apply effects once at combat start (e.g., `buff_adjacent_attack`).
+- **Triggered**: Fire in response to combat events (e.g., an ally landing a crit). Defined inline on a character, not in `abilities.json`.
 
 ## Target Modes
 
@@ -140,3 +144,83 @@ Freezes all enemies.
 ## Multistrike
 
 Multistrike is a character stat (`multistrike_value`), not an ability. When a character with multistrike finishes their cooldown, they execute their full ability list once as normal, then repeat it a number of additional times equal to their `multistrike_value`. A character with `multistrike_value` of 3 and an `attack_enemy` ability would strike 4 total times per cooldown. Targets are re-resolved between each strike, so if a target dies, the next strike picks a new valid target. Extra strikes stop if the attacking character dies mid-sequence.
+
+---
+
+## Triggered Abilities
+
+Triggered abilities are **composed inline** on a character's `abilities` array in `characters.json`. They are not defined in `abilities.json` — instead you build them from pieces: a trigger, a target mode, an effect, and optional filters.
+
+Triggered abilities fire independently of the character's cooldown. When the trigger event occurs, the ability executes immediately.
+
+### Structure
+
+```json
+{
+  "type": "triggered",
+  "trigger": "<trigger_name>",
+  "target_mode": "<target_mode>",
+  "buff_stat": "<stat_name>",
+  "buff_modifier_type": "flat" | "percent",
+  "buff_value": <number>,
+  "require_ability_category": "<category>"  // optional filter
+}
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `type` | Yes | Must be `"triggered"` |
+| `trigger` | Yes | The combat event that fires this ability |
+| `target_mode` | Yes | Who to apply the effect to (see Target Modes above) |
+| `buff_stat` | Yes | The stat to modify on targets |
+| `buff_modifier_type` | Yes | `"flat"` (additive) or `"percent"` (multiplicative) |
+| `buff_value` | Yes | Amount to modify the stat by |
+| `require_ability_category` | No | Only affect targets that have an ability of this category |
+
+### Available Triggers
+
+| Trigger | Fires When |
+|---------|------------|
+| `on_ally_crit` | Any ally on the same team lands a critical hit |
+
+More triggers can be added by emitting `_process_triggered_effects` calls in `combat_manager.gd` for new combat events.
+
+### Example: Crit Synergy Burn
+
+A character that gives all burn-capable allies +1 `burn_value` whenever any teammate crits:
+
+```json
+{
+  "id": "PYRO_CMD",
+  "name": "Pyro Commander",
+  "abilities": [
+    "attack_enemy",
+    {
+      "type": "triggered",
+      "trigger": "on_ally_crit",
+      "target_mode": "ally_all",
+      "buff_stat": "burn_value",
+      "buff_modifier_type": "flat",
+      "buff_value": 1,
+      "require_ability_category": "burn"
+    }
+  ],
+  "base_stats": { ... }
+}
+```
+
+**How it works:**
+1. At combat start, the triggered ability is registered as a `CombatEffect` on this character.
+2. When any ally crits, the game checks all living allies for `on_ally_crit` effects.
+3. This character's effect fires: it resolves `ally_all` targets, filters to only those with a `burn`-category ability, and gives each a permanent +1 flat `burn_value` modifier.
+4. Those allies' future burn ability casts now apply 1 extra burn stack.
+
+### Filtering with `require_ability_category`
+
+The `require_ability_category` field filters targets to only characters that have at least one ability with a matching `category`. This lets you write effects like "buff all allies that have burn abilities" without affecting healers or attackers.
+
+Categories match the `category` field in `abilities.json` (e.g., `attack`, `heal`, `poison`, `burn`, `shield`, `haste`, `slow`, `freeze`).
+
+### Duration
+
+Stat modifiers applied by triggered abilities are currently **permanent** (persist for the rest of the run). The triggered effect itself lasts for the duration of combat. A `"combat"`-only duration for the stat modifiers can be added in the future.
