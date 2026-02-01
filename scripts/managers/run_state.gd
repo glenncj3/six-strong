@@ -13,6 +13,8 @@ const CharacterGridScript = preload("res://scripts/managers/character_grid.gd")
 const PlayerInventoryScript = preload("res://scripts/managers/player_inventory.gd")
 const LingeringEffectsScript = preload("res://scripts/managers/lingering_effects.gd")
 const RunPoolScript = preload("res://scripts/managers/run_pool.gd")
+const GoldManagerScript = preload("res://scripts/managers/gold_manager.gd")
+const ReputationManagerScript = preload("res://scripts/managers/reputation_manager.gd")
 
 # =============================================================================
 # CORE RUN DATA
@@ -21,12 +23,30 @@ const RunPoolScript = preload("res://scripts/managers/run_pool.gd")
 var run_id: String = ""
 var current_round: int = 1  # Runs start at round 1
 var current_phase: String = "encounter"
-var reputation: int = 20
 var wins: int = 0
 var losses: int = 0
-var current_gold: int = 0
-var starting_gold: int = 0
 var encounters_this_round: int = 0
+
+# Extracted managers (Phase 2 refactor)
+var gold_manager = null  # GoldManager instance
+var reputation_manager = null  # ReputationManager instance
+
+# Backward-compatible accessors
+var reputation: int:
+	get: return reputation_manager.reputation if reputation_manager else 20
+	set(value):
+		if reputation_manager:
+			reputation_manager.reputation = value
+var current_gold: int:
+	get: return gold_manager.current_gold if gold_manager else 0
+	set(value):
+		if gold_manager:
+			gold_manager.current_gold = value
+var starting_gold: int:
+	get: return gold_manager.starting_gold if gold_manager else 0
+	set(value):
+		if gold_manager:
+			gold_manager.starting_gold = value
 
 # Player level progression (gates what content is available from pools)
 var player_level: int = 1
@@ -69,7 +89,8 @@ func _init() -> void:
 	grid = CharacterGridScript.new()
 	inventory = PlayerInventoryScript.new()
 	lingering_effects = LingeringEffectsScript.new()
-	reputation = GameConstants.STARTING_REPUTATION
+	gold_manager = GoldManagerScript.new()
+	reputation_manager = ReputationManagerScript.new()
 
 
 func reset() -> void:
@@ -77,14 +98,13 @@ func reset() -> void:
 	run_id = ""
 	current_round = 1  # Runs start at round 1
 	current_phase = "encounter"
-	reputation = GameConstants.STARTING_REPUTATION
 	wins = 0
 	losses = 0
-	current_gold = 0
-	starting_gold = 0
 	encounters_this_round = 0
 	player_level = 1
 	player_xp = 0
+	gold_manager.reset()
+	reputation_manager.reset()
 	grid.clear()
 	inventory.clear()
 	lingering_effects.clear()
@@ -93,25 +113,17 @@ func reset() -> void:
 
 
 # =============================================================================
-# GOLD OPERATIONS
+# GOLD OPERATIONS (delegated to GoldManager)
 # =============================================================================
 
 func add_gold(amount: int) -> void:
 	"""Add gold to the run."""
-	current_gold += amount
+	gold_manager.add_gold(amount)
 
 
 func remove_gold(amount: int) -> bool:
-	"""
-	Remove gold from the run.
-
-	Returns:
-		True if gold was removed, false if insufficient gold
-	"""
-	if current_gold >= amount:
-		current_gold -= amount
-		return true
-	return false
+	"""Remove gold from the run. Returns false if insufficient gold."""
+	return gold_manager.spend_gold(amount).is_ok()
 
 
 func spend_gold(amount: int) -> bool:
@@ -120,17 +132,17 @@ func spend_gold(amount: int) -> bool:
 
 
 # =============================================================================
-# REPUTATION OPERATIONS
+# REPUTATION OPERATIONS (delegated to ReputationManager)
 # =============================================================================
 
 func lose_reputation(amount: int) -> void:
 	"""Lose reputation, clamped to 0."""
-	reputation = max(0, reputation - amount)
+	reputation_manager.lose_reputation(amount)
 
 
 func is_defeated() -> bool:
 	"""Check if reputation has reached 0."""
-	return reputation <= 0
+	return reputation_manager.is_defeated()
 
 
 # =============================================================================
@@ -324,11 +336,11 @@ func to_dict() -> Dictionary:
 		"run_id": run_id,
 		"current_round": current_round,
 		"current_phase": current_phase,
-		"reputation": reputation,
+		"reputation": reputation_manager.reputation,
 		"wins": wins,
 		"losses": losses,
-		"current_gold": current_gold,
-		"starting_gold": starting_gold,
+		"current_gold": gold_manager.current_gold,
+		"starting_gold": gold_manager.starting_gold,
 		"encounters_this_round": encounters_this_round,
 		"player_level": player_level,
 		"player_xp": player_xp,
@@ -348,11 +360,10 @@ static func from_dict(data: Dictionary):
 	state.run_id = data.get("run_id", "")
 	state.current_round = data.get("current_round", 1)  # Default to round 1
 	state.current_phase = data.get("current_phase", "encounter")
-	state.reputation = data.get("reputation", GameConstants.STARTING_REPUTATION)
+	state.gold_manager.load_from_dict(data)
+	state.reputation_manager.load_from_dict(data)
 	state.wins = data.get("wins", 0)
 	state.losses = data.get("losses", 0)
-	state.current_gold = data.get("current_gold", 0)
-	state.starting_gold = data.get("starting_gold", 0)
 	state.encounters_this_round = data.get("encounters_this_round", 0)
 	state.player_level = data.get("player_level", 1)
 	state.player_xp = data.get("player_xp", 0)
