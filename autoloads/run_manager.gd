@@ -11,9 +11,6 @@ extends Node
 const SaveDataValidatorScript = preload("res://scripts/utils/save_data_validator.gd")
 const RunStateScript = preload("res://scripts/managers/run_state.gd")
 const RunPoolScript = preload("res://scripts/managers/run_pool.gd")
-const SkillEffectRegistryScript = preload("res://scripts/skills/skill_effect_registry.gd")
-const SkillContextScript = preload("res://scripts/skills/skill_context.gd")
-const SkillEffectsScript = preload("res://scripts/skills/skill_effects.gd")
 
 # =============================================================================
 # SIGNALS
@@ -52,23 +49,11 @@ var is_run_active: bool = false
 # RunState composite owns all run data (Phase 4 - SRP fix)
 var _run_state = null  # RunStateScript instance
 
-# Skill registry (managed here as it's a singleton-like resource)
-var _skill_registry = SkillEffectRegistryScript.new()
-
 
 
 # =============================================================================
 # LIFECYCLE
 # =============================================================================
-
-func _ready() -> void:
-	_init_skill_registry()
-
-
-func _init_skill_registry() -> void:
-	"""Initialize the skill effect registry with all built-in effects."""
-	_skill_registry.clear()
-	SkillEffectsScript.register_all(_skill_registry)
 
 
 # =============================================================================
@@ -131,9 +116,9 @@ func start_new_run_with_legacies(drafted_legacies: Array) -> void:
 		if not starting_item_id.is_empty():
 			_run_state.inventory.add_item_by_id(starting_item_id, false)
 
-	# Connect lingering effect signals
-	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)
-	_run_state.lingering_effects.effect_triggered.connect(_on_lingering_effect_triggered)
+	# Connect skill manager signals
+	_run_state.skill_manager.lingering_effect_added.connect(_on_lingering_effect_added)
+	_run_state.skill_manager.lingering_effect_triggered.connect(_on_lingering_effect_triggered)
 
 	# Round 1 starts with combat immediately after draft (no encounter phase)
 	_run_state.set_phase(PHASE_COMBAT)
@@ -182,9 +167,9 @@ func start_new_run(drafted_character_ids: Array) -> void:
 	_run_state.starting_gold = 0
 	_run_state.current_gold = 0
 
-	# Connect lingering effect signals
-	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)
-	_run_state.lingering_effects.effect_triggered.connect(_on_lingering_effect_triggered)
+	# Connect skill manager signals
+	_run_state.skill_manager.lingering_effect_added.connect(_on_lingering_effect_added)
+	_run_state.skill_manager.lingering_effect_triggered.connect(_on_lingering_effect_triggered)
 
 	# Round 1 starts with combat immediately after draft (no encounter phase)
 	_run_state.set_phase(PHASE_COMBAT)
@@ -230,9 +215,9 @@ func load_run_state() -> bool:
 	# Restore RunState from saved data
 	_run_state = RunStateScript.from_dict(save_data)
 
-	# Reconnect lingering effect signals
-	_run_state.lingering_effects.effect_added.connect(_on_lingering_effect_added)
-	_run_state.lingering_effects.effect_triggered.connect(_on_lingering_effect_triggered)
+	# Reconnect skill manager signals
+	_run_state.skill_manager.lingering_effect_added.connect(_on_lingering_effect_added)
+	_run_state.skill_manager.lingering_effect_triggered.connect(_on_lingering_effect_triggered)
 
 	# Phase 6: Restore RunPool on EncounterFactory if pool exists
 	if _run_state.pool != null and EncounterFactory:
@@ -644,7 +629,7 @@ func get_grid_empty_slots() -> Array[Vector2i]:
 
 func get_skill_registry():
 	"""Get the skill effect registry."""
-	return _skill_registry
+	return _run_state.skill_manager.get_skill_registry() if _run_state else null
 
 
 func get_lingering_effects():
@@ -653,61 +638,30 @@ func get_lingering_effects():
 
 
 func add_lingering_effect(skill_data: Dictionary) -> bool:
-	"""
-	Add a lingering effect from skill data.
-
-	Args:
-		skill_data: The full skill data dictionary containing effect and trigger
-
-	Returns:
-		True if effect was added successfully
-	"""
+	"""Add a lingering effect from skill data."""
 	if not _run_state:
 		return false
-	var effect_id = _run_state.lingering_effects.add_effect(skill_data, _run_state.current_round)
-	if effect_id > 0:
+	var result = _run_state.skill_manager.add_lingering_effect(skill_data, _run_state.current_round)
+	if result:
 		save_run_state()
-		return true
-	return false
+	return result
 
 
 func trigger_lingering_effects(trigger_type: String) -> Array[Dictionary]:
-	"""
-	Trigger all lingering effects matching the trigger type.
-
-	Args:
-		trigger_type: The trigger to match (e.g., "next_combat")
-
-	Returns:
-		Array of triggered effect entries
-	"""
+	"""Trigger all lingering effects matching the trigger type."""
 	if not _run_state:
 		return []
-	var context = _create_skill_context()
-	var triggered = _run_state.lingering_effects.trigger(trigger_type, context, _skill_registry)
+	var triggered = _run_state.skill_manager.trigger_effects(trigger_type, self)
 	if triggered.size() > 0:
 		save_run_state()
 	return triggered
 
 
 func trigger_character_acquired_effects(character: CharacterInstance) -> Array[Dictionary]:
-	"""
-	Trigger lingering effects for a newly acquired character.
-
-	Args:
-		character: The newly acquired character
-
-	Returns:
-		Array of triggered effect entries
-	"""
+	"""Trigger lingering effects for a newly acquired character."""
 	if not _run_state:
 		return []
-	var context = _create_skill_context()
-	var triggered = _run_state.lingering_effects.trigger_for_character(
-		"next_character_acquired",
-		character,
-		context
-	)
+	var triggered = _run_state.skill_manager.trigger_character_acquired_effects(character, self)
 	if triggered.size() > 0:
 		save_run_state()
 	return triggered
@@ -717,19 +671,14 @@ func has_pending_effects(trigger_type: String) -> bool:
 	"""Check if there are any lingering effects waiting for a trigger."""
 	if not _run_state:
 		return false
-	return _run_state.lingering_effects.has_effects_for_trigger(trigger_type)
+	return _run_state.skill_manager.has_pending_effects(trigger_type)
 
 
 func get_pending_effects(trigger_type: String) -> Array[Dictionary]:
 	"""Get all pending effects for a trigger type."""
 	if not _run_state:
 		return []
-	return _run_state.lingering_effects.get_effects_by_trigger(trigger_type)
-
-
-func _create_skill_context():
-	"""Create a SkillContext for effect execution."""
-	return SkillContextScript.from_run_manager(self)
+	return _run_state.skill_manager.get_pending_effects(trigger_type)
 
 
 func _on_lingering_effect_added(effect: Dictionary) -> void:
