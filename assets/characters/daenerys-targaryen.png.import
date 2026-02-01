@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://nanlocveb5yo"
-path="res://.godot/imported/warden.png-1e0123ba3dd6861ef3598f57c9770466.ctex"
+uid="uid://cxbieq7snrn5r"
+path="res://.godot/imported/daenerys-targaryen.png-27050d94a5640d49f56914ddd576f1e7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/warden.png"
-dest_files=["res://.godot/imported/warden.png-1e0123ba3dd6861ef3598f57c9770466.ctex"]
+source_file="res://assets/characters/daenerys-targaryen.png"
+dest_files=["res://.godot/imported/daenerys-targaryen.png-27050d94a5640d49f56914ddd576f1e7.ctex"]
 
 [params]
 
