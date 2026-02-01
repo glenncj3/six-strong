@@ -19,6 +19,9 @@ var _continue_button: Button
 # Slot displays: key = "team_row_col", value = Dictionary with ui nodes
 var _slot_displays: Dictionary = {}
 
+# Active shield VFX: key = CombatCharacter id, value = SpriteSheetVFX
+var _shield_vfx: Dictionary = {}
+
 
 
 func _ready() -> void:
@@ -338,6 +341,19 @@ func _on_ability_used(source: CombatCharacter, ability: Dictionary, targets: Arr
 			if vfx:
 				add_child(vfx)
 
+	# Spawn looping shield VFX on targets
+	if ability.get("category", "") == "shield":
+		for t in targets:
+			var target_pos = _get_slot_center(t)
+			if target_pos != Vector2.ZERO:
+				# Remove existing shield VFX if already present
+				if _shield_vfx.has(t.id) and is_instance_valid(_shield_vfx[t.id]):
+					_shield_vfx[t.id].queue_free()
+				var vfx = CombatVFX.create_shield_effect(target_pos)
+				if vfx:
+					add_child(vfx)
+					_shield_vfx[t.id] = vfx
+
 
 func _on_effect_applied(target: CombatCharacter, effect: CombatEffect) -> void:
 	var effect_name = effect.effect_id if effect.effect_id != "" else effect.stat
@@ -369,6 +385,9 @@ func _on_character_healed(target: CombatCharacter, amount: float, source: Combat
 
 func _on_shield_absorbed(target: CombatCharacter, amount: float, shield_remaining: float) -> void:
 	print("[Combat] %s %s SHIELD absorbs %d damage (%d shield remaining)" % [_get_team_label(target), target.character_name, int(amount), int(shield_remaining)])
+	if shield_remaining <= 0 and _shield_vfx.has(target.id) and is_instance_valid(_shield_vfx[target.id]):
+		_shield_vfx[target.id].queue_free()
+		_shield_vfx.erase(target.id)
 
 
 func _on_character_died(character: CombatCharacter) -> void:
@@ -377,6 +396,12 @@ func _on_character_died(character: CombatCharacter) -> void:
 
 
 func _on_combat_ended(winner: int, _reason: String) -> void:
+	# Clean up any looping shield VFX
+	for key in _shield_vfx:
+		if is_instance_valid(_shield_vfx[key]):
+			_shield_vfx[key].queue_free()
+	_shield_vfx.clear()
+
 	# Restore player health after combat
 	for ch in _player_grid.get_all_characters():
 		ch.restore_full_health()

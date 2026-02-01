@@ -12,8 +12,8 @@ const BURN_FPS = 192.0
 const BLADE_TEXTURE = preload("res://assets/external-assets/ultimate-megapack/Projectile_Spinning_Blade_spritesheet.png")
 const BLADE_FRAME_SIZE = Vector2i(512, 512)
 const BLADE_COLUMNS = 8
-const BLADE_TOTAL_FRAMES = 64
-const BLADE_FPS = 256.0
+const BLADE_TOTAL_FRAMES = 2
+const BLADE_FPS = 8.0
 
 
 static func create_attack_projectile(source_pos: Vector2, target_pos: Vector2) -> SpriteSheetVFX:
@@ -26,14 +26,28 @@ static func create_attack_projectile(source_pos: Vector2, target_pos: Vector2) -
 const POISON_TEXTURE = preload("res://assets/external-assets/ultimate-megapack/Aura_V38_spritesheet.png")
 const POISON_FRAME_SIZE = Vector2i(512, 512)
 const POISON_COLUMNS = 8
-const POISON_TOTAL_FRAMES = 64
-const POISON_FPS = 256.0
+const POISON_TOTAL_FRAMES = 1
+const POISON_FPS = 4.0
 
 
 static func create_poison_projectile(source_pos: Vector2, target_pos: Vector2) -> SpriteSheetVFX:
 	var vfx = SpriteSheetVFX.new()
 	vfx.setup(POISON_TEXTURE, POISON_FRAME_SIZE, POISON_TOTAL_FRAMES, POISON_COLUMNS, POISON_FPS)
-	vfx.travel_to(source_pos, target_pos, 0.35)
+	vfx.travel_to(source_pos, target_pos, 0.35, false, false)
+	return vfx
+
+
+const SHIELD_TEXTURE = preload("res://assets/external-assets/ultimate-megapack/Hex_Bursts_Center_V3_spritesheet.png")
+const SHIELD_FRAME_SIZE = Vector2i(512, 512)
+const SHIELD_COLUMNS = 8
+const SHIELD_TOTAL_FRAMES = 64
+const SHIELD_FPS = 64.0
+
+
+static func create_shield_effect(target_pos: Vector2) -> SpriteSheetVFX:
+	var vfx = SpriteSheetVFX.new()
+	vfx.setup(SHIELD_TEXTURE, SHIELD_FRAME_SIZE, SHIELD_TOTAL_FRAMES, SHIELD_COLUMNS, SHIELD_FPS)
+	vfx.play_at(target_pos, 0.35, true, true)
 	return vfx
 
 

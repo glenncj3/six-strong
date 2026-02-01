@@ -47,6 +47,19 @@ func _run_tests():
 	_test_poison_projectile_uses_travel()
 	_test_poison_projectile_no_additive_blend()
 
+	section("SpriteSheetVFX play_at")
+	_test_play_at_positions_at_target()
+	_test_play_at_applies_scale()
+	_test_play_at_centers_sprite()
+	_test_play_at_sets_additive_blend()
+	_test_play_at_not_looping_by_default()
+	_test_play_at_looping_when_requested()
+
+	section("CombatVFX Factory - Shield Effect")
+	_test_create_shield_effect_returns_vfx()
+	_test_shield_effect_constants()
+	_test_shield_effect_uses_play_at()
+
 
 # --- SpriteSheetVFX Setup ---
 
@@ -252,8 +265,8 @@ func _test_create_poison_projectile_returns_vfx():
 func _test_poison_projectile_constants():
 	assert_eq(CombatVFX.POISON_FRAME_SIZE, Vector2i(512, 512), "Poison frame size is 512x512")
 	assert_eq(CombatVFX.POISON_COLUMNS, 8, "Poison columns is 8")
-	assert_eq(CombatVFX.POISON_TOTAL_FRAMES, 64, "Poison total frames is 64")
-	assert_eq(CombatVFX.POISON_FPS, 256.0, "Poison FPS is 256")
+	assert_eq(CombatVFX.POISON_TOTAL_FRAMES, 1, "Poison total frames is 1")
+	assert_eq(CombatVFX.POISON_FPS, 4.0, "Poison FPS is 4")
 
 
 func _test_poison_projectile_uses_travel():
@@ -270,6 +283,80 @@ func _test_poison_projectile_no_additive_blend():
 	var vfx = CombatVFX.create_poison_projectile(Vector2.ZERO, Vector2(100, 0))
 	root.add_child(vfx)
 	assert_null(vfx._sprite.material, "Poison projectile has no additive blend (has alpha)")
+	vfx.queue_free()
+
+
+# --- play_at ---
+
+func _test_play_at_positions_at_target():
+	var vfx = _make_vfx(16, 4, Vector2i(64, 64))
+	vfx.play_at(Vector2(150, 250), 0.5)
+	assert_eq(vfx.global_position, Vector2(150, 250), "Positioned at target")
+	vfx.queue_free()
+
+
+func _test_play_at_applies_scale():
+	var vfx = _make_vfx(16, 4, Vector2i(64, 64))
+	vfx.play_at(Vector2.ZERO, 0.35)
+	assert_eq(vfx.scale, Vector2(0.35, 0.35), "Scale applied correctly")
+	vfx.queue_free()
+
+
+func _test_play_at_centers_sprite():
+	var vfx = _make_vfx(16, 4, Vector2i(64, 64))
+	vfx.play_at(Vector2.ZERO, 1.0)
+	assert_eq(vfx._sprite.offset, Vector2.ZERO, "Sprite offset centered")
+	vfx.queue_free()
+
+
+func _test_play_at_sets_additive_blend():
+	var vfx = _make_vfx(16, 4, Vector2i(64, 64))
+	vfx.play_at(Vector2.ZERO, 1.0, true)
+	assert_not_null(vfx._sprite.material, "Material assigned with additive=true")
+	assert_eq(vfx._sprite.material.blend_mode, CanvasItemMaterial.BLEND_MODE_ADD, "Additive blend mode set")
+	vfx.queue_free()
+
+
+func _test_play_at_not_looping_by_default():
+	var vfx = _make_vfx(16, 4, Vector2i(64, 64))
+	vfx.play_at(Vector2.ZERO, 1.0)
+	assert_false(vfx._looping, "Not looping by default")
+	vfx.queue_free()
+
+
+func _test_play_at_looping_when_requested():
+	var vfx = _make_vfx(16, 4, Vector2i(64, 64))
+	vfx.play_at(Vector2.ZERO, 1.0, false, true)
+	assert_true(vfx._looping, "Looping when requested")
+	vfx.queue_free()
+
+
+# --- CombatVFX Factory: Shield Effect ---
+
+func _test_create_shield_effect_returns_vfx():
+	var vfx = CombatVFX.create_shield_effect(Vector2(100, 200))
+	root.add_child(vfx)
+	assert_not_null(vfx, "create_shield_effect returns a VFX instance")
+	assert_true(vfx is SpriteSheetVFX, "Returns SpriteSheetVFX")
+	vfx.queue_free()
+
+
+func _test_shield_effect_constants():
+	assert_eq(CombatVFX.SHIELD_FRAME_SIZE, Vector2i(512, 512), "Shield frame size is 512x512")
+	assert_eq(CombatVFX.SHIELD_COLUMNS, 8, "Shield columns is 8")
+	assert_eq(CombatVFX.SHIELD_TOTAL_FRAMES, 64, "Shield total frames is 64")
+	assert_eq(CombatVFX.SHIELD_FPS, 64.0, "Shield FPS is 64")
+
+
+func _test_shield_effect_uses_play_at():
+	var vfx = CombatVFX.create_shield_effect(Vector2(100, 200))
+	root.add_child(vfx)
+	assert_eq(vfx.global_position, Vector2(100, 200), "Positioned at target")
+	assert_eq(vfx.scale, Vector2(0.35, 0.35), "Effect scale is 0.35")
+	assert_false(vfx._traveling, "Shield does not travel")
+	assert_eq(vfx._sprite.offset, Vector2.ZERO, "Sprite centered")
+	assert_not_null(vfx._sprite.material, "Additive blend enabled")
+	assert_true(vfx._looping, "Shield VFX loops")
 	vfx.queue_free()
 
 

@@ -15,6 +15,7 @@ var _travel_from: Vector2
 var _travel_to: Vector2
 var _traveling: bool = false
 var _travel_duration: float = 0.0
+var _looping: bool = false
 
 
 func setup(texture: Texture2D, frame_size: Vector2i, total_frames: int, columns: int, fps: float = 24.0) -> void:
@@ -46,18 +47,29 @@ func place_between(source_pos: Vector2, target_pos: Vector2) -> void:
 	scale = Vector2(scale_x, scale_y)
 
 
-func travel_to(source_pos: Vector2, target_pos: Vector2, projectile_scale: float = 1.0, additive_blend: bool = false) -> void:
+func travel_to(source_pos: Vector2, target_pos: Vector2, projectile_scale: float = 1.0, additive_blend: bool = false, rotate_toward_target: bool = true) -> void:
 	"""Animate position from source to target over the animation duration."""
 	_travel_from = source_pos
 	_travel_to = target_pos
 	_traveling = true
 	_travel_duration = float(_total_frames) / _fps
 	global_position = source_pos
-	# Point sprite in travel direction
-	var delta_vec = target_pos - source_pos
-	rotation = delta_vec.angle() + PI / 2.0
+	if rotate_toward_target:
+		var delta_vec = target_pos - source_pos
+		rotation = delta_vec.angle() + PI / 2.0
 	scale = Vector2(projectile_scale, projectile_scale)
 	# Center the sprite instead of anchoring at bottom
+	_sprite.offset = Vector2.ZERO
+	if additive_blend:
+		_sprite.material = CanvasItemMaterial.new()
+		_sprite.material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+
+
+func play_at(pos: Vector2, effect_scale: float = 1.0, additive_blend: bool = false, looping: bool = false) -> void:
+	"""Play animation at a fixed position (centered on pos)."""
+	global_position = pos
+	scale = Vector2(effect_scale, effect_scale)
+	_looping = looping
 	_sprite.offset = Vector2.ZERO
 	if additive_blend:
 		_sprite.material = CanvasItemMaterial.new()
@@ -70,9 +82,13 @@ func _process(delta: float) -> void:
 	_elapsed += delta
 	var frame = int(_elapsed * _fps)
 	if frame >= _total_frames:
-		_finished = true
-		queue_free()
-		return
+		if _looping:
+			_elapsed = 0.0
+			frame = 0
+		else:
+			_finished = true
+			queue_free()
+			return
 	if frame != _current_frame:
 		_current_frame = frame
 		_set_frame(frame)
