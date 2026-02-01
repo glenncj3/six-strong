@@ -218,6 +218,14 @@ func _get_pos_key(character: CombatCharacter) -> String:
 	return "%d_%d_%d" % [character.team, character.row, character.column]
 
 
+func _get_slot_center(combat_char: CombatCharacter) -> Vector2:
+	var pos_key = _get_pos_key(combat_char)
+	if not _slot_displays.has(pos_key):
+		return Vector2.ZERO
+	var slot: CharacterTile = _slot_displays[pos_key]["slot"]
+	return slot.global_position + slot.size / 2.0
+
+
 func _update_slot_stats(combat_char: CombatCharacter) -> void:
 	var pos_key = _get_pos_key(combat_char)
 	if not _slot_displays.has(pos_key):
@@ -294,6 +302,19 @@ func _on_ability_used(source: CombatCharacter, ability: Dictionary, targets: Arr
 	_update_slot_stats(source)
 	for t in targets:
 		_update_slot_stats(t)
+
+	# Spawn burn VFX
+	if ability.get("category", "") == "burn":
+		var source_pos = _get_slot_center(source)
+		if source_pos == Vector2.ZERO:
+			return
+		for t in targets:
+			var target_pos = _get_slot_center(t)
+			if target_pos == Vector2.ZERO:
+				continue
+			var vfx = CombatVFX.create_burn_jet(source_pos, target_pos)
+			if vfx:
+				add_child(vfx)
 
 
 func _on_effect_applied(target: CombatCharacter, effect: CombatEffect) -> void:
