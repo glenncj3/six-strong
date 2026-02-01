@@ -5,13 +5,10 @@ extends Control
 ## Combat log output goes to console via print().
 
 const CharacterTileScene = preload("res://scenes/components/character_tile.tscn")
-const CombatVFXScript = preload("res://scripts/effects/combat_vfx.gd")
-
 var combat_data: Dictionary = {}
 var _manager: CombatManager
 var _player_grid: CharacterGrid
 var _enemy_grid: CharacterGrid
-var _combat_vfx: RefCounted
 
 # UI references
 var _enemy_label: Label
@@ -256,10 +253,6 @@ func _start_combat() -> void:
 	_manager.effect_removed.connect(_on_effect_removed)
 	_manager.character_healed.connect(_on_character_healed)
 	_manager.shield_absorbed.connect(_on_shield_absorbed)
-
-	# VFX system
-	_combat_vfx = CombatVFXScript.new()
-	_combat_vfx.connect_to_manager(_manager, _slot_displays, self)
 
 	print("[Combat] Battle begins!")
 	_manager.initialize_combat(_player_grid, _enemy_grid)
