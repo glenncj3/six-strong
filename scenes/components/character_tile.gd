@@ -489,6 +489,19 @@ func set_drag_highlight(enabled: bool, is_valid: bool = true) -> void:
 			highlight_rect.color = Color(0.8, 0.3, 0.3, 0.4)  # Red for invalid
 
 
+func shake(intensity: float = 4.0, duration: float = 0.2) -> void:
+	"""Play a small vertical shake animation with slight randomization."""
+	var rand_intensity = intensity * randf_range(0.8, 1.2)
+	var rand_duration = duration * randf_range(0.85, 1.15)
+	var tween = create_tween()
+	var original_pos = position
+	var step = rand_duration / 4.0
+	tween.tween_property(self, "position", original_pos + Vector2(0, -rand_intensity), step)
+	tween.tween_property(self, "position", original_pos + Vector2(0, rand_intensity), step)
+	tween.tween_property(self, "position", original_pos + Vector2(0, -rand_intensity * 0.5), step)
+	tween.tween_property(self, "position", original_pos, step)
+
+
 func is_empty() -> bool:
 	"""Check if slot has no character."""
 	return character == null

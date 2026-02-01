@@ -264,6 +264,7 @@ func _start_combat() -> void:
 	_manager.effect_removed.connect(_on_effect_removed)
 	_manager.character_healed.connect(_on_character_healed)
 	_manager.shield_absorbed.connect(_on_shield_absorbed)
+	_manager.character_cooldown_triggered.connect(_on_character_cooldown_triggered)
 
 	print("[Combat] Battle begins!")
 	_manager.initialize_combat(_player_grid, _enemy_grid)
@@ -388,6 +389,13 @@ func _on_shield_absorbed(target: CombatCharacter, amount: float, shield_remainin
 	if shield_remaining <= 0 and _shield_vfx.has(target.id) and is_instance_valid(_shield_vfx[target.id]):
 		_shield_vfx[target.id].queue_free()
 		_shield_vfx.erase(target.id)
+
+
+func _on_character_cooldown_triggered(character: CombatCharacter) -> void:
+	var pos_key = _get_pos_key(character)
+	if _slot_displays.has(pos_key):
+		var slot: CharacterTile = _slot_displays[pos_key]["slot"]
+		slot.shake()
 
 
 func _on_character_died(character: CombatCharacter) -> void:
