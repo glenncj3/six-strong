@@ -109,14 +109,14 @@ static func _test_is_victory() -> bool:
 
 static func _test_add_player_xp_no_level() -> bool:
 	var pm = PM.new()
-	var leveled = pm.add_player_xp(1)
-	return not leveled and pm.player_level == 1 and pm.player_xp == 1
+	var result = pm.add_player_xp(1)
+	return result.is_ok() and not result.unwrap() and pm.player_level == 1 and pm.player_xp == 1
 
 
 static func _test_add_player_xp_level_up() -> bool:
 	var pm = PM.new()
-	var leveled = pm.add_player_xp(GameConstants.XP_PER_LEVEL)
-	return leveled and pm.player_level == 2
+	var result = pm.add_player_xp(GameConstants.XP_PER_LEVEL)
+	return result.is_ok() and result.unwrap() and pm.player_level == 2
 
 
 static func _test_max_level() -> bool:

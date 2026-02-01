@@ -48,9 +48,16 @@ func get_skill_registry():
 # LINGERING EFFECT OPERATIONS
 # =============================================================================
 
-func add_lingering_effect(skill_data: Dictionary, current_round: int = 0) -> bool:
+func add_lingering_effect(skill_data: Dictionary, current_round: int = 0):  # -> Result
 	var effect_id = _lingering_effects.add_effect(skill_data, current_round)
-	return effect_id > 0
+	if effect_id > 0:
+		return Result.ok(effect_id)
+	# Determine specific error
+	if not skill_data.has("effect"):
+		return Result.err(ErrorCodes.INVALID_SKILL, "Skill data missing 'effect' field")
+	if skill_data.get("trigger", "").is_empty():
+		return Result.err(ErrorCodes.INVALID_SKILL, "Lingering skill missing 'trigger' field")
+	return Result.err(ErrorCodes.INVALID_SKILL, "Failed to add lingering effect")
 
 
 func trigger_effects(trigger_type: String, run_manager) -> Array[Dictionary]:

@@ -178,7 +178,10 @@ func is_defeated() -> bool:
 # =============================================================================
 
 func add_player_xp(amount: int) -> bool:
-	return progression_manager.add_player_xp(amount)
+	var result = progression_manager.add_player_xp(amount)
+	if result.is_err():
+		return false
+	return result.unwrap()
 
 func get_player_level() -> int:
 	return progression_manager.get_player_level()

@@ -77,7 +77,7 @@ func start_new_run_with_legacies(drafted_legacies: Array) -> void:
 		drafted_legacies: Array of LegacyData objects from draft phase
 	"""
 	if drafted_legacies.size() == 0:
-		push_error("RunManager: Must draft at least one legacy")
+		ErrorLogger.log_error("RUN", ErrorCodes.NO_ACTIVE_RUN, "Must draft at least one legacy")
 		return
 
 	# Create new RunState
@@ -147,7 +147,7 @@ func start_new_run(drafted_character_ids: Array) -> void:
 		drafted_character_ids: Array of character IDs from PlayerAccount
 	"""
 	if drafted_character_ids.size() != GameConstants.TEAM_SIZE:
-		push_error("RunManager: Must draft exactly %d characters" % GameConstants.TEAM_SIZE)
+		ErrorLogger.log_error("RUN", ErrorCodes.INVALID_CHARACTER_ID, "Must draft exactly %d characters" % GameConstants.TEAM_SIZE)
 		return
 
 	# Create new RunState
@@ -157,7 +157,7 @@ func start_new_run(drafted_character_ids: Array) -> void:
 	for char_id in drafted_character_ids:
 		var char_data = PlayerAccount.get_character_data(char_id)
 		if char_data.is_empty():
-			push_error("RunManager: Character data not found: %s" % char_id)
+			ErrorLogger.log_error("RUN", ErrorCodes.CHARACTER_NOT_FOUND, "Character data not found: %s" % char_id)
 			continue
 
 		var char_instance = CharacterInstance.new(char_data)
@@ -203,13 +203,13 @@ func load_run_state() -> bool:
 	# Validate save data against schema
 	var save_data = SaveDataValidatorScript.validate_and_fix(raw_data, SaveDataValidatorScript.get_run_state_schema())
 	if save_data.is_empty():
-		push_error("RunManager: Save data validation failed, cannot load run")
+		ErrorLogger.log_error("RUN", ErrorCodes.LOAD_FAILED, "Save data validation failed, cannot load run")
 		return false
 
 	# Validate team members exist
 	var team_data = save_data.get("team", [])
 	if not _validate_team_data(team_data):
-		push_error("RunManager: Team validation failed, save may be corrupt")
+		ErrorLogger.log_error("RUN", ErrorCodes.LOAD_FAILED, "Team validation failed, save may be corrupt")
 		return false
 
 	# Restore RunState from saved data
@@ -233,11 +233,11 @@ func _validate_team_data(team_data: Array) -> bool:
 	for char_data in team_data:
 		var char_id = char_data.get("base_character_id", "")
 		if char_id.is_empty():
-			push_warning("RunManager: Team member missing base_character_id")
+			ErrorLogger.log_warning("RUN", "Team member missing base_character_id")
 			return false
 		var master_data = GameData.get_character_by_id(char_id)
 		if master_data.is_empty():
-			push_warning("RunManager: Team member references unknown character: %s" % char_id)
+			ErrorLogger.log_warning("RUN", "Team member references unknown character: %s" % char_id)
 			return false
 	return true
 
@@ -428,11 +428,14 @@ func add_item_to_inventory(item_id: String, is_upgrade: bool = true) -> ItemInst
 		The created ItemInstance, or null if invalid
 	"""
 	if not _run_state:
+		ErrorLogger.log_warning("INVENTORY", "Cannot add item: no active run")
 		return null
 	var item = _run_state.inventory.add_item_by_id(item_id, is_upgrade)
 	if item != null:
 		item_acquired.emit(item)
 		save_run_state()
+	else:
+		ErrorLogger.log_warning("INVENTORY", "Failed to add item: %s" % item_id)
 	return item
 
 
@@ -469,12 +472,15 @@ func apply_item_upgrade(upgrade_id: String, base_item_id: String) -> ItemInstanc
 		The new ItemInstance if successful, null if failed
 	"""
 	if not _run_state:
+		ErrorLogger.log_warning("INVENTORY", "Cannot apply upgrade: no active run")
 		return null
 
 	var upgrade_item = _run_state.inventory.replace_item_with_upgrade(base_item_id, upgrade_id)
 	if upgrade_item != null:
 		item_acquired.emit(upgrade_item)
 		save_run_state()
+	else:
+		ErrorLogger.log_warning("INVENTORY", "Failed to apply upgrade %s to %s" % [upgrade_id, base_item_id])
 
 	return upgrade_item
 
@@ -642,9 +648,11 @@ func add_lingering_effect(skill_data: Dictionary) -> bool:
 	if not _run_state:
 		return false
 	var result = _run_state.skill_manager.add_lingering_effect(skill_data, _run_state.current_round)
-	if result:
+	if result.is_ok():
 		save_run_state()
-	return result
+		return true
+	ErrorLogger.log_warning("SKILL", result.error_message())
+	return false
 
 
 func trigger_lingering_effects(trigger_type: String) -> Array[Dictionary]:
@@ -714,7 +722,7 @@ func set_phase(phase: String) -> void:
 	if not _run_state:
 		return
 	if phase != PHASE_ENCOUNTER and phase != PHASE_COMBAT:
-		push_error("RunManager: Invalid phase: %s" % phase)
+		ErrorLogger.log_error("PROGRESSION", "INVALID_PHASE", "Invalid phase: %s" % phase)
 		return
 	_run_state.set_phase(phase)
 	phase_changed.emit(_run_state.current_phase)
@@ -738,6 +746,7 @@ func complete_encounter() -> void:
 func add_gold(amount: int) -> void:
 	"""Add gold (from combat rewards, etc.)."""
 	if not _run_state:
+		ErrorLogger.log_warning("GOLD", "Cannot add gold: no active run")
 		return
 	_run_state.add_gold(amount)
 	gold_changed.emit(_run_state.current_gold)
@@ -747,11 +756,13 @@ func add_gold(amount: int) -> void:
 func spend_gold(amount: int) -> bool:
 	"""Spend gold (returns false if not enough)."""
 	if not _run_state:
+		ErrorLogger.log_warning("GOLD", "Cannot spend gold: no active run")
 		return false
 	if _run_state.spend_gold(amount):
 		gold_changed.emit(_run_state.current_gold)
 		save_run_state()
 		return true
+	ErrorLogger.log_info("GOLD", "Cannot afford %d gold (have %d)" % [amount, _run_state.current_gold])
 	return false
 
 
@@ -846,6 +857,7 @@ func add_loss() -> void:
 func lose_reputation(amount: int) -> void:
 	"""Lose reputation (from combat loss)."""
 	if not _run_state:
+		ErrorLogger.log_warning("REPUTATION", "Cannot lose reputation: no active run")
 		return
 	_run_state.lose_reputation(amount)
 	reputation_changed.emit(_run_state.reputation)

@@ -141,22 +141,34 @@ static func _show_no_item_fallback(container: Control, gold_bonus: int, on_compl
 static func _acquire_item_and_complete(item_id: String, container: Control, gold_bonus: int, on_complete: Callable, on_gold_reward: Callable) -> void:
 	"""Add item to player inventory and complete the encounter."""
 	# Add item to inventory
-	RunManager.add_item_to_inventory(item_id)
+	var item = RunManager.add_item_to_inventory(item_id)
 
 	# Award gold bonus
 	EncounterUIHelpers.try_reward_gold(gold_bonus, on_gold_reward)
 
-	# Show what was acquired
-	var item_data = GameData.get_item_upgrade_by_id(item_id)
-	var item_name = item_data.get("name", "Item")
+	if item != null:
+		# Show what was acquired
+		var item_data = GameData.get_item_upgrade_by_id(item_id)
+		var item_name = item_data.get("name", "Item")
 
-	var result_label = UIHelpers.create_label(
-		"Acquired: %s (+%dg)" % [item_name, gold_bonus],
-		GameConstants.FONT_SIZE_BODY,
-		GameConstants.COLOR_SUCCESS,
-		true
-	)
-	container.add_child(result_label)
+		var result_label = UIHelpers.create_label(
+			"Acquired: %s (+%dg)" % [item_name, gold_bonus],
+			GameConstants.FONT_SIZE_BODY,
+			GameConstants.COLOR_SUCCESS,
+			true
+		)
+		container.add_child(result_label)
+	else:
+		# Item failed to add - give extra gold as compensation
+		var fallback_gold = gold_bonus * 2
+		EncounterUIHelpers.try_reward_gold(fallback_gold, on_gold_reward)
+		var result_label = UIHelpers.create_label(
+			"Item unavailable! +%dg instead" % (gold_bonus + fallback_gold),
+			GameConstants.FONT_SIZE_BODY,
+			GameConstants.COLOR_GOLD,
+			true
+		)
+		container.add_child(result_label)
 
 	# Complete encounter
 	if on_complete.is_valid():

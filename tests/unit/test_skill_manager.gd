@@ -84,14 +84,14 @@ static func _test_add_lingering_effect() -> bool:
 		"effect": {"type": "grant_gold", "value": 50},
 		"trigger": "next_combat"
 	}
-	var ok = sm.add_lingering_effect(skill_data, 1)
-	return ok and sm.get_lingering_effects().get_effect_count() == 1
+	var result = sm.add_lingering_effect(skill_data, 1)
+	return result.is_ok() and sm.get_lingering_effects().get_effect_count() == 1
 
 
 static func _test_add_invalid_effect() -> bool:
 	var sm = SM.new()
-	var ok = sm.add_lingering_effect({}, 1)  # Missing effect field
-	return not ok
+	var result = sm.add_lingering_effect({}, 1)  # Missing effect field
+	return result.is_err()
 
 
 static func _test_has_pending_effects() -> bool:

@@ -73,11 +73,11 @@ func is_victory() -> bool:
 # PLAYER LEVEL PROGRESSION
 # =============================================================================
 
-func add_player_xp(amount: int) -> bool:
+func add_player_xp(amount: int):  # -> Result
 	if amount <= 0:
-		return false
+		return Result.err(ErrorCodes.INVALID_XP_AMOUNT, "XP amount must be positive")
 	if player_level >= GameConstants.MAX_PLAYER_LEVEL:
-		return false
+		return Result.err(ErrorCodes.MAX_LEVEL_REACHED, "Already at max level")
 
 	player_xp += amount
 	var leveled_up = false
@@ -93,7 +93,7 @@ func add_player_xp(amount: int) -> bool:
 	if leveled_up:
 		player_level_changed.emit(player_level)
 
-	return leveled_up
+	return Result.ok(leveled_up)
 
 
 func get_player_level() -> int:
