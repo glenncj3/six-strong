@@ -11,6 +11,7 @@ extends RefCounted
 
 const CharacterGridScript = preload("res://scripts/managers/character_grid.gd")
 const PlayerInventoryScript = preload("res://scripts/managers/player_inventory.gd")
+const InventoryManagerScript = preload("res://scripts/managers/inventory_manager.gd")
 const LingeringEffectsScript = preload("res://scripts/managers/lingering_effects.gd")
 const RunPoolScript = preload("res://scripts/managers/run_pool.gd")
 const GoldManagerScript = preload("res://scripts/managers/gold_manager.gd")
@@ -69,7 +70,9 @@ var team: Array:
 			for character in value:
 				grid.place_character_in_first_empty(character)
 
-var inventory  # PlayerInventoryScript instance
+var inventory_manager = null  # InventoryManager instance
+var inventory:  # Backward-compatible accessor to underlying PlayerInventory
+	get: return inventory_manager.get_inventory() if inventory_manager else null
 var lingering_effects  # LingeringEffectsScript instance
 var pool = null  # RunPoolScript instance - Set after draft completes
 
@@ -87,7 +90,7 @@ var drafted_legacy_ids: Array[String] = []
 
 func _init() -> void:
 	grid = CharacterGridScript.new()
-	inventory = PlayerInventoryScript.new()
+	inventory_manager = InventoryManagerScript.new()
 	lingering_effects = LingeringEffectsScript.new()
 	gold_manager = GoldManagerScript.new()
 	reputation_manager = ReputationManagerScript.new()
@@ -106,7 +109,7 @@ func reset() -> void:
 	gold_manager.reset()
 	reputation_manager.reset()
 	grid.clear()
-	inventory.clear()
+	inventory_manager.clear()
 	lingering_effects.clear()
 	pool = null
 	drafted_legacy_ids.clear()
@@ -345,7 +348,7 @@ func to_dict() -> Dictionary:
 		"player_level": player_level,
 		"player_xp": player_xp,
 		"grid": grid.to_dict(),
-		"inventory": inventory.to_dict(),
+		"inventory": inventory_manager.to_dict(),
 		"lingering_effects": lingering_effects.to_dict(),
 		"pool": pool.to_dict() if pool else {},
 		"drafted_legacy_ids": Array(drafted_legacy_ids)
@@ -383,7 +386,7 @@ static func from_dict(data: Dictionary):
 	# Restore inventory
 	var inventory_data = data.get("inventory", {})
 	if inventory_data.has("items"):
-		state.inventory = PlayerInventoryScript.from_dict(inventory_data)
+		state.inventory_manager.load_from_dict(inventory_data)
 
 	# Restore lingering effects
 	var effects_data = data.get("lingering_effects", {})
