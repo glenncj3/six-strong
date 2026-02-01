@@ -46,7 +46,7 @@ func place_between(source_pos: Vector2, target_pos: Vector2) -> void:
 	scale = Vector2(scale_x, scale_y)
 
 
-func travel_to(source_pos: Vector2, target_pos: Vector2, projectile_scale: float = 1.0) -> void:
+func travel_to(source_pos: Vector2, target_pos: Vector2, projectile_scale: float = 1.0, additive_blend: bool = false) -> void:
 	"""Animate position from source to target over the animation duration."""
 	_travel_from = source_pos
 	_travel_to = target_pos
@@ -59,9 +59,9 @@ func travel_to(source_pos: Vector2, target_pos: Vector2, projectile_scale: float
 	scale = Vector2(projectile_scale, projectile_scale)
 	# Center the sprite instead of anchoring at bottom
 	_sprite.offset = Vector2.ZERO
-	# Additive blend makes black background transparent
-	_sprite.material = CanvasItemMaterial.new()
-	_sprite.material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	if additive_blend:
+		_sprite.material = CanvasItemMaterial.new()
+		_sprite.material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 
 
 func _process(delta: float) -> void:

@@ -29,6 +29,7 @@ func _run_tests():
 	_test_travel_to_calculates_duration()
 	_test_travel_to_centers_sprite()
 	_test_travel_to_sets_additive_blend()
+	_test_travel_to_no_blend_by_default()
 	_test_travel_to_applies_scale()
 
 	section("CombatVFX Factory - Burn Jet")
@@ -39,6 +40,12 @@ func _run_tests():
 	_test_create_attack_projectile_returns_vfx()
 	_test_attack_projectile_constants()
 	_test_attack_projectile_uses_travel()
+
+	section("CombatVFX Factory - Poison Projectile")
+	_test_create_poison_projectile_returns_vfx()
+	_test_poison_projectile_constants()
+	_test_poison_projectile_uses_travel()
+	_test_poison_projectile_no_additive_blend()
 
 
 # --- SpriteSheetVFX Setup ---
@@ -168,9 +175,16 @@ func _test_travel_to_centers_sprite():
 
 func _test_travel_to_sets_additive_blend():
 	var vfx = _make_vfx(64, 8, Vector2i(512, 512))
-	vfx.travel_to(Vector2.ZERO, Vector2(100, 0), 0.35)
-	assert_not_null(vfx._sprite.material, "Material assigned")
+	vfx.travel_to(Vector2.ZERO, Vector2(100, 0), 0.35, true)
+	assert_not_null(vfx._sprite.material, "Material assigned with additive=true")
 	assert_eq(vfx._sprite.material.blend_mode, CanvasItemMaterial.BLEND_MODE_ADD, "Additive blend mode set")
+	vfx.queue_free()
+
+
+func _test_travel_to_no_blend_by_default():
+	var vfx = _make_vfx(64, 8, Vector2i(512, 512))
+	vfx.travel_to(Vector2.ZERO, Vector2(100, 0), 0.35)
+	assert_null(vfx._sprite.material, "No material when additive_blend=false")
 	vfx.queue_free()
 
 
@@ -222,6 +236,40 @@ func _test_attack_projectile_uses_travel():
 	assert_eq(vfx._travel_from, Vector2(10, 20), "Travel from source")
 	assert_eq(vfx._travel_to, Vector2(300, 20), "Travel to target")
 	assert_eq(vfx.scale, Vector2(0.35, 0.35), "Projectile scale is 0.35")
+	vfx.queue_free()
+
+
+# --- CombatVFX Factory: Poison Projectile ---
+
+func _test_create_poison_projectile_returns_vfx():
+	var vfx = CombatVFX.create_poison_projectile(Vector2(0, 0), Vector2(200, 0))
+	root.add_child(vfx)
+	assert_not_null(vfx, "create_poison_projectile returns a VFX instance")
+	assert_true(vfx is SpriteSheetVFX, "Returns SpriteSheetVFX")
+	vfx.queue_free()
+
+
+func _test_poison_projectile_constants():
+	assert_eq(CombatVFX.POISON_FRAME_SIZE, Vector2i(512, 512), "Poison frame size is 512x512")
+	assert_eq(CombatVFX.POISON_COLUMNS, 8, "Poison columns is 8")
+	assert_eq(CombatVFX.POISON_TOTAL_FRAMES, 64, "Poison total frames is 64")
+	assert_eq(CombatVFX.POISON_FPS, 256.0, "Poison FPS is 256")
+
+
+func _test_poison_projectile_uses_travel():
+	var vfx = CombatVFX.create_poison_projectile(Vector2(10, 20), Vector2(300, 20))
+	root.add_child(vfx)
+	assert_true(vfx._traveling, "Poison projectile uses travel mode")
+	assert_eq(vfx._travel_from, Vector2(10, 20), "Travel from source")
+	assert_eq(vfx._travel_to, Vector2(300, 20), "Travel to target")
+	assert_eq(vfx.scale, Vector2(0.35, 0.35), "Projectile scale is 0.35")
+	vfx.queue_free()
+
+
+func _test_poison_projectile_no_additive_blend():
+	var vfx = CombatVFX.create_poison_projectile(Vector2.ZERO, Vector2(100, 0))
+	root.add_child(vfx)
+	assert_null(vfx._sprite.material, "Poison projectile has no additive blend (has alpha)")
 	vfx.queue_free()
 
 

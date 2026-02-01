@@ -314,6 +314,17 @@ func _on_ability_used(source: CombatCharacter, ability: Dictionary, targets: Arr
 					if vfx:
 						add_child(vfx)
 
+	# Spawn poison projectile VFX
+	if ability.get("category", "") == "poison":
+		var source_pos = _get_slot_center(source)
+		if source_pos != Vector2.ZERO:
+			for t in targets:
+				var target_pos = _get_slot_center(t)
+				if target_pos != Vector2.ZERO:
+					var vfx = CombatVFX.create_poison_projectile(source_pos, target_pos)
+					if vfx:
+						add_child(vfx)
+
 	# Spawn burn VFX
 	if ability.get("category", "") == "burn":
 		var source_pos = _get_slot_center(source)

@@ -19,6 +19,20 @@ const BLADE_FPS = 256.0
 static func create_attack_projectile(source_pos: Vector2, target_pos: Vector2) -> SpriteSheetVFX:
 	var vfx = SpriteSheetVFX.new()
 	vfx.setup(BLADE_TEXTURE, BLADE_FRAME_SIZE, BLADE_TOTAL_FRAMES, BLADE_COLUMNS, BLADE_FPS)
+	vfx.travel_to(source_pos, target_pos, 0.35, true)
+	return vfx
+
+
+const POISON_TEXTURE = preload("res://assets/external-assets/ultimate-megapack/Aura_V38_spritesheet.png")
+const POISON_FRAME_SIZE = Vector2i(512, 512)
+const POISON_COLUMNS = 8
+const POISON_TOTAL_FRAMES = 64
+const POISON_FPS = 256.0
+
+
+static func create_poison_projectile(source_pos: Vector2, target_pos: Vector2) -> SpriteSheetVFX:
+	var vfx = SpriteSheetVFX.new()
+	vfx.setup(POISON_TEXTURE, POISON_FRAME_SIZE, POISON_TOTAL_FRAMES, POISON_COLUMNS, POISON_FPS)
 	vfx.travel_to(source_pos, target_pos, 0.35)
 	return vfx
 
