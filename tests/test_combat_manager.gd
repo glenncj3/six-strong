@@ -418,8 +418,8 @@ func test_effect_removed_signal():
 func test_character_healed_signal():
 	var manager = CombatManager.new()
 	var heal_events: Array = []
-	manager.character_healed.connect(func(tgt, amt, src):
-		heal_events.append({"target": tgt, "amount": amt, "source": src})
+	manager.character_healed.connect(func(tgt, amt, src, crit):
+		heal_events.append({"target": tgt, "amount": amt, "source": src, "is_crit": crit})
 	)
 
 	var pg = _make_grid_with_one(_make_source(100, 2.0, 10.0))

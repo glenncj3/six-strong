@@ -2,6 +2,8 @@ class_name AbilityExecutor
 extends RefCounted
 ## Executes abilities by resolving targets then applying actions inferred from ability fields.
 
+const CRITTABLE_EFFECT_CATEGORIES = ["burn", "poison", "shield"]
+
 
 static func execute(source: CombatCharacter, ability: Dictionary, context: Dictionary) -> void:
 	var target_mode = ability.get("target_mode", "enemy_single")
@@ -38,9 +40,12 @@ static func _damage_targets(source: CombatCharacter, ability: Dictionary, contex
 static func _heal_targets(source: CombatCharacter, ability: Dictionary, context: Dictionary, targets: Array) -> void:
 	var heal_from = ability.get("heal_from", "")
 	var heal_value = source.get_stat_value(heal_from) if heal_from != "" else ability.get("heal_value", 0.0)
+	var is_crit = source.crit_chance > 0.0 and randf() < source.crit_chance
+	if is_crit:
+		heal_value *= GameConstants.CRIT_MULTIPLIER
 	var heal: Callable = context["heal"]
 	for target in targets:
-		heal.call(target, heal_value, source)
+		heal.call(target, heal_value, source, is_crit)
 
 
 static func _get_effect_stat_bonus(character: CombatCharacter, stat_name: String) -> float:
@@ -76,6 +81,11 @@ static func _apply_effect_to_targets(source: CombatCharacter, ability: Dictionar
 		return
 
 	var overrides = _build_effect_overrides(source, ability)
+	var category = ability.get("category", "")
+	if category in CRITTABLE_EFFECT_CATEGORIES:
+		var is_crit = source.crit_chance > 0.0 and randf() < source.crit_chance
+		if is_crit and overrides.has("stacks"):
+			overrides["stacks"] = int(overrides["stacks"] * GameConstants.CRIT_MULTIPLIER)
 	for target in targets:
 		var effect = StatusEffectFactory.create_from_template(template, source.id, overrides)
 		apply_effect.call(target, effect)

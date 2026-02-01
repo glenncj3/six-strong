@@ -11,7 +11,7 @@ signal damage_taken(target: CombatCharacter, amount: float, source: CombatCharac
 signal character_died(character: CombatCharacter)
 signal effect_applied(target: CombatCharacter, effect: CombatEffect)
 signal effect_removed(target: CombatCharacter, effect: CombatEffect)
-signal character_healed(target: CombatCharacter, amount: float, source: CombatCharacter)
+signal character_healed(target: CombatCharacter, amount: float, source: CombatCharacter, is_crit: bool)
 signal ability_used(source: CombatCharacter, ability: Dictionary, targets: Array)
 signal shield_absorbed(target: CombatCharacter, amount: float, shield_remaining: float)
 
@@ -454,7 +454,7 @@ func _get_all_characters() -> Array:
 	return result
 
 
-func heal_character(target: CombatCharacter, amount: float, source: CombatCharacter) -> void:
+func heal_character(target: CombatCharacter, amount: float, source: CombatCharacter, is_crit: bool = false) -> void:
 	if not target.is_alive:
 		return
 	var actual = min(amount, target.max_health - target.health)
@@ -464,4 +464,9 @@ func heal_character(target: CombatCharacter, amount: float, source: CombatCharac
 	_process_triggered_effects(target, "on_heal", {target = target, amount = actual, source = source})
 
 	if actual > 0:
-		character_healed.emit(target, actual, source)
+		character_healed.emit(target, actual, source, is_crit)
+
+	# Process on_ally_crit triggers for heal crits
+	if is_crit and source is CombatCharacter:
+		for ally in _state.board.get_living_characters_on_team(source.team):
+			_process_triggered_effects(ally, "on_ally_crit", {source = source, target = target})

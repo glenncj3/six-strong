@@ -376,7 +376,7 @@ func _on_effect_removed(target: CombatCharacter, effect: CombatEffect) -> void:
 	_update_slot_stats(target)
 
 
-func _on_character_healed(target: CombatCharacter, amount: float, source: CombatCharacter) -> void:
+func _on_character_healed(target: CombatCharacter, amount: float, source: CombatCharacter, is_crit: bool = false) -> void:
 	if source:
 		print("[Combat] %s %s heals %s %s for %d HP" % [_get_team_label(source), source.character_name, _get_team_label(target), target.character_name, int(amount)])
 	else:

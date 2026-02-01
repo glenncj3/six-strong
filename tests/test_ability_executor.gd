@@ -100,9 +100,9 @@ func _mock_deal_damage(source: CombatCharacter, target: CombatCharacter, amount:
 	_damage_log.append({"source": source, "target": target, "amount": amount})
 
 
-func _mock_heal(target: CombatCharacter, amount: float, source: CombatCharacter) -> void:
+func _mock_heal(target: CombatCharacter, amount: float, source: CombatCharacter, is_crit: bool = false) -> void:
 	target.health = min(target.health + amount, target.max_health)
-	_heal_log.append({"target": target, "amount": amount, "source": source})
+	_heal_log.append({"target": target, "amount": amount, "source": source, "is_crit": is_crit})
 
 
 func _mock_apply_effect(target: CombatCharacter, effect: CombatEffect) -> void:
