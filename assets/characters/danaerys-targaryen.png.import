@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c658dk2il0lpd"
-path="res://.godot/imported/targaryen.png-5133b607c76346cb2c43f846691aa767.ctex"
+uid="uid://bh1ugyakysuyy"
+path="res://.godot/imported/danaerys-targaryen.png-d9fa27fcbd727ea11a6a4c37e26ab289.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/targaryen.png"
-dest_files=["res://.godot/imported/targaryen.png-5133b607c76346cb2c43f846691aa767.ctex"]
+source_file="res://assets/characters/danaerys-targaryen.png"
+dest_files=["res://.godot/imported/danaerys-targaryen.png-d9fa27fcbd727ea11a6a4c37e26ab289.ctex"]
 
 [params]
 
