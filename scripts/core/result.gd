@@ -20,11 +20,11 @@ static func ok(value: Variant = null) -> RefCounted:
 	return r
 
 
-static func err(error_code: String, error_message: String = "") -> RefCounted:
+static func err(code: String, message: String = "") -> RefCounted:
 	var script = load("res://scripts/core/result.gd")
 	var r = script.new()
-	r._error_code = error_code
-	r._error_message = error_message
+	r._error_code = code
+	r._error_message = message
 	r._is_ok = false
 	return r
 
