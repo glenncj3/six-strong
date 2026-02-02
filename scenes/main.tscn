@@ -44,7 +44,7 @@ vertical_alignment = 1
 layout_mode = 2
 theme_type_variation = "HeaderLabel"
 theme_override_font_sizes/font_size = 24
-text = "⭐ 0/10"
+text = "🏆 0/10"
 vertical_alignment = 1
 
 [node name="ReputationLabel" type="Label" parent="HUDLayer/RunHUD/HeaderBar/MarginContainer/HBoxContainer/CenterSection"]

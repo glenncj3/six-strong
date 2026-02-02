@@ -259,7 +259,7 @@ static func _add_combat_rewards_overlay(panel: PanelContainer, data: Dictionary)
 
 	var gold = data.get("reward_gold", 0)
 	var xp = data.get("reward_xp", 0)
-	rewards_label.text = "%s%d  %s%d" % [GameConstants.EMOJI_GOLD, gold, GameConstants.EMOJI_STAR, xp]
+	rewards_label.text = "%s%d  %s%d" % [GameConstants.EMOJI_GOLD, gold, GameConstants.EMOJI_XP, xp]
 	UIStyles.style_label(rewards_label, GameConstants.FONT_SIZE_HEADING)
 	UIStyles.apply_text_outline(rewards_label)
 	UIStyles.apply_text_glow(rewards_label)

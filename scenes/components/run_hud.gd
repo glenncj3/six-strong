@@ -150,7 +150,7 @@ func _enter_draft_mode() -> void:
 	_is_draft_mode = true
 	content_container.modulate.a = 1.0
 	round_label.text = "RECRUIT!"
-	wins_label.text = "%s 0/%d" % [GameConstants.EMOJI_STAR, GameConstants.WINS_FOR_VICTORY]
+	wins_label.text = "%s 0/%d" % [GameConstants.EMOJI_TROPHY, GameConstants.WINS_FOR_VICTORY]
 	reputation_label.text = "%s %d" % [GameConstants.EMOJI_HEART, GameConstants.STARTING_REPUTATION]
 	reputation_label.modulate = Color.WHITE
 	gold_label.text = "%s 0" % GameConstants.EMOJI_GOLD
@@ -173,7 +173,7 @@ func _update_stats() -> void:
 
 	round_label.text = "ROUND %d" % round_num
 	reputation_label.text = "%s %d" % [GameConstants.EMOJI_HEART, rep]
-	wins_label.text = "%s %d/%d" % [GameConstants.EMOJI_STAR, wins, GameConstants.WINS_FOR_VICTORY]
+	wins_label.text = "%s %d/%d" % [GameConstants.EMOJI_TROPHY, wins, GameConstants.WINS_FOR_VICTORY]
 	gold_label.text = "%s %d" % [GameConstants.EMOJI_GOLD, gold]
 
 	if rep <= GameConstants.REPUTATION_CRITICAL_THRESHOLD:

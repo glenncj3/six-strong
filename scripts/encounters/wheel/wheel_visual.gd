@@ -62,11 +62,11 @@ const SEGMENT_COLORS := [
 const REWARD_TYPE_ICONS := {
 	RewardTypes.RewardType.GOLD: "💰",
 	RewardTypes.RewardType.HEALTH: "❤️",
-	RewardTypes.RewardType.XP: "⭐",
+	RewardTypes.RewardType.XP: "✨",
 	RewardTypes.RewardType.ITEM: "⚔️",
 	RewardTypes.RewardType.SKILL: "📜",
 	RewardTypes.RewardType.ITEM_RANDOM: "🎁",
-	RewardTypes.RewardType.SKILL_RANDOM: "✨"
+	RewardTypes.RewardType.SKILL_RANDOM: "🎲"
 }
 
 

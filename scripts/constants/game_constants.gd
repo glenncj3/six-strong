@@ -295,6 +295,8 @@ const EMOJI_GEM := "💎"
 const EMOJI_REROLL := "🎫"
 const EMOJI_HEART := "❤️"
 const EMOJI_STAR := "⭐"
+const EMOJI_TROPHY := "🏆"
+const EMOJI_XP := "✨"
 const EMOJI_GOLD := "💰"
 
 # =============================================================================
