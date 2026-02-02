@@ -43,7 +43,7 @@ func place_between(source_pos: Vector2, target_pos: Vector2) -> void:
 	rotation = delta_vec.angle() + PI / 2.0
 	# Scale Y so the sprite height matches the distance
 	var scale_y = distance / float(_frame_size.y) * 1.2
-	var scale_x = distance / float(_frame_size.y) * 1.2
+	var scale_x = distance / float(_frame_size.y) * 0.6
 	scale = Vector2(scale_x, scale_y)
 
 
