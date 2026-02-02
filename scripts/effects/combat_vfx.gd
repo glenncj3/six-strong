@@ -9,30 +9,33 @@ const BURN_TOTAL_FRAMES = 48
 const BURN_FPS = 192.0
 
 
-const BLADE_TEXTURE = preload("res://assets/external-assets/ultimate-megapack/Projectile_Spinning_Blade_spritesheet.png")
+const BLADE_TEXTURE = preload("res://assets/external-assets/ultimate-megapack/Stab_V5_spritesheet.png")
 const BLADE_FRAME_SIZE = Vector2i(512, 512)
-const BLADE_COLUMNS = 8
-const BLADE_TOTAL_FRAMES = 2
-const BLADE_FPS = 8.0
+const BLADE_COLUMNS = 4
+const BLADE_TOTAL_FRAMES = 8
+const BLADE_FPS = 24.0
 
 
 static func create_attack_projectile(source_pos: Vector2, target_pos: Vector2) -> SpriteSheetVFX:
 	var vfx = SpriteSheetVFX.new()
 	vfx.setup(BLADE_TEXTURE, BLADE_FRAME_SIZE, BLADE_TOTAL_FRAMES, BLADE_COLUMNS, BLADE_FPS)
 	vfx.travel_to(source_pos, target_pos, 0.35, true)
+	# Stab sprite faces right; travel_to adds PI/2 assuming upward-facing sprite
+	vfx.rotation -= PI / 2.0
 	return vfx
 
 
-const POISON_TEXTURE = preload("res://assets/external-assets/ultimate-megapack/Aura_V38_spritesheet.png")
-const POISON_FRAME_SIZE = Vector2i(512, 512)
+const POISON_TEXTURE = preload("res://assets/external-assets/ultimate-megapack/Foam_Single_v1_spritesheet.png")
+const POISON_FRAME_SIZE = Vector2i(128, 128)
 const POISON_COLUMNS = 8
-const POISON_TOTAL_FRAMES = 1
-const POISON_FPS = 4.0
+const POISON_TOTAL_FRAMES = 16
+const POISON_FPS = 16.0
 
 
 static func create_poison_projectile(source_pos: Vector2, target_pos: Vector2) -> SpriteSheetVFX:
 	var vfx = SpriteSheetVFX.new()
 	vfx.setup(POISON_TEXTURE, POISON_FRAME_SIZE, POISON_TOTAL_FRAMES, POISON_COLUMNS, POISON_FPS)
+	vfx._sprite.modulate = Color(0.7, 0.2, 1.0)
 	vfx.travel_to(source_pos, target_pos, 0.35, false, false)
 	return vfx
 
