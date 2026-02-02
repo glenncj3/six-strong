@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://empvok7ctk75"
-path="res://.godot/imported/vampiric_blade.png-26ca59957c4db7c518a8bcb1ca52ec2b.ctex"
+uid="uid://5yxmmltnemcs"
+path="res://.godot/imported/stark-sigil.png-a57fb0a2532e6f074a5c0d11f06573c0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/items/vampiric_blade.png"
-dest_files=["res://.godot/imported/vampiric_blade.png-26ca59957c4db7c518a8bcb1ca52ec2b.ctex"]
+source_file="res://assets/skills/stark-sigil.png"
+dest_files=["res://.godot/imported/stark-sigil.png-a57fb0a2532e6f074a5c0d11f06573c0.ctex"]
 
 [params]
 

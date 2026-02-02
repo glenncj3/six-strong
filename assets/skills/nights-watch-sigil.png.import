@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cqyqygucfohox"
-path="res://.godot/imported/shadow_cloak.png-e7e539aaa7edaedf4ce8a719b2ef732f.ctex"
+uid="uid://daavmviipwv2d"
+path="res://.godot/imported/nights-watch-sigil.png-25b1011396e3aa1faccd4c4066eae141.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/items/shadow_cloak.png"
-dest_files=["res://.godot/imported/shadow_cloak.png-e7e539aaa7edaedf4ce8a719b2ef732f.ctex"]
+source_file="res://assets/skills/nights-watch-sigil.png"
+dest_files=["res://.godot/imported/nights-watch-sigil.png-25b1011396e3aa1faccd4c4066eae141.ctex"]
 
 [params]
 

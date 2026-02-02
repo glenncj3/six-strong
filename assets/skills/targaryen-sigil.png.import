@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cx7mj5mdd5g3d"
-path="res://.godot/imported/battle_axe.png-b5466dde4f2b32bea2685ef4898678fd.ctex"
+uid="uid://bxv407sr7fp2"
+path="res://.godot/imported/targaryen-sigil.png-a9516afc3747e24437ea84358a1471a2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/items/battle_axe.png"
-dest_files=["res://.godot/imported/battle_axe.png-b5466dde4f2b32bea2685ef4898678fd.ctex"]
+source_file="res://assets/skills/targaryen-sigil.png"
+dest_files=["res://.godot/imported/targaryen-sigil.png-a9516afc3747e24437ea84358a1471a2.ctex"]
 
 [params]
 

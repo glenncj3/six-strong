@@ -46,6 +46,8 @@ static func create_panel_style(
 	style.bg_color = bg_color
 
 	style.set_corner_radius_all(corner_radius)
+	style.corner_detail = 12
+	style.anti_aliasing = true
 	style.set_border_width_all(border_width)
 	style.border_color = border_color
 
@@ -371,7 +373,7 @@ static func create_clickable_panel_styles(
 		border_color,
 		BORDER_WIDTH_NORMAL,
 		CORNER_RADIUS_MEDIUM,
-		true
+		false
 	)
 
 	var hover_style = create_panel_style(
@@ -379,7 +381,7 @@ static func create_clickable_panel_styles(
 		hover_border_color,
 		BORDER_WIDTH_NORMAL,
 		CORNER_RADIUS_MEDIUM,
-		true
+		false
 	)
 
 	var pressed_style = create_panel_style(

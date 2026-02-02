@@ -203,7 +203,7 @@ static func _create_option_info_section(data: Dictionary, panel_type: OptionPane
 	name_label.text = data.get("name", "Unknown")
 	name_label.theme_type_variation = "HeaderLabel"
 	UIStyles.style_label(name_label, GameConstants.FONT_SIZE_REWARD)
-	var outline_size := 8 if panel_type == OptionPanelType.ENCOUNTER else 4
+	var outline_size := 8
 	UIStyles.apply_text_outline(name_label, Color.BLACK, outline_size)
 
 	# Description
@@ -235,7 +235,8 @@ static func _add_combat_labels(info_vbox: VBoxContainer, data: Dictionary) -> vo
 
 	var diff_label = Label.new()
 	info_vbox.add_child(diff_label)
-	diff_label.text = "★".repeat(star_count)
+	diff_label.add_theme_constant_override("margin_left", 8)
+	diff_label.text = "  " + "★".repeat(star_count)
 	UIStyles.style_label(diff_label, GameConstants.FONT_SIZE_HEADING, Color("#FFD700"))
 	# Gold 3D effect via outline and shadow
 	diff_label.add_theme_color_override("font_outline_color", Color("#8B6914"))
