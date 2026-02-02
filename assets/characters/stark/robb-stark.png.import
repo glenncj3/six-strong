@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bavmoow2vl2wd"
-path="res://.godot/imported/jon-snow.png-cb0120f693cd302d6a887f6824930879.ctex"
+uid="uid://btfcoww4epi21"
+path="res://.godot/imported/robb-stark.png-51789d46bc15c9b5cf36cb284054fff6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/jon-snow.png"
-dest_files=["res://.godot/imported/jon-snow.png-cb0120f693cd302d6a887f6824930879.ctex"]
+source_file="res://assets/characters/stark/robb-stark.png"
+dest_files=["res://.godot/imported/robb-stark.png-51789d46bc15c9b5cf36cb284054fff6.ctex"]
 
 [params]
 

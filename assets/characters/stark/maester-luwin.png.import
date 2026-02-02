@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6jt18vpap1qo"
-path="res://.godot/imported/stark.png-1dc9483267c4debe363be79ca1d47c03.ctex"
+uid="uid://mmvoh61bttjg"
+path="res://.godot/imported/maester-luwin.png-9668ba582289b031ad9c86ccb284a736.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/stark.png"
-dest_files=["res://.godot/imported/stark.png-1dc9483267c4debe363be79ca1d47c03.ctex"]
+source_file="res://assets/characters/stark/maester-luwin.png"
+dest_files=["res://.godot/imported/maester-luwin.png-9668ba582289b031ad9c86ccb284a736.ctex"]
 
 [params]
 

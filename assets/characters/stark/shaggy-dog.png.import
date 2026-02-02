@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6jt18vpap1qo"
-path="res://.godot/imported/stark.png-1dc9483267c4debe363be79ca1d47c03.ctex"
+uid="uid://vnd4gqda7i58"
+path="res://.godot/imported/shaggy-dog.png-33068fe57f9f9135b5c4f494a7419b6c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/stark.png"
-dest_files=["res://.godot/imported/stark.png-1dc9483267c4debe363be79ca1d47c03.ctex"]
+source_file="res://assets/characters/stark/shaggy-dog.png"
+dest_files=["res://.godot/imported/shaggy-dog.png-33068fe57f9f9135b5c4f494a7419b6c.ctex"]
 
 [params]
 

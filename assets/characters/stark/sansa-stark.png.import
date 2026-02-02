@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cxbieq7snrn5r"
-path="res://.godot/imported/daenerys-targaryen.png-27050d94a5640d49f56914ddd576f1e7.ctex"
+uid="uid://cqei4mdl4fk0h"
+path="res://.godot/imported/sansa-stark.png-9f81fdbe7cda0a190d89c5d03b7bcae8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/daenerys-targaryen.png"
-dest_files=["res://.godot/imported/daenerys-targaryen.png-27050d94a5640d49f56914ddd576f1e7.ctex"]
+source_file="res://assets/characters/stark/sansa-stark.png"
+dest_files=["res://.godot/imported/sansa-stark.png-9f81fdbe7cda0a190d89c5d03b7bcae8.ctex"]
 
 [params]
 

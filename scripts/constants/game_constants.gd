@@ -31,7 +31,7 @@ const MAX_PLAYER_LEVEL := 5  # Maximum player level (gates all content at this l
 # Starting resources
 const STARTING_GEMS := 1000
 const STARTING_REROLL_TOKENS := 0
-const STARTING_REPUTATION := 20
+const STARTING_REPUTATION := 10
 
 # =============================================================================
 # ECONOMY CONSTANTS
@@ -61,7 +61,7 @@ const COMBAT_WIN_XP := 30  # XP per character per combat win
 # =============================================================================
 
 # Win/loss conditions
-const WINS_FOR_VICTORY := 10
+const WINS_FOR_VICTORY := 7
 const TEAM_SIZE := 3  # DEPRECATED: Use MAX_GRID_CHARACTERS for Phase 5+
 const DRAFT_OPTIONS_PER_PICK := 3
 const DRAFT_OWNED_OPTIONS := 2  # Remaining filled by random
