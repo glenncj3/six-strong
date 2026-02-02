@@ -26,12 +26,16 @@ static func _ensure_initialized() -> void:
 
 
 static func _register_default_handlers() -> void:
-	"""Register all default encounter type handlers."""
+	"""Register all default encounter handlers by id."""
 
 	var ui_handlers: Dictionary = {
-		"shop": {
+		"traveling_merchant": {
 			"create_ui": ShopEncounterUI.create_ui,
 			"get_reward_preview": ShopEncounterUI.get_reward_preview
+		},
+		"skill_trainer": {
+			"create_ui": SkillTrainerEncounterUI.create_ui,
+			"get_reward_preview": SkillTrainerEncounterUI.get_reward_preview
 		},
 		"treasure_chest": {
 			"create_ui": TreasureChestEncounterUI.create_ui,
@@ -40,10 +44,6 @@ static func _register_default_handlers() -> void:
 		"health_restore": {
 			"create_ui": HealthRestoreEncounterUI.create_ui,
 			"get_reward_preview": HealthRestoreEncounterUI.get_reward_preview
-		},
-		"skill_trainer": {
-			"create_ui": SkillTrainerEncounterUI.create_ui,
-			"get_reward_preview": SkillTrainerEncounterUI.get_reward_preview
 		},
 		"gamble": {
 			"create_ui": GambleEncounterUI.create_ui,
@@ -61,17 +61,21 @@ static func _register_default_handlers() -> void:
 			"create_ui": WheelOfFortuneEncounterUI.create_ui,
 			"get_reward_preview": WheelOfFortuneEncounterUI.get_reward_preview
 		},
-		"character_shop": {
+		"mercenary_camp": {
+			"create_ui": CharacterShopEncounterUI.create_ui,
+			"get_reward_preview": CharacterShopEncounterUI.get_reward_preview
+		},
+		"castle_winterfell": {
 			"create_ui": CharacterShopEncounterUI.create_ui,
 			"get_reward_preview": CharacterShopEncounterUI.get_reward_preview
 		},
 	}
 
-	for type_name in ui_handlers:
-		var type_def = EncounterFactory.get_type_def(type_name)
-		var handler = ui_handlers[type_name].duplicate()
+	for encounter_id in ui_handlers:
+		var type_def = EncounterFactory.get_type_def_by_id(encounter_id)
+		var handler = ui_handlers[encounter_id].duplicate()
 		handler["immediate_complete"] = type_def.get("immediate_complete", false)
-		register(type_name, handler)
+		register(encounter_id, handler)
 
 
 static func register(encounter_type: String, handler: Dictionary) -> void:
@@ -117,11 +121,11 @@ static func get_reward_preview(encounter_data: Dictionary) -> String:
 	"""
 	_ensure_initialized()
 
-	var encounter_type = encounter_data.get("type", "")
-	if not _handlers.has(encounter_type):
+	var encounter_id = encounter_data.get("id", "")
+	if not _handlers.has(encounter_id):
 		return ""
 
-	var handler = _handlers[encounter_type]
+	var handler = _handlers[encounter_id]
 	var preview_func: Callable = handler.get("get_reward_preview", Callable())
 	if preview_func.is_valid():
 		return preview_func.call(encounter_data)
@@ -142,12 +146,12 @@ static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Contro
 	"""
 	_ensure_initialized()
 
-	var encounter_type = encounter_data.get("type", "")
-	if not _handlers.has(encounter_type):
-		push_error("EncounterRegistry: No handler for type: %s" % encounter_type)
+	var encounter_id = encounter_data.get("id", "")
+	if not _handlers.has(encounter_id):
+		push_error("EncounterRegistry: No handler for id: %s" % encounter_id)
 		return null
 
-	var handler = _handlers[encounter_type]
+	var handler = _handlers[encounter_id]
 	var create_func: Callable = handler.get("create_ui")
 	if create_func.is_valid():
 		return create_func.call(encounter_data, context)

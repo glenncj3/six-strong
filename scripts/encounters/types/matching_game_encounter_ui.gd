@@ -4,7 +4,7 @@ extends RefCounted
 ## Player reveals tiles one at a time until two of the same type are found.
 ##
 ## Auto-registration metadata (Phase 4):
-const ENCOUNTER_TYPE := "matching_game"
+const ENCOUNTER_ID := "matching_game"
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:

@@ -3,7 +3,7 @@ extends RefCounted
 ## UI creation and reward preview for shop encounters.
 ##
 ## Auto-registration metadata (Phase 4):
-const ENCOUNTER_TYPE := "shop"
+const ENCOUNTER_ID := "traveling_merchant"
 ## Shows up to 3 offerings (items/skills) in tiles.
 ##
 ## Phase 2 Refactor:

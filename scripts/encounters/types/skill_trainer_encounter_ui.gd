@@ -3,7 +3,7 @@ extends RefCounted
 ## UI creation and reward preview for skill trainer encounters.
 ##
 ## Auto-registration metadata (Phase 4):
-const ENCOUNTER_TYPE := "skill_trainer"
+const ENCOUNTER_ID := "skill_trainer"
 ## Shows 3 skill options that execute immediately on purchase.
 ##
 ## Phase 3 Refactor:

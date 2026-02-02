@@ -88,19 +88,17 @@ func has_run_pool() -> bool:
 	return _run_pool != null
 
 
-func generate_encounter_options(count: int) -> Array:
+func generate_encounter_options(_count: int = 3) -> Array:
 	var options = []
-	var used_types = []
+	var categories = ["character_shop", "shop", "minigame"]
 
-	for i in range(count):
-		var encounter_type = _select_weighted_encounter_type(used_types)
-		used_types.append(encounter_type)
-
-		var type_def = _get_type_def(encounter_type)
+	for category in categories:
+		var type_def = _pick_weighted_from_category(category)
+		if type_def.is_empty():
+			continue
 		var encounter_data = _create_encounter_data(type_def)
 		options.append(encounter_data)
-
-		encounter_generated.emit(encounter_type)
+		encounter_generated.emit(type_def.get("id", ""))
 
 	return options
 
@@ -109,26 +107,31 @@ func get_type_def(type_name: String) -> Dictionary:
 	return _get_type_def(type_name)
 
 
+func get_type_def_by_id(encounter_id: String) -> Dictionary:
+	"""Get a specific encounter definition by its unique id."""
+	for type_def in _encounter_types:
+		if type_def.get("id", "") == encounter_id:
+			return type_def
+	return {}
+
+
 func get_all_type_defs() -> Array:
 	return _encounter_types
 
 
-func _select_weighted_encounter_type(excluded_types: Array) -> String:
-	var available_types = []
-	var available_weights = []
-
+func _pick_weighted_from_category(category: String) -> Dictionary:
+	"""Pick a single encounter from a category by individual weight."""
+	var candidates = []
+	var weights = []
 	for type_def in _encounter_types:
-		var type_name = type_def["type"]
-		if type_name not in excluded_types:
-			available_types.append(type_name)
-			available_weights.append(type_def.get("weight", 1.0))
-
-	if available_types.is_empty():
-		for type_def in _encounter_types:
-			available_types.append(type_def["type"])
-			available_weights.append(type_def.get("weight", 1.0))
-
-	return _weighted_random_select(available_types, available_weights)
+		if type_def["type"] == category:
+			candidates.append(type_def)
+			weights.append(type_def.get("weight", 1.0))
+	if candidates.is_empty():
+		return {}
+	if candidates.size() == 1:
+		return candidates[0]
+	return _weighted_random_select(candidates, weights)
 
 
 func _weighted_random_select(items: Array, weights: Array) -> Variant:
@@ -149,6 +152,7 @@ func _weighted_random_select(items: Array, weights: Array) -> Variant:
 
 func _create_encounter_data(type_def: Dictionary) -> Dictionary:
 	var encounter_data = {
+		"id": type_def["id"],
 		"type": type_def["type"],
 		"name": type_def["name"],
 		"description": type_def["description"],
@@ -190,10 +194,18 @@ func _apply_scaling(encounter_data: Dictionary) -> void:
 
 
 func _get_type_def(type_name: String) -> Dictionary:
+	"""Get a random encounter definition for this type, weighted by individual weights."""
+	var candidates = []
+	var weights = []
 	for type_def in _encounter_types:
 		if type_def["type"] == type_name:
-			return type_def
-	return {}
+			candidates.append(type_def)
+			weights.append(type_def.get("weight", 1.0))
+	if candidates.is_empty():
+		return {}
+	if candidates.size() == 1:
+		return candidates[0]
+	return _weighted_random_select(candidates, weights)
 
 
 func _resolve_value(val: Variant) -> Variant:
@@ -458,18 +470,30 @@ func _gen_pick_characters(params: Dictionary) -> Array:
 	Excludes characters the player already has in their team.
 
 	Args:
-		params: { "count": int }
+		params: { "count": int, "filter_tags": Array (optional) }
 
 	Returns:
 		Array of character offering dictionaries with:
 		- id, name, description, image_path, cost, level_requirement, base_stats
 	"""
 	var count = int(params.get("count", 3))
+	var filter_tags: Array = params.get("filter_tags", [])
 	var offerings: Array = []
 
 	var available_chars = _get_cached_characters()
 	if available_chars.is_empty():
 		return offerings
+
+	# Filter by tags if specified
+	if not filter_tags.is_empty():
+		var tag_filtered: Array = []
+		for char_data in available_chars:
+			var char_tags = char_data.get("tags", [])
+			for tag in filter_tags:
+				if tag in char_tags:
+					tag_filtered.append(char_data)
+					break
+		available_chars = tag_filtered
 
 	# Get IDs of characters already in the team
 	var team_char_ids: Array[String] = []

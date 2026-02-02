@@ -3,7 +3,7 @@ extends RefCounted
 ## UI creation and reward preview for health restore encounters.
 ##
 ## Auto-registration metadata (Phase 4):
-const ENCOUNTER_TYPE := "health_restore"
+const ENCOUNTER_ID := "health_restore"
 ## Shows 3 heal options, player picks one, then picks a character to heal.
 
 const PurchasableTileScene = preload("res://scenes/components/purchasable_tile.tscn")

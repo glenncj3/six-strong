@@ -5,7 +5,7 @@ extends RefCounted
 ## First spin is free; player may pay gold for one additional spin.
 ##
 ## Auto-registration metadata (Phase 4):
-const ENCOUNTER_TYPE := "wheel_of_fortune"
+const ENCOUNTER_ID := "wheel_of_fortune"
 ##
 ## Phase 2 Refactor:
 ## - Items go to player inventory (no character selection)

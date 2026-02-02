@@ -1,6 +1,7 @@
 {
   "encounter_types": [
     {
+      "id": "traveling_merchant",
       "type": "shop",
       "name": "Traveling Merchant",
       "description": "Purchase an item or skill.",
@@ -22,7 +23,29 @@
       }
     },
     {
-      "type": "treasure_chest",
+      "id": "skill_trainer",
+      "type": "shop",
+      "name": "Skill Trainer",
+      "description": "Purchase a skill for your team.",
+      "image_path": "res://assets/encounters/trainer.png",
+      "weight": 100,
+      "source": "base",
+      "immediate_complete": false,
+      "colors": {
+        "bg": "#6A3A8A",
+        "hover": "#8A5AAA",
+        "pressed": "#4A1A6A",
+        "border": "#B88726"
+      },
+      "generation": {
+        "data_fields": {
+          "skill_ids": {"generator": "pick_learnable_skills", "count": 3}
+        }
+      }
+    },
+    {
+      "id": "treasure_chest",
+      "type": "minigame",
       "name": "Treasure Chest",
       "description": "Choose a mystery item to claim!",
       "image_path": "res://assets/encounters/chest.png",
@@ -43,7 +66,8 @@
       }
     },
     {
-      "type": "health_restore",
+      "id": "health_restore",
+      "type": "minigame",
       "name": "Healing Fountain",
       "description": "Purchase healing for your team.",
       "image_path": "res://assets/encounters/fountain.png",
@@ -67,27 +91,8 @@
       }
     },
     {
-      "type": "skill_trainer",
-      "name": "Skill Trainer",
-      "description": "Purchase a skill for your team.",
-      "image_path": "res://assets/encounters/trainer.png",
-      "weight": 100,
-      "source": "base",
-      "immediate_complete": false,
-      "colors": {
-        "bg": "#6A3A8A",
-        "hover": "#8A5AAA",
-        "pressed": "#4A1A6A",
-        "border": "#B88726"
-      },
-      "generation": {
-        "data_fields": {
-          "skill_ids": {"generator": "pick_learnable_skills", "count": 3}
-        }
-      }
-    },
-    {
-      "type": "gamble",
+      "id": "gamble",
+      "type": "minigame",
       "name": "Mysterious Gambler",
       "description": "Risk gold for a chance at greater rewards.",
       "image_path": "res://assets/encounters/gambler.png",
@@ -108,7 +113,8 @@
       }
     },
     {
-      "type": "matching_game",
+      "id": "matching_game",
+      "type": "minigame",
       "name": "Memory Merchant",
       "description": "Test your memory to uncover hidden treasures!",
       "image_path": "res://assets/encounters/chest.png",
@@ -131,7 +137,8 @@
       }
     },
     {
-      "type": "slot_machine",
+      "id": "slot_machine",
+      "type": "minigame",
       "name": "Lucky Spinner",
       "description": "Spin the reels for a chance at riches!",
       "image_path": "res://assets/encounters/chest.png",
@@ -157,7 +164,8 @@
       }
     },
     {
-      "type": "wheel_of_fortune",
+      "id": "wheel_of_fortune",
+      "type": "minigame",
       "name": "Fortune's Wheel",
       "description": "Spin the mystical wheel to claim your prize!",
       "image_path": "res://assets/encounters/chest.png",
@@ -178,6 +186,7 @@
       }
     },
     {
+      "id": "mercenary_camp",
       "type": "character_shop",
       "name": "Mercenary Camp",
       "description": "Hire adventurers to join your party.",
@@ -194,6 +203,27 @@
       "generation": {
         "data_fields": {
           "offerings": {"generator": "pick_characters", "count": 3}
+        }
+      }
+    },
+    {
+      "id": "castle_winterfell",
+      "type": "character_shop",
+      "name": "Castle Winterfell",
+      "description": "The ancient seat of House Stark. Loyal Northerners seek to join your cause.",
+      "image_path": "res://assets/encounters/castle-winterfell.png",
+      "weight": 10000,
+      "source": "base",
+      "immediate_complete": false,
+      "colors": {
+        "bg": "#2A3A4A",
+        "hover": "#4A5A6A",
+        "pressed": "#1A2A3A",
+        "border": "#8AA4BE"
+      },
+      "generation": {
+        "data_fields": {
+          "offerings": {"generator": "pick_characters", "count": 3, "filter_tags": ["Stark"]}
         }
       }
     }

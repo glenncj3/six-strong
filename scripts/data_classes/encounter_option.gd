@@ -3,6 +3,7 @@ extends RefCounted
 # EncounterOption - Typed data class for encounter options
 # Replaces untyped Dictionary returns for better type safety and IDE support
 
+var id: String = ""
 var type: String = ""
 var name: String = ""
 var description: String = ""
@@ -17,6 +18,7 @@ var border_color: Color = Color("#B88726")
 
 
 static func create(
+	p_id: String,
 	p_type: String,
 	p_name: String,
 	p_description: String,
@@ -29,6 +31,7 @@ static func create(
 ) -> EncounterOption:
 	"""Factory method to create an EncounterOption."""
 	var option = EncounterOption.new()
+	option.id = p_id
 	option.type = p_type
 	option.name = p_name
 	option.description = p_description
@@ -44,6 +47,7 @@ static func create(
 func to_dict() -> Dictionary:
 	"""Convert to dictionary for compatibility with existing code."""
 	return {
+		"id": id,
 		"type": type,
 		"name": name,
 		"description": description,
@@ -59,6 +63,7 @@ func to_dict() -> Dictionary:
 static func from_dict(dict: Dictionary) -> EncounterOption:
 	"""Create from dictionary for loading saved data."""
 	var option = EncounterOption.new()
+	option.id = dict.get("id", "")
 	option.type = dict.get("type", "")
 	option.name = dict.get("name", "")
 	option.description = dict.get("description", "")
@@ -104,13 +109,13 @@ func is_shop() -> bool:
 	return type == "shop"
 
 
-func is_xp_reward() -> bool:
-	return type == "xp_reward"
+func is_character_shop() -> bool:
+	return type == "character_shop"
 
 
-func is_gold_reward() -> bool:
-	return type == "gold_reward"
+func is_minigame() -> bool:
+	return type == "minigame"
 
 
 func is_health_restore() -> bool:
-	return type == "health_restore"
+	return id == "health_restore"

@@ -137,18 +137,12 @@ static func create_option_panel(data: Dictionary, panel_type: OptionPanelType, o
 	if on_select.is_valid():
 		panel.panel_clicked.connect(on_select)
 
-	# Common structure
-	var hbox = HBoxContainer.new()
-	panel.add_child(hbox)
-	hbox.add_theme_constant_override("separation", 12)
+	# Full-art background image (border to border)
+	_add_full_art_background(panel, data)
 
-	# Image section
-	var margin = _create_option_image_section(data)
-	hbox.add_child(margin)
-
-	# Info section with common labels
+	# Info overlay on top of the art
 	var info_vbox = _create_option_info_section(data, panel_type)
-	hbox.add_child(info_vbox)
+	panel.add_child(info_vbox)
 
 	# Type-specific labels
 	if panel_type == OptionPanelType.COMBAT:
@@ -158,41 +152,62 @@ static func create_option_panel(data: Dictionary, panel_type: OptionPanelType, o
 	return panel
 
 
-static func _create_option_image_section(data: Dictionary) -> MarginContainer:
-	"""Create the image section for an option panel."""
-	var margin = MarginContainer.new()
-	UIStyles.set_margin_all(margin, GameConstants.PANEL_MARGIN)
+static func _add_full_art_background(panel: PanelContainer, data: Dictionary) -> void:
+	"""Add a full-art background image inset within the panel border."""
+	var image_path = data.get("image_path", "")
+	if image_path.is_empty():
+		return
+
+	var content_margin = MarginContainer.new()
+	content_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content_margin.clip_contents = true
+	UIStyles.set_margin_all(content_margin, UIStyles.BORDER_WIDTH_NORMAL)
+	panel.add_child(content_margin)
 
 	var image = TextureRect.new()
-	margin.add_child(image)
-	image.custom_minimum_size = Vector2(GameConstants.COMBAT_IMAGE_SIZE, GameConstants.COMBAT_IMAGE_SIZE)
-	image.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	UIContainerHelpers.set_texture_safe(image, data.get("image_path", ""))
-
-	return margin
+	content_margin.add_child(image)
+	image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	UIContainerHelpers.set_texture_safe(image, image_path)
 
 
 static func _create_option_info_section(data: Dictionary, _panel_type: OptionPanelType) -> VBoxContainer:
-	"""Create the info section (name, type, description) for an option panel."""
+	"""Create the info section (name, type, description) overlaid on the panel art."""
 	var info_vbox = VBoxContainer.new()
 	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	info_vbox.add_theme_constant_override("separation", 4)
 
-	var top_spacer = Control.new()
-	top_spacer.custom_minimum_size.y = 5
-	info_vbox.add_child(top_spacer)
+	# Push text to the bottom of the panel
+	var spacer = Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	info_vbox.add_child(spacer)
+
+	# Bottom text container with padding and gradient background
+	var bottom_margin = MarginContainer.new()
+	bottom_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bottom_margin.add_theme_constant_override("margin_left", 12)
+	bottom_margin.add_theme_constant_override("margin_right", 12)
+	bottom_margin.add_theme_constant_override("margin_bottom", 8)
+	info_vbox.add_child(bottom_margin)
+
+	var text_vbox = VBoxContainer.new()
+	text_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	text_vbox.add_theme_constant_override("separation", 2)
+	bottom_margin.add_child(text_vbox)
 
 	# Name
 	var name_label = Label.new()
-	info_vbox.add_child(name_label)
+	text_vbox.add_child(name_label)
 	name_label.text = data.get("name", "Unknown")
 	name_label.theme_type_variation = "HeaderLabel"
 	UIStyles.style_label(name_label, GameConstants.FONT_SIZE_REWARD)
+	UIStyles.apply_text_outline(name_label)
 
 	# Description
 	var desc_label = Label.new()
-	info_vbox.add_child(desc_label)
+	text_vbox.add_child(desc_label)
 	desc_label.text = data.get("description", "")
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc_label.max_lines_visible = 2

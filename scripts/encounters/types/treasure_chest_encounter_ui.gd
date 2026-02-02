@@ -3,7 +3,7 @@ extends RefCounted
 ## UI creation and reward preview for treasure chest encounters.
 ##
 ## Auto-registration metadata (Phase 4):
-const ENCOUNTER_TYPE := "treasure_chest"
+const ENCOUNTER_ID := "treasure_chest"
 ## Shows 3 mystery item options with different elements. Player picks one to reveal
 ## a random item of that element, which goes directly to player inventory.
 ##

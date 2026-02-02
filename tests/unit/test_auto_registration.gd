@@ -60,15 +60,15 @@ func _test_encounter_handlers_have_metadata():
 		var content = file.get_as_text()
 		file.close()
 
-		if content.contains("const ENCOUNTER_TYPE"):
+		if content.contains("const ENCOUNTER_ID"):
 			handlers_with_metadata.append(file_path.get_file())
 		else:
 			handlers_without_metadata.append(file_path.get_file())
 
 	if handlers_without_metadata.is_empty():
-		_pass("All %d handlers have ENCOUNTER_TYPE" % handlers_with_metadata.size())
+		_pass("All %d handlers have ENCOUNTER_ID" % handlers_with_metadata.size())
 	else:
-		_fail("Missing ENCOUNTER_TYPE: %s" % ", ".join(handlers_without_metadata))
+		_fail("Missing ENCOUNTER_ID: %s" % ", ".join(handlers_without_metadata))
 
 
 func _test_encounter_registry_uses_handler_list():
@@ -85,7 +85,7 @@ func _test_encounter_registry_uses_handler_list():
 
 	# Check for the handler list pattern (array of handler classes)
 	var has_handler_list = content.contains("HANDLER_CLASSES") or content.contains("_handler_classes") or content.contains("handler_classes")
-	var has_register_from_class = content.contains("_register_from_class") or content.contains("register_from_class") or content.contains("ENCOUNTER_TYPE")
+	var has_register_from_class = content.contains("_register_from_class") or content.contains("register_from_class") or content.contains("ENCOUNTER_ID")
 
 	if has_handler_list or has_register_from_class:
 		_pass("Uses handler list or metadata-based registration")
@@ -115,6 +115,7 @@ func _test_all_encounter_types_discoverable():
 		"slot_machine",
 		"wheel_of_fortune",
 	]
+	# Note: file names still match these patterns (e.g. shop_encounter_ui.gd)
 
 	var found_types: Array = []
 	var handler_dir = "res://scripts/encounters/types/"

@@ -48,11 +48,11 @@ func _setup_encounter() -> void:
 	"""Setup the encounter UI using the data-driven handler system."""
 	title_label.text = encounter_data["name"]
 
-	var encounter_type = encounter_data.get("type", "")
+	var encounter_id = encounter_data.get("id", "")
 
 	# Check if handler exists
-	if not EncounterHandlers.has_handler(encounter_type):
-		push_error("EncounterActive: Unknown encounter type: %s" % encounter_type)
+	if not EncounterHandlers.has_handler(encounter_id):
+		push_error("EncounterActive: Unknown encounter id: %s" % encounter_id)
 		return
 
 	# Create typed context with callbacks for handlers
@@ -74,7 +74,7 @@ func _setup_encounter() -> void:
 		content_container.add_child(ui)
 
 	# Check if encounter completes immediately
-	if EncounterHandlers.should_complete_immediately(encounter_type):
+	if EncounterHandlers.should_complete_immediately(encounter_id):
 		complete_button.disabled = false
 		encounter_completed = true
 

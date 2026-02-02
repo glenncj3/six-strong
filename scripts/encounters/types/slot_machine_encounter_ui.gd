@@ -5,7 +5,7 @@ extends RefCounted
 ## Starts with free spins, can pay resource for more.
 ##
 ## Auto-registration metadata (Phase 4):
-const ENCOUNTER_TYPE := "slot_machine"
+const ENCOUNTER_ID := "slot_machine"
 
 
 static func create_ui(encounter_data: Dictionary, context: Dictionary) -> Control:

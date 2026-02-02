@@ -83,11 +83,12 @@ func create_mock_context() -> Dictionary:
 	}
 
 
-func create_mock_encounter_data(encounter_type: String, custom_data: Dictionary = {}) -> Dictionary:
+func create_mock_encounter_data(encounter_id: String, custom_data: Dictionary = {}) -> Dictionary:
 	"""Create mock encounter data for testing."""
 	var base_data = {
-		"type": encounter_type,
-		"name": "Test %s" % encounter_type,
+		"id": encounter_id,
+		"type": encounter_id,
+		"name": "Test %s" % encounter_id,
 		"description": "Test encounter",
 		"image_path": "",
 		"bg_color": "#3D2E24",

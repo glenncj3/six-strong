@@ -3,7 +3,7 @@ extends RefCounted
 ## UI creation and reward preview for character shop encounters.
 ##
 ## Auto-registration metadata (Phase 4):
-const ENCOUNTER_TYPE := "character_shop"
+const ENCOUNTER_ID := "character_shop"  # Handles mercenary_camp, castle_winterfell, etc.
 ## Displays 2-3 characters from the run pool for purchase.
 ## Players spend gold to add characters to their grid.
 ##
