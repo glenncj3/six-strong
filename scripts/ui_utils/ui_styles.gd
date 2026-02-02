@@ -321,6 +321,14 @@ static func apply_text_outline(label: Label, outline_color: Color = Color.BLACK,
 	label.add_theme_constant_override("outline_size", outline_size)
 
 
+static func apply_text_glow(label: Label, glow_color: Color = Color(0.0, 0.0, 0.0, 0.85), glow_size: int = 12) -> void:
+	"""Apply a soft glow effect to a label using the shadow system."""
+	label.add_theme_color_override("font_shadow_color", glow_color)
+	label.add_theme_constant_override("shadow_offset_x", 0)
+	label.add_theme_constant_override("shadow_offset_y", 0)
+	label.add_theme_constant_override("shadow_outline_size", glow_size)
+
+
 static func set_margin_all(container: MarginContainer, margin: int) -> void:
 	"""Set all four margins on a MarginContainer to the same value."""
 	container.add_theme_constant_override("margin_left", margin)

@@ -203,8 +203,9 @@ static func _create_option_info_section(data: Dictionary, panel_type: OptionPane
 	name_label.text = data.get("name", "Unknown")
 	name_label.theme_type_variation = "HeaderLabel"
 	UIStyles.style_label(name_label, GameConstants.FONT_SIZE_REWARD)
-	var outline_size := 8
+	var outline_size := 4
 	UIStyles.apply_text_outline(name_label, Color.BLACK, outline_size)
+	UIStyles.apply_text_glow(name_label)
 
 	# Description
 	var desc_label = Label.new()
@@ -214,6 +215,7 @@ static func _create_option_info_section(data: Dictionary, panel_type: OptionPane
 	desc_label.max_lines_visible = 2
 	UIStyles.style_label(desc_label, GameConstants.FONT_SIZE_HEADING)
 	UIStyles.apply_text_outline(desc_label, Color.BLACK, outline_size)
+	UIStyles.apply_text_glow(desc_label)
 
 	return info_vbox
 
@@ -242,6 +244,7 @@ static func _add_combat_labels(info_vbox: VBoxContainer, data: Dictionary) -> vo
 	diff_label.add_theme_color_override("font_outline_color", Color("#8B6914"))
 	diff_label.add_theme_constant_override("outline_size", 3)
 	UIStyles.apply_text_outline(diff_label, Color("#4A3800"), 3)
+	UIStyles.apply_text_glow(diff_label)
 
 
 static func _add_combat_rewards_overlay(panel: PanelContainer, data: Dictionary) -> void:
@@ -259,6 +262,7 @@ static func _add_combat_rewards_overlay(panel: PanelContainer, data: Dictionary)
 	rewards_label.text = "%s%d  %s%d" % [GameConstants.EMOJI_GOLD, gold, GameConstants.EMOJI_STAR, xp]
 	UIStyles.style_label(rewards_label, GameConstants.FONT_SIZE_HEADING)
 	UIStyles.apply_text_outline(rewards_label)
+	UIStyles.apply_text_glow(rewards_label)
 
 	# Anchor to bottom-right
 	rewards_label.anchor_left = 1.0
