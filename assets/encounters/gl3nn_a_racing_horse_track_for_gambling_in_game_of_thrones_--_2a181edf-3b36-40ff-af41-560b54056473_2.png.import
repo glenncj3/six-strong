@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://die0fjvrumca7"
-path="res://.godot/imported/shadow_guild.png-7632922322908f7375ba9381a272eadd.ctex"
+uid="uid://c7i614hf0oc0a"
+path="res://.godot/imported/gl3nn_a_racing_horse_track_for_gambling_in_game_of_thrones_--_2a181edf-3b36-40ff-af41-560b54056473_2.png-000d4d7cdadbe34dc15048ccad743fec.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/legacies/shadow_guild.png"
-dest_files=["res://.godot/imported/shadow_guild.png-7632922322908f7375ba9381a272eadd.ctex"]
+source_file="res://assets/encounters/gl3nn_a_racing_horse_track_for_gambling_in_game_of_thrones_--_2a181edf-3b36-40ff-af41-560b54056473_2.png"
+dest_files=["res://.godot/imported/gl3nn_a_racing_horse_track_for_gambling_in_game_of_thrones_--_2a181edf-3b36-40ff-af41-560b54056473_2.png-000d4d7cdadbe34dc15048ccad743fec.ctex"]
 
 [params]
 

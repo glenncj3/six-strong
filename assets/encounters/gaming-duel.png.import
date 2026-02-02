@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dn74o7olhkmo3"
-path="res://.godot/imported/iron_legion.png-ef0322a38c8b3e4ffca375ffa79d99d1.ctex"
+uid="uid://b3oeqqerxtmsq"
+path="res://.godot/imported/gaming-duel.png-122bfaf1eb0500483a7b39ec3c3d798f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/legacies/iron_legion.png"
-dest_files=["res://.godot/imported/iron_legion.png-ef0322a38c8b3e4ffca375ffa79d99d1.ctex"]
+source_file="res://assets/encounters/gaming-duel.png"
+dest_files=["res://.godot/imported/gaming-duel.png-122bfaf1eb0500483a7b39ec3c3d798f.ctex"]
 
 [params]
 

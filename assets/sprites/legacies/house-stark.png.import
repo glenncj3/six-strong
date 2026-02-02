@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cwgcpvkgq6u7l"
-path="res://.godot/imported/merchant.png-14d8352acc3231d432f27a10e20ef17a.ctex"
+uid="uid://bp1q2u4hl6src"
+path="res://.godot/imported/house-stark.png-cc769898942de054b44e3d4b9abdde32.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/encounters/merchant.png"
-dest_files=["res://.godot/imported/merchant.png-14d8352acc3231d432f27a10e20ef17a.ctex"]
+source_file="res://assets/sprites/legacies/house-stark.png"
+dest_files=["res://.godot/imported/house-stark.png-cc769898942de054b44e3d4b9abdde32.ctex"]
 
 [params]
 

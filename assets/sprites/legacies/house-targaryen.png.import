@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dctmuoyujslq5"
-path="res://.godot/imported/wild_hunt.png-196b410539c6092ce41e616263e41a71.ctex"
+uid="uid://ctmwxv3ny0y6w"
+path="res://.godot/imported/house-targaryen.png-8dd421586bc7135e25b8834258a69843.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/legacies/wild_hunt.png"
-dest_files=["res://.godot/imported/wild_hunt.png-196b410539c6092ce41e616263e41a71.ctex"]
+source_file="res://assets/sprites/legacies/house-targaryen.png"
+dest_files=["res://.godot/imported/house-targaryen.png-8dd421586bc7135e25b8834258a69843.ctex"]
 
 [params]
 

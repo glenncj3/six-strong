@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b7hx87yjukeir"
-path="res://.godot/imported/knight_order.png-48bdf5d5efa66e477f8029c90e48684f.ctex"
+uid="uid://c88qoedg3oonr"
+path="res://.godot/imported/placeholder.png-90e8f95f1f2a9f942c2ea7d0665d5489.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/legacies/knight_order.png"
-dest_files=["res://.godot/imported/knight_order.png-48bdf5d5efa66e477f8029c90e48684f.ctex"]
+source_file="res://assets/sprites/legacies/placeholder.png"
+dest_files=["res://.godot/imported/placeholder.png-90e8f95f1f2a9f942c2ea7d0665d5489.ctex"]
 
 [params]
 

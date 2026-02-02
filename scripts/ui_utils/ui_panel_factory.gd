@@ -172,7 +172,7 @@ static func _add_full_art_background(panel: PanelContainer, data: Dictionary) ->
 	UIContainerHelpers.set_texture_safe(image, image_path)
 
 
-static func _create_option_info_section(data: Dictionary, _panel_type: OptionPanelType) -> VBoxContainer:
+static func _create_option_info_section(data: Dictionary, panel_type: OptionPanelType) -> VBoxContainer:
 	"""Create the info section (name, type, description) overlaid on the panel art."""
 	var info_vbox = VBoxContainer.new()
 	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -203,7 +203,8 @@ static func _create_option_info_section(data: Dictionary, _panel_type: OptionPan
 	name_label.text = data.get("name", "Unknown")
 	name_label.theme_type_variation = "HeaderLabel"
 	UIStyles.style_label(name_label, GameConstants.FONT_SIZE_REWARD)
-	UIStyles.apply_text_outline(name_label)
+	var outline_size := 8 if panel_type == OptionPanelType.ENCOUNTER else 4
+	UIStyles.apply_text_outline(name_label, Color.BLACK, outline_size)
 
 	# Description
 	var desc_label = Label.new()
@@ -212,7 +213,7 @@ static func _create_option_info_section(data: Dictionary, _panel_type: OptionPan
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc_label.max_lines_visible = 2
 	UIStyles.style_label(desc_label, GameConstants.FONT_SIZE_HEADING)
-	UIStyles.apply_text_outline(desc_label)
+	UIStyles.apply_text_outline(desc_label, Color.BLACK, outline_size)
 
 	return info_vbox
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://nem3b5mu2rrx"
-path="res://.godot/imported/nights_watch.png-f553e1e40a8caa48d74131bad2af5c00.ctex"
+uid="uid://bgus06ft1rpx6"
+path="res://.godot/imported/house-lannister.png-19b9ff94b2a6c9acce46caf15cedb51f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/legacies/nights_watch.png"
-dest_files=["res://.godot/imported/nights_watch.png-f553e1e40a8caa48d74131bad2af5c00.ctex"]
+source_file="res://assets/sprites/legacies/house-lannister.png"
+dest_files=["res://.godot/imported/house-lannister.png-19b9ff94b2a6c9acce46caf15cedb51f.ctex"]
 
 [params]
 

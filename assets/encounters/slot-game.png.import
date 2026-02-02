@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b3h5n7fffq3wb"
-path="res://.godot/imported/training.png-8531aa55239c2f8c84e0186af03a7b5f.ctex"
+uid="uid://b1tetyvqp8wqq"
+path="res://.godot/imported/slot-game.png-73214ea26004c6c16f41608fea3e1b2a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/encounters/training.png"
-dest_files=["res://.godot/imported/training.png-8531aa55239c2f8c84e0186af03a7b5f.ctex"]
+source_file="res://assets/encounters/slot-game.png"
+dest_files=["res://.godot/imported/slot-game.png-73214ea26004c6c16f41608fea3e1b2a.ctex"]
 
 [params]
 

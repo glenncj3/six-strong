@@ -20,6 +20,7 @@ var draft_manager: LegacyDraftManager = null
 var options_tiles_container: HBoxContainer = null
 var legacy_tiles: Array = []  # References to option tiles
 var select_buttons: Array = []  # SELECT buttons for each option
+var cached_tile_size: float = 0.0  # Cached to prevent resizing between rounds
 
 
 func _ready() -> void:
@@ -197,4 +198,6 @@ func _start_run() -> void:
 
 
 func _get_tile_size() -> float:
-	return UIScaler.calculate_tile_size(options_display_container.size.x, GameConstants.TEAM_SIZE)
+	if cached_tile_size <= 0.0:
+		cached_tile_size = UIScaler.calculate_tile_size(options_display_container.size.x, GameConstants.TEAM_SIZE)
+	return cached_tile_size

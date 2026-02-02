@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://buskhox62plg1"
-path="res://.godot/imported/house_baratheon.png-3e09f087f3cac4d87048e605b0c7bd61.ctex"
+uid="uid://dtchb0csdxlbt"
+path="res://.godot/imported/gl3nn_a_jousting_arena_for_gambling_in_game_of_thrones_--ar_7_22340dbf-78d8-4593-863d-e10f06eb16e6_3.png-cb6d698490404ae1020b708dfd0442ab.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/legacies/house_baratheon.png"
-dest_files=["res://.godot/imported/house_baratheon.png-3e09f087f3cac4d87048e605b0c7bd61.ctex"]
+source_file="res://assets/encounters/gl3nn_a_jousting_arena_for_gambling_in_game_of_thrones_--ar_7_22340dbf-78d8-4593-863d-e10f06eb16e6_3.png"
+dest_files=["res://.godot/imported/gl3nn_a_jousting_arena_for_gambling_in_game_of_thrones_--ar_7_22340dbf-78d8-4593-863d-e10f06eb16e6_3.png-cb6d698490404ae1020b708dfd0442ab.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dk5n0fasib08t"
-path="res://.godot/imported/house_targaryen.png-68e279175153f03272a054a32bed9173.ctex"
+uid="uid://pr4k48kinfgm"
+path="res://.godot/imported/mercenary-camp.png-71341877d5bc98348e3cfb5e96a0cdf3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/legacies/house_targaryen.png"
-dest_files=["res://.godot/imported/house_targaryen.png-68e279175153f03272a054a32bed9173.ctex"]
+source_file="res://assets/encounters/mercenary-camp.png"
+dest_files=["res://.godot/imported/mercenary-camp.png-71341877d5bc98348e3cfb5e96a0cdf3.ctex"]
 
 [params]
 

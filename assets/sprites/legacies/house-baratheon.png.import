@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cm5oxqqet8yed"
-path="res://.godot/imported/house_lannister.png-a9097d3c820d3872f2ac5094e9b71400.ctex"
+uid="uid://budvgpbwd5fl7"
+path="res://.godot/imported/house-baratheon.png-b065556f4e1ae106d73a6e59782f8118.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/legacies/house_lannister.png"
-dest_files=["res://.godot/imported/house_lannister.png-a9097d3c820d3872f2ac5094e9b71400.ctex"]
+source_file="res://assets/sprites/legacies/house-baratheon.png"
+dest_files=["res://.godot/imported/house-baratheon.png-b065556f4e1ae106d73a6e59782f8118.ctex"]
 
 [params]
 

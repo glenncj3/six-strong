@@ -125,6 +125,11 @@ func _pick_weighted_from_category(category: String) -> Dictionary:
 	var weights = []
 	for type_def in _encounter_types:
 		if type_def["type"] == category:
+			# Legacy-sourced encounters require presence in the RunPool
+			if type_def.get("source", "base") == "legacy":
+				var enc_id = type_def.get("id", "")
+				if _run_pool == null or not _run_pool.has_content(RunPoolScript.ContentType.ENCOUNTER, enc_id):
+					continue
 			candidates.append(type_def)
 			weights.append(type_def.get("weight", 1.0))
 	if candidates.is_empty():

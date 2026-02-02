@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://r1fvjm8riavk"
-path="res://.godot/imported/arcane_academy.png-ffcc1b7de68ef51865a4cc7115ff8ffc.ctex"
+uid="uid://3gxkouvyb5hc"
+path="res://.godot/imported/nights-watch.png-1a927704d9e27f0331ffe9e3f4a320e5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/legacies/arcane_academy.png"
-dest_files=["res://.godot/imported/arcane_academy.png-ffcc1b7de68ef51865a4cc7115ff8ffc.ctex"]
+source_file="res://assets/sprites/legacies/nights-watch.png"
+dest_files=["res://.godot/imported/nights-watch.png-1a927704d9e27f0331ffe9e3f4a320e5.ctex"]
 
 [params]
 

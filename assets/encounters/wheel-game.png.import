@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dbvglwfkjknvd"
-path="res://.godot/imported/elite.png-021897ee05572874729f5c720253c74b.ctex"
+uid="uid://ikg74u0wctpm"
+path="res://.godot/imported/wheel-game.png-304e45c4b8de5eda9c3b787ca8593911.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/encounters/elite.png"
-dest_files=["res://.godot/imported/elite.png-021897ee05572874729f5c720253c74b.ctex"]
+source_file="res://assets/encounters/wheel-game.png"
+dest_files=["res://.godot/imported/wheel-game.png-304e45c4b8de5eda9c3b787ca8593911.ctex"]
 
 [params]
 
