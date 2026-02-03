@@ -157,6 +157,8 @@ Triggered abilities fire independently of the character's cooldown. When the tri
 
 ```json
 {
+  "name": "<display_name>",
+  "description": "<description_text>",
   "type": "triggered",
   "trigger": "<trigger_name>",
   "target_mode": "<target_mode>",
@@ -169,6 +171,8 @@ Triggered abilities fire independently of the character's cooldown. When the tri
 
 | Field | Required | Description |
 |-------|----------|-------------|
+| `name` | No | Display name shown in the character inspect popup |
+| `description` | No | Description text shown in the character inspect popup |
 | `type` | Yes | Must be `"triggered"` |
 | `trigger` | Yes | The combat event that fires this ability |
 | `target_mode` | Yes | Who to apply the effect to (see Target Modes above) |
@@ -196,6 +200,8 @@ A character that gives all burn-capable allies +1 `burn_value` whenever any team
   "abilities": [
     "attack_enemy",
     {
+      "name": "Flame Resonance",
+      "description": "When an ally crits, all allies with burn abilities gain +1 burn value",
       "type": "triggered",
       "trigger": "on_ally_crit",
       "target_mode": "ally_all",

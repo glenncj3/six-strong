@@ -80,9 +80,25 @@ func _finalize_tile() -> void:
 	_tile.clickable = false
 
 
-func _add_abilities(ability_ids: Array) -> void:
-	for ability_id in ability_ids:
-		var ability = GameData.get_ability(ability_id)
+func _add_abilities(ability_entries: Array) -> void:
+	for entry in ability_entries:
+		var ability: Dictionary
+		var fallback_name: String = ""
+		if entry is String:
+			fallback_name = entry
+			ability = GameData.get_ability(entry)
+		elif entry is Dictionary:
+			fallback_name = entry.get("id", "Triggered Ability")
+			# Inline ability - use directly, but also merge base ability if id exists
+			if entry.has("id") and entry["id"] != "":
+				var base = GameData.get_ability(entry["id"])
+				ability = base.duplicate()
+				ability.merge(entry, true)
+			else:
+				ability = entry
+		else:
+			continue
+
 		if ability.is_empty():
 			continue
 
@@ -90,7 +106,7 @@ func _add_abilities(ability_ids: Array) -> void:
 		ability_box.add_theme_constant_override("separation", 4)
 
 		var name_label = Label.new()
-		name_label.text = ability.get("name", ability_id)
+		name_label.text = ability.get("name", fallback_name)
 		name_label.theme_type_variation = "HeaderLabel"
 		name_label.add_theme_font_size_override("font_size", 24)
 		name_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_GOLD)
