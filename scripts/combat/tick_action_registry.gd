@@ -62,6 +62,6 @@ static func _burn_apply(context: Dictionary) -> void:
 
 	print("[Combat] BURN procs on %s for %d damage (%d stacks)" % [character.character_name, int(effect.stacks), effect.stacks])
 
-	# Deal damage equal to total burn stacks (null source = no block/crit)
+	# Deal damage equal to total burn stacks (null source = no block/crit, "burn" type = shieldable)
 	var deal_damage: Callable = mgr_ctx["deal_damage"]
-	deal_damage.call(null, character, float(effect.stacks))
+	deal_damage.call(null, character, float(effect.stacks), "burn")

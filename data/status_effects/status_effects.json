@@ -14,7 +14,7 @@
     {
       "id": "shield",
       "name": "Shield",
-      "description": "Absorbs damage from attacks. Each stack absorbs 1 point of damage.",
+      "description": "Absorbs damage from attacks and burn. Each stack absorbs 1 point of damage.",
       "tags": ["buff", "shield"],
       "merge_behavior": "add_stacks",
       "duration_type": "permanent",

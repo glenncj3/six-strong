@@ -77,6 +77,7 @@ func _run_tests():
 	test_shield_partial_absorb()
 	test_shield_removed_at_zero()
 	test_shield_does_not_absorb_poison()
+	test_shield_absorbs_burn_damage()
 	test_shield_stacks_merge()
 	test_shield_merge_from_multiple_sources()
 	test_shield_self_ability_integration()
@@ -761,6 +762,27 @@ func test_shield_does_not_absorb_poison():
 	# Poison tick deals 5 damage, bypasses shield
 	assert_true(enemy.health < 1000.0, "poison bypassed shield")
 	assert_eq(enemy.get_stacks("shield"), 50, "shield stacks unchanged by poison")
+
+
+func test_shield_absorbs_burn_damage():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 0.0, 0.0, 0.0))
+	manager.initialize_combat(pg, eg)
+
+	var enemy = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	var shield_template = _get_shield_template()
+	var shield = StatusEffectFactory.create_from_template(shield_template, "s1", {"stacks": 50})
+	manager.apply_effect(enemy, shield)
+
+	var burn_template = _get_burn_template()
+	var burn = StatusEffectFactory.create_from_template(burn_template, "s1", {"stacks": 10})
+	manager.apply_effect(enemy, burn)
+
+	# Burn deals 10 damage on apply, shield absorbs it
+	assert_true(abs(enemy.health - 1000.0) < 0.01, "burn damage absorbed by shield")
+	assert_eq(enemy.get_stacks("shield"), 40, "shield reduced from 50 to 40")
+	assert_eq(enemy.get_stacks("burn"), 10, "burn stacks remain")
 
 
 func test_shield_stacks_merge():

@@ -369,14 +369,15 @@ func _execute_ability(character: CombatCharacter, ability: Dictionary) -> void:
 	AbilityExecutor.execute(character, ability, context)
 
 
-func _execute_damage(source, target: CombatCharacter, base_damage: float) -> void:
+func _execute_damage(source, target: CombatCharacter, base_damage: float, damage_type: String = "") -> void:
 	var result = DamageResolver.resolve(source, target, base_damage)
 
 	if result.blocked:
 		damage_blocked.emit(source, target)
 
-	# Shield absorption: absorb damage from attacks (source is a CombatCharacter)
-	if source is CombatCharacter and target.has_effect("shield"):
+	# Shield absorption: absorb damage from attacks and burn (but not poison)
+	var is_shieldable = source is CombatCharacter or damage_type == "burn"
+	if is_shieldable and target.has_effect("shield"):
 		var shield_effect = target.get_effect("shield")
 		var absorbed = min(shield_effect.stacks, result.damage)
 		shield_effect.stacks -= absorbed
