@@ -12,6 +12,8 @@ signal concede_requested
 @onready var gold_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/GoldLabel
 @onready var gems_label = $HeaderBar/MarginContainer/HBoxContainer/CenterSection/GemsLabel
 @onready var concede_button = $HeaderBar/MarginContainer/HBoxContainer/RightSection/ConcedeButton
+@onready var items_button = $ItemsButton
+@onready var items_popup = $ItemsPopup
 @onready var concede_confirm_dialog = $ConcedeConfirmDialog
 @onready var dialog_panel = $ConcedeConfirmDialog/DialogPanel
 @onready var dialog_title = $ConcedeConfirmDialog/DialogPanel/DialogContent/DialogTitle
@@ -35,6 +37,7 @@ func _ready() -> void:
 	_apply_visual_styling()
 
 	concede_button.pressed.connect(_on_concede_button_pressed)
+	items_button.pressed.connect(_on_items_button_pressed)
 	dialog_confirm_button.pressed.connect(_on_concede_confirmed)
 	dialog_cancel_button.pressed.connect(_on_concede_dialog_closed)
 	dialog_overlay.gui_input.connect(_on_overlay_input)
@@ -54,6 +57,7 @@ func _apply_visual_styling() -> void:
 	gold_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	gems_label.add_theme_color_override("font_color", GameConstants.COLOR_TEXT_LIGHT)
 	_style_concede_button()
+	_style_items_button()
 	_style_concede_dialog()
 
 
@@ -79,6 +83,12 @@ func _style_concede_button() -> void:
 	concede_button.add_theme_color_override("font_hover_color", Color.WHITE)
 	concede_button.add_theme_color_override("font_pressed_color", GameConstants.COLOR_TEXT_LIGHT)
 	concede_button.add_theme_font_size_override("font_size", 16)
+
+
+func _style_items_button() -> void:
+	UIStyles.setup_button(items_button, 18)
+	ButtonEffects.apply_effects(items_button)
+	items_button.visible = false  # Hidden by default, shown during runs
 
 
 func _style_concede_dialog() -> void:
@@ -135,6 +145,7 @@ func _crossfade_to_run_mode() -> void:
 	_header_tween.tween_callback(func():
 		_is_draft_mode = false
 		gems_label.visible = false
+		items_button.visible = true  # Show items button during runs
 		_update_stats()
 	)
 
@@ -156,12 +167,14 @@ func _enter_draft_mode() -> void:
 	gold_label.text = "%s 0" % GameConstants.EMOJI_GOLD
 	gems_label.text = "%s %d" % [GameConstants.EMOJI_GEM, PlayerAccount.get_gems()]
 	gems_label.visible = true
+	items_button.visible = false  # Hide items button during draft
 
 
 func _enter_run_mode() -> void:
 	_is_draft_mode = false
 	content_container.modulate.a = 1.0
 	gems_label.visible = false
+	items_button.visible = true  # Show items button during runs
 	_update_stats()
 
 
@@ -267,3 +280,15 @@ func _on_overlay_input(event: InputEvent) -> void:
 func _on_concede_dialog_closed() -> void:
 	_concede_dialog_open = false
 	concede_confirm_dialog.visible = false
+
+
+# =============================================================================
+# ITEMS BUTTON HANDLING
+# =============================================================================
+
+func _on_items_button_pressed() -> void:
+	var run_state = RunManager.get_run_state()
+	if not run_state:
+		return
+	var items = run_state.inventory.get_all_items()
+	items_popup.show_items(items)

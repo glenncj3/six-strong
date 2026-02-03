@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://dxvcx7qkajyqr"]
+[gd_scene load_steps=6 format=3 uid="uid://dxvcx7qkajyqr"]
 
 [ext_resource type="Script" path="res://scenes/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scenes/components/run_hud.gd" id="2_run_hud"]
 [ext_resource type="PackedScene" uid="uid://header_bar_comp" path="res://scenes/components/header_bar.tscn" id="3_header_bar"]
 [ext_resource type="PackedScene" uid="uid://team_hud_comp1" path="res://scenes/components/team_hud.tscn" id="4_team_hud"]
+[ext_resource type="PackedScene" uid="uid://items_popup_comp" path="res://scenes/components/items_popup.tscn" id="5_items_popup"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -83,6 +84,21 @@ grow_horizontal = 0
 grow_vertical = 2
 text = "✕"
 
+[node name="ItemsButton" type="Button" parent="HUDLayer/RunHUD"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -60.0
+offset_top = -98.0
+offset_right = 60.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "ITEMS"
+
 [node name="ConcedeConfirmDialog" type="Control" parent="HUDLayer/RunHUD"]
 visible = false
 layout_mode = 1
@@ -136,6 +152,9 @@ text = "CANCEL"
 custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 text = "CONCEDE"
+
+[node name="ItemsPopup" parent="HUDLayer/RunHUD" instance=ExtResource("5_items_popup")]
+layout_mode = 1
 
 [node name="TeamHUD" parent="HUDLayer" instance=ExtResource("4_team_hud")]
 layout_mode = 1
