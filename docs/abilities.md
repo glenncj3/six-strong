@@ -162,9 +162,8 @@ Triggered abilities fire independently of the character's cooldown. When the tri
   "type": "triggered",
   "trigger": "<trigger_name>",
   "target_mode": "<target_mode>",
-  "buff_stat": "<stat_name>",
-  "buff_modifier_type": "flat" | "percent",
-  "buff_value": <number>,
+  "action": "<action_type>",
+  // ... action-specific fields (see below)
   "require_ability_category": "<category>"  // optional filter
 }
 ```
@@ -174,20 +173,287 @@ Triggered abilities fire independently of the character's cooldown. When the tri
 | `name` | No | Display name shown in the character inspect popup |
 | `description` | No | Description text shown in the character inspect popup |
 | `type` | Yes | Must be `"triggered"` |
-| `trigger` | Yes | The combat event that fires this ability |
+| `trigger` | Yes | The combat event that fires this ability (see Available Triggers) |
 | `target_mode` | Yes | Who to apply the effect to (see Target Modes above) |
-| `buff_stat` | Yes | The stat to modify on targets |
+| `action` | No | What the ability does (defaults to `"buff_stat"`) |
+| `require_ability_category` | No | Only affect targets that have an ability of this category |
+
+### Actions
+
+The `action` field determines what the triggered ability does. Each action has its own required fields.
+
+#### `buff_stat` (default)
+Permanently modifies a stat on targets.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `buff_stat` | Yes | The stat to modify (e.g., `"burn_value"`, `"damage"`) |
 | `buff_modifier_type` | Yes | `"flat"` (additive) or `"percent"` (multiplicative) |
 | `buff_value` | Yes | Amount to modify the stat by |
-| `require_ability_category` | No | Only affect targets that have an ability of this category |
+
+#### `deal_damage`
+Deals damage to targets. Damage goes through normal resolution (can crit, blocked by shields, etc.).
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `damage_value` | No* | Flat damage amount |
+| `damage_from` | No* | Stat to read damage from (e.g., `"damage"`, `"burn_value"`) |
+
+*One of `damage_value` or `damage_from` is required.
+
+#### `heal`
+Heals targets.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `heal_value` | No* | Flat heal amount |
+| `heal_from` | No* | Stat to read heal amount from (e.g., `"heal_value"`) |
+
+*One of `heal_value` or `heal_from` is required.
+
+#### `apply_effect`
+Applies a status effect (poison, burn, shield, haste, etc.) to targets.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `applies_effect` | Yes | Status effect ID from `status_effects.json` (e.g., `"poison"`, `"burn"`) |
+| `stacks_from` | No | Stat to read stack count from (e.g., `"poison_value"`) |
+| `duration_from` | No | Stat to read duration from (e.g., `"haste_value"`) |
 
 ### Available Triggers
 
-| Trigger | Fires When |
-|---------|------------|
-| `on_ally_crit` | Any ally on the same team lands a critical hit |
+| Trigger | Fires When | Fires On |
+|---------|------------|----------|
+| `on_cooldown` | Character's cooldown completes (before abilities execute) | The character whose cooldown completed |
+| `on_ally_crit` | Any ally on the same team lands a critical hit | All living allies |
+| `on_front_ally_strike` | The front-row ally in the same column completes their cooldown | The back-row character directly behind |
+| `on_damage_taken` | Character takes damage | The character that took damage |
+| `on_heal` | Character is healed | The character that was healed |
+| `on_death` | Character dies | The dying character (before removal) |
+| `on_ally_death` | Any ally dies | All living allies |
+| `on_enemy_death` | Any enemy dies | All living enemies |
+| `on_<effect_id>` | Character receives a status effect (e.g., `on_haste`) | The character receiving the effect |
+| `on_ally_<effect_id>` | Any ally receives a status effect (e.g., `on_ally_haste`) | All living allies |
+| `on_enemy_<effect_id>` | Any enemy receives a status effect (e.g., `on_enemy_haste`) | All living enemies |
 
 More triggers can be added by emitting `_process_triggered_effects` calls in `combat_manager.gd` for new combat events.
+
+### Trigger: `on_cooldown`
+
+Fires when a character's cooldown completes, **before** their abilities execute. Useful for effects that should happen at the start of a character's turn.
+
+**Trigger Data:**
+| Key | Value |
+|-----|-------|
+| `character` | The character whose cooldown completed |
+
+### Trigger: `on_damage_taken`
+
+Fires when a character takes damage (after shields absorb, before death check).
+
+**Trigger Data:**
+| Key | Value |
+|-----|-------|
+| `target` | The character that took damage |
+| `amount` | The damage amount after mitigation |
+| `source` | The character/effect that dealt the damage |
+
+### Trigger: `on_heal`
+
+Fires when a character is healed.
+
+**Trigger Data:**
+| Key | Value |
+|-----|-------|
+| `target` | The character that was healed |
+| `amount` | The actual heal amount (capped by missing health) |
+| `source` | The character that provided the healing |
+
+### Trigger: `on_death`
+
+Fires on a character when they die, before they are removed from combat. Allows "on death" effects like explosions or buffs to remaining allies.
+
+**Trigger Data:**
+| Key | Value |
+|-----|-------|
+| `character` | The dying character |
+
+### Trigger: `on_ally_death`
+
+Fires on all living allies when an ally dies.
+
+**Trigger Data:**
+| Key | Value |
+|-----|-------|
+| `dead_character` | The ally that died |
+
+### Trigger: `on_enemy_death`
+
+Fires on all living enemies when an enemy dies.
+
+**Trigger Data:**
+| Key | Value |
+|-----|-------|
+| `dead_character` | The enemy that died |
+
+### Effect Application Triggers (`on_<effect_id>`)
+
+Triggers with the pattern `on_<effect_id>` fire automatically when the corresponding status effect is applied to a character. This works for any effect defined in `status_effects.json`:
+
+- `on_haste` - Fires on the character receiving haste
+- `on_poison` - Fires on the character receiving poison
+- `on_burn` - Fires on the character receiving burn
+- `on_shield` - Fires on the character receiving shield
+- `on_slow` - Fires on the character receiving slow
+- `on_freeze` - Fires on the character receiving freeze
+
+**Key behavior:** The trigger fires on **every application**, including when the effect is already active and gets extended/stacked. For example, if a character is hasted for 3 seconds, then hasted again for 2 seconds before the first expires, `on_haste` fires twice.
+
+**Trigger Data:**
+| Key | Value |
+|-----|-------|
+| `target` | The character receiving the effect |
+| `effect` | The active effect (after merging, if applicable) |
+
+### Ally/Enemy Effect Triggers (`on_ally_<effect_id>`, `on_enemy_<effect_id>`)
+
+In addition to `on_<effect_id>` (which fires on the affected character), two broader triggers fire on team-wide observers:
+
+- `on_ally_<effect_id>` - Fires on **all living allies** (including the affected character) when any ally receives the effect
+- `on_enemy_<effect_id>` - Fires on **all living enemies** when an enemy receives the effect
+
+**Examples:**
+- `on_ally_haste` - Fires on all allies when any ally is hasted (including self)
+- `on_enemy_haste` - Fires on all enemies when an enemy is hasted
+- `on_ally_poison` - Fires on all allies when any ally is poisoned
+- `on_enemy_shield` - Fires on all enemies when an enemy gains shield
+
+**Multi-target behavior:** When an ability affects multiple targets (e.g., poisoning 3 enemies), the trigger fires **once per target**. For example, if "Poison All Enemies" poisons 3 enemies, `on_enemy_poison` fires 3 times on all living allies. This allows effects to scale with the number of targets affected.
+
+**Trigger Data:**
+| Key | Value |
+|-----|-------|
+| `target` | The character who received the effect |
+| `effect` | The active effect (after merging, if applicable) |
+
+**Example: Speed Synergy**
+
+A character that buffs allies whenever any ally gets hasted:
+
+```json
+{
+  "id": "TEMPO_MASTER",
+  "name": "Tempo Master",
+  "abilities": [
+    "attack_enemy",
+    {
+      "name": "Speed Synergy",
+      "description": "When any ally is hasted, all allies gain +5% damage",
+      "type": "triggered",
+      "trigger": "on_ally_haste",
+      "target_mode": "ally_all",
+      "action": "buff_stat",
+      "buff_stat": "damage",
+      "buff_modifier_type": "percent",
+      "buff_value": 0.05
+    }
+  ],
+  "base_stats": { ... }
+}
+```
+
+**Example: Haste Disruptor**
+
+A character that reacts when enemies get speed buffs:
+
+```json
+{
+  "id": "HASTE_DISRUPTOR",
+  "name": "Haste Disruptor",
+  "abilities": [
+    "attack_enemy",
+    {
+      "name": "Disruption Field",
+      "description": "When an enemy is hasted, deal 8 damage to them",
+      "type": "triggered",
+      "trigger": "on_enemy_haste",
+      "target_mode": "enemy_single",
+      "action": "deal_damage",
+      "damage_value": 8
+    }
+  ],
+  "base_stats": { ... }
+}
+```
+
+**Example: Self-Haste Trigger**
+
+A character that deals damage whenever they personally receive haste:
+
+```json
+{
+  "id": "SPEED_DEMON",
+  "name": "Speed Demon",
+  "abilities": [
+    "attack_enemy",
+    {
+      "name": "Adrenaline Rush",
+      "description": "When hasted, deal 10 damage to a random enemy",
+      "type": "triggered",
+      "trigger": "on_haste",
+      "target_mode": "enemy_single",
+      "action": "deal_damage",
+      "damage_value": 10
+    }
+  ],
+  "base_stats": { ... }
+}
+```
+
+### Trigger: `on_front_ally_strike`
+
+This positional trigger creates synergy between front and back row characters in the same column. It fires when a front-row character's cooldown completes (they "strike"), triggering abilities on the back-row ally directly behind them.
+
+**Requirements:**
+- The character with this trigger must be in the **back row**
+- There must be a living ally in the **front row, same column**
+- The front ally's cooldown must complete (any ability type: attack, burn, poison, heal, etc.)
+
+**Trigger Data:**
+| Key | Value |
+|-----|-------|
+| `front_ally` | The front-row character that just acted |
+| `character` | The back-row character receiving the trigger |
+
+**Example: Backstab Archer**
+
+A back-row archer that deals bonus damage whenever their front-line partner attacks:
+
+```json
+{
+  "id": "BACKSTAB_ARCHER",
+  "name": "Backstab Archer",
+  "abilities": [
+    "attack_enemy",
+    {
+      "name": "Opportunist",
+      "description": "When front ally strikes, deal 5 damage to an enemy",
+      "type": "triggered",
+      "trigger": "on_front_ally_strike",
+      "target_mode": "enemy_single",
+      "action": "deal_damage",
+      "damage_value": 5
+    }
+  ],
+  "base_stats": { ... }
+}
+```
+
+**How it works:**
+1. Place this character in the back row (row 1) with an ally in front (row 0, same column).
+2. When the front ally's cooldown completes and they act, this trigger fires.
+3. The archer's "Opportunist" ability executes, dealing 5 damage to an enemy.
+4. This happens in addition to the archer's normal cooldown-based attacks.
 
 ### Example: Crit Synergy Burn
 
@@ -205,6 +471,7 @@ A character that gives all burn-capable allies +1 `burn_value` whenever any team
       "type": "triggered",
       "trigger": "on_ally_crit",
       "target_mode": "ally_all",
+      "action": "buff_stat",
       "buff_stat": "burn_value",
       "buff_modifier_type": "flat",
       "buff_value": 1,

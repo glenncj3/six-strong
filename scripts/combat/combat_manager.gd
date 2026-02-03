@@ -170,29 +170,97 @@ func _apply_buff_adjacent_attack(source: CombatCharacter, ability: Dictionary, p
 
 
 func _apply_triggered_ability(source: CombatCharacter, ability: Dictionary, trigger: String) -> void:
-	var buff_stat = ability.get("buff_stat", "")
-	var mod_type = ability.get("buff_modifier_type", "flat")
-	var buff_value = float(ability.get("buff_value", 0))
 	var target_mode = ability.get("target_mode", "self")
 	var require_category = ability.get("require_ability_category", "")
+	var action_type = ability.get("action", "buff_stat")  # Default to buff_stat for backwards compatibility
 
 	var action = func(data: Dictionary) -> void:
 		var targets = CombatTargeting.resolve_targets(source, _state.board, target_mode)
 		if require_category != "":
 			targets = _filter_targets_by_ability_category(targets, require_category)
-		for target in targets:
-			if not buff_stat.is_empty():
-				var effect = CombatEffect.create_stat_modifier(
-					"character", source.id, buff_stat, buff_value, mod_type, "permanent"
-				)
-				effect.tags = ["buff"]
-				apply_effect(target, effect)
+		_execute_triggered_action(source, ability, action_type, targets, data)
 
 	var effect = CombatEffect.create_triggered(
 		"character", source.id, trigger, action, "combat"
 	)
-	effect.tags = ["buff"]
+	effect.tags = ["triggered"]
 	apply_effect(source, effect)
+
+
+func _execute_triggered_action(source: CombatCharacter, ability: Dictionary, action_type: String, targets: Array, data: Dictionary) -> void:
+	match action_type:
+		"buff_stat":
+			_triggered_action_buff_stat(source, ability, targets)
+		"deal_damage":
+			_triggered_action_deal_damage(source, ability, targets)
+		"heal":
+			_triggered_action_heal(source, ability, targets)
+		"apply_effect":
+			_triggered_action_apply_effect(source, ability, targets)
+
+
+func _triggered_action_buff_stat(source: CombatCharacter, ability: Dictionary, targets: Array) -> void:
+	var buff_stat = ability.get("buff_stat", "")
+	var mod_type = ability.get("buff_modifier_type", "flat")
+	var buff_value = float(ability.get("buff_value", 0))
+	if buff_stat.is_empty():
+		return
+	for target in targets:
+		var effect = CombatEffect.create_stat_modifier(
+			"character", source.id, buff_stat, buff_value, mod_type, "permanent"
+		)
+		effect.tags = ["buff"]
+		apply_effect(target, effect)
+
+
+func _triggered_action_deal_damage(source: CombatCharacter, ability: Dictionary, targets: Array) -> void:
+	var damage_value: float
+	var damage_from = ability.get("damage_from", "")
+	if damage_from != "":
+		damage_value = source.get_stat_value(damage_from)
+	else:
+		damage_value = float(ability.get("damage_value", 0))
+	if damage_value <= 0:
+		return
+	for target in targets:
+		_execute_damage(source, target, damage_value)
+
+
+func _triggered_action_heal(source: CombatCharacter, ability: Dictionary, targets: Array) -> void:
+	var heal_value: float
+	var heal_from = ability.get("heal_from", "")
+	if heal_from != "":
+		heal_value = source.get_stat_value(heal_from)
+	else:
+		heal_value = float(ability.get("heal_value", 0))
+	if heal_value <= 0:
+		return
+	for target in targets:
+		heal_character(target, heal_value, source, false)
+
+
+func _triggered_action_apply_effect(source: CombatCharacter, ability: Dictionary, targets: Array) -> void:
+	var effect_id = ability.get("applies_effect", "")
+	if effect_id == "":
+		return
+	var template = _get_status_effect_data(effect_id)
+	if template.is_empty():
+		return
+	var overrides = _build_triggered_effect_overrides(source, ability)
+	for target in targets:
+		var effect = StatusEffectFactory.create_from_template(template, source.id, overrides)
+		apply_effect(target, effect)
+
+
+func _build_triggered_effect_overrides(source: CombatCharacter, ability: Dictionary) -> Dictionary:
+	var overrides = {}
+	var stacks_from = ability.get("stacks_from", "")
+	if stacks_from != "":
+		overrides["stacks"] = int(source.get_stat_value(stacks_from))
+	var duration_from = ability.get("duration_from", "")
+	if duration_from != "":
+		overrides["duration_value"] = source.get_stat_value(duration_from)
+	return overrides
 
 
 func _filter_targets_by_ability_category(targets: Array, category: String) -> Array:
@@ -259,6 +327,15 @@ func _execute_character_action(character: CombatCharacter) -> void:
 
 	# Process on_cooldown triggered effects
 	_process_triggered_effects(character, "on_cooldown", {character = character})
+
+	# Process on_front_ally_strike for back-row ally when front-row character acts
+	if character.row == GameConstants.ROW_FRONT:
+		var back_ally = _state.board.get_character_at(character.team, GameConstants.ROW_BACK, character.column)
+		if back_ally and back_ally.is_alive:
+			_process_triggered_effects(back_ally, "on_front_ally_strike", {
+				front_ally = character,
+				character = back_ally
+			})
 
 	for aid in character.ability_ids:
 		var ability = _lookup_ability(aid)
@@ -404,6 +481,15 @@ func apply_effect(target: CombatCharacter, effect_to_apply: CombatEffect) -> voi
 		else:
 			active_effect = effect_to_apply
 			_effect_manager.process_triggered_effects(target, "on_" + result.trigger_id, {target = target, effect = active_effect})
+
+		# Process on_ally_<effect_id> triggers for all living allies
+		for ally in _state.board.get_living_characters_on_team(target.team):
+			_process_triggered_effects(ally, "on_ally_" + result.trigger_id, {target = target, effect = active_effect})
+
+		# Process on_enemy_<effect_id> triggers for all living enemies
+		var enemy_team = GameConstants.get_enemy_team(target.team)
+		for enemy in _state.board.get_living_characters_on_team(enemy_team):
+			_process_triggered_effects(enemy, "on_enemy_" + result.trigger_id, {target = target, effect = active_effect})
 
 		# Invoke on_apply callback if present
 		if active_effect != null and active_effect.on_apply.is_valid():
