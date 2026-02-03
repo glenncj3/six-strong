@@ -11,6 +11,7 @@ extends Node
 const SaveDataValidatorScript = preload("res://scripts/utils/save_data_validator.gd")
 const RunStateScript = preload("res://scripts/managers/run_state.gd")
 const RunPoolScript = preload("res://scripts/managers/run_pool.gd")
+const RunTriggeredAbilitiesScript = preload("res://scripts/managers/run_triggered_abilities.gd")
 
 # =============================================================================
 # SIGNALS
@@ -666,9 +667,15 @@ func trigger_lingering_effects(trigger_type: String) -> Array[Dictionary]:
 
 
 func trigger_character_acquired_effects(character: CharacterInstance) -> Array[Dictionary]:
-	"""Trigger lingering effects for a newly acquired character."""
+	"""Trigger lingering effects and character abilities for a newly acquired character."""
 	if not _run_state:
 		return []
+
+	# Process character ability triggers (on_recruit, on_ally_recruit)
+	var all_characters = _run_state.get_team()
+	RunTriggeredAbilitiesScript.process_recruit_triggers(character, all_characters, self)
+
+	# Process lingering skill effects (next_character_acquired)
 	var triggered = _run_state.skill_manager.trigger_character_acquired_effects(character, self)
 	if triggered.size() > 0:
 		save_run_state()

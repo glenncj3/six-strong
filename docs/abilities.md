@@ -222,6 +222,10 @@ Applies a status effect (poison, burn, shield, haste, etc.) to targets.
 
 ### Available Triggers
 
+#### Combat Triggers
+
+These triggers fire during combat and are processed by `CombatManager`:
+
 | Trigger | Fires When | Fires On |
 |---------|------------|----------|
 | `on_cooldown` | Character's cooldown completes (before abilities execute) | The character whose cooldown completed |
@@ -236,7 +240,18 @@ Applies a status effect (poison, burn, shield, haste, etc.) to targets.
 | `on_ally_<effect_id>` | Any ally receives a status effect (e.g., `on_ally_haste`) | All living allies |
 | `on_enemy_<effect_id>` | Any enemy receives a status effect (e.g., `on_enemy_haste`) | All living enemies |
 
-More triggers can be added by emitting `_process_triggered_effects` calls in `combat_manager.gd` for new combat events.
+More combat triggers can be added by emitting `_process_triggered_effects` calls in `combat_manager.gd` for new combat events.
+
+#### Run-Time Triggers
+
+These triggers fire outside of combat and are processed by `RunTriggeredAbilities`:
+
+| Trigger | Fires When | Fires On |
+|---------|------------|----------|
+| `on_recruit` | This character is recruited to the team | The recruited character |
+| `on_ally_recruit` | Any character is recruited (including self) | All characters on the team |
+
+See the [Run-Time Triggers](#run-time-triggers) section for full documentation.
 
 ### Trigger: `on_cooldown`
 
@@ -497,3 +512,110 @@ Categories match the `category` field in `abilities.json` (e.g., `attack`, `heal
 ### Duration
 
 Stat modifiers applied by triggered abilities are currently **permanent** (persist for the rest of the run). The triggered effect itself lasts for the duration of combat. A `"combat"`-only duration for the stat modifiers can be added in the future.
+
+---
+
+## Run-Time Triggers
+
+Some triggers fire outside of combat, during the run itself. These are processed by `RunTriggeredAbilities` when the corresponding event occurs.
+
+### Available Run-Time Triggers
+
+| Trigger | Fires When | Fires On |
+|---------|------------|----------|
+| `on_recruit` | This character is recruited to the team | The recruited character |
+| `on_ally_recruit` | Any character is recruited (including self) | All characters on the team |
+
+### Run-Time Target Modes
+
+Run-time triggers support a subset of target modes:
+
+| Mode | Description |
+|------|-------------|
+| `self` | The character with the triggered ability |
+| `recruited` | The character that was just recruited |
+| `ally_all` | All characters on the team |
+| `ally_other` | All characters except the trigger owner |
+
+### Run-Time Actions
+
+| Action | Description | Fields |
+|--------|-------------|--------|
+| `buff_stat` | Permanently modify a stat | `buff_stat`, `buff_modifier_type`, `buff_value` |
+| `heal` | Restore health | `heal_value` or `heal_from` |
+| `grant_gold` | Give gold to the player | `gold_value` |
+
+### Example: Welcome Bonus
+
+A character that grants gold when recruited:
+
+```json
+{
+  "id": "MERCHANT",
+  "name": "Traveling Merchant",
+  "abilities": [
+    "attack_enemy",
+    {
+      "name": "Welcome Bonus",
+      "description": "When recruited, gain 50 gold",
+      "type": "triggered",
+      "trigger": "on_recruit",
+      "target_mode": "self",
+      "action": "grant_gold",
+      "gold_value": 50
+    }
+  ],
+  "base_stats": { ... }
+}
+```
+
+### Example: Team Synergy
+
+A character that buffs all allies (including the new recruit) whenever any character joins:
+
+```json
+{
+  "id": "RALLY_CAPTAIN",
+  "name": "Rally Captain",
+  "abilities": [
+    "attack_enemy",
+    {
+      "name": "Rally the Troops",
+      "description": "When any ally is recruited, all allies gain +2 damage",
+      "type": "triggered",
+      "trigger": "on_ally_recruit",
+      "target_mode": "ally_all",
+      "action": "buff_stat",
+      "buff_stat": "damage",
+      "buff_modifier_type": "flat",
+      "buff_value": 2
+    }
+  ],
+  "base_stats": { ... }
+}
+```
+
+### Example: Self-Improvement on Recruit
+
+A character that buffs themselves when another character joins:
+
+```json
+{
+  "id": "JEALOUS_WARRIOR",
+  "name": "Jealous Warrior",
+  "abilities": [
+    "attack_enemy",
+    {
+      "name": "Competitive Spirit",
+      "description": "When another ally is recruited, gain +5% damage",
+      "type": "triggered",
+      "trigger": "on_ally_recruit",
+      "target_mode": "self",
+      "action": "buff_stat",
+      "buff_stat": "damage",
+      "buff_modifier_type": "percent",
+      "buff_value": 0.05
+    }
+  ],
+  "base_stats": { ... }
+}
