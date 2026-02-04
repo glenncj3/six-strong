@@ -426,14 +426,30 @@ func _test_skill_data_new_schema() -> void:
 			_fail("test_skill_data_new_schema: Skill '%s' missing effect_type" % skill.get("id", "unknown"))
 			return
 
-		if not skill.has("effect"):
-			_fail("test_skill_data_new_schema: Skill '%s' missing effect" % skill.get("id", "unknown"))
+		# Skills can have either "effect" (single) or "effects" (multi)
+		var has_effect = skill.has("effect")
+		var has_effects = skill.has("effects")
+		if not has_effect and not has_effects:
+			_fail("test_skill_data_new_schema: Skill '%s' missing effect or effects" % skill.get("id", "unknown"))
 			return
 
-		var effect = skill.get("effect", {})
-		if not effect.has("type"):
-			_fail("test_skill_data_new_schema: Skill '%s' effect missing type" % skill.get("id", "unknown"))
-			return
+		# Validate single effect
+		if has_effect:
+			var effect = skill.get("effect", {})
+			if not effect.has("type"):
+				_fail("test_skill_data_new_schema: Skill '%s' effect missing type" % skill.get("id", "unknown"))
+				return
+
+		# Validate multi-effects
+		if has_effects:
+			var effects = skill.get("effects", [])
+			if effects.is_empty():
+				_fail("test_skill_data_new_schema: Skill '%s' has empty effects array" % skill.get("id", "unknown"))
+				return
+			for effect in effects:
+				if not effect.has("type"):
+					_fail("test_skill_data_new_schema: Skill '%s' effect in effects array missing type" % skill.get("id", "unknown"))
+					return
 
 		# Track effect types seen
 		var effect_type = skill.get("effect_type", "")

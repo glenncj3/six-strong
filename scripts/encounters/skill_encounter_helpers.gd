@@ -4,12 +4,13 @@ extends RefCounted
 ## Extracted from ShopEncounterUI and SkillTrainerEncounterUI to reduce duplication.
 
 
-static func execute_skill(skill_data: Dictionary) -> Dictionary:
+static func execute_skill(skill_data: Dictionary, drop_target = null) -> Dictionary:
 	"""
 	Execute a skill's effect immediately.
 
 	Args:
 		skill_data: The skill data dictionary
+		drop_target: Optional CharacterInstance for targeted effects
 
 	Returns:
 		Dictionary with "success" (bool) and "message" (String)
@@ -34,10 +35,16 @@ static func execute_skill(skill_data: Dictionary) -> Dictionary:
 				"message": "Failed to prepare %s!" % skill_name
 			}
 
-	# Execute instant effect
+	# Create context with drop_target
 	var context = SkillContext.from_run_manager(RunManager)
-	var registry = get_skill_registry()
+	context.drop_target = drop_target
 
+	# Check for multi-effect skills (effects array)
+	if skill_data.has("effects"):
+		return _execute_multi_effect(skill_data, context)
+
+	# Execute single effect
+	var registry = get_skill_registry()
 	var exec_success = registry.execute(skill_data, context)
 	if exec_success:
 		var effect = skill_data.get("effect", {})
@@ -50,6 +57,62 @@ static func execute_skill(skill_data: Dictionary) -> Dictionary:
 		return {
 			"success": false,
 			"message": "Failed to use %s!" % skill_name
+		}
+
+
+static func _execute_multi_effect(skill_data: Dictionary, context) -> Dictionary:
+	"""
+	Execute a skill with multiple effects.
+
+	Args:
+		skill_data: The skill data with "effects" array
+		context: SkillContext with drop_target set
+
+	Returns:
+		Dictionary with "success" (bool) and "message" (String)
+	"""
+	var effects = skill_data.get("effects", [])
+	var skill_name = skill_data.get("name", "Skill")
+
+	if effects.is_empty():
+		return {
+			"success": false,
+			"message": "No effects to execute for %s!" % skill_name
+		}
+
+	var registry = get_skill_registry()
+	var all_success = true
+	var descriptions: Array[String] = []
+
+	for effect_data in effects:
+		if not effect_data is Dictionary:
+			continue
+
+		# Create a temporary skill_data wrapper for each effect
+		var temp_skill = {"effect": effect_data}
+		var success = registry.execute(temp_skill, context)
+
+		if success:
+			var desc = SkillEffects.get_effect_description(effect_data)
+			if not desc.is_empty() and not desc.begins_with("Unknown"):
+				descriptions.append(desc)
+		else:
+			all_success = false
+
+	if all_success and not descriptions.is_empty():
+		return {
+			"success": true,
+			"message": "%s!" % ", ".join(descriptions)
+		}
+	elif all_success:
+		return {
+			"success": true,
+			"message": "%s activated!" % skill_name
+		}
+	else:
+		return {
+			"success": false,
+			"message": "Some effects failed for %s!" % skill_name
 		}
 
 
@@ -100,3 +163,78 @@ static func dim_tile_by_id(tiles: Array, offering_id: String) -> void:
 			tile.modulate = GameConstants.COLOR_TILE_DIMMED
 			tile.set_clickable(false)
 			break
+
+
+static func validate_skill_target(skill_data: Dictionary, drop_target) -> Dictionary:
+	"""
+	Validate if a drop target is valid for a skill.
+
+	Args:
+		skill_data: The skill data dictionary
+		drop_target: CharacterInstance to validate
+
+	Returns:
+		Dictionary with "valid" (bool) and "error" (String)
+	"""
+	var context = SkillContext.from_run_manager(RunManager)
+	context.drop_target = drop_target
+
+	# Check multi-effect skills
+	if skill_data.has("effects"):
+		for effect_data in skill_data.get("effects", []):
+			if not effect_data is Dictionary:
+				continue
+			var effect_type = effect_data.get("type", "")
+			if effect_type == "stat_buff":
+				var effect = StatBuffEffect.from_dict(effect_data)
+				if not effect.validate_target(drop_target, context, effect_data):
+					return {
+						"valid": false,
+						"error": effect.get_validation_error(drop_target, context, effect_data)
+					}
+		return {"valid": true, "error": ""}
+
+	# Check single effect
+	var effect = skill_data.get("effect", {})
+	var effect_type = effect.get("type", "")
+
+	if effect_type == "stat_buff":
+		var buff_effect = StatBuffEffect.from_dict(effect)
+		if not buff_effect.validate_target(drop_target, context, effect):
+			return {
+				"valid": false,
+				"error": buff_effect.get_validation_error(drop_target, context, effect)
+			}
+
+	return {"valid": true, "error": ""}
+
+
+static func skill_requires_target(skill_data: Dictionary) -> bool:
+	"""
+	Check if a skill requires a drop target.
+
+	Args:
+		skill_data: The skill data dictionary
+
+	Returns:
+		True if the skill needs a target character
+	"""
+	# Check multi-effect skills
+	if skill_data.has("effects"):
+		for effect_data in skill_data.get("effects", []):
+			if not effect_data is Dictionary:
+				continue
+			var target_mode = effect_data.get("target_mode", "dropped")
+			if SkillTargetResolver.requires_drop_target(target_mode):
+				return true
+		return false
+
+	# Check single effect
+	var effect = skill_data.get("effect", {})
+	var target_mode = effect.get("target_mode", "")
+
+	# If no target_mode specified, use default behavior (no target required)
+	if target_mode.is_empty():
+		return false
+
+	return SkillTargetResolver.requires_drop_target(target_mode)

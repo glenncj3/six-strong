@@ -66,6 +66,7 @@ static func from_legacies(legacies: Array, game_data = null):
 	# Always add generic content first (available regardless of legacies)
 	pool._add_generic_characters(gd)
 	pool._add_generic_items(gd)
+	pool._add_generic_skills(gd)
 
 	for legacy in legacies:
 		pool._add_legacy_content(legacy, gd)
@@ -110,6 +111,23 @@ func _add_generic_items(game_data) -> void:
 			var item_id = item_data.get("id", "")
 			var level_req = item_data.get("level_requirement", 1)
 			_item_pool[item_id] = level_req
+
+
+func _add_generic_skills(game_data) -> void:
+	"""Add all generic skills to the pool (always available regardless of legacies).
+
+	Note: By default, all skills are treated as generic unless they have is_generic: false.
+	This is because skills are instant effects that don't require legacy unlocking."""
+	if game_data == null:
+		return
+
+	var all_skills = game_data.get_all_skills()
+	for skill_data in all_skills:
+		# Skills default to generic (opposite of items/characters which default to non-generic)
+		if skill_data.get("is_generic", true):
+			var skill_id = skill_data.get("id", "")
+			var level_req = skill_data.get("level_requirement", 1)
+			_skill_pool[skill_id] = level_req
 
 
 func _add_legacy_content(legacy: LegacyData, game_data) -> void:

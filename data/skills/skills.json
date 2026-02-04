@@ -11,7 +11,8 @@
         "value": 30
       },
       "cost": 15,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_gold_rush",
@@ -24,7 +25,8 @@
         "value": 25
       },
       "cost": 10,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_training_session",
@@ -37,7 +39,8 @@
         "value": 15
       },
       "cost": 12,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_fortune_blessing",
@@ -52,7 +55,8 @@
       },
       "trigger": "next_character_acquired",
       "cost": 18,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_minor_heal",
@@ -65,7 +69,8 @@
         "value": 15
       },
       "cost": 8,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_jackpot",
@@ -78,7 +83,8 @@
         "value": 50
       },
       "cost": 25,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_battle_hardening",
@@ -93,7 +99,8 @@
       },
       "trigger": "next_character_acquired",
       "cost": 15,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_group_training",
@@ -106,7 +113,8 @@
         "value": 25
       },
       "cost": 20,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_emergency_funds",
@@ -119,7 +127,8 @@
         "value": 15
       },
       "cost": 5,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_team_restoration",
@@ -132,7 +141,8 @@
         "value": 50
       },
       "cost": 22,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_future_charges",
@@ -147,7 +157,8 @@
       },
       "trigger": "next_character_acquired",
       "cost": 14,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_combat_prep",
@@ -161,7 +172,8 @@
       },
       "trigger": "next_combat",
       "cost": 16,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_power_strike",
@@ -174,7 +186,8 @@
         "value": 20
       },
       "cost": 12,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_iron_skin",
@@ -189,7 +202,8 @@
       },
       "trigger": "next_character_acquired",
       "cost": 14,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_vitality",
@@ -202,7 +216,8 @@
         "value": 25
       },
       "cost": 12,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_dodge",
@@ -217,7 +232,8 @@
       },
       "trigger": "next_character_acquired",
       "cost": 16,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_backstab",
@@ -230,7 +246,8 @@
         "value": 30
       },
       "cost": 15,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_inner_peace",
@@ -243,7 +260,8 @@
         "value": 35
       },
       "cost": 18,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_arcane_blast",
@@ -256,7 +274,8 @@
         "value": 25
       },
       "cost": 15,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_life_drain",
@@ -269,7 +288,8 @@
         "value": 40
       },
       "cost": 20,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_eagle_eye",
@@ -284,7 +304,8 @@
       },
       "trigger": "next_character_acquired",
       "cost": 10,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_hunters_mark",
@@ -297,7 +318,8 @@
         "value": 20
       },
       "cost": 10,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_natures_gift",
@@ -310,7 +332,8 @@
         "value": 30
       },
       "cost": 15,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_war_cry",
@@ -325,7 +348,8 @@
       },
       "trigger": "next_character_acquired",
       "cost": 14,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_bloodlust",
@@ -338,7 +362,8 @@
         "value": 30
       },
       "cost": 18,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
     },
     {
       "id": "skill_iron_will",
@@ -351,7 +376,134 @@
         "value": 20
       },
       "cost": 10,
-      "level_requirement": 1
+      "level_requirement": 1,
+      "is_generic": false
+    },
+    {
+      "id": "skill_empower",
+      "name": "Empower",
+      "description": "Grant +15 max health to target character.",
+      "image_path": "res://assets/skills/empower.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "stat_buff",
+        "target_mode": "dropped",
+        "modifiers": [
+          { "stat": "health", "modifier_type": "flat", "value": 15 }
+        ]
+      },
+      "cost": 12,
+      "level_requirement": 1,
+      "is_generic": false
+    },
+    {
+      "id": "skill_battle_shout",
+      "name": "Battle Shout",
+      "description": "All characters gain +8 damage.",
+      "image_path": "res://assets/skills/battle_shout.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "stat_buff",
+        "target_mode": "all",
+        "modifiers": [
+          { "stat": "damage", "modifier_type": "flat", "value": 8 }
+        ]
+      },
+      "cost": 20,
+      "level_requirement": 1,
+      "is_generic": false
+    },
+    {
+      "id": "skill_fortify",
+      "name": "Fortify",
+      "description": "Grant +20% max health and +5 defend rate to target character.",
+      "image_path": "res://assets/skills/fortify.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "stat_buff",
+        "target_mode": "dropped",
+        "modifiers": [
+          { "stat": "health", "modifier_type": "percent", "value": 0.2 },
+          { "stat": "agility", "modifier_type": "flat", "value": 5 }
+        ]
+      },
+      "cost": 18,
+      "level_requirement": 1,
+      "is_generic": false
+    },
+    {
+      "id": "skill_inspire_others",
+      "name": "Inspire Others",
+      "description": "All other characters gain +5 speed.",
+      "image_path": "res://assets/skills/inspire_others.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "stat_buff",
+        "target_mode": "all_except_dropped",
+        "modifiers": [
+          { "stat": "speed", "modifier_type": "flat", "value": 5 }
+        ]
+      },
+      "cost": 15,
+      "level_requirement": 1,
+      "is_generic": false
+    },
+    {
+      "id": "skill_front_line_training",
+      "name": "Front Line Training",
+      "description": "Characters in the same row gain +10 damage.",
+      "image_path": "res://assets/skills/front_line.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "stat_buff",
+        "target_mode": "row_of_dropped",
+        "modifiers": [
+          { "stat": "damage", "modifier_type": "flat", "value": 10 }
+        ]
+      },
+      "cost": 16,
+      "level_requirement": 1,
+      "is_generic": false
+    },
+    {
+      "id": "skill_aura_of_protection",
+      "name": "Aura of Protection",
+      "description": "Adjacent characters gain +15 max health.",
+      "image_path": "res://assets/skills/aura_protection.png",
+      "effect_type": "instant",
+      "effect": {
+        "type": "stat_buff",
+        "target_mode": "adjacent_to_dropped",
+        "modifiers": [
+          { "stat": "health", "modifier_type": "flat", "value": 15 }
+        ]
+      },
+      "cost": 14,
+      "level_requirement": 1,
+      "is_generic": false
+    },
+    {
+      "id": "skill_warriors_blessing",
+      "name": "Warrior's Blessing",
+      "description": "Target gains +10 damage. All characters heal for 20.",
+      "image_path": "res://assets/skills/warriors_blessing.png",
+      "effect_type": "instant",
+      "effects": [
+        {
+          "type": "stat_buff",
+          "target_mode": "dropped",
+          "modifiers": [
+            { "stat": "damage", "modifier_type": "flat", "value": 10 }
+          ]
+        },
+        {
+          "type": "heal_team",
+          "value": 20
+        }
+      ],
+      "cost": 25,
+      "level_requirement": 1,
+      "is_generic": true
     }
   ]
 }

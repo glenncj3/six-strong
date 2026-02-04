@@ -326,13 +326,20 @@ func _handle_purchasable_drop(event: InputEvent) -> void:
 
 	var drop_pos = _get_event_position(event)
 
+	# Check if dropped on a character slot first
+	var target_slot = _get_slot_at_position(drop_pos)
+	if target_slot and target_slot.character != null:
+		# Dropped on a character — pass as drop target for targeted skills
+		PurchasableTileScript.complete_drag_on_slot(target_slot.character)
+		return
+
 	# Accept drop if in bottom 50% of screen (purchase zone)
 	var viewport_height = get_viewport().get_visible_rect().size.y
 	var is_in_purchase_zone = drop_pos.y >= viewport_height * 0.5
 
 	if is_in_purchase_zone:
 		# Drop landed in purchase zone — trigger purchase via tile_clicked
-		PurchasableTileScript.complete_drag_on_slot()
+		PurchasableTileScript.complete_drag_on_slot(null)
 	# If not in purchase zone, PurchasableTile handles its own cancel in its _input
 
 

@@ -82,6 +82,7 @@ static func _build_skill_tile_data(skill_data: Dictionary) -> Dictionary:
 	# Mark effect type
 	tile_data["effect_type"] = skill_data.get("effect_type", "instant")
 	tile_data["trigger"] = skill_data.get("trigger", "")
+	tile_data["requires_target"] = SkillEncounterHelpers.skill_requires_target(skill_data)
 
 	return tile_data
 
@@ -108,17 +109,28 @@ static func _on_skill_selected(skill_data: Dictionary, state: Dictionary) -> voi
 		SkillEncounterHelpers.show_result(result_label, "Not enough gold!", GameConstants.COLOR_ERROR)
 		return
 
+	# Check if skill requires a target
+	var requires_target = skill_data.get("requires_target", false)
+	var drop_target = skill_data.get("drop_target", null)
+
+	if requires_target and drop_target == null:
+		SkillEncounterHelpers.show_result(result_label, "Drag onto a character to use!", GameConstants.COLOR_ERROR)
+		return
+
 	# Spend gold
 	if not EncounterUIHelpers.try_spend_gold(cost, on_gold_spend):
 		SkillEncounterHelpers.show_result(result_label, "Purchase failed!", GameConstants.COLOR_ERROR)
 		return
 
-	# Execute the skill
-	var result = SkillEncounterHelpers.execute_skill(skill_data)
+	# Execute the skill with optional drop target
+	var result = SkillEncounterHelpers.execute_skill(skill_data, drop_target)
 	var color = GameConstants.COLOR_SUCCESS if result.success else GameConstants.COLOR_ERROR
 	SkillEncounterHelpers.show_result(result_label, result.message, color)
 
 	if result.success:
+		# Refresh team display to show updated stats
+		_refresh_team_hud()
+
 		# Dim the selected tile
 		SkillEncounterHelpers.dim_tile_by_id(tiles, skill_id)
 
@@ -128,6 +140,15 @@ static func _on_skill_selected(skill_data: Dictionary, state: Dictionary) -> voi
 	else:
 		# Refund gold if skill failed
 		RunManager.add_gold(cost)
+
+
+static func _refresh_team_hud() -> void:
+	"""Refresh the team HUD to show updated character stats."""
+	var tree = Engine.get_main_loop() as SceneTree
+	if tree:
+		var team_hud = tree.get_first_node_in_group("team_hud")
+		if team_hud and team_hud.has_method("refresh_display"):
+			team_hud.refresh_display()
 
 
 static func get_reward_preview(_encounter_data: Dictionary) -> String:

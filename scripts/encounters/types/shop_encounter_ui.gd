@@ -92,7 +92,9 @@ static func _enrich_skill_tile_data(tile_data: Dictionary) -> void:
 	# Copy effect type for display purposes
 	tile_data["effect_type"] = skill_data.get("effect_type", "instant")
 	tile_data["effect"] = skill_data.get("effect", {})
+	tile_data["effects"] = skill_data.get("effects", [])  # Multi-effect skills
 	tile_data["trigger"] = skill_data.get("trigger", "")
+	tile_data["requires_target"] = SkillEncounterHelpers.skill_requires_target(skill_data)
 
 
 static func _setup_tile(tile: Control, tile_data: Dictionary, tile_size: float, state: Dictionary) -> void:
@@ -134,15 +136,28 @@ static func _on_offering_selected(tile_data: Dictionary, state: Dictionary) -> v
 		SkillEncounterHelpers.show_result(result_label, "Purchase failed!", GameConstants.COLOR_ERROR)
 		return
 
-	# Apply the reward - no character selection needed
+	# Apply the reward
 	var success = false
 	if offering_type == "skill":
-		# Execute skill effect immediately
-		var result = SkillEncounterHelpers.execute_skill(tile_data)
+		# Check if skill requires a target
+		var requires_target = tile_data.get("requires_target", false)
+		var drop_target = tile_data.get("drop_target", null)
+
+		if requires_target and drop_target == null:
+			# Refund gold - skill needs a target but none provided
+			RunManager.add_gold(cost)
+			SkillEncounterHelpers.show_result(result_label, "Drag onto a character to use!", GameConstants.COLOR_ERROR)
+			return
+
+		# Execute skill effect with optional drop target
+		var result = SkillEncounterHelpers.execute_skill(tile_data, drop_target)
 		success = result.success
 		var color = GameConstants.COLOR_SUCCESS if success else GameConstants.COLOR_ERROR
 		SkillEncounterHelpers.show_result(result_label, result.message, color)
-		if not success:
+		if success:
+			# Refresh team display to show updated stats
+			_refresh_team_hud()
+		else:
 			# Refund gold
 			RunManager.add_gold(cost)
 	else:
@@ -167,6 +182,15 @@ static func _on_offering_selected(tile_data: Dictionary, state: Dictionary) -> v
 		if state.purchases_made >= max_purchases:
 			if on_complete.is_valid():
 				on_complete.call()
+
+
+static func _refresh_team_hud() -> void:
+	"""Refresh the team HUD to show updated character stats."""
+	var tree = Engine.get_main_loop() as SceneTree
+	if tree:
+		var team_hud = tree.get_first_node_in_group("team_hud")
+		if team_hud and team_hud.has_method("refresh_display"):
+			team_hud.refresh_display()
 
 
 static func get_reward_preview(encounter_data: Dictionary) -> String:

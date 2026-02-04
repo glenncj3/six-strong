@@ -43,6 +43,14 @@ static func register_all(registry) -> void:
 		_validate_stat_boost,
 		true
 	)
+	# Stat buff effects (targeted)
+	registry.register_effect(
+		"stat_buff",
+		_effect_stat_buff,
+		"",  # Description generated dynamically by StatBuffEffect
+		_validate_stat_buff,
+		false
+	)
 
 
 # =============================================================================
@@ -98,6 +106,36 @@ static func _effect_grant_xp(effect_data: Dictionary, context) -> void:
 
 
 # =============================================================================
+# STAT BUFF EFFECTS
+# =============================================================================
+
+static func _effect_stat_buff(effect_data: Dictionary, context) -> void:
+	"""
+	Apply stat buffs to target characters.
+
+	Effect data:
+		- target_mode: String - How to select targets ("dropped", "all", etc.)
+		- modifiers: Array - List of {stat, modifier_type, value} dictionaries
+
+	Context:
+		- drop_target: CharacterInstance - The character dropped on (for targeted modes)
+	"""
+	var effect = StatBuffEffect.from_dict(effect_data)
+	var drop_target = context.drop_target
+
+	# Validate target if required
+	if not effect.validate_target(drop_target, context, effect_data):
+		var error = effect.get_validation_error(drop_target, context, effect_data)
+		push_warning("SkillEffects: stat_buff validation failed - %s" % error)
+		return
+
+	# Execute the effect
+	var success = effect.execute(drop_target, context)
+	if not success:
+		push_warning("SkillEffects: stat_buff execution failed")
+
+
+# =============================================================================
 # LINGERING EFFECTS
 # =============================================================================
 
@@ -137,6 +175,11 @@ static func _validate_stat_boost(effect_data: Dictionary) -> bool:
 	var stat = effect_data.get("stat", "")
 	var value = effect_data.get("value", 0)
 	return not stat.is_empty() and value != 0
+
+
+static func _validate_stat_buff(effect_data: Dictionary) -> bool:
+	"""Validate stat buff effect has valid modifiers."""
+	return StatBuffEffect.validate_effect_data(effect_data)
 
 
 # =============================================================================
@@ -181,6 +224,8 @@ static func get_effect_description(effect_data: Dictionary) -> String:
 			var stat = effect_data.get("stat", "health")
 			var stat_name = _get_stat_display_name(stat)
 			return "Next character gains +%d %s" % [value, stat_name]
+		"stat_buff":
+			return StatBuffEffect.get_effect_description(effect_data)
 		_:
 			return "Unknown effect: %s" % effect_type
 
@@ -236,6 +281,8 @@ static func is_valid_effect(effect_data: Dictionary) -> bool:
 		"next_character_stat_boost":
 			var stat = effect_data.get("stat", "")
 			return not stat.is_empty() and value != 0
+		"stat_buff":
+			return StatBuffEffect.validate_effect_data(effect_data)
 		_:
 			return false
 

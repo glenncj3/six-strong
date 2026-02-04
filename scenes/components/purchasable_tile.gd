@@ -183,14 +183,18 @@ static func is_drag_active() -> bool:
 	return _active_drag_tile != null and is_instance_valid(_active_drag_tile)
 
 
-static func complete_drag_on_slot() -> void:
+static func complete_drag_on_slot(drop_target: CharacterInstance = null) -> void:
 	"""Called by TeamHUD when a purchasable drag is dropped in purchase zone."""
 	if not is_drag_active():
 		return
 	_drop_handled = true  # Prevent PurchasableTile from cancelling
 	var tile = _active_drag_tile
+	# Add drop target to tile_data if provided
+	var emit_data = tile.tile_data.duplicate()
+	if drop_target != null:
+		emit_data["drop_target"] = drop_target
 	# Emit tile_clicked to trigger the existing purchase flow
-	tile.tile_clicked.emit(tile.tile_data)
+	tile.tile_clicked.emit(emit_data)
 	tile._finish_drag_cleanup()
 
 
