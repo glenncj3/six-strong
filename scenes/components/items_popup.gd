@@ -106,7 +106,7 @@ func _on_item_gui_input(event: InputEvent, panel: PanelContainer, item: ItemInst
 			_cancel_hold()
 
 
-func _start_hold(item: ItemInstance, position: Vector2) -> void:
+func _start_hold(item: ItemInstance, _position: Vector2) -> void:
 	"""Start the hold timer for showing tooltip."""
 	_held_item = item
 	_hold_timer.start()

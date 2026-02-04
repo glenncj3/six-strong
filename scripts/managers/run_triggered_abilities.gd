@@ -102,7 +102,7 @@ static func _resolve_targets(
 			return [source]
 
 
-static func _action_buff_stat(source: CharacterInstance, ability: Dictionary, targets: Array) -> void:
+static func _action_buff_stat(_source: CharacterInstance, ability: Dictionary, targets: Array) -> void:
 	"""Buff a stat on targets."""
 	var stat = ability.get("buff_stat", "")
 	var mod_type = ability.get("buff_modifier_type", "flat")
@@ -148,7 +148,7 @@ static func _action_grant_gold(ability: Dictionary, run_manager) -> void:
 	run_manager.add_gold(gold_value)
 
 
-static func _action_grant_xp(ability: Dictionary, targets: Array) -> void:
+static func _action_grant_xp(ability: Dictionary, _targets: Array) -> void:
 	"""Grant XP to targets (for future use when characters have XP)."""
 	var xp_value = int(ability.get("xp_value", 0))
 	if xp_value <= 0:

@@ -109,8 +109,8 @@ func _center_popup() -> void:
 	anchor_right = 0.5
 	anchor_bottom = 0.5
 	# Use current size for offsets
-	var half_width: float = size.x / 2 if size.x > 0 else GameConstants.MODAL_FALLBACK_HALF_SIZE
-	var half_height: float = size.y / 2 if size.y > 0 else GameConstants.MODAL_FALLBACK_HALF_SIZE
+	var half_width: float = size.x / 2.0 if size.x > 0 else GameConstants.MODAL_FALLBACK_HALF_SIZE
+	var half_height: float = size.y / 2.0 if size.y > 0 else GameConstants.MODAL_FALLBACK_HALF_SIZE
 	offset_left = -half_width
 	offset_top = -half_height
 	offset_right = half_width

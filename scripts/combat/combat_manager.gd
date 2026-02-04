@@ -187,7 +187,7 @@ func _apply_triggered_ability(source: CombatCharacter, ability: Dictionary, trig
 	apply_effect(source, effect)
 
 
-func _execute_triggered_action(source: CombatCharacter, ability: Dictionary, action_type: String, targets: Array, data: Dictionary) -> void:
+func _execute_triggered_action(source: CombatCharacter, ability: Dictionary, action_type: String, targets: Array, _data: Dictionary) -> void:
 	match action_type:
 		"buff_stat":
 			_triggered_action_buff_stat(source, ability, targets)

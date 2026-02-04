@@ -172,7 +172,7 @@ static func _add_full_art_background(panel: PanelContainer, data: Dictionary) ->
 	UIContainerHelpers.set_texture_safe(image, image_path)
 
 
-static func _create_option_info_section(data: Dictionary, panel_type: OptionPanelType) -> VBoxContainer:
+static func _create_option_info_section(data: Dictionary, _panel_type: OptionPanelType) -> VBoxContainer:
 	"""Create the info section (name, type, description) overlaid on the panel art."""
 	var info_vbox = VBoxContainer.new()
 	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
