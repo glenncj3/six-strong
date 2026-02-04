@@ -209,6 +209,27 @@ func cleanse_by_tag(tag: String) -> Array:
 
 func update(delta: float) -> Dictionary:
 	var result = {"action_ready": false, "expired_effects": [], "tick_events": []}
+
+	# Decrement seconds-type effect durations (use raw delta, not affected by tick rate)
+	# This happens regardless of whether the character has speed
+	var seconds_expired: Array = []
+	for effect in effects:
+		if effect.duration_type == "seconds":
+			effect.duration_value -= delta
+			if effect.duration_value <= 0:
+				seconds_expired.append(effect)
+	result["expired_effects"].append_array(seconds_expired)
+
+	# Process tick events for effects with tick_interval > 0
+	# DoT ticks use raw delta so poison ticks at constant rate regardless of haste/slow
+	for effect in effects:
+		if effect.tick_interval > 0:
+			effect.tick_elapsed += delta
+			while effect.tick_elapsed >= effect.tick_interval:
+				effect.tick_elapsed -= effect.tick_interval
+				result["tick_events"].append(effect)
+
+	# Cooldown processing requires speed > 0
 	if not has_speed():
 		return result
 
@@ -234,22 +255,5 @@ func update(delta: float) -> Dictionary:
 				if effect.duration_value <= 0:
 					to_expire.append(effect)
 		result["expired_effects"].append_array(to_expire)
-
-	# Decrement seconds-type effect durations (use raw delta, not affected by tick rate)
-	var seconds_expired: Array = []
-	for effect in effects:
-		if effect.duration_type == "seconds":
-			effect.duration_value -= delta
-			if effect.duration_value <= 0:
-				seconds_expired.append(effect)
-	result["expired_effects"].append_array(seconds_expired)
-
-	# Process tick events for effects with tick_interval > 0
-	for effect in effects:
-		if effect.tick_interval > 0:
-			effect.tick_elapsed += effective_delta
-			while effect.tick_elapsed >= effect.tick_interval:
-				effect.tick_elapsed -= effect.tick_interval
-				result["tick_events"].append(effect)
 
 	return result

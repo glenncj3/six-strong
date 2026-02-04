@@ -86,6 +86,8 @@ func _run_tests():
 	section("Interactions")
 	test_cleanse_removes_poison_not_haste()
 	test_on_poisoned_trigger_fires()
+	test_poison_ticks_while_frozen()
+	test_poison_persists_after_source_death()
 
 
 # =============================================================================
@@ -1427,3 +1429,69 @@ func test_on_poisoned_trigger_fires():
 	var poison = StatusEffectFactory.create_from_template(poison_template, "s1", {"stacks": 3})
 	manager.apply_effect(ch, poison)
 	assert_true(triggered[0], "on_poison trigger fired when poison applied")
+
+
+func test_poison_ticks_while_frozen():
+	var manager = CombatManager.new()
+	var pg = _make_grid_with_one(_make_source(1000, 2.0, 10.0))
+	var eg = _make_grid_with_one(_make_source(1000, 100.0, 10.0))
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var freeze_template = _get_freeze_template()
+	var poison_template = _get_poison_template()
+
+	# Apply freeze (stops cooldowns) and poison to player
+	var freeze = StatusEffectFactory.create_from_template(freeze_template, "s1", {"duration_value": 10.0})
+	var poison = StatusEffectFactory.create_from_template(poison_template, "s2", {"stacks": 5})
+	manager.apply_effect(player, freeze)
+	manager.apply_effect(player, poison)
+
+	assert_true(abs(player.tick_rate_multiplier - 0.0) < 0.01, "player is frozen (tick_rate = 0)")
+	assert_eq(player.get_stacks("poison"), 5, "5 stacks of poison")
+	var initial_health = player.health
+
+	# Wait for poison to tick (1.5 seconds)
+	_simulate_time(manager, 1.5)
+	assert_true(player.health < initial_health, "poison dealt damage while frozen")
+	assert_eq(player.get_stacks("poison"), 4, "poison stacks decremented while frozen")
+
+
+func test_poison_persists_after_source_death():
+	var manager = CombatManager.new()
+	# Player with high damage to kill enemy
+	var pg = _make_grid_with_one(_make_source(1000, 1.0, 500.0, 0.0, 0.0))
+	# Two enemies: one fast poisoner and one slow tank (so combat continues after poisoner dies)
+	var eg = CharacterGrid.new()
+	var poisoner = _make_source(100, 0.5, 10.0, 0.0, 0.0, {"poison_value": 10})
+	var tank = _make_source(5000, 100.0, 1.0)  # Very slow, won't act
+	eg.place_character(poisoner, 0, 0)
+	eg.place_character(tank, 0, 1)
+	manager.initialize_combat(pg, eg)
+
+	var player = manager.get_state().board.get_character_at(GameConstants.TEAM_PLAYER, 0, 0)
+	var enemy_poisoner = manager.get_state().board.get_character_at(GameConstants.TEAM_OPPONENT, 0, 0)
+	enemy_poisoner.ability_ids = ["poison_enemy"]
+	enemy_poisoner.extra_stats["poison_value"] = 10
+
+	# Enemy poisoner acts first (speed 0.5 < 1.0), applies poison to player
+	_simulate_time(manager, 0.6)
+	assert_true(player.has_effect("poison"), "player has poison from enemy")
+	assert_eq(player.get_stacks("poison"), 10, "10 stacks of poison applied")
+	var initial_health = player.health
+
+	# Player acts (speed 1.0), kills poisoner
+	_simulate_time(manager, 0.5)
+	assert_false(enemy_poisoner.is_alive, "poisoner is dead")
+
+	# Combat should still be active (tank is alive)
+	assert_true(manager.get_state().combat_active, "combat still active")
+
+	# Poison should persist and continue ticking
+	assert_true(player.has_effect("poison"), "poison persists after source death")
+	var stacks_after_kill = player.get_stacks("poison")
+
+	# Wait for another poison tick
+	_simulate_time(manager, 1.5)
+	assert_true(player.health < initial_health, "poison continued to deal damage after source death")
+	assert_true(player.get_stacks("poison") < stacks_after_kill, "poison stacks decremented after source death")
