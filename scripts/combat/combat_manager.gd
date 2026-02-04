@@ -429,9 +429,6 @@ func _kill_character(character: CombatCharacter) -> void:
 	for enemy in _state.board.get_living_characters_on_team(enemy_team):
 		_process_triggered_effects(enemy, "on_enemy_death", {dead_character = character})
 
-	# Remove effects sourced from this character
-	_remove_effects_from_source(character.id)
-
 	# Clear effects on this character
 	character.effects.clear()
 
