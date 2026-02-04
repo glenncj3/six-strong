@@ -11,18 +11,21 @@ signal drag_started(row: int, col: int, character: CharacterInstance)
 signal drop_received(row: int, col: int, from_row: int, from_col: int)
 
 const SLOT_BORDER_WIDTH := 3
-const STAT_ICON_SIZE := 36
-const STAT_FONT_SIZE := 20
+const STAT_ICON_SIZE := 48
+const STAT_FONT_SIZE := 28
 const NAME_FONT_SIZE := 20
 const NAME_MARGIN_BOTTOM := 55
 const HP_BAR_HEIGHT := 6
+const TOP_STATS_CORNER_MARGIN := 8
 
-const TOP_STATS := [
+const TOP_STATS_LEFT := [
 	{"key": "damage", "icon": "res://assets/sprites/icons/icon_damage.Png"},
-	{"key": "heal_value", "icon": "res://assets/sprites/icons/icon_heal.Png"},
-	{"key": "shield_value", "icon": "res://assets/sprites/icons/icon_shield.Png"},
 	{"key": "burn_value", "icon": "res://assets/sprites/icons/icon_burn.Png"},
 	{"key": "poison_value", "icon": "res://assets/sprites/icons/icon_poison.Png"},
+]
+const TOP_STATS_RIGHT := [
+	{"key": "heal_value", "icon": "res://assets/sprites/icons/icon_heal.Png"},
+	{"key": "shield_value", "icon": "res://assets/sprites/icons/icon_shield.Png"},
 ]
 const BOTTOM_STATS := [
 	{"key": "charges", "icon": "res://assets/sprites/icons/icon_charges.Png"},
@@ -44,7 +47,8 @@ var char_data: Dictionary = {}  # For collection mode (dictionary-based)
 var _is_drag_target: bool = false
 var _is_valid_drop_target: bool = false
 var _stat_badges: Dictionary = {}  # key -> {container, label}
-var _top_stats_container: HBoxContainer
+var _top_stats_left_container: HBoxContainer
+var _top_stats_right_container: HBoxContainer
 var _bottom_stats_container: HBoxContainer
 var _stats_overlay: Control
 var _hp_container: Control
@@ -284,16 +288,25 @@ func _build_stat_containers() -> void:
 
 	var half_icon = STAT_ICON_SIZE / 2.0
 
-	_top_stats_container = _create_stat_row(TOP_STATS)
-	_top_stats_container.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_top_stats_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_top_stats_container.position.y = -half_icon + SLOT_BORDER_WIDTH
-	_stats_overlay.add_child(_top_stats_container)
+	# Top left stats (damage, burn, poison) - left justified
+	_top_stats_left_container = _create_stat_row(TOP_STATS_LEFT)
+	_top_stats_left_container.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_top_stats_left_container.position.x = TOP_STATS_CORNER_MARGIN
+	_top_stats_left_container.position.y = -half_icon + SLOT_BORDER_WIDTH
+	_stats_overlay.add_child(_top_stats_left_container)
+
+	# Top right stats (heal, shield) - right justified
+	_top_stats_right_container = _create_stat_row(TOP_STATS_RIGHT)
+	_top_stats_right_container.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_top_stats_right_container.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_top_stats_right_container.position.x = -TOP_STATS_CORNER_MARGIN
+	_top_stats_right_container.position.y = -half_icon + SLOT_BORDER_WIDTH
+	_stats_overlay.add_child(_top_stats_right_container)
 
 	_bottom_stats_container = _create_stat_row(BOTTOM_STATS)
 	_bottom_stats_container.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_bottom_stats_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_bottom_stats_container.position.y = -half_icon - SLOT_BORDER_WIDTH
+	_bottom_stats_container.position.y = -30
 	_stats_overlay.add_child(_bottom_stats_container)
 
 
@@ -430,10 +443,12 @@ func set_display_scale(scale_factor: float) -> void:
 
 	# Reposition stat rows using anchor offsets for new icon size
 	var half_icon = scaled_icon / 2.0
-	_top_stats_container.offset_top = -half_icon + SLOT_BORDER_WIDTH
-	_top_stats_container.offset_bottom = half_icon + SLOT_BORDER_WIDTH
-	_bottom_stats_container.offset_top = -half_icon - SLOT_BORDER_WIDTH
-	_bottom_stats_container.offset_bottom = half_icon - SLOT_BORDER_WIDTH
+	var scaled_corner_margin = int(TOP_STATS_CORNER_MARGIN * scale_factor)
+	_top_stats_left_container.position.x = scaled_corner_margin
+	_top_stats_left_container.position.y = -half_icon + SLOT_BORDER_WIDTH
+	_top_stats_right_container.position.x = -scaled_corner_margin
+	_top_stats_right_container.position.y = -half_icon + SLOT_BORDER_WIDTH
+	_bottom_stats_container.position.y = -30 * scale_factor
 
 	# Scale name margin bottom to keep name above bottom stats
 	name_margin.add_theme_constant_override("margin_bottom", int(NAME_MARGIN_BOTTOM * scale_factor))
