@@ -9,7 +9,7 @@
       "starting_character_options": ["ST01"],
       "starting_item_options": [],
       "character_pool": ["ST01", "ST02", "ST03", "ST04", "ST05", "ST06", "ST07", "ST08", "ST09", "ST10"],
-      "item_pool": [],
+      "item_pool": ["item_ice"],
       "skill_pool": [],
       "unique_encounters": [],
       "prestige_rewards": [
@@ -19,7 +19,7 @@
             "starting_characters": ["ST01"],
             "starting_items": [],
             "characters": ["ST01", "ST02", "ST03", "ST04", "ST05", "ST06", "ST07", "ST08", "ST09", "ST10"],
-            "items": [],
+            "items": ["item_ice"],
             "skills": [],
             "encounters": ["castle_winterfell"]
           }
@@ -61,7 +61,7 @@
       "starting_character_options": ["TA01"],
       "starting_item_options": [],
       "character_pool": ["TA01", "TA02", "TA03", "TA04", "TA05", "TA06", "TA07", "TA08", "TA09", "TA10"],
-      "item_pool": [],
+      "item_pool": ["item_drogons_egg"],
       "skill_pool": [],
       "unique_encounters": [],
       "prestige_rewards": [
@@ -71,7 +71,7 @@
             "starting_characters": ["TA01"],
             "starting_items": [],
             "characters": ["TA01", "TA02", "TA03", "TA04", "TA05", "TA06", "TA07", "TA08", "TA09", "TA10"],
-            "items": [],
+            "items": ["item_drogons_egg"],
             "skills": [],
             "encounters": []
           }
@@ -87,7 +87,7 @@
       "starting_character_options": ["NI01"],
       "starting_item_options": [],
       "character_pool": ["NI01"],
-      "item_pool": [],
+      "item_pool": ["item_black_cloak"],
       "skill_pool": [],
       "unique_encounters": [],
       "prestige_rewards": [
@@ -97,7 +97,7 @@
             "starting_characters": ["NI01"],
             "starting_items": [],
             "characters": ["NI01"],
-            "items": [],
+            "items": ["item_black_cloak"],
             "skills": [],
             "encounters": []
           }

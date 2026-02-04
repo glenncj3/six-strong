@@ -18,15 +18,20 @@ func _init(item_data_id: String, is_upgrade: bool = false) -> void:
 
 	Args:
 		item_data_id: Item or item upgrade ID from GameData
-		is_upgrade: True if this is an item upgrade, false for regular item
+		is_upgrade: True to check upgrades first, false to check regular items first
 	"""
 	item_id = item_data_id
 
+	# Try the specified type first, then fall back to the other
 	var item_data: Dictionary
 	if is_upgrade:
 		item_data = GameData.get_item_upgrade_by_id(item_id)
+		if item_data.is_empty():
+			item_data = GameData.get_item_by_id(item_id)
 	else:
 		item_data = GameData.get_item_by_id(item_id)
+		if item_data.is_empty():
+			item_data = GameData.get_item_upgrade_by_id(item_id)
 
 	if item_data.is_empty():
 		push_error("ItemInstance: Item data not found: %s" % item_id)

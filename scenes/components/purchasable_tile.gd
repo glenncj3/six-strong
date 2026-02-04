@@ -14,6 +14,7 @@ const CharacterTileScene = preload("res://scenes/components/character_tile.tscn"
 static var _active_drag_tile: PurchasableTile = null
 static var _active_drag_preview: Control = null
 static var _active_drag_canvas: CanvasLayer = null
+static var _drop_handled: bool = false  # Set by TeamHUD when drop is processed
 
 @onready var content_margin: MarginContainer = $ContentMargin
 @onready var icon: TextureRect = $ContentMargin/Icon
@@ -141,11 +142,18 @@ func _input(event: InputEvent) -> void:
 			_active_drag_preview.position = pos - preview_size / 2.0
 
 	elif _is_drag_release_event(event):
-		# Check if dropped on a TeamHUD slot — handled by TeamHUD._handle_purchasable_drop
-		# If TeamHUD consumed it, _active_drag_tile will be null already
-		# Otherwise cancel (snap back, no purchase)
-		if _active_drag_tile == self:
-			_cancel_drag()
+		# Defer cancel check to let TeamHUD process the drop first
+		# (TeamHUD._input runs after PurchasableTile._input due to tree order)
+		call_deferred("_check_and_cancel_drag")
+
+
+func _check_and_cancel_drag() -> void:
+	"""Called deferred after release - cancel only if drop wasn't handled by TeamHUD."""
+	if _drop_handled:
+		_drop_handled = false
+		return
+	if _active_drag_tile == self:
+		_cancel_drag()
 
 
 func _cancel_drag() -> void:
@@ -168,6 +176,7 @@ func _finish_drag_cleanup() -> void:
 		_active_drag_canvas.queue_free()
 	_active_drag_canvas = null
 	_active_drag_tile = null
+	_drop_handled = false
 
 
 static func is_drag_active() -> bool:
@@ -175,9 +184,10 @@ static func is_drag_active() -> bool:
 
 
 static func complete_drag_on_slot() -> void:
-	"""Called by TeamHUD when a purchasable drag is dropped on a valid slot."""
+	"""Called by TeamHUD when a purchasable drag is dropped in purchase zone."""
 	if not is_drag_active():
 		return
+	_drop_handled = true  # Prevent PurchasableTile from cancelling
 	var tile = _active_drag_tile
 	# Emit tile_clicked to trigger the existing purchase flow
 	tile.tile_clicked.emit(tile.tile_data)

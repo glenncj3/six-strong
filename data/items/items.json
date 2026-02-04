@@ -188,6 +188,66 @@
       "stat_modifiers": {"health": 5},
       "slot": "accessory",
       "cost": 15
+    },
+    {
+      "id": "item_valyrian_smelt",
+      "name": "Valyrian Smelt",
+      "description": "Refined ore from the mines of Old Valyria.",
+      "image_path": "res://assets/items/valyrian_smelt.png",
+      "stat_modifiers": {},
+      "slot": "accessory",
+      "cost": 15,
+      "is_generic": true
+    },
+    {
+      "id": "item_dragonglass",
+      "name": "Dragonglass",
+      "description": "Obsidian forged in dragonfire.",
+      "image_path": "res://assets/items/dragonglass.png",
+      "stat_modifiers": {},
+      "slot": "accessory",
+      "cost": 12,
+      "is_generic": true
+    },
+    {
+      "id": "item_maesters_chains",
+      "name": "Maester's Chains",
+      "description": "Links of knowledge and service.",
+      "image_path": "res://assets/items/maesters_chains.png",
+      "stat_modifiers": {},
+      "slot": "accessory",
+      "cost": 18,
+      "is_generic": true
+    },
+    {
+      "id": "item_ice",
+      "name": "Ice",
+      "description": "The ancestral Valyrian steel greatsword of House Stark.",
+      "image_path": "res://assets/items/ice.png",
+      "stat_modifiers": {},
+      "slot": "weapon",
+      "cost": 20,
+      "legacy": "legacy_house_stark"
+    },
+    {
+      "id": "item_drogons_egg",
+      "name": "Drogon's Egg",
+      "description": "A petrified dragon egg, warm to the touch.",
+      "image_path": "res://assets/items/drogons_egg.png",
+      "stat_modifiers": {},
+      "slot": "accessory",
+      "cost": 25,
+      "legacy": "legacy_house_targaryen"
+    },
+    {
+      "id": "item_black_cloak",
+      "name": "Black Cloak",
+      "description": "The sworn garb of the Watch.",
+      "image_path": "res://assets/items/black_cloak.png",
+      "stat_modifiers": {},
+      "slot": "armor",
+      "cost": 18,
+      "legacy": "legacy_nights_watch"
     }
   ]
 }

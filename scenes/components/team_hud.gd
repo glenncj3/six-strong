@@ -249,6 +249,7 @@ func _ensure_drag_canvas_layer() -> void:
 
 
 var _showing_purchasable_highlights: bool = false
+var _items_button_pulse_tween: Tween = null
 
 func _input(event: InputEvent) -> void:
 	if not _is_dragging:
@@ -272,18 +273,49 @@ func _update_purchasable_highlights() -> void:
 	var drag_active = PurchasableTileScript.is_drag_active()
 	if drag_active and not _showing_purchasable_highlights:
 		_showing_purchasable_highlights = true
-		_set_all_slot_highlights(true)
+		_start_items_button_pulse()
 	elif not drag_active and _showing_purchasable_highlights:
 		_showing_purchasable_highlights = false
-		_set_all_slot_highlights(false)
+		_stop_items_button_pulse()
 
 
-func _set_all_slot_highlights(enabled: bool) -> void:
-	for row_idx in range(GameConstants.GRID_ROWS):
-		for col_idx in range(GameConstants.GRID_COLS):
-			var slot = _get_slot(row_idx, col_idx)
-			if slot:
-				slot.set_drag_highlight(enabled, true)
+func _get_items_button() -> Button:
+	"""Find the ItemsButton in RunHUD (sibling to TeamHUD under HUDLayer)."""
+	var hud_layer = get_parent()
+	if hud_layer:
+		var run_hud = hud_layer.get_node_or_null("RunHUD")
+		if run_hud:
+			return run_hud.get_node_or_null("ItemsButton")
+	return null
+
+
+func _start_items_button_pulse() -> void:
+	"""Start pulsing the Items button to indicate drop target."""
+	var items_button = _get_items_button()
+	if not items_button:
+		return
+
+	# Kill any existing pulse
+	if _items_button_pulse_tween and _items_button_pulse_tween.is_valid():
+		_items_button_pulse_tween.kill()
+
+	items_button.pivot_offset = items_button.size / 2.0
+	_items_button_pulse_tween = create_tween().set_loops()
+	_items_button_pulse_tween.tween_property(items_button, "scale", Vector2(1.15, 1.15), 0.4) \
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_items_button_pulse_tween.tween_property(items_button, "scale", Vector2(1.0, 1.0), 0.4) \
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+
+func _stop_items_button_pulse() -> void:
+	"""Stop pulsing the Items button."""
+	if _items_button_pulse_tween and _items_button_pulse_tween.is_valid():
+		_items_button_pulse_tween.kill()
+		_items_button_pulse_tween = null
+
+	var items_button = _get_items_button()
+	if items_button:
+		items_button.scale = Vector2(1.0, 1.0)
 
 
 func _handle_purchasable_drop(event: InputEvent) -> void:
@@ -293,11 +325,15 @@ func _handle_purchasable_drop(event: InputEvent) -> void:
 		return
 
 	var drop_pos = _get_event_position(event)
-	var target_slot = _get_slot_at_position(drop_pos)
-	if target_slot:
-		# Drop landed on a TeamHUD slot — trigger purchase via tile_clicked
+
+	# Accept drop if in bottom 50% of screen (purchase zone)
+	var viewport_height = get_viewport().get_visible_rect().size.y
+	var is_in_purchase_zone = drop_pos.y >= viewport_height * 0.5
+
+	if is_in_purchase_zone:
+		# Drop landed in purchase zone — trigger purchase via tile_clicked
 		PurchasableTileScript.complete_drag_on_slot()
-	# If no slot hit, PurchasableTile handles its own cancel in its _input
+	# If not in purchase zone, PurchasableTile handles its own cancel in its _input
 
 
 func _finish_drag(drop_position: Vector2) -> void:
