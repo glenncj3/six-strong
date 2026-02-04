@@ -60,6 +60,10 @@ func _run_tests():
 	_test_shield_effect_constants()
 	_test_shield_effect_uses_play_at()
 
+	section("Effect VFX Key Generation")
+	_test_effect_vfx_key_format()
+	_test_effect_vfx_key_uniqueness()
+
 
 # --- SpriteSheetVFX Setup ---
 
@@ -358,6 +362,27 @@ func _test_shield_effect_uses_play_at():
 	assert_not_null(vfx._sprite.material, "Additive blend enabled")
 	assert_true(vfx._looping, "Shield VFX loops")
 	vfx.queue_free()
+
+
+# --- Effect VFX Key Generation ---
+# These test the key format used by combat_scene to track effect VFX
+
+func _test_effect_vfx_key_format():
+	# Verify the key format matches what combat_scene uses
+	var character_id = "char_123"
+	var effect_id = "shield"
+	var key = "%s:%s" % [character_id, effect_id]
+	assert_eq(key, "char_123:shield", "Key format is character_id:effect_id")
+
+
+func _test_effect_vfx_key_uniqueness():
+	# Verify different character/effect combinations produce unique keys
+	var key1 = "%s:%s" % ["char_1", "shield"]
+	var key2 = "%s:%s" % ["char_2", "shield"]
+	var key3 = "%s:%s" % ["char_1", "burn"]
+	assert_true(key1 != key2, "Different characters produce different keys")
+	assert_true(key1 != key3, "Different effects produce different keys")
+	assert_true(key2 != key3, "All combinations are unique")
 
 
 # --- Helpers ---

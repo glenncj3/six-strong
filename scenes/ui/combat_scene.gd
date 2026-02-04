@@ -19,8 +19,9 @@ var _continue_button: Button
 # Slot displays: key = "team_row_col", value = Dictionary with ui nodes
 var _slot_displays: Dictionary = {}
 
-# Active shield VFX: key = CombatCharacter id, value = SpriteSheetVFX
-var _shield_vfx: Dictionary = {}
+# Active looping VFX tied to effects: key = "character_id:effect_id", value = SpriteSheetVFX
+# Automatically cleaned up when the associated effect is removed.
+var _effect_vfx: Dictionary = {}
 
 
 
@@ -239,6 +240,35 @@ func _update_slot_stats(combat_char: CombatCharacter) -> void:
 	slot.update_stats_from_combat(combat_char)
 
 
+func _get_effect_vfx_key(character_id: String, effect_id: String) -> String:
+	return "%s:%s" % [character_id, effect_id]
+
+
+func _register_effect_vfx(character: CombatCharacter, effect_id: String, vfx: Node) -> void:
+	## Register a looping VFX tied to an effect. Will be auto-cleaned when the effect is removed.
+	var vfx_key = _get_effect_vfx_key(character.id, effect_id)
+	# Clean up existing VFX if already present
+	if _effect_vfx.has(vfx_key) and is_instance_valid(_effect_vfx[vfx_key]):
+		_effect_vfx[vfx_key].queue_free()
+	_effect_vfx[vfx_key] = vfx
+
+
+func _clear_effect_vfx(character: CombatCharacter, effect_id: String) -> void:
+	## Remove and free VFX tied to a specific effect on a character.
+	var vfx_key = _get_effect_vfx_key(character.id, effect_id)
+	if _effect_vfx.has(vfx_key) and is_instance_valid(_effect_vfx[vfx_key]):
+		_effect_vfx[vfx_key].queue_free()
+	_effect_vfx.erase(vfx_key)
+
+
+func _clear_all_effect_vfx() -> void:
+	## Clean up all active effect VFX.
+	for vfx_key in _effect_vfx:
+		if is_instance_valid(_effect_vfx[vfx_key]):
+			_effect_vfx[vfx_key].queue_free()
+	_effect_vfx.clear()
+
+
 # =============================================================================
 # COMBAT LOGIC
 # =============================================================================
@@ -344,18 +374,15 @@ func _on_ability_used(source: CombatCharacter, ability: Dictionary, targets: Arr
 			if vfx:
 				add_child(vfx)
 
-	# Spawn looping shield VFX on targets
+	# Spawn looping shield VFX on targets (auto-cleaned when effect is removed)
 	if ability.get("category", "") == "shield":
 		for t in targets:
 			var target_pos = _get_slot_center(t)
 			if target_pos != Vector2.ZERO:
-				# Remove existing shield VFX if already present
-				if _shield_vfx.has(t.id) and is_instance_valid(_shield_vfx[t.id]):
-					_shield_vfx[t.id].queue_free()
 				var vfx = CombatVFX.create_shield_effect(target_pos)
 				if vfx:
 					add_child(vfx)
-					_shield_vfx[t.id] = vfx
+					_register_effect_vfx(t, "shield", vfx)
 
 
 func _on_effect_applied(target: CombatCharacter, effect: CombatEffect) -> void:
@@ -377,6 +404,9 @@ func _on_effect_removed(target: CombatCharacter, effect: CombatEffect) -> void:
 	var effect_name = effect.effect_id if effect.effect_id != "" else effect.stat
 	print("[Combat] %s %s loses effect [%s]" % [_get_team_label(target), target.character_name, effect_name])
 	_update_slot_stats(target)
+	# Clean up any VFX tied to this effect
+	if effect.effect_id != "":
+		_clear_effect_vfx(target, effect.effect_id)
 
 
 func _on_character_healed(target: CombatCharacter, amount: float, source: CombatCharacter, _is_crit: bool = false) -> void:
@@ -388,9 +418,8 @@ func _on_character_healed(target: CombatCharacter, amount: float, source: Combat
 
 func _on_shield_absorbed(target: CombatCharacter, amount: float, shield_remaining: float) -> void:
 	print("[Combat] %s %s SHIELD absorbs %d damage (%d shield remaining)" % [_get_team_label(target), target.character_name, int(amount), int(shield_remaining)])
-	if shield_remaining <= 0 and _shield_vfx.has(target.id) and is_instance_valid(_shield_vfx[target.id]):
-		_shield_vfx[target.id].queue_free()
-		_shield_vfx.erase(target.id)
+	# Note: VFX cleanup is handled by _on_effect_removed when shield effect is actually removed.
+	# This signal just logs the absorption event.
 
 
 func _on_character_cooldown_triggered(character: CombatCharacter) -> void:
@@ -406,11 +435,8 @@ func _on_character_died(character: CombatCharacter) -> void:
 
 
 func _on_combat_ended(winner: int, _reason: String) -> void:
-	# Clean up any looping shield VFX
-	for key in _shield_vfx:
-		if is_instance_valid(_shield_vfx[key]):
-			_shield_vfx[key].queue_free()
-	_shield_vfx.clear()
+	# Clean up any looping effect VFX
+	_clear_all_effect_vfx()
 
 	# Restore player health after combat
 	for ch in _player_grid.get_all_characters():
