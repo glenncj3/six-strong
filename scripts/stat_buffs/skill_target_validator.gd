@@ -22,7 +22,7 @@ extends RefCounted
 # VALIDATION
 # =============================================================================
 
-static func is_valid_target(effect_data: Dictionary, target, context) -> bool:
+static func is_valid_target(effect_data: Dictionary, target, _context) -> bool:
 	"""
 	Check if a drop target is valid for the given effect.
 

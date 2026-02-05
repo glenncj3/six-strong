@@ -184,13 +184,13 @@ static func validate_skill_target(skill_data: Dictionary, drop_target) -> Dictio
 		for effect_data in skill_data.get("effects", []):
 			if not effect_data is Dictionary:
 				continue
-			var effect_type = effect_data.get("type", "")
-			if effect_type == "stat_buff":
-				var effect = StatBuffEffect.from_dict(effect_data)
-				if not effect.validate_target(drop_target, context, effect_data):
+			var inner_effect_type = effect_data.get("type", "")
+			if inner_effect_type == "stat_buff":
+				var buff_effect = StatBuffEffect.from_dict(effect_data)
+				if not buff_effect.validate_target(drop_target, context, effect_data):
 					return {
 						"valid": false,
-						"error": effect.get_validation_error(drop_target, context, effect_data)
+						"error": buff_effect.get_validation_error(drop_target, context, effect_data)
 					}
 		return {"valid": true, "error": ""}
 
@@ -224,8 +224,8 @@ static func skill_requires_target(skill_data: Dictionary) -> bool:
 		for effect_data in skill_data.get("effects", []):
 			if not effect_data is Dictionary:
 				continue
-			var target_mode = effect_data.get("target_mode", "dropped")
-			if SkillTargetResolver.requires_drop_target(target_mode):
+			var inner_target_mode = effect_data.get("target_mode", "dropped")
+			if SkillTargetResolver.requires_drop_target(inner_target_mode):
 				return true
 		return false
 
