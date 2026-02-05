@@ -20,6 +20,7 @@ static var _drop_handled: bool = false  # Set by TeamHUD when drop is processed
 @onready var icon: TextureRect = $ContentMargin/Icon
 @onready var name_label: Label = $ContentMargin/NameMargin/NameLabel
 @onready var gold_cost_icon: PanelContainer = $ContentMargin/CostMargin/GoldCostIcon
+@onready var border_overlay: Panel = $BorderOverlay
 
 var tile_data: Dictionary = {}
 var cost: int = 0
@@ -37,24 +38,34 @@ var _original_global_pos: Vector2 = Vector2.ZERO
 
 func _init_default_styles() -> void:
 	var normal = StyleBoxFlat.new()
-	normal.bg_color = GameConstants.COLOR_SUCCESS.darkened(0.3)
+	normal.bg_color = GameConstants.COLOR_PANEL_DARK
 	normal.set_corner_radius_all(UIStyles.CORNER_RADIUS_MEDIUM)
 	var hover = normal.duplicate()
-	hover.bg_color = GameConstants.COLOR_SUCCESS.darkened(0.1)
+	hover.bg_color = GameConstants.COLOR_PANEL_DARK.lightened(0.15)
 	var pressed = normal.duplicate()
-	pressed.bg_color = GameConstants.COLOR_SUCCESS.darkened(0.5)
+	pressed.bg_color = GameConstants.COLOR_PANEL_DARK.darkened(0.1)
 	setup_styles({"normal": normal, "hover": hover, "pressed": pressed})
 
 
 func _on_ready() -> void:
 	UIHelpers.set_children_mouse_filter_ignore(self)
 	UIStyles.set_margin_all(content_margin, TILE_BORDER_WIDTH)
+	_setup_border_overlay()
 	_setup_long_press_timer()
 
 	# Apply any pending setup that was called before node was ready
 	if not _pending_setup.is_empty():
 		_apply_setup(_pending_setup.tile_data, _pending_setup.tile_size)
 		_pending_setup = {}
+
+
+func _setup_border_overlay() -> void:
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color.TRANSPARENT
+	style.set_border_width_all(TILE_BORDER_WIDTH)
+	style.border_color = GameConstants.COLOR_BORDER_SILVER
+	style.set_corner_radius_all(UIStyles.CORNER_RADIUS_MEDIUM)
+	border_overlay.add_theme_stylebox_override("panel", style)
 
 
 func _setup_long_press_timer() -> void:
@@ -240,6 +251,7 @@ func _embed_character_tile(p_tile_data: Dictionary, tile_size: float) -> void:
 	# Hide generic display elements — CharacterTile handles portrait, name, stats
 	icon.visible = false
 	name_label.visible = false
+	border_overlay.visible = false  # CharacterTile has its own gold border
 	# Disable clip_contents so CharacterTile's stat badges can overflow the edges
 	clip_contents = false
 

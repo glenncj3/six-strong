@@ -46,3 +46,7 @@ text = "Item"
 horizontal_alignment = 1
 vertical_alignment = 1
 text_overrun_behavior = 3
+
+[node name="BorderOverlay" type="Panel" parent="."]
+layout_mode = 2
+mouse_filter = 2
